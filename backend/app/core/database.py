@@ -10,7 +10,7 @@ def connect_to_mongodb():
     global client, db
 
     if not MONGO_URI:
-        raise ValueError("MONGO_URI is not configured in .env")
+        raise ValueError("MONGO_URI is not connnected in .env")
 
     client = MongoClient(MONGO_URI)
 
