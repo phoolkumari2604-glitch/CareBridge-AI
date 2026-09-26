@@ -1,0 +1,1980 @@
+import { useEffect, useState } from "react";
+import useAuth from "./hooks/useAuth";
+
+import ParticleBackground from "./components/ParticleBackground";
+import LiveQueue from "./components/LiveQueue";
+import StaffPortal from "./components/StaffPortal";
+import SecurityAudit from "./components/SecurityAudit";
+import Profile from "./components/Profile";
+import Settings from "./components/Settings";
+
+import {
+  getHospitals,
+  getDoctors,
+  createAppointment,
+  type Hospital as ApiHospital,
+  type Doctor as ApiDoctor,
+  type Appointment as ApiAppointment,
+} from "./api/api";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
+// You can move this style block to a separate App.css file and import it.
+const styles = `
+/* ==========================================================================
+   CAREBRIDGE AI - SIDEBAR CSS (GLASSMORPHISM & RESPONSIVE)
+   ========================================================================== */
+
+:root {
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --bg-sidebar: rgba(10, 25, 41, 0.7); /* Deep space blue glass */
+  --bg-sidebar-hover: rgba(148, 163, 184, 0.08);
+  --bg-active: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, rgba(56, 189, 248, 0.02) 100%);
+  --color-primary: #38bdf8; /* Cyber sky blue */
+  --color-text-main: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --border-glass: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+/* App Shell Layout */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: #030712; /* Fallback deep background */
+  overflow-x: hidden;
+}
+
+.main-area {
+     flex: 1;
+     transition: padding 0.35s ease;
+     padding: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   1. MAIN SIDEBAR CONTAINER
+   -------------------------------------------------------------------------- */
+aside.sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: var(--bg-sidebar);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease;
+  position: relative;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+/* Collapsed Sidebar State (Desktop) */
+aside.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+  padding: 24px 12px;
+}
+
+/* --------------------------------------------------------------------------
+   2. BRAND HEADER
+   -------------------------------------------------------------------------- */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 24px 8px;
+  border-bottom: var(--border-glass);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, #38bdf8 0%, #0369a1 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  flex-shrink: 0;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
+
+.sidebar-brand div {
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-brand strong {
+  color: var(--color-text-main);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-brand span {
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* --------------------------------------------------------------------------
+   3. USER CONTEXT PANEL
+   -------------------------------------------------------------------------- */
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 8px;
+  margin: 16px 0;
+  background: rgba(148, 163, 184, 0.04);
+  border-radius: 12px;
+  border: var(--border-glass);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar-user-avatar {
+  width: 36px;
+  height: 36px;
+  background: #1e293b;
+  border: 1px solid var(--color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-user-info strong {
+  color: var(--color-text-main);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sidebar-user-info span {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   4. NAVIGATION MENU BUTTONS
+   -------------------------------------------------------------------------- */
+.menu-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  padding: 16px 8px 8px 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.menu-icon {
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  color: var(--color-text-muted);
+  transition: color 0.2s ease;
+}
+
+/* Hover and Active States */
+.menu-item:hover {
+  background: var(--bg-sidebar-hover);
+  color: var(--color-text-main);
+}
+
+.menu-item:hover .menu-icon {
+  color: var(--color-primary);
+}
+
+.menu-item.active {
+  background: var(--bg-active);
+  color: var(--color-primary);
+  font-weight: 600;
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 10px 10px 0;
+  padding-left: 11px; /* Compensate for the 3px border */
+}
+
+.menu-item.active .menu-icon {
+  color: var(--color-primary);
+}
+
+/* Navigation Badge */
+.menu-badge {
+  margin-left: auto;
+  background: #ef4444; /* Alert Red */
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 20px;
+  min-width: 12px;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   5. SYSTEM STATUS & UTILITY CONTROLS
+   -------------------------------------------------------------------------- */
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: rgba(16, 185, 129, 0.04); /* Soft Green glow */
+  border-radius: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981; /* Emerald active green */
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.system-status strong {
+  display: block;
+  font-size: 11px;
+  color: #10b981;
+}
+
+.system-status small {
+  display: block;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+/* Core Collapse/Expand Button styling */
+.collapse-button {
+  background: var(--bg-sidebar-hover);
+  border: var(--border-glass);
+  border-radius: 8px;
+  color: var(--color-text-main);
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.collapse-button:hover {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--color-primary);
+}
+
+/* Sign Out Action */
+.logout-button {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.logout-button:hover {
+  background: rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   6. RESPONSIVE MEDIA QUERIES (MOBILE INTERFACES)
+   -------------------------------------------------------------------------- */
+
+/* Tablet & Mobile Breakpoint (Below 1024px) */
+@media (max-width: 1024px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  aside.sidebar {
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-right: none;
+    border-bottom: var(--border-glass);
+    position: sticky;
+    top: 0;
+  }
+
+  /* Redefine collapsed mechanics for top header on mobile */
+  aside.sidebar.collapsed {
+    width: 100%;
+    padding: 12px 16px;
+  }
+
+  .sidebar-brand {
+    padding: 0;
+    border-bottom: none;
+  }
+
+  /* Hide elements on mobile that belong to a traditional desktop sidebar */
+  .sidebar-user,
+  .menu-label,
+  .sidebar-bottom,
+  .sidebar-menu,
+  .logout-button {
+    display: none !important;
+  }
+
+  /* Make Main area padding account for top sticky header */
+  .main-area {
+    margin-top: 0;
+    width: 100%;
+  }
+}
+
+/* Small Smartphone Breakpoint (Optimized for quick taps) */
+@media (max-width: 640px) {
+  .sidebar-brand span {
+    display: none; /* Hide subtitle to keep logo clean */
+  }
+}
+`;
+
+type Page =
+  | "dashboard"
+  | "assistant"
+  | "hospitals"
+  | "doctors"
+  | "appointments"
+  | "approval"
+  | "opd"
+  | "queue"
+  | "staff"
+  | "security"
+  | "profile"
+  | "settings";
+
+type Hospital = {
+  id: number;
+  name: string;
+  type: string;
+  location: string;
+  distance: string;
+  rating: string;
+};
+
+type Doctor = {
+  id: number;
+  name: string;
+  initials: string;
+  specialization: string;
+  experience: number;
+  fee: number;
+  availability: string;
+};
+
+function App() {
+  const auth = useAuth();
+
+  const [activePage, setActivePage] =
+    useState<Page>("dashboard");
+
+  const [sidebarCollapsed, setSidebarCollapsed] =
+    useState(false);
+
+  // =========================================================
+  // AUTHENTICATION
+  // =========================================================
+  const [authMode, setAuthMode] =
+    useState<"login" | "register">("login");
+
+  const currentUser = auth.user;
+
+  const authLoading = auth.loading;
+
+  const authError = auth.error;
+
+  const patientId = currentUser?.id ?? 1;
+
+  function logout() {
+    auth.logout();
+    setActivePage("dashboard");
+  }
+
+  const [selectedHospital, setSelectedHospital] =
+    useState<Hospital | null>(null);
+
+  const [apiHospitals, setApiHospitals] =
+    useState<ApiHospital[]>([]);
+
+  const [hospitalLoading, setHospitalLoading] =
+    useState(false);
+
+  const [hospitalError, setHospitalError] =
+    useState("");
+
+  const [hospitalCity, setHospitalCity] =
+    useState("");
+
+  const [selectedDoctor, setSelectedDoctor] =
+    useState<Doctor | null>(null);
+
+  const [apiDoctors, setApiDoctors] =
+    useState<ApiDoctor[]>([]);
+
+  const [doctorLoading, setDoctorLoading] =
+    useState(false);
+
+  const [doctorError, setDoctorError] =
+    useState("");
+
+  const [doctorSpecialization, setDoctorSpecialization] =
+    useState("");
+
+  const [appointmentApproved, setAppointmentApproved] =
+    useState(false);
+
+  const [createdAppointment, setCreatedAppointment] =
+    useState<ApiAppointment | null>(null);
+
+  const [appointmentCreating, setAppointmentCreating] =
+    useState(false);
+
+  const [appointmentError, setAppointmentError] =
+    useState("");
+
+  const [appointmentDate, setAppointmentDate] =
+    useState("2026-09-20");
+
+  const [appointmentTime, setAppointmentTime] =
+    useState("10:30");
+
+  const [appointmentReason, setAppointmentReason] =
+    useState("");
+
+  const [chatMessages, setChatMessages] = useState<
+    { type: string; text: string }[]
+  >([
+    {
+      type: "ai",
+      text:
+        "Hello! I'm CareBridge AI. How can I help you today?",
+    },
+    {
+      type: "ai",
+      text:
+        "I can help you find hospitals, doctors, appointments and live queue information.",
+    },
+  ]);
+
+  const [chatInput, setChatInput] = useState("");
+
+  function navigate(page: Page) {
+    setActivePage(page);
+  }
+
+  async function loadHospitals(city?: string) {
+    try {
+      setHospitalLoading(true);
+      setHospitalError("");
+
+      const data = await getHospitals(city);
+
+      setApiHospitals(data);
+    } catch (error) {
+      setHospitalError(
+        error instanceof Error
+          ? error.message
+          : "Unable to load hospitals"
+      );
+    } finally {
+      setHospitalLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (activePage === "hospitals") {
+      loadHospitals();
+    }
+  }, [activePage]);
+
+  async function loadDoctors(
+    hospitalId?: number,
+    specialization?: string
+  ) {
+    try {
+      setDoctorLoading(true);
+      setDoctorError("");
+
+      const data = await getDoctors(
+        hospitalId,
+        specialization
+      );
+
+      setApiDoctors(data);
+    } catch (error) {
+      setDoctorError(
+        error instanceof Error
+          ? error.message
+          : "Unable to load doctors"
+      );
+    } finally {
+      setDoctorLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (activePage === "doctors") {
+      loadDoctors(
+        selectedHospital?.id,
+        doctorSpecialization || undefined
+      );
+    }
+  }, [
+    activePage,
+    selectedHospital,
+    doctorSpecialization,
+  ]);
+
+  function sendMessage() {
+    if (!chatInput.trim()) return;
+
+    const userMessage = chatInput.trim();
+
+    setChatMessages((messages) => [
+      ...messages,
+      {
+        type: "user",
+        text: userMessage,
+      },
+      {
+        type: "ai",
+        text:
+          "I understand. I can help you search hospitals, find doctors, and create an appointment request. Please choose an option below.",
+      },
+    ]);
+
+    setChatInput("");
+  }
+
+  function startBooking(doctor: Doctor) {
+    setSelectedDoctor(doctor);
+    setAppointmentApproved(false);
+    setCreatedAppointment(null);
+    setAppointmentError("");
+    setActivePage("appointments");
+  }
+
+  async function approveAppointment() {
+    if (!selectedDoctor || !selectedHospital) {
+      setAppointmentError(
+        "Please select a hospital and doctor before approval."
+      );
+      return;
+    }
+
+    try {
+      setAppointmentCreating(true);
+      setAppointmentError("");
+
+      const appointment = await createAppointment({
+        patient_id: patientId,
+        hospital_id: selectedHospital.id,
+        doctor_id: selectedDoctor.id,
+        appointment_date: appointmentDate,
+        appointment_time: appointmentTime,
+        reason: appointmentReason || undefined,
+      });
+
+      setCreatedAppointment(appointment);
+      setAppointmentApproved(true);
+      setActivePage("appointments");
+    } catch (error) {
+      setAppointmentError(
+        error instanceof Error
+          ? error.message
+          : "Unable to create appointment"
+      );
+    } finally {
+      setAppointmentCreating(false);
+    }
+  }
+
+  function renderDashboard() {
+    return (
+      <>
+        <div className="welcome-card">
+          <div>
+            <div className="eyebrow">
+              PATIENT COMMAND CENTER
+            </div>
+
+            <h2>
+              From Waiting
+              <br />
+              <span>to Care.</span>
+            </h2>
+
+            <p>
+              Your intelligent healthcare administration
+              workspace. Search hospitals, find doctors,
+              manage appointments and monitor your queue
+              from one place.
+            </p>
+
+            <button
+              className="primary-button"
+              onClick={() => navigate("assistant")}
+            >
+              Start with AI Assistant →
+            </button>
+          </div>
+
+          <div className="hero-orbit">
+            <div className="orbit orbit-one" />
+            <div className="orbit orbit-two" />
+
+            <div className="orbit-core">✦</div>
+          </div>
+        </div>
+
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">
+              PATIENT OVERVIEW
+            </div>
+
+            <h3>Today's healthcare activity</h3>
+          </div>
+        </div>
+
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon">▣</div>
+
+            <span>UPCOMING APPOINTMENTS</span>
+
+            <strong>01</strong>
+
+            <small>Today</small>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon">#</div>
+
+            <span>QUEUE POSITION</span>
+
+            <strong>08</strong>
+
+            <small>Live tracking</small>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon">✓</div>
+
+            <span>APPROVED REQUESTS</span>
+
+            <strong>03</strong>
+
+            <small>This month</small>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon">✦</div>
+
+            <span>AI ASSISTANCE</span>
+
+            <strong>24/7</strong>
+
+            <small>Available</small>
+          </div>
+        </div>
+
+        <div className="dashboard-grid">
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <h3>SmartFlow Engine</h3>
+
+                <p>
+                  Current healthcare request workflow
+                </p>
+              </div>
+
+              <span className="live-pill">
+                <i />
+                ACTIVE
+              </span>
+            </div>
+
+            <div className="smartflow">
+              <div className="flow-step active">
+                <span>✓</span>
+                <strong>Request</strong>
+              </div>
+
+              <div className="flow-line" />
+
+              <div className="flow-step active">
+                <span>✓</span>
+                <strong>Search</strong>
+              </div>
+
+              <div className="flow-line" />
+
+              <div className="flow-step active">
+                <span>03</span>
+                <strong>Approval</strong>
+              </div>
+
+              <div className="flow-line" />
+
+              <div className="flow-step">
+                <span>04</span>
+                <strong>Care</strong>
+              </div>
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <h3>Next Appointment</h3>
+
+                <p>
+                  Your upcoming consultation
+                </p>
+              </div>
+            </div>
+
+            <div className="appointment-preview">
+              <div className="doctor-avatar">
+                AR
+              </div>
+
+              <div>
+                <strong>Dr. Ananya Rao</strong>
+
+                <span>General Medicine</span>
+
+                <small>
+                  Apollo Health City
+                </small>
+              </div>
+            </div>
+
+            <div className="appointment-time">
+              <div>
+                <small>DATE</small>
+                <strong>Today</strong>
+              </div>
+
+              <div>
+                <small>TIME</small>
+                <strong>10:30 AM</strong>
+              </div>
+
+              <div>
+                <small>QUEUE</small>
+                <strong>#08</strong>
+              </div>
+            </div>
+
+            <button
+              className="outline-button full"
+              onClick={() => navigate("opd")}
+            >
+              View Digital OPD Pass
+            </button>
+          </div>
+        </div>
+
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">
+              QUICK ACTIONS
+            </div>
+
+            <h3>What would you like to do?</h3>
+          </div>
+        </div>
+
+        <div className="quick-actions">
+          <button
+            className="quick-action"
+            onClick={() => navigate("assistant")}
+          >
+            <span>✦</span>
+
+            <div>
+              <strong>Ask CareBridge</strong>
+              <small>
+                AI healthcare assistant
+              </small>
+            </div>
+
+            <b>→</b>
+          </button>
+
+          <button
+            className="quick-action"
+            onClick={() => navigate("hospitals")}
+          >
+            <span>⌖</span>
+
+            <div>
+              <strong>Find Hospital</strong>
+              <small>
+                Search healthcare facilities
+              </small>
+            </div>
+
+            <b>→</b>
+          </button>
+
+          <button
+            className="quick-action"
+            onClick={() => navigate("doctors")}
+          >
+            <span>♙</span>
+
+            <div>
+              <strong>Find Doctor</strong>
+              <small>
+                Check availability
+              </small>
+            </div>
+
+            <b>→</b>
+          </button>
+
+          <button
+            className="quick-action"
+            onClick={() => navigate("queue")}
+          >
+            <span>#</span>
+
+            <div>
+              <strong>Live Queue</strong>
+              <small>
+                Track waiting status
+              </small>
+            </div>
+
+            <b>→</b>
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  function renderAssistant() {
+    return (
+      <>
+        <PageIntro
+          eyebrow="AI HEALTHCARE ASSISTANT"
+          title="CareBridge Assistant"
+          description="Tell the assistant what healthcare support you need."
+        />
+
+        <div className="assistant-layout">
+          <div className="panel chat-panel">
+            <div className="chat-top">
+              <div className="ai-avatar">✦</div>
+
+              <div>
+                <strong>CareBridge AI</strong>
+
+                <span>
+                  <i /> Online • SmartFlow enabled
+                </span>
+              </div>
+            </div>
+
+            <div className="conversation">
+              {chatMessages.map(
+                (message, index) => (
+                  <div
+                    key={index}
+                    className={`message ${
+                      message.type === "user"
+                        ? "user"
+                        : "ai"
+                    }`}
+                  >
+                    {message.type === "ai" && (
+                      <small>
+                        CAREBRIDGE AI
+                      </small>
+                    )}
+
+                    {message.text}
+                  </div>
+                )
+              )}
+
+              <div className="suggestions">
+                <button
+                  onClick={() =>
+                    setChatInput(
+                      "Find a hospital near me"
+                    )
+                  }
+                >
+                  Find a hospital
+                </button>
+
+                <button
+                  onClick={() =>
+                    setChatInput(
+                      "Find a cardiologist"
+                    )
+                  }
+                >
+                  Find a doctor
+                </button>
+
+                <button
+                  onClick={() =>
+                    setChatInput(
+                      "Book an appointment"
+                    )
+                  }
+                >
+                  Book appointment
+                </button>
+
+                <button
+                  onClick={() =>
+                    navigate("queue")
+                  }
+                >
+                  Check queue
+                </button>
+              </div>
+            </div>
+
+            <div className="chat-input">
+              <input
+                value={chatInput}
+                onChange={(event) =>
+                  setChatInput(
+                    event.target.value
+                  )
+                }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
+                placeholder="Ask CareBridge anything..."
+              />
+
+              <button onClick={sendMessage}>
+                →
+              </button>
+            </div>
+          </div>
+
+          <div className="panel intelligence-panel">
+            <div className="eyebrow">
+              CONTEXT
+            </div>
+
+            <h3>
+              AI understands your workflow
+            </h3>
+
+            <div className="context-item">
+              <span>CURRENT REQUEST</span>
+              <strong>
+                General consultation
+              </strong>
+            </div>
+
+            <div className="context-item">
+              <span>
+                PREFERRED LOCATION
+              </span>
+
+              <strong>Hyderabad</strong>
+            </div>
+
+            <div className="context-item">
+              <span>
+                APPOINTMENT STATUS
+              </span>
+
+              <strong>
+                Ready for selection
+              </strong>
+            </div>
+
+            <div className="safety-box">
+              <span>
+                ✓ SAFETY GUARDRAIL ACTIVE
+              </span>
+
+              <p>
+                CareBridge will show an approval
+                step before confirming an appointment
+                or executing an administrative action.
+              </p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  function renderHospitals() {
+    return (
+      <>
+        <PageIntro
+          eyebrow="HOSPITAL DISCOVERY"
+          title="Find a Hospital"
+          description="Discover healthcare facilities connected to the CareBridge network."
+        />
+
+        <div className="search-panel">
+          <div className="search-box">
+            <span className="search-icon">⌕</span>
+
+            <input
+              value={hospitalCity}
+              onChange={(event) =>
+                setHospitalCity(event.target.value)
+              }
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  loadHospitals(
+                    hospitalCity.trim() || undefined
+                  );
+                }
+              }}
+              placeholder="Search by city..."
+            />
+          </div>
+
+          <button
+            className="primary-button"
+            onClick={() =>
+              loadHospitals(
+                hospitalCity.trim() || undefined
+              )
+            }
+          >
+            Search Hospitals
+          </button>
+        </div>
+
+        <div className="filter-row">
+          <button
+            className="filter active"
+            onClick={() => loadHospitals()}
+          >
+            All Hospitals
+          </button>
+
+          <button
+            className="filter"
+            onClick={() =>
+              loadHospitals(
+                hospitalCity.trim() || undefined
+              )
+            }
+          >
+            Available
+          </button>
+        </div>
+
+        {hospitalLoading && (
+          <div className="empty-state">
+            <div className="loading-spinner">◌</div>
+            <h3>Finding hospitals...</h3>
+            <p>
+              Connecting to the CareBridge healthcare
+              network.
+            </p>
+          </div>
+        )}
+
+        {hospitalError && !hospitalLoading && (
+          <div className="error-card">
+            <strong>Unable to load hospitals</strong>
+            <p>{hospitalError}</p>
+
+            <button
+              className="secondary-button"
+              onClick={() =>
+                loadHospitals(
+                  hospitalCity.trim() || undefined
+                )
+              }
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {!hospitalLoading &&
+          !hospitalError &&
+          apiHospitals.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon">⌖</div>
+
+              <h3>No hospitals available yet</h3>
+
+              <p>
+                Add hospitals through the FastAPI
+                backend. They will appear here
+                automatically.
+              </p>
+            </div>
+          )}
+
+        {!hospitalLoading &&
+          !hospitalError &&
+          apiHospitals.length > 0 && (
+            <div className="hospital-grid">
+              {apiHospitals.map((hospital) => {
+                const uiHospital: Hospital = {
+                  id: hospital.id,
+                  name: hospital.name,
+                  type: "HEALTHCARE FACILITY",
+                  location: `${hospital.address}, ${hospital.city}`,
+                  distance: "Network",
+                  rating: "—",
+                };
+
+                return (
+                  <div
+                    className="hospital-card"
+                    key={hospital.id}
+                  >
+                    <div className="hospital-image">
+                      <span>✚</span>
+                      <b>
+                        {hospital.is_active
+                          ? "OPEN"
+                          : "CLOSED"}
+                      </b>
+                    </div>
+
+                    <div className="hospital-content">
+                      <div className="hospital-type">
+                        {uiHospital.type}
+                      </div>
+
+                      <h3>{uiHospital.name}</h3>
+
+                      <p>
+                        {uiHospital.location}
+                      </p>
+
+                      {hospital.phone && (
+                        <p>
+                          ☎ {hospital.phone}
+                        </p>
+                      )}
+
+                      <div className="hospital-meta">
+                        <span>
+                          ● {hospital.is_active
+                            ? "Active"
+                            : "Inactive"}
+                        </span>
+
+                        <span>
+                          ID #{hospital.id}
+                        </span>
+                      </div>
+
+                      <button
+                        className="primary-button full"
+                        onClick={() => {
+                          setSelectedHospital(
+                            uiHospital
+                          );
+                          navigate("doctors");
+                        }}
+                      >
+                        View Doctors →
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+      </>
+    );
+  }
+
+  function renderDoctors() {
+    return (
+      <>
+        <PageIntro
+          eyebrow="DOCTOR AVAILABILITY"
+          title="Choose a Doctor"
+          description={
+            selectedHospital
+              ? `Doctors at ${selectedHospital.name}`
+              : "Explore available doctors and specialists."
+          }
+        />
+
+        {selectedHospital && (
+          <div className="selected-context">
+            <span>SELECTED HOSPITAL</span>
+            <strong>{selectedHospital.name}</strong>
+            <button
+              className="secondary-button"
+              onClick={() => navigate("hospitals")}
+            >
+              Change Hospital
+            </button>
+          </div>
+        )}
+
+        <div className="filter-row">
+          <button
+            className={`filter ${
+              doctorSpecialization === "" ? "active" : ""
+            }`}
+            onClick={() => setDoctorSpecialization("")}
+          >
+            All
+          </button>
+
+          <button
+            className={`filter ${
+              doctorSpecialization === "General Medicine"
+                ? "active"
+                : ""
+            }`}
+            onClick={() =>
+              setDoctorSpecialization("General Medicine")
+            }
+          >
+            General Medicine
+          </button>
+
+          <button
+            className={`filter ${
+              doctorSpecialization === "Cardiology"
+                ? "active"
+                : ""
+            }`}
+            onClick={() =>
+              setDoctorSpecialization("Cardiology")
+            }
+          >
+            Cardiology
+          </button>
+
+          <button
+            className={`filter ${
+              doctorSpecialization === "Dermatology"
+                ? "active"
+                : ""
+            }`}
+            onClick={() =>
+              setDoctorSpecialization("Dermatology")
+            }
+          >
+            Dermatology
+          </button>
+        </div>
+
+        {doctorLoading && (
+          <div className="empty-state">
+            <div className="loading-spinner">◌</div>
+            <h3>Finding doctors...</h3>
+            <p>
+              Checking real-time doctor availability
+              from the CareBridge network.
+            </p>
+          </div>
+        )}
+
+        {doctorError && !doctorLoading && (
+          <div className="error-card">
+            <strong>Unable to load doctors</strong>
+            <p>{doctorError}</p>
+
+            <button
+              className="secondary-button"
+              onClick={() =>
+                loadDoctors(
+                  selectedHospital?.id,
+                  doctorSpecialization || undefined
+                )
+              }
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {!doctorLoading &&
+          !doctorError &&
+          apiDoctors.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon">♙</div>
+
+              <h3>No doctors available yet</h3>
+
+              <p>
+                Add doctors through the FastAPI backend.
+                They will appear here automatically.
+              </p>
+
+              {selectedHospital && (
+                <button
+                  className="secondary-button"
+                  onClick={() => navigate("hospitals")}
+                >
+                  Choose Another Hospital
+                </button>
+              )}
+            </div>
+          )}
+
+        {!doctorLoading &&
+          !doctorError &&
+          apiDoctors.length > 0 && (
+            <div className="doctor-grid">
+              {apiDoctors.map((doctor) => {
+                const initials = doctor.name
+                  .replace(/^Dr\.\s*/i, "")
+                  .split(" ")
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((part) => part[0])
+                  .join("")
+                  .toUpperCase();
+
+                const uiDoctor: Doctor = {
+                  id: doctor.id,
+                  name: doctor.name,
+                  initials: initials || "DR",
+                  specialization: doctor.specialization,
+                  experience: doctor.experience_years,
+                  fee: doctor.consultation_fee,
+                  availability: doctor.available_time
+                    ? `Available ${doctor.available_time}`
+                    : doctor.available_days
+                      ? doctor.available_days
+                      : "Availability not specified",
+                };
+
+                return (
+                  <div
+                    className="doctor-card"
+                    key={doctor.id}
+                  >
+                    <div className="doctor-card-top">
+                      <div className="large-avatar">
+                        {uiDoctor.initials}
+                      </div>
+
+                      <span className="available-dot">
+                        ● {uiDoctor.availability}
+                      </span>
+                    </div>
+
+                    <h3>{uiDoctor.name}</h3>
+
+                    <div className="specialization">
+                      {uiDoctor.specialization}
+                    </div>
+
+                    <div className="doctor-details">
+                      <div>
+                        <small>EXPERIENCE</small>
+                        <strong>
+                          {uiDoctor.experience} Years
+                        </strong>
+                      </div>
+
+                      <div>
+                        <small>CONSULTATION</small>
+                        <strong>
+                          ₹{uiDoctor.fee}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <button
+                      className="primary-button full"
+                      onClick={() =>
+                        startBooking(uiDoctor)
+                      }
+                    >
+                      Select Doctor
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+      </>
+    );
+  }
+
+  function renderAppointments() {
+    return (
+      <>
+        <PageIntro
+          eyebrow="APPOINTMENT MANAGEMENT"
+          title="Appointments"
+          description="Review and manage your healthcare appointments."
+        />
+
+        {selectedDoctor &&
+          !appointmentApproved && (
+            <div className="approval-card">
+              <div className="approval-header">
+                <div>
+                  <div className="eyebrow">
+                    NEW APPOINTMENT REQUEST
+                  </div>
+
+                  <h3>
+                    Review before approval
+                  </h3>
+                </div>
+
+                <span className="approval-number">
+                  REQUEST #CB-001
+                </span>
+              </div>
+
+              <div className="approval-doctor">
+                <div className="large-avatar">
+                  {selectedDoctor.initials}
+                </div>
+
+                <div>
+                  <h3>
+                    {selectedDoctor.name}
+                  </h3>
+
+                  <span>
+                    {selectedDoctor.specialization}
+                  </span>
+                </div>
+              </div>
+
+              <div className="approval-details">
+                <div>
+                  <small>HOSPITAL</small>
+
+                  <strong>
+                    {selectedHospital?.name ||
+                      "Select a hospital"}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>DATE</small>
+
+                  <input
+                    type="date"
+                    value={appointmentDate}
+                    onChange={(event) =>
+                      setAppointmentDate(event.target.value)
+                    }
+                  />
+                </div>
+
+                <div>
+                  <small>TIME</small>
+
+                  <input
+                    type="time"
+                    value={appointmentTime}
+                    onChange={(event) =>
+                      setAppointmentTime(event.target.value)
+                    }
+                  />
+                </div>
+
+                <div>
+                  <small>CONSULTATION FEE</small>
+
+                  <strong>₹{selectedDoctor.fee}</strong>
+                </div>
+              </div>
+
+              <div style={{ marginTop: "18px" }}>
+                <small style={{ color: "#8da2b8" }}>
+                  REASON FOR VISIT (OPTIONAL)
+                </small>
+
+                <textarea
+                  value={appointmentReason}
+                  onChange={(event) =>
+                    setAppointmentReason(event.target.value)
+                  }
+                  placeholder="Briefly describe the reason for your visit"
+                  rows={3}
+                  style={{
+                    width: "100%",
+                    marginTop: "8px",
+                    padding: "12px",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(148, 163, 184, 0.14)",
+                    background: "#0c1b2d",
+                    color: "#f8fafc",
+                    resize: "vertical",
+                  }}
+                />
+              </div>
+
+              <div className="approval-warning">
+                <strong>
+                  ⚠ Patient Approval Required
+                </strong>
+
+                <p>
+                  CareBridge will not confirm
+                  this appointment automatically.
+                  Review the details and explicitly
+                  approve the request.
+                </p>
+              </div>
+
+              {appointmentError && (
+                <div className="error-card" style={{ marginTop: "16px" }}>
+                  {appointmentError}
+                </div>
+              )}
+
+              <div className="approval-actions">
+                <button
+                  className="reject-button"
+                  onClick={() => {
+                    setSelectedDoctor(null);
+                    setAppointmentError("");
+                  }}
+                  disabled={appointmentCreating}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="primary-button"
+                  onClick={approveAppointment}
+                  disabled={appointmentCreating}
+                >
+                  {appointmentCreating
+                    ? "Creating Appointment..."
+                    : "Approve Appointment ✓"}
+                </button>
+              </div>
+            </div>
+          )}
+
+        {appointmentApproved && createdAppointment && (
+          <section className="cb-appointment-confirmation">
+            <div className="cb-appointment-confirmation-header">
+              <div>
+                <span className="eyebrow">
+                  APPOINTMENT CONFIRMED
+                </span>
+
+                <h3>Care request created successfully</h3>
+
+                <p>
+                  This confirmation reflects the appointment returned by the CareBridge API.
+                </p>
+              </div>
+
+              <span
+                className={`cb-appointment-confirmation-status cb-status-${createdAppointment.status.toLowerCase()}`}
+              >
+                {createdAppointment.status.toUpperCase()}
+              </span>
+            </div>
+
+            <div className="cb-appointment-confirmation-grid">
+              <div>
+                <span>DOCTOR</span>
+                <strong>{selectedDoctor?.name || `Doctor #${createdAppointment.doctor_id}`}</strong>
+              </div>
+
+              <div>
+                <span>HOSPITAL</span>
+                <strong>{selectedHospital?.name || `Hospital #${createdAppointment.hospital_id}`}</strong>
+              </div>
+
+              <div>
+                <span>DATE</span>
+                <strong>{createdAppointment.appointment_date}</strong>
+              </div>
+
+              <div>
+                <span>TIME</span>
+                <strong>{createdAppointment.appointment_time}</strong>
+              </div>
+
+              <div>
+                <span>APPOINTMENT ID</span>
+                <strong>#{createdAppointment.id}</strong>
+              </div>
+
+              <div>
+                <span>STATUS</span>
+                <strong>{createdAppointment.status}</strong>
+              </div>
+            </div>
+
+            <div className="cb-appointment-confirmation-footer">
+              <span>
+                Your digital OPD pass is available for this appointment.
+              </span>
+
+              <button
+                className="primary-button"
+                onClick={() => navigate("opd")}
+              >
+                Open Digital OPD Pass →
+              </button>
+            </div>
+          </section>
+        )}
+
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">
+              UPCOMING
+            </div>
+
+            <h3>
+              Your appointment schedule
+            </h3>
+          </div>
+        </div>
+
+        <div className="appointment-list">
+          <div className="appointment-row">
+            <div className="date-block">
+              <strong>20</strong>
+              <span>SEP</span>
+            </div>
+
+            <div className="appointment-main">
+              <span className="status approved">
+                CONFIRMED
+              </span>
+
+              <h3>
+                Dr. Ananya Rao
+              </h3>
+
+              <p>
+                General Medicine • Apollo
+                Health City
+              </p>
+            </div>
+
+            <div className="appointment-info">
+              <span>TIME</span>
+              <strong>10:30 AM</strong>
+            </div>
+
+            <div className="appointment-info">
+              <span>QUEUE</span>
+              <strong>#08</strong>
+            </div>
+
+            <button
+              className="outline-button"
+              onClick={() =>
+                navigate("opd")
+              }
+            >
+              View
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  function renderApproval() {
+    const hasRequest = Boolean(
+      selectedDoctor && selectedHospital
+    );
+    const approvalStatus = createdAppointment
+      ? `Appointment created: ${createdAppointment.status}`
+      : hasRequest
+        ? "Awaiting patient review"
+        : "No appointment request selected";
+
+    return (
+      <>
+        <PageIntro
+          eyebrow="HUMAN-IN-THE-LOOP CONTROL"
+          title="Approval Center"
+          description="Review the requested appointment before using the available CareBridge appointment workflow."
+        />
+
+        <div className="approval-layout">
+          <div className="approval-card">
+            <div className="approval-header">
+              <div>
+                <div className="eyebrow">
+                    REQUEST REVIEW
+                </div>
+
+                <h3>
+                    Requested appointment action
+                </h3>
+              </div>
+
+              <span className="approval-number">
+                  {createdAppointment
+                    ? `#${createdAppointment.id}`
+                    : "NOT CREATED"}
+              </span>
+            </div>
+
+              <div className="approval-doctor">
+                <div className="large-avatar">
+                  {selectedDoctor?.initials || "--"}
+                </div>
+
+                <div>
+                  <h3>
+                    {selectedDoctor?.name ||
+                      "No doctor selected"}
+                  </h3>
+
+                  <span>
+                    {selectedDoctor?.specialization ||
+                      "Select a doctor to create a request"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="approval-details">
+                <div>
+                  <small>PATIENT</small>
+                  <strong>
+                    {currentUser?.full_name ||
+                      "Authenticated patient"}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>HOSPITAL</small>
+                  <strong>
+                    {selectedHospital?.name ||
+                      "No hospital selected"}
+                  </strong>
+                </div>
+
+                <div>
+                  <small>DATE</small>
+                  <strong>{appointmentDate}</strong>
+                </div>
+
+                <div>
+                  <small>TIME</small>
+                  <strong>{appointmentTime}</strong>
+                </div>
+              </div>
+
+              <div className="approval-warning">
+                <strong>
+                  Approval execution is not connected
+                </strong>
+
+                <p>
+                  No backend approval or safety-check API is available. CareBridge will not claim that approval or safety checks have completed here.
+                </p>
+              </div>
+
+              <div className="approval-status-line">
+                <span>WORKFLOW STATUS</span>
+                <strong>{approvalStatus}</strong>
+              </div>
+
+              <div className="approval-actions">
+                <button
+                  className="reject-button"
+                  type="button"
+                  onClick={() => navigate("appointments")}
+                >
+                  Review appointment
+                </button>
+
+                <button
+                  className="primary-button"
+                  type="button"
+                  onClick={() => navigate("appointments")}
+                >
+                  Open available workflow
+                </button>
+              </div>
+          </div>
+
+          <div className="panel trace-panel">
+            <div className="eyebrow">
+              EXECUTION TRACE
+            </div>
+
+            <h3>
+              SmartFlow Activity
+            </h3>
+
+            <TraceStep
+              number={hasRequest ? "01" : "--"}
+              title="Appointment request"
+              description={
+                hasRequest
+                  ? "Selected doctor and hospital are available for review"
+                  : "Select a hospital and doctor to create a request"
+              }
+              done={hasRequest}
+            />
+
+            <TraceStep
+              number={selectedHospital ? "02" : "--"}
+              title="Hospital context"
+              description={
+                selectedHospital
+                  ? "Hospital selection is present in the frontend flow"
+                  : "No hospital selection is present"
+              }
+              done={Boolean(selectedHospital)}
+            />
+
+            <TraceStep
+              number={selectedDoctor ? "03" : "--"}
+              title="Doctor context"
+              description={
+                selectedDoctor
+                  ? "Doctor selection is present in the frontend flow"
+                  : "No doctor selection is present"
+              }
+              done={Boolean(selectedDoctor)}
+            />
+
+            <TraceStep
+              number="04"
+              title="Approval API"
+              description="Not available in the current backend"
+              current={!createdAppointment}
+            />
+
+            <TraceStep
+              number="05"
+              title="Appointment creation"
+              description={
+                createdAppointment
+                  ? "Created through the existing appointment API"
+                  : "Available from the appointment review screen"
+              }
+              done={Boolean(createdAppointment)}
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  function renderOPD() {
+    const confirmedDoctor =
+      selectedDoctor?.name || "Doctor unavailable";
+    const confirmedHospital =
+      selectedHospital?.name || "Hospital unavailable";
+    const confirmedDate =
+      createdAppointment?.appointment_date || "Not available";
+    const confirmedTime =
+      createdAppointment?.appointment_time || "Not available";
+    const confirmedStatus =
+      createdAppointment?.status || "No appointment record";
+    const confirmedQueue = "Not assigned";
+
+    return (
+      <>
+        <PageIntro
+          eyebrow="DIGITAL OPD"
+          title="Your OPD Pass"
+          description="Use this digital pass when you reach the hospital."
+        />
+
+        <div className="opd-layout">
+          <div className="opd-pass">
+            <div className="opd-header">
+              <div classN

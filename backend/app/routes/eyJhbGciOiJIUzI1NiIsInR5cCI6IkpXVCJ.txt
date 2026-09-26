@@ -1,0 +1,12 @@
+ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWI2NGNlZGYzZTdhYzQ5MDBjNTFhYWQiLCJlbWFpbCI6ImNhcmVicmlkZ2V0ZXN0QGNhcmVicmlkZ2UuY29tIiwicm9sZSI6IlBBVElFTlQiLCJleHAiOjE3OTAzMzU5OTh9.in6T96gN31-RI9dHwaKj6o5Mens-Ex7Mzrk2xwSo2wg
+
+
+
+ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWI2NGNlZGYzZTdhYzQ5MDBjNTFhYWQiLCJlbWFpbCI6ImNhcmVicmlkZ2V0ZXN0QGNhcmVicmlkZ2UuY29tIiwicm9sZSI6IlBBVElFTlQiLCJleHAiOjE3OTAzNDQ0MTF9.aVGedg-MTcsX3YSmvCNAeifYtwEgJnywe_onSe_JUEk
+
+ADMIN ACCOUNT CREATED SUCCESSFULLY
+============================================================
+Admin ID : 6ab67b1e68d20a378e2a5530
+Email    : phoolkumari2604@gmail.com
+Role     : ADMIN
+
