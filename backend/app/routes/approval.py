@@ -206,6 +206,33 @@ def update_approval(
             detail="Approval not found"
         )
 
+    # -----------------------------------------
+    # Synchronize appointment approval status
+    # -----------------------------------------
+    if status == "APPROVED":
+
+        db.appointments.update_one(
+            {"_id": approval["appointment_id"]},
+            {
+                "$set": {
+                    "approval_status": "APPROVED",
+                    "updated_at": datetime.utcnow(),
+                }
+            }
+        )
+
+    elif status == "REJECTED":
+
+        db.appointments.update_one(
+            {"_id": approval["appointment_id"]},
+            {
+                "$set": {
+                    "approval_status": "REJECTED",
+                    "updated_at": datetime.utcnow(),
+                }
+            }
+        )
+
     return {
         "message": f"Approval {status.lower()} successfully",
         "approval_id": approval_id,

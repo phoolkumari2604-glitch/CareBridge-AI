@@ -1,25 +1,17 @@
+﻿from fastapi import APIRouter, Depends, HTTPException
 from datetime import timedelta
 
-from fastapi import APIRouter, HTTPException, Depends
-
 from app.core.database import get_database
-from app.core.security import (
-    hash_password,
-    verify_password,
-    create_access_token,
-)
-from app.core.dependencies import (
-    get_current_user,
-    require_admin,
-)
-
+from app.core.dependencies import get_current_user, require_admin
+from app.core.security import hash_password, verify_password, create_access_token
 from app.models.user import create_user_document
 from app.schemas.auth import (
     RegisterRequest,
     LoginRequest,
-    LoginResponse,
     UserResponse,
+    LoginResponse,
 )
+from app.services.audit_service import log_audit_action
 
 
 router = APIRouter(
@@ -28,33 +20,12 @@ router = APIRouter(
 )
 
 
-# ============================================================
-# REGISTER PATIENT
-# ============================================================
-
-@router.post(
-    "/register",
-    response_model=UserResponse,
-)
-def register_user(
-    user: RegisterRequest,
-):
+@router.post("/register", response_model=UserResponse)
+def register_user(user: RegisterRequest):
     db = get_database()
 
-    # Public registration is allowed only for PATIENT
-    role = user.role.upper()
-
-    if role != "PATIENT":
-        raise HTTPException(
-            status_code=403,
-            detail="Only PATIENT accounts can be registered through this endpoint",
-        )
-
-    # Check duplicate email
     existing_user = db.users.find_one(
-        {
-            "email": user.email.lower()
-        }
+        {"email": user.email.lower()}
     )
 
     if existing_user:
@@ -63,12 +34,8 @@ def register_user(
             detail="A user with this email already exists",
         )
 
-    # Hash password
-    password_hash = hash_password(
-        user.password
-    )
+    password_hash = hash_password(user.password)
 
-    # Create user document
     user_data = create_user_document(
         name=user.name,
         email=user.email,
@@ -77,9 +44,17 @@ def register_user(
         phone=user.phone,
     )
 
-    # Insert user
-    result = db.users.insert_one(
-        user_data
+    result = db.users.insert_one(user_data)
+
+    # Audit patient registration
+    log_audit_action(
+        db=db,
+        user_id=str(result.inserted_id),
+        user_role="PATIENT",
+        action="PATIENT_REGISTERED",
+        resource="USER",
+        resource_id=str(result.inserted_id),
+        details=f"Patient user {user_data['email']} registered successfully",
     )
 
     return {
@@ -91,24 +66,12 @@ def register_user(
     }
 
 
-# ============================================================
-# LOGIN
-# ============================================================
-
-@router.post(
-    "/login",
-    response_model=LoginResponse,
-)
-def login_user(
-    user: LoginRequest,
-):
+@router.post("/login", response_model=LoginResponse)
+def login_user(user: LoginRequest):
     db = get_database()
 
-    # Find user
     existing_user = db.users.find_one(
-        {
-            "email": user.email.lower()
-        }
+        {"email": user.email.lower()}
     )
 
     if not existing_user:
@@ -117,7 +80,6 @@ def login_user(
             detail="Invalid email or password",
         )
 
-    # Verify password
     if not verify_password(
         user.password,
         existing_user["password_hash"],
@@ -127,19 +89,26 @@ def login_user(
             detail="Invalid email or password",
         )
 
-    # JWT payload
     token_data = {
         "sub": str(existing_user["_id"]),
         "email": existing_user["email"],
         "role": existing_user["role"],
     }
 
-    # Create token
     access_token = create_access_token(
         data=token_data,
-        expires_delta=timedelta(
-            minutes=60
-        ),
+        expires_delta=timedelta(minutes=60),
+    )
+
+    # Audit successful login
+    log_audit_action(
+        db=db,
+        user_id=str(existing_user["_id"]),
+        user_role=existing_user["role"],
+        action="LOGIN_SUCCESS",
+        resource="AUTH",
+        resource_id=str(existing_user["_id"]),
+        details="User logged in successfully",
     )
 
     return {
@@ -155,18 +124,12 @@ def login_user(
     }
 
 
-# ============================================================
-# GET CURRENT USER
-# ============================================================
-
 @router.get(
     "/me",
     response_model=UserResponse,
 )
 def get_me(
-    current_user: dict = Depends(
-        get_current_user
-    ),
+    current_user: dict = Depends(get_current_user),
 ):
     return {
         "id": str(current_user["_id"]),
@@ -177,28 +140,18 @@ def get_me(
     }
 
 
-# ============================================================
-# CREATE STAFF USER
-# ADMIN ONLY
-# ============================================================
-
 @router.post(
     "/staff",
     response_model=UserResponse,
 )
 def create_staff_user(
     user: RegisterRequest,
-    current_user: dict = Depends(
-        require_admin
-    ),
+    current_user: dict = Depends(require_admin),
 ):
     db = get_database()
 
-    # Check duplicate email
     existing_user = db.users.find_one(
-        {
-            "email": user.email.lower()
-        }
+        {"email": user.email.lower()}
     )
 
     if existing_user:
@@ -207,12 +160,8 @@ def create_staff_user(
             detail="A user with this email already exists",
         )
 
-    # Hash password
-    password_hash = hash_password(
-        user.password
-    )
+    password_hash = hash_password(user.password)
 
-    # Always create STAFF
     user_data = create_user_document(
         name=user.name,
         email=user.email,
@@ -221,9 +170,17 @@ def create_staff_user(
         phone=user.phone,
     )
 
-    # Insert staff user
-    result = db.users.insert_one(
-        user_data
+    result = db.users.insert_one(user_data)
+
+    # Audit staff creation
+    log_audit_action(
+        db=db,
+        user_id=str(current_user["_id"]),
+        user_role=current_user["role"],
+        action="STAFF_CREATED",
+        resource="USER",
+        resource_id=str(result.inserted_id),
+        details=f"Staff user {user_data['email']} created",
     )
 
     return {
@@ -233,5 +190,3 @@ def create_staff_user(
         "role": "STAFF",
         "phone": user_data["phone"],
     }
-
-

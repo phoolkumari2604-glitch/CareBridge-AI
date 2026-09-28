@@ -19,6 +19,10 @@ def run_smartflow(
 ):
     db = get_database()
 
+    # -------------------------------------------------
+    # VALIDATE APPOINTMENT ID
+    # -------------------------------------------------
+
     if not ObjectId.is_valid(appointment_id):
         raise HTTPException(
             status_code=400,
@@ -136,19 +140,31 @@ def run_smartflow(
 
     if not queue_entry:
 
+        # Get the last active token for the same
+        # hospital and doctor.
         last_entry = db.queue.find_one(
-            {},
-            sort=[("token_number", -1)]
+            {
+                "hospital_id": appointment["hospital_id"],
+                "doctor_id": appointment["doctor_id"],
+                "status": {
+                    "$in": [
+                        "WAITING",
+                        "CALLED",
+                        "IN_CONSULTATION",
+                    ]
+                },
+            },
+            sort=[("token_number", -1)],
         )
 
-        token_number = (
-            last_entry["token_number"] + 1
-            if last_entry
-            else 1
-        )
+        if last_entry:
+            token_number = last_entry["token_number"] + 1
+        else:
+            token_number = 1
 
         queue_data = {
             "appointment_id": ObjectId(appointment_id),
+            "opd_pass_id": opd_pass["_id"],
             "patient_id": appointment["patient_id"],
             "hospital_id": appointment["hospital_id"],
             "doctor_id": appointment["doctor_id"],
@@ -171,17 +187,27 @@ def run_smartflow(
     # 5. CALCULATE QUEUE POSITION
     # -------------------------------------------------
 
-    patients_ahead = db.queue.count_documents({
-        "token_number": {
-            "$lt": queue_entry["token_number"]
-        },
-        "status": "WAITING",
-    })
+    patients_ahead = db.queue.count_documents(
+        {
+            "hospital_id": queue_entry["hospital_id"],
+            "doctor_id": queue_entry["doctor_id"],
+            "status": {
+                "$in": [
+                    "WAITING",
+                    "CALLED",
+                    "IN_CONSULTATION",
+                ]
+            },
+            "token_number": {
+                "$lt": queue_entry["token_number"]
+            },
+        }
+    )
 
     queue_position = patients_ahead + 1
 
     # -------------------------------------------------
-    # RESPONSE
+    # 6. RESPONSE
     # -------------------------------------------------
 
     return {
@@ -208,10 +234,10 @@ def run_smartflow(
 
         "queue": {
             "queue_id": str(queue_entry["_id"]),
+            "opd_pass_id": str(queue_entry["opd_pass_id"]),
             "token_number": queue_entry["token_number"],
             "status": queue_entry["status"],
             "patients_ahead": patients_ahead,
             "queue_position": queue_position,
         },
     }
-
