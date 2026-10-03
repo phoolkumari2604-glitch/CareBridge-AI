@@ -1,0 +1,373 @@
+/* =========================================================
+   CAREBRIDGE AI
+   REUSABLE SYSTEM STATES
+========================================================= */
+
+.system-state {
+  width: 100%;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.system-state__card {
+  width: min(100%, 560px);
+  padding: 42px 34px;
+  box-sizing: border-box;
+  text-align: center;
+
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 24px;
+
+  background: var(--card, #ffffff);
+
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08);
+
+  animation: systemStateAppear 0.3s ease;
+}
+
+@keyframes systemStateAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   ICON
+========================================================= */
+
+.system-state__icon-wrapper {
+  width: 82px;
+  height: 82px;
+
+  display: grid;
+  place-items: center;
+
+  margin: 0 auto 22px;
+
+  border-radius: 50%;
+
+  background: var(--accent-bg, #eff6ff);
+}
+
+.system-state__icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+/* =========================================================
+   SPINNER
+========================================================= */
+
+.system-state__spinner {
+  width: 38px;
+  height: 38px;
+
+  border: 4px solid #dbeafe;
+  border-top-color: var(--accent, #2563eb);
+
+  border-radius: 50%;
+
+  animation: systemSpinner 0.8s linear infinite;
+}
+
+@keyframes systemSpinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.system-state__content {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.system-state__label {
+  display: inline-block;
+
+  margin-bottom: 8px;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+
+  color: var(--accent, #2563eb);
+}
+
+.system-state__content h2 {
+  margin: 0;
+
+  color: var(--text-h, #111827);
+
+  font-size: clamp(22px, 3vw, 28px);
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.system-state__content p {
+  margin: 12px auto 0;
+
+  color: var(--text-muted, #64748b);
+
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.system-state__actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 26px;
+}
+
+.system-state__primary,
+.system-state__secondary {
+  min-height: 42px;
+  padding: 0 18px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.system-state__primary {
+  border: 1px solid var(--accent, #2563eb);
+
+  background: var(--accent, #2563eb);
+
+  color: #ffffff;
+
+  box-shadow:
+    0 6px 16px rgba(37, 99, 235, 0.2);
+}
+
+.system-state__primary:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 9px 20px rgba(37, 99, 235, 0.28);
+}
+
+.system-state__secondary {
+  border: 1px solid var(--border, #e2e8f0);
+
+  background: var(--card, #ffffff);
+
+  color: var(--text-h, #334155);
+}
+
+.system-state__secondary:hover {
+  transform: translateY(-1px);
+
+  border-color: var(--accent, #2563eb);
+
+  color: var(--accent, #2563eb);
+
+  background: var(--accent-bg, #eff6ff);
+}
+
+.system-state__primary:focus-visible,
+.system-state__secondary:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   STATE TYPES
+========================================================= */
+
+.system-state--loading
+  .system-state__icon-wrapper {
+  background: #eff6ff;
+}
+
+.system-state--empty
+  .system-state__icon-wrapper {
+  background: #f8fafc;
+}
+
+.system-state--error
+  .system-state__icon-wrapper,
+.system-state--server-error
+  .system-state__icon-wrapper {
+  background: #fff7ed;
+}
+
+.system-state--offline
+  .system-state__icon-wrapper {
+  background: #f1f5f9;
+}
+
+.system-state--unauthorized
+  .system-state__icon-wrapper,
+.system-state--forbidden
+  .system-state__icon-wrapper {
+  background: #fef2f2;
+}
+
+.system-state--not-found
+  .system-state__icon-wrapper {
+  background: #f8fafc;
+}
+
+.system-state--conflict
+  .system-state__icon-wrapper {
+  background: #fffbeb;
+}
+
+.system-state--validation
+  .system-state__icon-wrapper {
+  background: #fff7ed;
+}
+
+/* =========================================================
+   COMPACT MODE
+========================================================= */
+
+.system-state--compact {
+  min-height: 280px;
+  padding: 20px;
+}
+
+.system-state--compact
+  .system-state__card {
+  padding: 28px 24px;
+  border-radius: 18px;
+}
+
+.system-state--compact
+  .system-state__icon-wrapper {
+  width: 62px;
+  height: 62px;
+  margin-bottom: 16px;
+}
+
+.system-state--compact
+  .system-state__icon {
+  font-size: 28px;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+  .system-state {
+    min-height: 360px;
+    padding: 18px 14px;
+  }
+
+  .system-state__card {
+    padding: 32px 20px;
+    border-radius: 20px;
+  }
+
+  .system-state__icon-wrapper {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 18px;
+  }
+
+  .system-state__icon {
+    font-size: 30px;
+  }
+
+  .system-state__spinner {
+    width: 32px;
+    height: 32px;
+  }
+
+  .system-state__content h2 {
+    font-size: 22px;
+  }
+
+  .system-state__content p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .system-state__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .system-state__primary,
+  .system-state__secondary {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 380px) {
+  .system-state {
+    padding: 12px 10px;
+  }
+
+  .system-state__card {
+    padding: 26px 16px;
+  }
+
+  .system-state__content h2 {
+    font-size: 20px;
+  }
+
+  .system-state__content p {
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .system-state__card {
+    animation: none;
+  }
+
+  .system-state__spinner {
+    animation: none;
+  }
+
+  .system-state__primary,
+  .system-state__secondary {
+    transition: none;
+  }
+}
+

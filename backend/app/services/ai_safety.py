@@ -41,3 +41,7 @@ def get_emergency_response() -> str:
         "your local emergency service now. Do not rely on this "
         "AI assistant for emergency diagnosis or treatment."
     )
+
+
+
+

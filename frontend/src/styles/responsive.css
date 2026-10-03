@@ -1,0 +1,71 @@
+/* =========================================
+   CAREBRIDGE AI — RESPONSIVE SYSTEM
+   ========================================= */
+
+/* Large desktop */
+
+@media (min-width: 1200px) {
+  .container {
+    width: min(1200px, calc(100% - 64px));
+  }
+}
+
+/* Tablet */
+
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 230px;
+  }
+
+  .container {
+    width: min(100% - 32px, 900px);
+  }
+}
+
+/* Mobile/tablet */
+
+@media (max-width: 768px) {
+  :root {
+    --navbar-height: 64px;
+  }
+
+  .container {
+    width: calc(100% - 24px);
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: block !important;
+  }
+}
+
+/* Small phones */
+
+@media (max-width: 480px) {
+  .container {
+    width: calc(100% - 20px);
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  body {
+    font-size: 14px;
+  }
+}

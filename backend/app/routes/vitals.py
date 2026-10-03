@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -61,7 +61,7 @@ def create_vital_signs(
     data = vitals.model_dump()
 
     data["patient_id"] = ObjectId(vitals.patient_id)
-    data["recorded_at"] = datetime.utcnow()
+    data["recorded_at"] = datetime.now(UTC)
 
     result = db.vital_signs.insert_one(data)
 
@@ -70,6 +70,63 @@ def create_vital_signs(
         "vital_id": str(result.inserted_id),
     }
 
+
+
+@router.get("/patient/{patient_id}")
+def get_patient_vital_history(
+    patient_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    db = get_database()
+
+    if not ObjectId.is_valid(patient_id):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid patient ID",
+        )
+
+    patient = db.patients.find_one(
+        {"_id": ObjectId(patient_id)}
+    )
+
+    if not patient:
+        raise HTTPException(
+            status_code=404,
+            detail="Patient not found",
+        )
+
+    # Patients can access only their own vital history
+    if current_user.get("role") == "PATIENT":
+        current_user_id = str(current_user["_id"])
+
+        owns_record = (
+            patient.get("user_id") == current_user_id
+            or patient.get("email") == current_user.get("email")
+        )
+
+        if not owns_record:
+            raise HTTPException(
+                status_code=403,
+                detail="You can only access your own vital history",
+            )
+
+    vitals = list(
+        db.vital_signs.find(
+            {"patient_id": ObjectId(patient_id)}
+        ).sort("recorded_at", -1)
+    )
+
+    if not vitals:
+        raise HTTPException(
+            status_code=404,
+            detail="No vital signs found",
+        )
+
+    for vital in vitals:
+        vital["_id"] = str(vital["_id"])
+        vital["patient_id"] = str(vital["patient_id"])
+
+    return vitals
 
 @router.get("/{patient_id}")
 def get_vital_signs(
@@ -114,6 +171,12 @@ def get_vital_signs(
             {"patient_id": ObjectId(patient_id)}
         ).sort("recorded_at", -1)
     )
+
+    if not vitals:
+        raise HTTPException(
+            status_code=404,
+            detail="No vital signs found",
+        )
 
     for vital in vitals:
         vital["_id"] = str(vital["_id"])
@@ -217,7 +280,7 @@ def update_vital_signs(
         if value is not None
     }
 
-    data["updated_at"] = datetime.utcnow()
+    data["updated_at"] = datetime.now(UTC)
 
     result = db.vital_signs.update_one(
         {"_id": ObjectId(vital_id)},
@@ -261,3 +324,6 @@ def delete_vital_signs(
     return {
         "message": "Vital signs deleted successfully",
     }
+
+
+

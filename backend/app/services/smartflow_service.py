@@ -52,7 +52,7 @@ def run_smartflow(db, appointment_id: str):
             "appointment_date": appointment["appointment_date"],
             "appointment_time": appointment["appointment_time"],
             "status": "ACTIVE",
-            "created_at": datetime.utcnow()
+            "created_at":datetime.now(UTC))
         }
 
         result = db.opd_passes.insert_one(opd_pass_data)
@@ -97,8 +97,8 @@ def run_smartflow(db, appointment_id: str):
             "doctor_id": appointment["doctor_id"],
             "token_number": token_number,
             "status": "WAITING",
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at":datetime.now(UTC)),
+            "updated_at":datetime.now(UTC))
         }
 
         queue_result = db.queue.insert_one(queue_data)

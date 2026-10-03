@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -79,8 +79,8 @@ def create_health_profile(
         profile.patient_id
     )
 
-    data["created_at"] = datetime.utcnow()
-    data["updated_at"] = datetime.utcnow()
+    data["created_at"] =datetime.now(UTC)
+    data["updated_at"] =datetime.now(UTC)
 
     result = db.health_profiles.insert_one(data)
 
@@ -197,7 +197,7 @@ def update_health_profile(
         if value is not None
     }
 
-    data["updated_at"] = datetime.utcnow()
+    data["updated_at"] =datetime.now(UTC)
 
     result = db.health_profiles.update_one(
         {
@@ -257,3 +257,4 @@ def delete_health_profile(
 
 
     
+

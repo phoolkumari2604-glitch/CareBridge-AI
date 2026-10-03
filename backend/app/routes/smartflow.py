@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 import secrets
 
 from app.core.database import get_database
@@ -53,9 +53,9 @@ def run_smartflow(
             "patient_id": appointment["patient_id"],
             "status": "APPROVED",
             "approved_by": current_user["_id"],
-            "approved_at": datetime.utcnow(),
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "approved_at":datetime.now(UTC),
+            "created_at":datetime.now(UTC),
+            "updated_at":datetime.now(UTC),
         }
 
         approval_result = db.approvals.insert_one(
@@ -71,8 +71,8 @@ def run_smartflow(
                 "$set": {
                     "status": "APPROVED",
                     "approved_by": current_user["_id"],
-                    "approved_at": datetime.utcnow(),
-                    "updated_at": datetime.utcnow(),
+                    "approved_at":datetime.now(UTC),
+                    "updated_at":datetime.now(UTC),
                 }
             }
         )
@@ -89,7 +89,7 @@ def run_smartflow(
             "$set": {
                 "approval_status": "APPROVED",
                 "status": "APPROVED",
-                "updated_at": datetime.utcnow(),
+                "updated_at":datetime.now(UTC),
             }
         }
     )
@@ -117,8 +117,8 @@ def run_smartflow(
             "doctor_id": appointment["doctor_id"],
             "pass_number": pass_number,
             "status": "ACTIVE",
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "created_at":datetime.now(UTC),
+            "updated_at":datetime.now(UTC),
         }
 
         opd_pass_result = db.opd_passes.insert_one(
@@ -170,8 +170,8 @@ def run_smartflow(
             "doctor_id": appointment["doctor_id"],
             "token_number": token_number,
             "status": "WAITING",
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "created_at":datetime.now(UTC),
+            "updated_at":datetime.now(UTC),
         }
 
         queue_result = db.queue.insert_one(
@@ -241,3 +241,4 @@ def run_smartflow(
             "queue_position": queue_position,
         },
     }
+

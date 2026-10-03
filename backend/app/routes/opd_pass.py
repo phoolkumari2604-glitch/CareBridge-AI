@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -60,8 +60,8 @@ def create_opd_pass(
         "doctor_id": appointment["doctor_id"],
         "pass_number": pass_number,
         "status": "ACTIVE",
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
+        "created_at":datetime.now(UTC),
+        "updated_at":datetime.now(UTC),
     }
 
     result = db.opd_passes.insert_one(opd_pass)
@@ -196,7 +196,7 @@ def update_opd_pass(
         {
             "$set": {
                 "status": status,
-                "updated_at": datetime.utcnow(),
+                "updated_at":datetime.now(UTC),
             }
         }
     )
@@ -240,3 +240,4 @@ def delete_opd_pass(
     return {
         "message": "OPD pass deleted successfully"
     }
+

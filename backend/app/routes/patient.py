@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -28,7 +28,7 @@ def create_patient(
     db = get_database()
 
     data = patient.model_dump()
-    data["created_at"] = datetime.utcnow()
+    data["created_at"] = datetime.now(UTC)
 
     # Link the patient record to the authenticated user.
     data["user_id"] = str(current_user["_id"])

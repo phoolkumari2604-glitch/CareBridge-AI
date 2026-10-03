@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -60,8 +60,8 @@ def create_health_record(
     data = record.model_dump()
 
     data["patient_id"] = ObjectId(record.patient_id)
-    data["created_at"] = datetime.utcnow()
-    data["updated_at"] = datetime.utcnow()
+    data["created_at"] =datetime.now(timezone.utc)
+    data["updated_at"] =datetime.now(timezone.utc)
 
     result = db.health_records.insert_one(data)
 
@@ -229,7 +229,7 @@ def update_health_record(
         if value is not None
     }
 
-    data["updated_at"] = datetime.utcnow()
+    data["updated_at"] =datetime.now(timezone.utc)
 
     result = db.health_records.update_one(
         {"_id": ObjectId(record_id)},
@@ -273,3 +273,4 @@ def delete_health_record(
     return {
         "message": "Health record deleted successfully"
     }
+

@@ -152,7 +152,7 @@ def test_vital_signs_create_get_update_delete():
     # UPDATE VITAL SIGNS
     update_response = client.put(
         f"/vitals/{vital_id}",
-        headers=patient_headers,
+        headers=admin_headers,
         json={
             "heart_rate": 75,
             "systolic_bp": 125,
@@ -176,7 +176,7 @@ def test_vital_signs_create_get_update_delete():
 
     assert verify_response.status_code == 200
 
-    updated_data = verify_response.json()
+    updated_data = verify_response.json()[0]
 
     assert updated_data["heart_rate"] == 75
     assert updated_data["systolic_bp"] == 125
@@ -214,6 +214,8 @@ def test_vital_signs_create_get_update_delete():
     assert final_response.status_code == 404
 
     close_mongodb_connection()
+
+
 
 
 

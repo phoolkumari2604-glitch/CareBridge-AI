@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from datetime import timedelta
 
 from app.core.database import get_database
@@ -111,6 +111,17 @@ def login_user(user: LoginRequest):
         details="User logged in successfully",
     )
 
+    patient_id = None
+    if existing_user.get("role") == "PATIENT":
+        patient_doc = db.patients.find_one({
+            "$or": [
+                {"user_id": str(existing_user["_id"])},
+                {"email": existing_user["email"].lower()}
+            ]
+        })
+        if patient_doc:
+            patient_id = str(patient_doc["_id"])
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -120,6 +131,7 @@ def login_user(user: LoginRequest):
             "email": existing_user["email"],
             "role": existing_user["role"],
             "phone": existing_user.get("phone"),
+            "patient_id": patient_id,
         },
     }
 
@@ -131,12 +143,25 @@ def login_user(user: LoginRequest):
 def get_me(
     current_user: dict = Depends(get_current_user),
 ):
+    db = get_database()
+    patient_id = None
+    if current_user.get("role") == "PATIENT":
+        patient_doc = db.patients.find_one({
+            "$or": [
+                {"user_id": str(current_user["_id"])},
+                {"email": current_user["email"].lower()}
+            ]
+        })
+        if patient_doc:
+            patient_id = str(patient_doc["_id"])
+
     return {
         "id": str(current_user["_id"]),
         "name": current_user["name"],
         "email": current_user["email"],
         "role": current_user["role"],
         "phone": current_user.get("phone"),
+        "patient_id": patient_id,
     }
 
 

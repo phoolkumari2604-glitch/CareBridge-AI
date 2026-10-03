@@ -23,3 +23,8 @@ def log_audit_action(
     result = db.audit_logs.insert_one(document)
 
     return str(result.inserted_id)
+
+
+
+
+

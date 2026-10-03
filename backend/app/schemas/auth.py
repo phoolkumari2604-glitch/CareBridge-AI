@@ -21,6 +21,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: str
     phone: Optional[str] = None
+    patient_id: Optional[str] = None
 
 
 class LoginResponse(BaseModel):

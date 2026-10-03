@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import get_current_user
@@ -97,8 +97,8 @@ def create_queue_entry(
         "doctor_id": appointment["doctor_id"],
         "token_number": token_number,
         "status": "WAITING",
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
+        "created_at":datetime.now(UTC),
+        "updated_at":datetime.now(UTC)
     }
 
     # 8. Save queue entry
@@ -241,7 +241,7 @@ def update_queue_entry(
         if value is not None
     }
 
-    data["updated_at"] = datetime.utcnow()
+    data["updated_at"] =datetime.now(UTC)
 
     # Update MongoDB
     result = db.queue.update_one(
@@ -287,3 +287,4 @@ def delete_queue_entry(
     return {
         "message": "Queue entry deleted successfully"
     }
+

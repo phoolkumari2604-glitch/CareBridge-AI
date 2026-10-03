@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -223,9 +223,9 @@ def create_appointment(
         "approval_status":
             "PENDING",
         "created_at":
-            datetime.utcnow(),
+           datetime.now(UTC),
         "updated_at":
-            datetime.utcnow()
+           datetime.now(UTC)
     }
 
     result = db.appointments.insert_one(
@@ -471,7 +471,7 @@ def update_appointment(
         data.pop("status", None)
         data.pop("approval_status", None)
 
-    data["updated_at"] = datetime.utcnow()
+    data["updated_at"] =datetime.now(UTC)
 
     result = db.appointments.update_one(
         {
@@ -589,3 +589,4 @@ def delete_appointment(
         "message":
             "Appointment deleted successfully"
     }
+

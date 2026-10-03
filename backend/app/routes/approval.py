@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -53,8 +53,8 @@ def create_approval(
         "patient_id": appointment["patient_id"],
         "status": "PENDING",
         "approved_by": None,
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
+        "created_at":datetime.now(UTC),
+        "updated_at":datetime.now(UTC),
     }
 
     result = db.approvals.insert_one(approval)
@@ -189,11 +189,11 @@ def update_approval(
     update_data = {
         "status": status,
         "approved_by": current_user["_id"],
-        "updated_at": datetime.utcnow(),
+        "updated_at":datetime.now(UTC),
     }
 
     if status == "APPROVED":
-        update_data["approved_at"] = datetime.utcnow()
+        update_data["approved_at"] =datetime.now(UTC)
 
     result = db.approvals.update_one(
         {"_id": ObjectId(approval_id)},
@@ -216,7 +216,7 @@ def update_approval(
             {
                 "$set": {
                     "approval_status": "APPROVED",
-                    "updated_at": datetime.utcnow(),
+                    "updated_at":datetime.now(UTC),
                 }
             }
         )
@@ -228,7 +228,7 @@ def update_approval(
             {
                 "$set": {
                     "approval_status": "REJECTED",
-                    "updated_at": datetime.utcnow(),
+                    "updated_at":datetime.now(UTC),
                 }
             }
         )
@@ -266,3 +266,4 @@ def delete_approval(
     return {
         "message": "Approval deleted successfully"
     }
+

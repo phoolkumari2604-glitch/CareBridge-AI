@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -48,7 +48,7 @@ def create_doctor(
     data = doctor.model_dump()
 
     data["hospital_id"] = ObjectId(doctor.hospital_id)
-    data["created_at"] = datetime.utcnow()
+    data["created_at"] = datetime.now(UTC)
 
     result = db.doctors.insert_one(data)
 
@@ -260,3 +260,4 @@ def delete_doctor(
     return {
         "message": "Doctor deleted successfully"
     }
+

@@ -73,7 +73,7 @@ def get_health_alerts(
                 "created_at": (
                     recorded_at.isoformat()
                     if recorded_at
-                    else datetime.utcnow().isoformat()
+                    else datetime.now(UTC).isoformat()
                 ),
             })
 
@@ -245,3 +245,4 @@ def get_health_alert_summary(
             else "No configured vital-sign alerts detected."
         ),
     }
+

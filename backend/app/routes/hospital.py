@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.database import get_database
 from app.core.dependencies import (
@@ -29,7 +29,7 @@ def create_hospital(
     db = get_database()
 
     data = hospital.model_dump()
-    data["created_at"] = datetime.utcnow()
+    data["created_at"] = datetime.now(UTC)
 
     result = db.hospitals.insert_one(data)
 
@@ -192,3 +192,6 @@ def search_hospitals_by_city(
         hospital["_id"] = str(hospital["_id"])
 
     return hospitals
+
+
+
