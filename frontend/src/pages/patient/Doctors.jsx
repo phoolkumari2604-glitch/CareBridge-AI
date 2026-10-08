@@ -6,18 +6,13 @@ import {
   CalendarDays,
   Clock3,
   Stethoscope,
-  Star,
   ChevronRight,
   Loader2,
   AlertCircle,
   Building,
   CheckCircle2,
-  X,
   Calendar,
   ShieldCheck,
-  Phone,
-  DollarSign,
-  User,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";

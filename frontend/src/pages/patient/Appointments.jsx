@@ -11,13 +11,11 @@ import {
   Stethoscope,
   Building,
   Ticket,
-  ChevronRight,
   Loader2,
   RefreshCw,
   Trash2,
   Eye,
   Search,
-  Check,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";

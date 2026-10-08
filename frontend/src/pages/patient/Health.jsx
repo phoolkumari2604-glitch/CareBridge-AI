@@ -8,6 +8,7 @@ import {
   Wind,
   FileText,
   AlertTriangle,
+  AlertCircle,
   TrendingUp,
   CalendarDays,
   ShieldCheck,

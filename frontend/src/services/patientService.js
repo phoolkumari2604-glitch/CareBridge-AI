@@ -339,4 +339,5 @@ const patientService = {
   },
 };
 
+export { patientService };
 export default patientService;
