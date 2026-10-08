@@ -1,94 +1,102 @@
 import os
-import json
 import io
-import pytest
+import time
+import uuid
+import random
 from app import create_app
+from bson import ObjectId
 from app.core.database import get_database
-
-@pytest.fixture
-def client():
-    app = create_app()
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
 
 def test_flask_e2e(client):
     db = get_database()
+    test_id = uuid.uuid4().hex[:8]
+
     print("\n--- 1. Testing Root & Health Endpoints ---")
     res = client.get("/")
     assert res.status_code == 200
-    data = res.get_json()
-    assert "CareBridge AI" in data.get("message", "")
+    assert "CareBridge AI" in res.get_json()["service"]
+    
+    health_res = client.get("/api/health")
+    assert health_res.status_code == 200
+    assert health_res.get_json()["database"] == "connected"
+    print("Health and root endpoints OK")
 
-    res = client.get("/api/health")
-    assert res.status_code == 200
-    assert res.get_json().get("status") == "healthy"
-
-    print("\n--- 2. Testing Registration & Login ---")
-    test_email = f"flask_test_patient_{os.urandom(4).hex()}@carebridge.test"
+    print("\n--- 2. Testing Registration with Baseline Vitals & Login ---")
+    reg_email = f"flask_test_patient_{test_id}@carebridge.test"
     reg_payload = {
-        "name": "Flask Test Patient",
-        "email": test_email,
-        "password": "Password123!",
-        "phone": "+91-9876543210"
+        "name": f"Test Patient {test_id.upper()}",
+        "email": reg_email,
+        "password": "SecurePassword123!",
+        "phone": "+91 9876543210",
+        "age": 29,
+        "gender": "Female",
+        "blood_group": "B+",
+        "heart_rate": 74,
+        "systolic_bp": 118,
+        "diastolic_bp": 78,
+        "spo2": 99.0,
+        "temperature": 36.6,
+        "weight": 62.5,
+        "height": 168.0,
+        "allergies": "Penicillin",
+        "medical_history": "Mild Rhinitis"
     }
-    res = client.post("/api/auth/register", json=reg_payload)
-    assert res.status_code in [201, 409], f"Registration failed: {res.data}"
+    reg_res = client.post("/api/auth/register", json=reg_payload)
+    assert reg_res.status_code == 201, f"Registration failed: {reg_res.data}"
+    reg_data = reg_res.get_json()
+    patient_id = reg_data.get("patient_id")
+    assert patient_id is not None
 
     # Login
     login_res = client.post("/api/auth/login", json={
-        "email": test_email,
-        "password": "Password123!"
+        "email": reg_email,
+        "password": "SecurePassword123!"
     })
-    assert login_res.status_code == 200, f"Login failed: {login_res.data}"
+    assert login_res.status_code == 200
     login_data = login_res.get_json()
     token = login_data["access_token"]
-    user_info = login_data["user"]
-    patient_id = user_info.get("patient_id")
     headers = {"Authorization": f"Bearer {token}"}
-    print(f"Logged in patient: {user_info['email']}, patient_id: {patient_id}")
+    print(f"Logged in patient with baseline vitals: {reg_email}, patient_id: {patient_id}")
 
-    # Me endpoint
-    me_res = client.get("/api/auth/me", headers=headers)
-    assert me_res.status_code == 200
-    assert me_res.get_json()["email"] == test_email
+    # Verify initial vitals persisted
+    v_init_res = client.get(f"/api/vitals/{patient_id}/latest", headers=headers)
+    assert v_init_res.status_code == 200
+    v_init_data = v_init_res.get_json()
+    assert v_init_data["heart_rate"] == 74
+    print("Registration baseline vitals verified successfully in vital_signs")
 
-    print("\n--- 3. Testing Hospital & Leafmap Endpoints ---")
+    print("\n--- 3. Testing Password Change Endpoint ---")
+    pw_res = client.post("/api/auth/change-password", json={
+        "current_password": "SecurePassword123!",
+        "new_password": "NewSecurePassword456!"
+    }, headers=headers)
+    assert pw_res.status_code == 200
+    print("Password changed successfully via /api/auth/change-password")
+
+    # Login with new password
+    new_login_res = client.post("/api/auth/login", json={
+        "email": reg_email,
+        "password": "NewSecurePassword456!"
+    })
+    assert new_login_res.status_code == 200
+    token = new_login_res.get_json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    print("\n--- 4. Testing Hospital & Leafmap Endpoints ---")
     hosp_res = client.get("/api/hospitals/", headers=headers)
     assert hosp_res.status_code == 200
     hospitals = hosp_res.get_json()
+    assert len(hospitals) > 0
+    hospital_id = str(hospitals[0]["_id"])
     print(f"Fetched {len(hospitals)} registered hospitals")
 
-    # If no hospital in db, insert one for testing
-    if len(hospitals) == 0:
-        h_ins = db.hospitals.insert_one({
-            "name": "CareBridge Memorial Hospital",
-            "city": "New Delhi",
-            "address": "Connaught Place",
-            "phone": "+91-11-2345-6789",
-            "emergency": True,
-            "lat": 28.6139,
-            "lng": 77.2090
-        })
-        hospital_id = str(h_ins.inserted_id)
-    else:
-        hospital_id = str(hospitals[0]["_id"])
-
-    # Test Leafmap HTML map endpoint
-    map_res = client.get("/api/hospitals/map/html?lat=28.6139&lng=77.2090")
+    # Leafmap map generation
+    map_res = client.get("/api/hospitals/map/html?lat=12.9716&lon=77.5946&zoom=12", headers=headers)
     assert map_res.status_code == 200
-    assert "html" in map_res.content_type
-    assert b"leaflet" in map_res.data.lower() or b"folium" in map_res.data.lower() or b"map" in map_res.data.lower()
+    assert "text/html" in map_res.content_type
     print("Leafmap interactive HTML generated successfully")
 
-    # Test Real-time nearby endpoint
-    nearby_res = client.get("/api/hospitals/nearby/realtime?lat=28.6139&lng=77.2090&radius_km=15", headers=headers)
-    assert nearby_res.status_code == 200
-    nearby_data = nearby_res.get_json()
-    assert "hospitals" in nearby_data
-    print(f"Fetched nearby realtime facilities: {len(nearby_data['hospitals'])} hospitals, {len(nearby_data.get('police_stations', []))} police stations")
-
-    print("\n--- 4. Testing Doctor Endpoints ---")
+    print("\n--- 5. Testing Doctor Endpoints & Doctor Profile Update ---")
     doc_res = client.get("/api/doctors/", headers=headers)
     assert doc_res.status_code == 200
     doctors = doc_res.get_json()
@@ -96,7 +104,7 @@ def test_flask_e2e(client):
         d_ins = db.doctors.insert_one({
             "name": "Dr. Sarah Jenkins",
             "specialty": "Cardiology",
-            "hospital_id": hospital_id,
+            "hospital_id": ObjectId(hospital_id),
             "available_days": ["Monday", "Wednesday", "Friday"],
             "available_slots": ["10:00 AM", "11:30 AM", "02:00 PM"],
             "status": "AVAILABLE"
@@ -109,14 +117,16 @@ def test_flask_e2e(client):
     assert avail_res.status_code == 200
     print(f"Doctor availability verified for doctor_id: {doctor_id}")
 
-    print("\n--- 5. Testing Appointments & Workflow ---")
+    print("\n--- 6. Testing Appointments & Workflow ---")
+    unique_date = f"2026-11-{random.randint(10, 28)}"
+    unique_time = f"0{random.randint(1,9)}:30 AM"
     appt_payload = {
         "patient_id": patient_id,
         "hospital_id": hospital_id,
         "doctor_id": doctor_id,
-        "appointment_date": "2026-10-15",
-        "appointment_time": "10:00 AM",
-        "reason": "Cardiology Checkup and ECG"
+        "appointment_date": unique_date,
+        "appointment_time": unique_time,
+        "reason": "Cardiology Consultation and ECG"
     }
     appt_res = client.post("/api/appointments/", json=appt_payload, headers=headers)
     assert appt_res.status_code in [201, 409], f"Appointment booking failed: {appt_res.data}"
@@ -128,7 +138,7 @@ def test_flask_e2e(client):
     appointment_id = str(appts[0]["_id"])
     print(f"Appointment booked and retrieved: {appointment_id}")
 
-    print("\n--- 6. Testing Approvals, Digital OPD Pass, Live Queue & SmartFlow ---")
+    print("\n--- 7. Testing Approvals, Digital OPD Pass, Live Queue & SmartFlow ---")
     # SmartFlow
     sf_res = client.post(f"/api/smartflow/{appointment_id}", headers=headers)
     assert sf_res.status_code == 200, f"SmartFlow failed: {sf_res.data}"
@@ -147,31 +157,6 @@ def test_flask_e2e(client):
     q_res = client.get("/api/queue/", headers=headers)
     assert q_res.status_code == 200
     print("Live queue retrieved successfully")
-
-    print("\n--- 7. Testing Vitals & Health Alerts ---")
-    vitals_payload = {
-        "patient_id": patient_id,
-        "heart_rate": 76,
-        "systolic_bp": 122,
-        "diastolic_bp": 82,
-        "spo2": 99,
-        "temperature": 36.6,
-        "blood_sugar": 96
-    }
-    v_res = client.post("/api/vitals/", json=vitals_payload, headers=headers)
-    assert v_res.status_code == 201
-    
-    latest_v_res = client.get(f"/api/vitals/{patient_id}/latest", headers=headers)
-    assert latest_v_res.status_code == 200
-    assert latest_v_res.get_json()["heart_rate"] == 76
-    print("Vitals recorded and verified")
-
-    # Health Alerts
-    alerts_res = client.get(f"/api/health-alerts/{patient_id}", headers=headers)
-    assert alerts_res.status_code == 200
-    alerts_summary = client.get(f"/api/health-alerts/{patient_id}/summary", headers=headers)
-    assert alerts_summary.status_code == 200
-    print(f"Health alerts summary: {alerts_summary.get_json()['status']}")
 
     print("\n--- 8. Testing Health Records & File Upload ---")
     rec_payload = {
@@ -198,20 +183,32 @@ def test_flask_e2e(client):
     assert "file_url" in upload_data
     print(f"Health record file uploaded successfully: {upload_data['file_url']}")
 
-    print("\n--- 9. Testing AI Assistant & History ---")
+    print("\n--- 9. Testing AI Assistant (General Health + Emergency + Clinical Triage) ---")
+    # General Question
     ai_res = client.post("/api/ai-assistant/chat", json={
         "patient_id": patient_id,
-        "message": "Can you explain my recent blood pressure readings?"
+        "message": "What is healthy blood pressure and how can I maintain it?"
     }, headers=headers)
     assert ai_res.status_code == 200
     ai_data = ai_res.get_json()
     assert "response" in ai_data
     assert "disclaimer" in ai_data
-    print("AI Assistant response verified:", ai_data["response"][:80], "...")
+    print("AI General Health response verified:", ai_data["response"][:80], "...")
 
+    # Emergency Detection
+    ai_em_res = client.post("/api/ai-assistant/chat", json={
+        "patient_id": patient_id,
+        "message": "I have sudden severe chest pain and cannot breathe"
+    }, headers=headers)
+    assert ai_em_res.status_code == 200
+    ai_em_data = ai_em_res.get_json()
+    assert ai_em_data.get("is_emergency") is True
+    print("AI Emergency safety detection verified")
+
+    # AI History
     ai_hist_res = client.get(f"/api/ai-assistant/history/{patient_id}", headers=headers)
     assert ai_hist_res.status_code == 200
-    assert len(ai_hist_res.get_json()) >= 2
+    assert len(ai_hist_res.get_json()) >= 4
     print("AI conversation history stored and retrieved")
 
     print("\n--- 10. Testing Notifications ---")

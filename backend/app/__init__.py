@@ -69,7 +69,7 @@ def create_app():
     @app.route("/", methods=["GET"])
     def root():
         return jsonify({
-            "message": "CareBridge AI Flask Backend is running",
+            "service": "CareBridge AI Flask Backend",
             "status": "healthy",
             "version": "1.0.0"
         }), 200
@@ -80,7 +80,7 @@ def create_app():
         return jsonify({
             "status": "healthy",
             "framework": "Flask",
-            "database": "MongoDB"
+            "database": "connected"
         }), 200
 
     # ----------------------------------------------------

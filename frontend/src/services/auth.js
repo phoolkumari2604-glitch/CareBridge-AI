@@ -5,7 +5,7 @@ import api from "./api";
 // ==================================================
 
 export const authAPI = {
-  // Register patient
+  // Register patient (optionally with initial vitals & profile)
   register: async (data) => {
     const response = await api.post("/auth/register", data);
     return response.data;
@@ -20,6 +20,18 @@ export const authAPI = {
   // Get currently logged-in user
   me: async () => {
     const response = await api.get("/auth/me");
+    return response.data;
+  },
+
+  // Update authenticated user profile
+  updateProfile: async (data) => {
+    const response = await api.put("/auth/profile", data);
+    return response.data;
+  },
+
+  // Change password
+  changePassword: async (data) => {
+    const response = await api.post("/auth/change-password", data);
     return response.data;
   },
 

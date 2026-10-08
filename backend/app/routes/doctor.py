@@ -55,14 +55,58 @@ def get_doctors():
     doctors = list(db.doctors.find(query))
     return jsonify(serialize_doc(doctors)), 200
 
+@doctor_bp.route("/me", methods=["GET"], strict_slashes=False)
+@doctor_bp.route("/profile", methods=["GET"], strict_slashes=False)
+@token_required
+def get_doctor_profile():
+    db = get_database()
+    user = g.current_user
+    user_id = str(user["_id"])
+    
+    doctor = db.doctors.find_one({
+        "$or": [
+            {"user_id": user_id},
+            {"email": user.get("email")},
+            {"name": user.get("name")}
+        ]
+    })
+    
+    if not doctor:
+        # Create baseline record if doctor user exists
+        doc_data = {
+            "user_id": user_id,
+            "name": user.get("name"),
+            "email": user.get("email"),
+            "phone": user.get("phone", ""),
+            "specialty": "Cardiology & Internal Medicine",
+            "department": "Cardiovascular Sciences",
+            "hospital": "CareBridge Multi-Specialty Hospital",
+            "license_number": "MCI-IND-" + str(user_id)[-6:].upper(),
+            "experience_years": 10,
+            "consultation_fee": 800,
+            "room_number": "OPD-304",
+            "available_slots": ["09:00 AM", "10:00 AM", "11:30 AM", "02:00 PM", "03:30 PM", "05:00 PM"],
+            "available_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            "status": "AVAILABLE",
+            "created_at": datetime.now(timezone.utc)
+        }
+        res = db.doctors.insert_one(doc_data)
+        doctor = db.doctors.find_one({"_id": res.inserted_id})
+        
+    return jsonify(serialize_doc(doctor)), 200
+
 @doctor_bp.route("/<doctor_id>", methods=["GET"], strict_slashes=False)
 @token_required
 def get_doctor(doctor_id):
     db = get_database()
     if not is_valid_object_id(doctor_id):
-        return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
+        # Fallback search by user_id
+        doctor = db.doctors.find_one({"user_id": doctor_id})
+        if not doctor:
+            return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
+    else:
+        doctor = db.doctors.find_one({"_id": ObjectId(doctor_id)})
         
-    doctor = db.doctors.find_one({"_id": ObjectId(doctor_id)})
     if not doctor:
         return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
         
@@ -88,14 +132,35 @@ def get_doctor_availability(doctor_id):
     }), 200
 
 @doctor_bp.route("/<doctor_id>", methods=["PUT"], strict_slashes=False)
-@staff_or_admin_required
+@token_required
 def update_doctor(doctor_id):
     db = get_database()
-    if not is_valid_object_id(doctor_id):
-        return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
+    user = g.current_user
+    user_role = user.get("role", "PATIENT")
+    user_id = str(user["_id"])
+    
+    # Check permissions: Admin, Staff, or the doctor themselves
+    is_authorized = user_role in ["ADMIN", "STAFF"]
+    
+    doctor = None
+    if is_valid_object_id(doctor_id):
+        doctor = db.doctors.find_one({"_id": ObjectId(doctor_id)})
+    if not doctor:
+        doctor = db.doctors.find_one({"user_id": doctor_id})
+        
+    if not doctor:
+        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
+        
+    if not is_authorized and user_role == "DOCTOR":
+        if str(doctor.get("user_id")) == user_id or doctor.get("email") == user.get("email") or str(doctor["_id"]) == doctor_id:
+            is_authorized = True
+            
+    if not is_authorized:
+        return jsonify({"error": "Forbidden", "detail": "You do not have permission to modify this doctor profile"}), 403
         
     data = request.get_json() or {}
     data.pop("_id", None)
+    data.pop("user_id", None)
     
     if "hospital_id" in data and data["hospital_id"]:
         if is_valid_object_id(data["hospital_id"]):
@@ -104,11 +169,27 @@ def update_doctor(doctor_id):
             return jsonify({"error": "Validation Error", "detail": "Invalid hospital ID"}), 400
             
     data["updated_at"] = datetime.now(timezone.utc)
-    result = db.doctors.update_one({"_id": ObjectId(doctor_id)}, {"$set": data})
-    if result.matched_count == 0:
-        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
-        
-    return jsonify({"message": "Doctor updated successfully"}), 200
+    
+    # If doctor name or phone is updated, also update user record
+    if "name" in data or "phone" in data:
+        user_updates = {}
+        if "name" in data and data["name"]:
+            user_updates["name"] = data["name"]
+        if "phone" in data and data["phone"]:
+            user_updates["phone"] = data["phone"]
+        if user_updates and doctor.get("user_id"):
+            try:
+                db.users.update_one({"_id": ObjectId(doctor["user_id"])}, {"$set": user_updates})
+            except Exception:
+                pass
+                
+    db.doctors.update_one({"_id": doctor["_id"]}, {"$set": data})
+    updated_doc = db.doctors.find_one({"_id": doctor["_id"]})
+    
+    return jsonify({
+        "message": "Doctor updated successfully",
+        "doctor": serialize_doc(updated_doc)
+    }), 200
 
 @doctor_bp.route("/<doctor_id>", methods=["DELETE"], strict_slashes=False)
 @staff_or_admin_required

@@ -2,7 +2,7 @@ import api from "./api";
 
 /**
  * Service for doctor dashboard and clinical operations.
- * Communicates with the FastAPI backend.
+ * Communicates with the Flask REST backend.
  */
 export const doctorService = {
   // ------------------------------------------------------------
@@ -51,6 +51,22 @@ export const doctorService = {
       console.warn(`Failed to fetch doctor ${doctorId}:`, error?.message);
       return null;
     }
+  },
+
+  async getDoctorProfile() {
+    try {
+      const response = await api.get("/doctors/me");
+      return response.data;
+    } catch (error) {
+      console.warn("Failed to fetch doctor profile:", error?.message);
+      return null;
+    }
+  },
+
+  async updateDoctor(doctorId, data) {
+    if (!doctorId) throw new Error("Doctor ID required");
+    const response = await api.put(`/doctors/${doctorId}`, data);
+    return response.data;
   },
 
   async getHospitals() {
@@ -122,7 +138,6 @@ export const doctorService = {
       const response = await api.get(`/vitals/patient/${patientId}`);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      // 404 means no vitals recorded yet
       return [];
     }
   },

@@ -1,8 +1,9 @@
-:root {
+:root,
+[data-theme="light"],
+.light-theme {
   /* ========================================
-     CAREBRIDGE AI — BRAND
+     CAREBRIDGE AI — BRAND (LIGHT MODE)
   ======================================== */
-
   --primary: #0b1f33;
   --primary-light: #163a59;
   --primary-dark: #071522;
@@ -11,28 +12,19 @@
   --accent-dark: #087f82;
   --accent-light: #dff7f7;
 
-  /* ========================================
-     BACKGROUNDS
-  ======================================== */
-
+  /* BACKGROUNDS */
   --background: #f4f7fa;
   --surface: #ffffff;
   --surface-soft: #f8fafc;
   --surface-muted: #eef3f6;
 
-  /* ========================================
-     TEXT
-  ======================================== */
-
+  /* TEXT */
   --text-primary: #102a43;
   --text-secondary: #52606d;
   --text-muted: #7b8794;
   --text-white: #ffffff;
 
-  /* ========================================
-     STATUS
-  ======================================== */
-
+  /* STATUS */
   --success: #15803d;
   --success-bg: #dcfce7;
 
@@ -45,18 +37,12 @@
   --info: #2563eb;
   --info-bg: #dbeafe;
 
-  /* ========================================
-     BORDERS
-  ======================================== */
-
+  /* BORDERS */
   --border: #d9e2ec;
   --border-light: #e8eef3;
   --border-focus: #0ea5a8;
 
-  /* ========================================
-     RADIUS
-  ======================================== */
-
+  /* RADIUS */
   --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -64,32 +50,21 @@
   --radius-xl: 24px;
   --radius-pill: 999px;
 
-  /* ========================================
-     SHADOWS
-  ======================================== */
-
+  /* SHADOWS */
   --shadow-xs: 0 1px 3px rgba(15, 23, 42, 0.05);
   --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
   --shadow-xl: 0 24px 60px rgba(15, 23, 42, 0.16);
 
-  /* ========================================
-     LAYOUT
-  ======================================== */
-
+  /* LAYOUT */
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 78px;
-
   --navbar-height: 72px;
   --mobile-nav-height: 68px;
-
   --content-max-width: 1600px;
 
-  /* ========================================
-     SPACING
-  ======================================== */
-
+  /* SPACING */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -101,19 +76,8 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ========================================
-     TYPOGRAPHY
-  ======================================== */
-
-  --font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
+  /* TYPOGRAPHY */
+  --font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-xs: 12px;
   --font-sm: 14px;
   --font-md: 16px;
@@ -123,32 +87,73 @@
   --font-3xl: 36px;
   --font-4xl: 48px;
 
-  /* ========================================
-     FONT WEIGHT
-  ======================================== */
-
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
   --weight-extrabold: 800;
 
-  /* ========================================
-     TRANSITIONS
-  ======================================== */
-
+  /* TRANSITIONS */
   --transition-fast: 150ms ease;
   --transition: 200ms ease;
   --transition-slow: 300ms ease;
 
-  /* ========================================
-     Z-INDEX
-  ======================================== */
-
+  /* Z-INDEX */
   --z-dropdown: 1000;
   --z-sticky: 1100;
   --z-navbar: 1200;
   --z-sidebar: 1250;
   --z-modal: 2000;
   --z-toast: 3000;
+}
+
+[data-theme="dark"],
+.dark-theme {
+  /* ========================================
+     CAREBRIDGE AI — DARK MODE
+  ======================================== */
+  --primary: #0ea5a8;
+  --primary-light: #22d3ee;
+  --primary-dark: #087f82;
+
+  --accent: #22d3ee;
+  --accent-dark: #0ea5a8;
+  --accent-light: #164e63;
+
+  /* BACKGROUNDS */
+  --background: #090e17;
+  --surface: #0f172a;
+  --surface-soft: #1e293b;
+  --surface-muted: #162032;
+
+  /* TEXT */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-white: #ffffff;
+
+  /* STATUS */
+  --success: #22c55e;
+  --success-bg: rgba(34, 197, 94, 0.15);
+
+  --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.15);
+
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.15);
+
+  --info: #38bdf8;
+  --info-bg: rgba(56, 189, 248, 0.15);
+
+  /* BORDERS */
+  --border: #1e293b;
+  --border-light: #334155;
+  --border-focus: #22d3ee;
+
+  /* SHADOWS */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.7);
 }

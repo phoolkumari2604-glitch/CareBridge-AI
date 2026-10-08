@@ -64,6 +64,20 @@ const Icon = ({ type }) => {
         </svg>
       );
 
+    case "heart":
+      return (
+        <svg {...common}>
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+        </svg>
+      );
+
+    case "activity":
+      return (
+        <svg {...common}>
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+      );
+
     case "check":
       return (
         <svg {...common}>
@@ -85,10 +99,24 @@ const Register = () => {
     phone: "",
     password: "",
     confirmPassword: "",
+    // Optional Baseline Vitals & Health Profile
+    age: "",
+    gender: "Other",
+    blood_group: "O+",
+    heart_rate: "",
+    systolic_bp: "",
+    diastolic_bp: "",
+    spo2: "",
+    temperature: "",
+    weight: "",
+    height: "",
+    allergies: "",
+    medical_history: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showOptionalVitals, setShowOptionalVitals] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -99,51 +127,29 @@ const Register = () => {
       ...previous,
       [field]: value,
     }));
-
     setError("");
   };
 
   const passwordStrength = useMemo(() => {
     const password = formData.password;
-
     if (!password) {
-      return {
-        score: 0,
-        label: "",
-      };
+      return { score: 0, label: "" };
     }
 
     let score = 0;
-
     if (password.length >= 6) score++;
     if (password.length >= 10) score++;
     if (/[A-Z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
 
-    if (score <= 1) {
-      return {
-        score,
-        label: "Weak",
-      };
-    }
-
-    if (score <= 3) {
-      return {
-        score,
-        label: "Good",
-      };
-    }
-
-    return {
-      score,
-      label: "Strong",
-    };
+    if (score <= 1) return { score, label: "Weak" };
+    if (score <= 3) return { score, label: "Good" };
+    return { score, label: "Strong" };
   }, [formData.password]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setError("");
     setSuccess("");
 
@@ -169,39 +175,47 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const data = await authAPI.register({
+      const payload = {
         name,
         email,
         password: formData.password,
         role: "PATIENT",
         phone,
-      });
+      };
 
-      setSuccess("Your account has been created successfully. Redirecting to login...");
+      // Include optional baseline health vitals if entered
+      if (formData.age) payload.age = parseInt(formData.age, 10);
+      if (formData.gender) payload.gender = formData.gender;
+      if (formData.blood_group) payload.blood_group = formData.blood_group;
+      if (formData.heart_rate) payload.heart_rate = parseInt(formData.heart_rate, 10);
+      if (formData.systolic_bp) payload.systolic_bp = parseInt(formData.systolic_bp, 10);
+      if (formData.diastolic_bp) payload.diastolic_bp = parseInt(formData.diastolic_bp, 10);
+      if (formData.spo2) payload.spo2 = parseFloat(formData.spo2);
+      if (formData.temperature) payload.temperature = parseFloat(formData.temperature);
+      if (formData.weight) payload.weight = parseFloat(formData.weight);
+      if (formData.height) payload.height = parseFloat(formData.height);
+      if (formData.allergies) payload.allergies = formData.allergies;
+      if (formData.medical_history) payload.medical_history = formData.medical_history;
 
+      await authAPI.register(payload);
+
+      setSuccess("Your account & baseline health record have been created successfully. Redirecting to login...");
       setTimeout(() => {
         navigate("/login");
       }, 1200);
     } catch (err) {
       console.error("Registration error:", err);
-
       const errorDetail =
         err.response?.data?.detail ||
         err.response?.data?.message ||
         (err.message === "Network Error"
-          ? "Unable to connect to CareBridge AI server. Please verify backend is running on port 8000."
+          ? "Unable to connect to CareBridge AI server. Please verify backend is running."
           : err.message || "Registration failed. Please try again.");
 
       if (Array.isArray(errorDetail)) {
-        setError(
-          errorDetail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", ")
-        );
+        setError(errorDetail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", "));
       } else {
-        setError(
-          typeof errorDetail === "string"
-            ? errorDetail
-            : "Registration failed. Please check your information."
-        );
+        setError(typeof errorDetail === "string" ? errorDetail : "Registration failed. Please check your information.");
       }
     } finally {
       setLoading(false);
@@ -210,7 +224,6 @@ const Register = () => {
 
   return (
     <main className="register-page">
-
       {/* Background */}
       <div className="register-background">
         <div className="register-orb register-orb-one"></div>
@@ -219,426 +232,376 @@ const Register = () => {
       </div>
 
       <section className="register-shell">
-
         {/* ================= LEFT PANEL ================= */}
-
         <aside className="register-hero">
-
           <div className="hero-top">
-
             <Link to="/" className="brand">
               <span className="brand-mark">C</span>
-
               <span className="brand-name">
                 Care<span>Bridge</span>
                 <small>AI</small>
               </span>
             </Link>
-
             <div className="hero-status">
               <span className="status-dot"></span>
               Healthcare platform
             </div>
-
           </div>
 
           <div className="hero-content">
-
             <div className="hero-badge">
               <span>✦</span>
               Intelligent healthcare
             </div>
-
             <h1>
-              Your health.
+              CareBridge AI
               <br />
-              <span>Connected.</span>
-              <br />
-              Simplified.
+              <span>Universal Health Identity</span>
             </h1>
-
-            <p className="hero-description">
-              One secure platform for managing appointments,
-              health records, digital OPD passes, live queues
-              and intelligent healthcare assistance.
+            <p>
+              Create your account to access digital OPD passes, track vital signs, consult specialists, and receive clinical assistance from CareBridge AI.
             </p>
 
-            <div className="feature-list">
-
-              <div className="feature-item">
-                <span className="feature-icon">✓</span>
-
+            <div className="hero-feature-cards">
+              <div className="feature-card">
+                <div className="feature-card-icon">
+                  <Icon type="heart" />
+                </div>
                 <div>
-                  <strong>Smart appointments</strong>
-                  <small>
-                    Find and manage your care effortlessly
-                  </small>
+                  <h4>Baseline Vitals Tracking</h4>
+                  <p>Capture initial physiological telemetry on registration</p>
                 </div>
               </div>
 
-              <div className="feature-item">
-                <span className="feature-icon">✓</span>
-
+              <div className="feature-card">
+                <div className="feature-card-icon">
+                  <Icon type="activity" />
+                </div>
                 <div>
-                  <strong>Digital OPD pass</strong>
-                  <small>
-                    Keep your visit information accessible
-                  </small>
+                  <h4>Live Queue & OPD Pass</h4>
+                  <p>QR pass and real-time hospital token updates</p>
                 </div>
               </div>
-
-              <div className="feature-item">
-                <span className="feature-icon">✓</span>
-
-                <div>
-                  <strong>Live queue tracking</strong>
-                  <small>
-                    Know your position before you arrive
-                  </small>
-                </div>
-              </div>
-
-              <div className="feature-item">
-                <span className="feature-icon">✓</span>
-
-                <div>
-                  <strong>AI healthcare assistant</strong>
-                  <small>
-                    Get guidance when you need it
-                  </small>
-                </div>
-              </div>
-
             </div>
           </div>
-
-          <div className="hero-footer">
-            <span>Secure</span>
-            <i></i>
-            <span>Connected</span>
-            <i></i>
-            <span>Patient-first</span>
-          </div>
-
         </aside>
 
-        {/* ================= RIGHT FORM ================= */}
-
+        {/* ================= RIGHT PANEL ================= */}
         <section className="register-form-area">
-
-          <div className="register-card">
-
-            <div className="card-decoration"></div>
-
-            {/* Header */}
-
+          <div className="form-card">
             <div className="form-header">
-
-              <div className="form-icon">
-                <Icon type="user" />
-              </div>
-
-              <div>
-
-                <span className="form-eyebrow">
-                  GET STARTED
-                </span>
-
-                <h2>Create your account</h2>
-
-                <p>
-                  Join CareBridge AI and manage your
-                  healthcare journey in one place.
-                </p>
-
-              </div>
-
+              <div className="form-header-badge">PATIENT REGISTRATION</div>
+              <h2>Create your Account</h2>
+              <p>Sign up to start managing your clinical consultations and telemetry</p>
             </div>
 
-            {/* Error */}
+            {error && <div className="register-error-banner">{error}</div>}
+            {success && <div className="register-success-banner">{success}</div>}
 
-            {error && (
-              <div className="form-alert form-alert-error">
-                <span>!</span>
-                <p>{error}</p>
-              </div>
-            )}
-
-            {/* Success */}
-
-            {success && (
-              <div className="form-alert form-alert-success">
-                <span>
-                  <Icon type="check" />
-                </span>
-
-                <p>{success}</p>
-              </div>
-            )}
-
-            {/* Form */}
-
-            <form
-              onSubmit={handleSubmit}
-              className="register-form"
-            >
-
+            <form onSubmit={handleSubmit} className="register-form">
               {/* Name */}
-
               <div className="form-row">
-
-                <div className="field-group field-full">
-
+                <div className="field-group">
                   <label htmlFor="name">
                     Full name <span>*</span>
                   </label>
-
                   <div className="input-wrapper">
-
                     <span className="input-icon">
                       <Icon type="user" />
                     </span>
-
                     <input
                       id="name"
                       type="text"
                       placeholder="Enter your full name"
                       value={formData.name}
-                      onChange={(e) =>
-                        updateField("name", e.target.value)
-                      }
+                      onChange={(e) => updateField("name", e.target.value)}
                       autoComplete="name"
+                      required
                     />
-
                   </div>
-
                 </div>
-
               </div>
 
               {/* Email + Phone */}
-
               <div className="form-row">
-
                 <div className="field-group">
-
                   <label htmlFor="email">
                     Email address <span>*</span>
                   </label>
-
                   <div className="input-wrapper">
-
                     <span className="input-icon">
                       <Icon type="mail" />
                     </span>
-
                     <input
                       id="email"
                       type="email"
                       placeholder="you@example.com"
                       value={formData.email}
-                      onChange={(e) =>
-                        updateField("email", e.target.value)
-                      }
+                      onChange={(e) => updateField("email", e.target.value)}
                       autoComplete="email"
+                      required
                     />
-
                   </div>
-
                 </div>
 
                 <div className="field-group">
-
                   <label htmlFor="phone">
                     Phone number <span>*</span>
                   </label>
-
                   <div className="input-wrapper">
-
                     <span className="input-icon">
                       <Icon type="phone" />
                     </span>
-
                     <input
                       id="phone"
                       type="tel"
-                      placeholder="Enter phone number"
+                      placeholder="e.g. +91 9876543210"
                       value={formData.phone}
-                      onChange={(e) =>
-                        updateField("phone", e.target.value)
-                      }
+                      onChange={(e) => updateField("phone", e.target.value)}
                       autoComplete="tel"
+                      required
                     />
-
                   </div>
-
                 </div>
-
               </div>
 
               {/* Passwords */}
-
               <div className="form-row">
-
                 <div className="field-group">
-
                   <label htmlFor="password">
                     Password <span>*</span>
                   </label>
-
                   <div className="input-wrapper">
-
                     <span className="input-icon">
                       <Icon type="lock" />
                     </span>
-
                     <input
                       id="password"
-                      type={
-                        showPassword
-                          ? "text"
-                          : "password"
-                      }
+                      type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
                       value={formData.password}
-                      onChange={(e) =>
-                        updateField(
-                          "password",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => updateField("password", e.target.value)}
                       autoComplete="new-password"
+                      required
                     />
-
                     <button
                       type="button"
                       className="password-toggle"
-                      onClick={() =>
-                        setShowPassword(!showPassword)
-                      }
+                      onClick={() => setShowPassword(!showPassword)}
                     >
-                      <Icon
-                        type={
-                          showPassword
-                            ? "eyeOff"
-                            : "eye"
-                        }
-                      />
+                      <Icon type={showPassword ? "eyeOff" : "eye"} />
                     </button>
-
                   </div>
 
                   {formData.password && (
                     <div className="password-strength">
-
                       <div className="strength-bars">
-
                         {[1, 2, 3, 4, 5].map((bar) => (
                           <span
                             key={bar}
-                            className={
-                              bar <=
-                              passwordStrength.score
-                                ? "active"
-                                : ""
-                            }
+                            className={bar <= passwordStrength.score ? "active" : ""}
                           ></span>
                         ))}
-
                       </div>
-
-                      <small>
-                        {passwordStrength.label}
-                      </small>
-
+                      <small>{passwordStrength.label}</small>
                     </div>
                   )}
-
                 </div>
 
                 <div className="field-group">
-
                   <label htmlFor="confirmPassword">
                     Confirm password <span>*</span>
                   </label>
-
                   <div className="input-wrapper">
-
                     <span className="input-icon">
                       <Icon type="lock" />
                     </span>
-
                     <input
                       id="confirmPassword"
-                      type={
-                        showConfirmPassword
-                          ? "text"
-                          : "password"
-                      }
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm password"
                       value={formData.confirmPassword}
-                      onChange={(e) =>
-                        updateField(
-                          "confirmPassword",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => updateField("confirmPassword", e.target.value)}
                       autoComplete="new-password"
+                      required
                     />
-
                     <button
                       type="button"
                       className="password-toggle"
-                      onClick={() =>
-                        setShowConfirmPassword(
-                          !showConfirmPassword
-                        )
-                      }
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
-                      <Icon
-                        type={
-                          showConfirmPassword
-                            ? "eyeOff"
-                            : "eye"
-                        }
-                      />
+                      <Icon type={showConfirmPassword ? "eyeOff" : "eye"} />
                     </button>
-
                   </div>
-
                 </div>
-
               </div>
 
-              {/* Security */}
+              {/* OPTIONAL BASELINE VITALS & HEALTH PROFILE ACCORDION */}
+              <div className="optional-vitals-box">
+                <button
+                  type="button"
+                  className="vitals-accordion-btn"
+                  onClick={() => setShowOptionalVitals(!showOptionalVitals)}
+                >
+                  <div className="btn-left">
+                    <span className="vitals-badge">OPTIONAL</span>
+                    <strong>Initial Baseline Vitals & Clinical Profile</strong>
+                  </div>
+                  <span className="accordion-arrow">{showOptionalVitals ? "▲ Hide" : "▼ Add Vitals"}</span>
+                </button>
 
+                {showOptionalVitals && (
+                  <div className="vitals-expanded-grid">
+                    <p className="vitals-help-text">
+                      Enter your initial physiological baseline for clinical health monitoring and telemetry analysis:
+                    </p>
+
+                    <div className="vitals-inputs-row">
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-age">Age (Years)</label>
+                        <input
+                          id="reg-age"
+                          type="number"
+                          min="1"
+                          max="120"
+                          placeholder="e.g. 28"
+                          value={formData.age}
+                          onChange={(e) => updateField("age", e.target.value)}
+                        />
+                      </div>
+
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-gender">Gender</label>
+                        <select
+                          id="reg-gender"
+                          value={formData.gender}
+                          onChange={(e) => updateField("gender", e.target.value)}
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-blood">Blood Group</label>
+                        <select
+                          id="reg-blood"
+                          value={formData.blood_group}
+                          onChange={(e) => updateField("blood_group", e.target.value)}
+                        >
+                          <option value="A+">A+</option>
+                          <option value="A-">A-</option>
+                          <option value="B+">B+</option>
+                          <option value="B-">B-</option>
+                          <option value="AB+">AB+</option>
+                          <option value="AB-">AB-</option>
+                          <option value="O+">O+</option>
+                          <option value="O-">O-</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="vitals-inputs-row">
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-hr">Heart Rate (BPM)</label>
+                        <input
+                          id="reg-hr"
+                          type="number"
+                          placeholder="e.g. 72"
+                          value={formData.heart_rate}
+                          onChange={(e) => updateField("heart_rate", e.target.value)}
+                        />
+                      </div>
+
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-sys">BP Systolic (mmHg)</label>
+                        <input
+                          id="reg-sys"
+                          type="number"
+                          placeholder="e.g. 120"
+                          value={formData.systolic_bp}
+                          onChange={(e) => updateField("systolic_bp", e.target.value)}
+                        />
+                      </div>
+
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-dia">BP Diastolic (mmHg)</label>
+                        <input
+                          id="reg-dia"
+                          type="number"
+                          placeholder="e.g. 80"
+                          value={formData.diastolic_bp}
+                          onChange={(e) => updateField("diastolic_bp", e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="vitals-inputs-row">
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-spo2">SpO2 Oxygen (%)</label>
+                        <input
+                          id="reg-spo2"
+                          type="number"
+                          step="0.1"
+                          placeholder="e.g. 98"
+                          value={formData.spo2}
+                          onChange={(e) => updateField("spo2", e.target.value)}
+                        />
+                      </div>
+
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-temp">Temperature (°C)</label>
+                        <input
+                          id="reg-temp"
+                          type="number"
+                          step="0.1"
+                          placeholder="e.g. 36.8"
+                          value={formData.temperature}
+                          onChange={(e) => updateField("temperature", e.target.value)}
+                        />
+                      </div>
+
+                      <div className="vitals-input-field">
+                        <label htmlFor="reg-weight">Weight (kg)</label>
+                        <input
+                          id="reg-weight"
+                          type="number"
+                          step="0.1"
+                          placeholder="e.g. 68"
+                          value={formData.weight}
+                          onChange={(e) => updateField("weight", e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="vitals-input-field full">
+                      <label htmlFor="reg-allergies">Known Allergies (Optional, comma-separated)</label>
+                      <input
+                        id="reg-allergies"
+                        type="text"
+                        placeholder="e.g. Penicillin, Peanuts, Sulfa"
+                        value={formData.allergies}
+                        onChange={(e) => updateField("allergies", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Security note */}
               <div className="security-note">
-
                 <div className="security-icon">
                   <Icon type="lock" />
                 </div>
-
                 <div>
-                  <strong>
-                    Your information is protected
-                  </strong>
-
-                  <span>
-                    Your account details are securely
-                    transmitted to CareBridge AI.
-                  </span>
+                  <strong>Your clinical records are encrypted</strong>
+                  <span>Your medical profile and vitals are securely stored in CareBridge AI.</span>
                 </div>
-
               </div>
 
               {/* Button */}
-
-              <button
-                type="submit"
-                className="register-button"
-                disabled={loading}
-              >
-
+              <button type="submit" className="register-button" disabled={loading}>
                 {loading ? (
                   <>
                     <span className="button-spinner"></span>
@@ -647,42 +610,24 @@ const Register = () => {
                 ) : (
                   <>
                     Create account
-                    <span className="button-arrow">
-                      →
-                    </span>
+                    <span className="button-arrow">→</span>
                   </>
                 )}
-
               </button>
-
             </form>
 
             {/* Login */}
-
             <div className="login-divider">
-
-              <span>
-                Already have an account?
-              </span>
-
-              <Link to="/login">
-                Sign in
-              </Link>
-
+              <span>Already have an account?</span>
+              <Link to="/login">Sign in</Link>
             </div>
 
             <p className="terms-text">
-              By creating an account, you agree to use
-              CareBridge AI responsibly and provide accurate
-              information.
+              By creating an account, you agree to use CareBridge AI responsibly and provide accurate clinical information.
             </p>
-
           </div>
-
         </section>
-
       </section>
-
     </main>
   );
 };
