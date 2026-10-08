@@ -78,7 +78,7 @@ function Login() {
         err.response?.data?.detail ||
         err.response?.data?.message ||
         (err.message === "Network Error"
-          ? "Unable to connect to CareBridge AI server. Please make sure the backend is running on port 8000."
+          ? "Unable to connect to CareBridge AI server. Please make sure the backend is running."
           : "Invalid email or password. Please try again.");
 
       setError(
