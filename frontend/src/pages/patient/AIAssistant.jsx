@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Send,
@@ -14,26 +14,36 @@ import {
   Loader2,
   Info,
   RefreshCw,
-  Hospital
+  Hospital,
+  Mic,
+  MicOff,
+  Copy,
+  Check,
+  Trash2,
+  Stethoscope,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import api from "../../services/api";
+import patientService from "../../services/patientService";
 import "./AIAssistant.css";
 
 function AIAssistant() {
   const { user } = useAuth();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+
   const [messages, setMessages] = useState([
     {
-      id: 1,
+      id: "welcome",
       sender: "ai",
-      text: "Hello! I am your CareBridge AI Health Assistant. I analyze your recorded vitals, medical records, appointments, and active alerts to provide informational support. How can I help you today?",
+      text: "Hello! I am your CareBridge AI Health Assistant. I analyze your recorded vitals, medical records, appointments, and active alerts to provide clinical informational guidance. How can I help you today?",
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
 
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,11 +53,84 @@ function AIAssistant() {
     scrollToBottom();
   }, [messages, loading]);
 
+  // Load conversation history on startup
+  const loadHistory = useCallback(async () => {
+    if (!user?.patient_id) return;
+    try {
+      const history = await patientService.getAIHistory(user.patient_id);
+      if (Array.isArray(history) && history.length > 0) {
+        const formatted = history.map((item) => ({
+          id: item.id || String(Math.random()),
+          sender: (item.sender || "USER").toLowerCase(),
+          text: item.message,
+          time: item.created_at
+            ? new Date(item.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : "Past",
+        }));
+        setMessages(formatted);
+      }
+    } catch (err) {
+      console.log("No previous conversation history found.");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
+  // Web Speech API Voice Recognition Setup
+  useEffect(() => {
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recog = new SpeechRecognition();
+      recog.continuous = false;
+      recog.interimResults = false;
+      recog.lang = "en-US";
+
+      recog.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setMessage((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
+        setIsListening(false);
+      };
+
+      recog.onerror = () => {
+        setIsListening(false);
+      };
+
+      recog.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recog;
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Mic start error:", err);
+      }
+    }
+  };
+
   const quickQuestions = [
-    "Explain my latest vital signs and alerts",
-    "How can I book an appointment with a doctor?",
-    "Tell me about nearby hospitals and emergency care",
-    "What should I know about my Digital OPD Pass?",
+    "Explain my latest vital signs and health status",
+    "How do I book an appointment with a cardiologist?",
+    "Find nearby 24/7 emergency hospitals",
+    "How does the Digital OPD Pass work?",
   ];
 
   const handleSendMessage = async (textToSend) => {
@@ -66,7 +149,7 @@ function AIAssistant() {
         {
           id: Date.now() + 1,
           sender: "ai",
-          text: "I couldn't locate your patient ID. Please make sure your patient profile is registered in your account settings.",
+          text: "I could not identify an active patient ID linked to this profile. Please ensure your patient profile is registered in Account Settings.",
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
@@ -86,16 +169,13 @@ function AIAssistant() {
     setLoading(true);
 
     try {
-      const res = await api.post("/ai-assistant/chat", {
-        patient_id: user.patient_id,
-        message: query,
-      });
+      const res = await patientService.chatWithAI(user.patient_id, query);
 
       const aiMsg = {
         id: Date.now() + 1,
         sender: "ai",
-        text: res.data.response || "I processed your request, but received no specific response text.",
-        disclaimer: res.data.disclaimer,
+        text: res.response || "I processed your request, but received no specific response text.",
+        disclaimer: res.disclaimer,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
@@ -105,7 +185,7 @@ function AIAssistant() {
       const errorMsg = {
         id: Date.now() + 1,
         sender: "ai",
-        text: "I apologize, but I encountered an error communicating with the medical analysis server. Please check your network and try again.",
+        text: "I apologize, but I encountered an error communicating with the clinical reasoning system. Please check your connection and try again.",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -114,21 +194,27 @@ function AIAssistant() {
     }
   };
 
+  const copyMessage = (id, text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
     <div className="ai-assistant-page">
       {/* HEADER */}
       <section className="ai-assistant-heading">
         <div>
-          <span className="ai-assistant-eyebrow">INTELLIGENT CLINICAL ASSISTANT</span>
+          <span className="ai-assistant-eyebrow">INTELLIGENT HEALTH COMPANION</span>
           <h1>CareBridge AI Assistant</h1>
           <p>
-            Real-time informational support analyzing your recorded vitals, medical records, and healthcare facilities.
+            Real-time algorithmic support analyzing your monitored vitals, electronic medical records, and healthcare facilities.
           </p>
         </div>
 
         <div className="ai-assistant-status">
           <span className="ai-status-dot"></span>
-          Assistant Online & Synced
+          Assistant Online & Telemetry Synced
         </div>
       </section>
 
@@ -142,7 +228,7 @@ function AIAssistant() {
             </div>
             <div>
               <h3>CareBridge AI</h3>
-              <p>Clinical Information Assistant</p>
+              <p>Patient Medical Assistant</p>
             </div>
           </div>
 
@@ -153,31 +239,31 @@ function AIAssistant() {
               <Heart size={16} />
               <div>
                 <strong>Vitals Analysis</strong>
-                <small>Checks your recorded vital signs against safe clinical thresholds</small>
+                <small>Evaluates your blood pressure, heart rate, and oxygen levels</small>
               </div>
             </div>
 
             <div className="ai-capability">
               <Hospital size={16} />
               <div>
-                <strong>Hospital Navigation</strong>
-                <small>Find nearby healthcare facilities and emergency centers</small>
+                <strong>Emergency Triage</strong>
+                <small>Locates nearby trauma centers and ambulance hotlines</small>
               </div>
             </div>
 
             <div className="ai-capability">
               <Calendar size={16} />
               <div>
-                <strong>Appointment Guidance</strong>
-                <small>Directions on doctor appointments and OPD pass management</small>
+                <strong>Appointment Scheduling</strong>
+                <small>Guidance on doctor slots and Digital OPD passes</small>
               </div>
             </div>
 
             <div className="ai-capability">
-              <AlertCircle size={16} />
+              <Stethoscope size={16} />
               <div>
-                <strong>Emergency Detection</strong>
-                <small>Recognizes critical emergencies and provides immediate guidance</small>
+                <strong>Health Records Review</strong>
+                <small>Explains clinical notes, prescriptions, and lab values</small>
               </div>
             </div>
           </div>
@@ -187,7 +273,7 @@ function AIAssistant() {
             <div>
               <strong>Clinical Safety Notice</strong>
               <p>
-                Responses are generated for informational purposes based on your recorded data and do not replace professional medical diagnosis or urgent emergency care.
+                Responses are generated algorithmically for informational guidance and do not replace formal diagnosis by a licensed physician or emergency medical care.
               </p>
             </div>
           </div>
@@ -200,8 +286,8 @@ function AIAssistant() {
               <Bot size={20} />
             </div>
             <div>
-              <h2>CareBridge Assistant</h2>
-              <span>Connected to Patient Health Records</span>
+              <h2>CareBridge Clinical Assistant</h2>
+              <span>Connected to Patient Health Records &middot; User ID: #{String(user?.patient_id || "").slice(-6).toUpperCase()}</span>
             </div>
             <div className="ai-chat-online">
               <span></span>
@@ -215,9 +301,9 @@ function AIAssistant() {
               <div className="ai-welcome-icon">
                 <Sparkles size={20} />
               </div>
-              <h2>How can I assist your health today?</h2>
+              <h2>How can I assist your healthcare today?</h2>
               <p>
-                Ask about your recorded vital signs, active health alerts, doctor appointments, or hospital services.
+                Inquire about your recorded vitals, active health alerts, upcoming consultations, or hospital emergency services.
               </p>
             </div>
 
@@ -231,7 +317,7 @@ function AIAssistant() {
 
                 <div className="ai-message-content">
                   <div className="ai-message-bubble">
-                    {item.text}
+                    <p className="bubble-text">{item.text}</p>
                     {item.disclaimer && (
                       <div className="ai-message-disclaimer">
                         <Info size={12} />
@@ -239,7 +325,17 @@ function AIAssistant() {
                       </div>
                     )}
                   </div>
-                  <span className="ai-message-time">{item.time}</span>
+
+                  <div className="ai-msg-meta">
+                    <span className="ai-message-time">{item.time}</span>
+                    <button
+                      className="msg-copy-btn"
+                      onClick={() => copyMessage(item.id, item.text)}
+                      title="Copy message"
+                    >
+                      {copiedId === item.id ? <Check size={12} className="text-green" /> : <Copy size={12} />}
+                    </button>
+                  </div>
                 </div>
 
                 {item.sender === "user" && (
@@ -258,7 +354,7 @@ function AIAssistant() {
                 <div className="ai-message-content">
                   <div className="ai-message-bubble loading-bubble">
                     <Loader2 size={16} className="spinner-icon" />
-                    <span>Analyzing health data & records...</span>
+                    <span>Analyzing clinical telemetry & database...</span>
                   </div>
                 </div>
               </div>
@@ -293,13 +389,23 @@ function AIAssistant() {
               }}
               className="ai-input-wrapper"
             >
+              <button
+                type="button"
+                className={`mic-btn ${isListening ? "active-listening" : ""}`}
+                onClick={toggleListening}
+                title={isListening ? "Stop voice dictation" : "Start voice dictation"}
+              >
+                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              </button>
+
               <input
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Ask about your vitals, alerts, appointments, or hospitals..."
+                placeholder={isListening ? "Listening... Speak your health question..." : "Ask about your vitals, alerts, appointments, or hospitals..."}
                 disabled={loading}
               />
+
               <button
                 type="submit"
                 className="ai-send-button"
@@ -309,8 +415,9 @@ function AIAssistant() {
                 {loading ? <Loader2 size={16} className="spinner-icon" /> : <Send size={16} />}
               </button>
             </form>
+
             <p className="ai-input-note">
-              CareBridge AI provides algorithmic informational analysis. Always consult healthcare professionals for medical decisions.
+              CareBridge AI provides automated algorithmic guidance based on your recorded vitals and profile.
             </p>
           </div>
         </section>
