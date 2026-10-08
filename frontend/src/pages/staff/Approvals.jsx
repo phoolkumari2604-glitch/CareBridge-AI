@@ -1,325 +1,311 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import {
+  CheckCircle2,
+  Clock3,
+  XCircle,
+  Search,
+  RefreshCw,
+  Loader2,
+  AlertCircle,
+  Building,
+  Check,
+  X,
+  FileText,
+  User,
+} from "lucide-react";
+import doctorService from "../../services/doctorService";
+import api from "../../services/api";
 import "./Approvals.css";
 
-const initialRequests = [
-  {
-    id: "APR-1001",
-    patient: "Ananya Sharma",
-    patientId: "PT-20481",
-    doctor: "Dr. Naresh Trehan",
-    hospital: "Medanta, Gurugram",
-    type: "Appointment",
-    date: "02 Oct 2026",
-    time: "10:30 AM",
-    status: "Pending",
-    priority: "High",
-  },
-  {
-    id: "APR-1002",
-    patient: "Ravi Kumar",
-    patientId: "PT-20482",
-    doctor: "Dr. Ashok Seth",
-    hospital: "Fortis Escorts Heart Institute",
-    type: "OPD Pass",
-    date: "02 Oct 2026",
-    time: "11:15 AM",
-    status: "Pending",
-    priority: "Normal",
-  },
-  {
-    id: "APR-1003",
-    patient: "Sneha Reddy",
-    patientId: "PT-20483",
-    doctor: "Dr. Arvinder Singh Soin",
-    hospital: "Medanta, Gurugram",
-    type: "Appointment",
-    date: "02 Oct 2026",
-    time: "12:00 PM",
-    status: "Approved",
-    priority: "Normal",
-  },
-  {
-    id: "APR-1004",
-    patient: "Vikram Patel",
-    patientId: "PT-20484",
-    doctor: "Dr. Sandeep Vaishya",
-    hospital: "Fortis Memorial Research Institute",
-    type: "Health Record",
-    date: "02 Oct 2026",
-    time: "01:30 PM",
-    status: "Pending",
-    priority: "High",
-  },
-  {
-    id: "APR-1005",
-    patient: "Meera Nair",
-    patientId: "PT-20485",
-    doctor: "Dr. P. Raghu Ram",
-    hospital: "KIMS Hospitals, Hyderabad",
-    type: "Appointment",
-    date: "01 Oct 2026",
-    time: "04:00 PM",
-    status: "Rejected",
-    priority: "Normal",
-  },
-];
-
 function Approvals() {
-  const [requests, setRequests] = useState(initialRequests);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
+
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
 
+  const loadApprovals = useCallback(async () => {
+    try {
+      setError(null);
+      const [approvalsRes, aptsRes, docsRes] = await Promise.allSettled([
+        api.get("/approvals/"),
+        doctorService.getAppointments(),
+        doctorService.getDoctors(),
+      ]);
+
+      const approvalsList = approvalsRes.status === "fulfilled" && Array.isArray(approvalsRes.value?.data) ? approvalsRes.value.data : [];
+      const aptsList = aptsRes.status === "fulfilled" && Array.isArray(aptsRes.value) ? aptsRes.value : [];
+      const docsList = docsRes.status === "fulfilled" && Array.isArray(docsRes.value) ? docsRes.value : [];
+
+      const docMap = {};
+      docsList.forEach((d) => {
+        docMap[d._id || d.id] = d;
+      });
+
+      // Combine structured approval requests
+      const consolidated = [];
+
+      // Add from approvals table
+      approvalsList.forEach((appr) => {
+        consolidated.push({
+          id: appr._id || appr.id,
+          source: "approval",
+          patient: appr.patient_name || `Patient #${String(appr.patient_id || "").slice(-6)}`,
+          patientId: `P-${String(appr.patient_id || "").slice(-5)}`,
+          doctor: appr.doctor_name || (docMap[appr.doctor_id]?.name || "Assigned Specialist"),
+          hospital: appr.hospital_name || (docMap[appr.doctor_id]?.hospital_name || "CareBridge Hospital Hub"),
+          type: appr.request_type || appr.type || "Medical Clearance",
+          date: appr.created_at ? new Date(appr.created_at).toLocaleDateString() : "Today",
+          time: appr.created_at ? new Date(appr.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "10:00 AM",
+          status: appr.status === "APPROVED" ? "Approved" : appr.status === "REJECTED" ? "Rejected" : "Pending",
+          priority: "Normal",
+          reason: appr.reason || "Outpatient Clinical Request",
+        });
+      });
+
+      // Add pending appointments as approval requests if not already listed
+      aptsList.forEach((apt) => {
+        const aptId = apt._id || apt.id;
+        const exists = consolidated.some((c) => c.id === aptId);
+        if (!exists) {
+          const doc = docMap[apt.doctor_id] || {};
+          const statusStr = (apt.approval_status || apt.status || "PENDING").toUpperCase();
+          consolidated.push({
+            id: aptId,
+            source: "appointment",
+            patient: apt.patient_name || `Patient #${String(apt.patient_id || "").slice(-6)}`,
+            patientId: `P-${String(apt.patient_id || "").slice(-5)}`,
+            doctor: doc.name || apt.doctor_name || "Specialist Doctor",
+            hospital: doc.hospital_name || doc.hospital || "CareBridge Medical Center",
+            type: "Appointment Booking",
+            date: apt.appointment_date || "Upcoming",
+            time: apt.appointment_time || "10:00 AM",
+            status: statusStr === "APPROVED" || statusStr === "CONFIRMED" ? "Approved" : statusStr === "REJECTED" || statusStr === "CANCELLED" ? "Rejected" : "Pending",
+            priority: (apt.reason || "").toLowerCase().includes("emergency") ? "High" : "Normal",
+            reason: apt.reason || "Patient consultation booking request",
+          });
+        }
+      });
+
+      setRequests(consolidated);
+    } catch (err) {
+      console.error("Failed to load approvals:", err);
+      setError("Failed to retrieve clearance approvals from backend.");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadApprovals();
+  }, [loadApprovals]);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    loadApprovals();
+  };
+
+  const updateStatus = async (id, status, source) => {
+    try {
+      const isApproved = status === "Approved";
+      if (source === "appointment") {
+        await doctorService.updateAppointment(id, {
+          approval_status: isApproved ? "APPROVED" : "REJECTED",
+          status: isApproved ? "APPROVED" : "CANCELLED",
+        });
+      } else {
+        try {
+          await api.put(`/approvals/${id}`, { status: isApproved ? "APPROVED" : "REJECTED" });
+        } catch {
+          // fallback
+          await doctorService.updateAppointment(id, { approval_status: isApproved ? "APPROVED" : "REJECTED" });
+        }
+      }
+
+      setRequests((current) =>
+        current.map((request) =>
+          request.id === id ? { ...request, status } : request
+        )
+      );
+
+      setToastMessage(`Request marked as ${status}.`);
+      setTimeout(() => setToastMessage(""), 3500);
+      setSelectedRequest(null);
+    } catch (err) {
+      console.error("Status update error:", err);
+      alert("Failed to update clearance status in database.");
+    }
+  };
+
   const filteredRequests = useMemo(() => {
     return requests.filter((request) => {
-      const matchesFilter =
-        filter === "All" || request.status === filter;
-
-      const searchText = search.toLowerCase();
+      const matchesFilter = filter === "All" || request.status === filter;
+      const searchText = search.toLowerCase().trim();
 
       const matchesSearch =
-        request.patient.toLowerCase().includes(searchText) ||
-        request.patientId.toLowerCase().includes(searchText) ||
-        request.doctor.toLowerCase().includes(searchText) ||
-        request.id.toLowerCase().includes(searchText) ||
-        request.type.toLowerCase().includes(searchText);
+        !searchText ||
+        (request.patient || "").toLowerCase().includes(searchText) ||
+        (request.patientId || "").toLowerCase().includes(searchText) ||
+        (request.doctor || "").toLowerCase().includes(searchText) ||
+        (request.id || "").toLowerCase().includes(searchText) ||
+        (request.type || "").toLowerCase().includes(searchText);
 
       return matchesFilter && matchesSearch;
     });
   }, [requests, filter, search]);
 
-  const pendingCount = requests.filter(
-    (request) => request.status === "Pending"
-  ).length;
-
-  const approvedCount = requests.filter(
-    (request) => request.status === "Approved"
-  ).length;
-
-  const rejectedCount = requests.filter(
-    (request) => request.status === "Rejected"
-  ).length;
-
-  const updateStatus = (id, status) => {
-    setRequests((current) =>
-      current.map((request) =>
-        request.id === id
-          ? { ...request, status }
-          : request
-      )
-    );
-
-    setSelectedRequest(null);
-  };
+  const pendingCount = requests.filter((request) => request.status === "Pending").length;
+  const approvedCount = requests.filter((request) => request.status === "Approved").length;
+  const rejectedCount = requests.filter((request) => request.status === "Rejected").length;
 
   return (
     <main className="staff-approvals-page">
-
       {/* HEADER */}
       <section className="approvals-header">
         <div>
-          <div className="page-kicker">
-            STAFF / ADMIN • OPERATIONS
-          </div>
-
-          <h1>Approvals</h1>
-
+          <span className="approvals-eyebrow">CAREBRIDGE AI — CLINICAL CLEARANCE</span>
+          <h1>Clearance & Approvals Hub</h1>
           <p>
-            Review and manage patient requests, appointments,
-            OPD passes and health-related approvals.
+            Review outpatient appointment bookings, doctor schedule authorizations, and diagnostic intake clearance.
           </p>
         </div>
 
-        <div className="header-status">
-          <span className="status-dot"></span>
-          System Operational
+        <button
+          className={`refresh-btn-secondary ${isRefreshing ? "spinning" : ""}`}
+          onClick={handleRefresh}
+          title="Refresh Approvals"
+          disabled={isRefreshing}
+        >
+          <RefreshCw size={16} />
+          <span>Refresh Requests</span>
+        </button>
+      </section>
+
+      {toastMessage && (
+        <div className="staff-approvals-toast">
+          <CheckCircle2 size={16} />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="staff-approvals-error">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* METRICS */}
+      <section className="approvals-stats">
+        <div className="stat-card">
+          <span>Total Requests</span>
+          <strong>{requests.length}</strong>
+          <small>Recorded in system</small>
+        </div>
+
+        <div className="stat-card pending">
+          <span>Pending Clearance</span>
+          <strong>{pendingCount}</strong>
+          <small>Awaiting review</small>
+        </div>
+
+        <div className="stat-card approved">
+          <span>Approved Requests</span>
+          <strong>{approvedCount}</strong>
+          <small>Granted clearance</small>
+        </div>
+
+        <div className="stat-card rejected">
+          <span>Rejected Requests</span>
+          <strong>{rejectedCount}</strong>
+          <small>Declined</small>
         </div>
       </section>
 
-      {/* SUMMARY CARDS */}
-      <section className="approval-stats">
-
-        <div className="approval-stat-card">
-          <div className="stat-icon pending-icon">⏳</div>
-
+      {/* MAIN PANEL */}
+      <section className="approvals-panel">
+        <div className="panel-header">
           <div>
-            <span>Pending</span>
-            <strong>{pendingCount}</strong>
-            <small>Needs review</small>
+            <h2>Clearance Requests</h2>
+            <p>{filteredRequests.length} requests displayed</p>
+          </div>
+
+          <div className="panel-actions">
+            <div className="search-box">
+              <Search size={16} />
+              <input
+                type="text"
+                placeholder="Search patient, doctor, ID..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="All">All Requests</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
           </div>
         </div>
 
-        <div className="approval-stat-card">
-          <div className="stat-icon approved-icon">✓</div>
-
-          <div>
-            <span>Approved</span>
-            <strong>{approvedCount}</strong>
-            <small>Processed requests</small>
+        {/* Loading */}
+        {loading && (
+          <div className="approvals-loading-box">
+            <Loader2 size={32} className="spinner-icon" />
+            <p>Loading clearance requests from CareBridge AI backend...</p>
           </div>
-        </div>
+        )}
 
-        <div className="approval-stat-card">
-          <div className="stat-icon rejected-icon">×</div>
-
-          <div>
-            <span>Rejected</span>
-            <strong>{rejectedCount}</strong>
-            <small>Declined requests</small>
-          </div>
-        </div>
-
-        <div className="approval-stat-card">
-          <div className="stat-icon total-icon">▣</div>
-
-          <div>
-            <span>Total Requests</span>
-            <strong>{requests.length}</strong>
-            <small>All approval records</small>
-          </div>
-        </div>
-
-      </section>
-
-      {/* TOOLBAR */}
-      <section className="approval-toolbar">
-
-        <div className="approval-search">
-          <span>⌕</span>
-
-          <input
-            type="text"
-            placeholder="Search patient, doctor, request ID..."
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
-          />
-        </div>
-
-        <div className="filter-buttons">
-
-          {["All", "Pending", "Approved", "Rejected"].map(
-            (status) => (
-              <button
-                key={status}
-                className={
-                  filter === status
-                    ? "filter-btn active"
-                    : "filter-btn"
-                }
-                onClick={() => setFilter(status)}
-              >
-                {status}
-              </button>
-            )
-          )}
-
-        </div>
-
-      </section>
-
-      {/* REQUEST TABLE */}
-      <section className="approval-panel">
-
-        <div className="panel-heading">
-          <div>
-            <h2>Approval Requests</h2>
-            <p>
-              {filteredRequests.length} request
-              {filteredRequests.length !== 1 ? "s" : ""} found
-            </p>
-          </div>
-
-          <button
-            className="refresh-btn"
-            onClick={() => setRequests(initialRequests)}
-          >
-            ↻ Refresh
-          </button>
-        </div>
-
-        <div className="approval-table-wrapper">
-
-          <table className="approval-table">
-
-            <thead>
-              <tr>
-                <th>Request</th>
-                <th>Patient</th>
-                <th>Doctor</th>
-                <th>Type</th>
-                <th>Date / Time</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {filteredRequests.length === 0 ? (
+        {/* Table */}
+        {!loading && (
+          <div className="approvals-table-container">
+            <table className="approvals-table">
+              <thead>
                 <tr>
-                  <td
-                    colSpan="8"
-                    className="empty-cell"
-                  >
-                    <div className="empty-state">
-                      <div>⌕</div>
-                      <h3>No requests found</h3>
-                      <p>
-                        Try changing your search or filter.
-                      </p>
-                    </div>
-                  </td>
+                  <th>Request ID</th>
+                  <th>Patient Details</th>
+                  <th>Assigned Specialist</th>
+                  <th>Type</th>
+                  <th>Date / Slot</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ) : (
-                filteredRequests.map((request) => (
+              </thead>
 
+              <tbody>
+                {filteredRequests.map((request) => (
                   <tr key={request.id}>
-
                     <td>
-                      <div className="request-id">
-                        {request.id}
-                      </div>
-
-                      <div className="hospital-name">
-                        {request.hospital}
-                      </div>
+                      <span className="req-id">#{String(request.id).slice(-8).toUpperCase()}</span>
                     </td>
 
                     <td>
                       <div className="patient-cell">
-                        <div className="avatar">
-                          {request.patient
-                            .split(" ")
-                            .map((name) => name[0])
-                            .join("")
-                            .slice(0, 2)}
-                        </div>
-
-                        <div>
-                          <strong>
-                            {request.patient}
-                          </strong>
-
-                          <span>
-                            {request.patientId}
-                          </span>
-                        </div>
+                        <strong>{request.patient}</strong>
+                        <span>{request.patientId}</span>
                       </div>
                     </td>
 
                     <td>
-                      <div className="doctor-name">
-                        {request.doctor}
+                      <div className="doctor-cell">
+                        <strong>{request.doctor}</strong>
+                        <span>{request.hospital}</span>
                       </div>
                     </td>
 
                     <td>
-                      <span className="type-badge">
-                        {request.type}
-                      </span>
+                      <span className="type-badge">{request.type}</span>
                     </td>
 
                     <td>
@@ -330,342 +316,143 @@ function Approvals() {
                     </td>
 
                     <td>
-                      <span
-                        className={
-                          request.priority === "High"
-                            ? "priority high"
-                            : "priority normal"
-                        }
-                      >
-                        {request.priority}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`approval-status ${request.status.toLowerCase()}`}
-                      >
-                        <i></i>
+                      <span className={`status-badge ${request.status.toLowerCase()}`}>
                         {request.status}
                       </span>
                     </td>
 
                     <td>
-
-                      {request.status === "Pending" ? (
-                        <div className="action-buttons">
-
-                          <button
-                            className="approve-btn"
-                            onClick={() =>
-                              updateStatus(
-                                request.id,
-                                "Approved"
-                              )
-                            }
-                            title="Approve request"
-                          >
-                            ✓
-                          </button>
-
-                          <button
-                            className="reject-btn"
-                            onClick={() =>
-                              updateStatus(
-                                request.id,
-                                "Rejected"
-                              )
-                            }
-                            title="Reject request"
-                          >
-                            ×
-                          </button>
-
-                          <button
-                            className="view-btn"
-                            onClick={() =>
-                              setSelectedRequest(request)
-                            }
-                            title="View details"
-                          >
-                            View
-                          </button>
-
-                        </div>
-                      ) : (
+                      <div className="action-buttons-group">
                         <button
-                          className="view-btn"
-                          onClick={() =>
-                            setSelectedRequest(request)
-                          }
+                          className="details-btn"
+                          onClick={() => setSelectedRequest(request)}
+                          title="View Details"
                         >
                           View
                         </button>
-                      )}
 
+                        {request.status === "Pending" && (
+                          <>
+                            <button
+                              className="approve-btn"
+                              onClick={() => updateStatus(request.id, "Approved", request.source)}
+                              title="Approve Request"
+                            >
+                              <Check size={14} />
+                            </button>
+
+                            <button
+                              className="reject-btn"
+                              onClick={() => updateStatus(request.id, "Rejected", request.source)}
+                              title="Reject Request"
+                            >
+                              <X size={14} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
-
                   </tr>
+                ))}
+              </tbody>
+            </table>
 
-                ))
-              )}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
+            {filteredRequests.length === 0 && (
+              <div className="empty-approvals">
+                <FileText size={38} className="text-muted" />
+                <h3>No clearance requests found</h3>
+                <p>
+                  {requests.length === 0
+                    ? "No pending approvals currently in the system."
+                    : "No requests match your current search and filter settings."}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
-      {/* MOBILE CARDS */}
-      <section className="approval-mobile-list">
-
-        {filteredRequests.map((request) => (
-
-          <article
-            className="approval-mobile-card"
-            key={request.id}
-          >
-
-            <div className="mobile-card-top">
-
+      {/* DETAILS MODAL */}
+      {selectedRequest && (
+        <div className="modal-overlay" onClick={() => setSelectedRequest(null)}>
+          <div className="modal-content approval-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
               <div>
-                <strong>{request.id}</strong>
-                <span>{request.type}</span>
+                <h2>Clearance Request Details</h2>
+                <p>ID: #{String(selectedRequest.id).slice(-8).toUpperCase()}</p>
               </div>
-
-              <span
-                className={`approval-status ${request.status.toLowerCase()}`}
-              >
-                <i></i>
-                {request.status}
-              </span>
-
+              <button className="modal-close-btn" onClick={() => setSelectedRequest(null)}>
+                ✕
+              </button>
             </div>
 
-            <div className="mobile-patient">
+            <div className="modal-body">
+              <div className="modal-grid-2">
+                <div className="modal-info-item">
+                  <span>Patient</span>
+                  <strong>{selectedRequest.patient}</strong>
+                </div>
 
-              <div className="avatar">
-                {request.patient
-                  .split(" ")
-                  .map((name) => name[0])
-                  .join("")
-                  .slice(0, 2)}
+                <div className="modal-info-item">
+                  <span>Doctor</span>
+                  <strong>{selectedRequest.doctor}</strong>
+                </div>
+
+                <div className="modal-info-item">
+                  <span>Hospital Facility</span>
+                  <strong>{selectedRequest.hospital}</strong>
+                </div>
+
+                <div className="modal-info-item">
+                  <span>Request Type</span>
+                  <strong>{selectedRequest.type}</strong>
+                </div>
+
+                <div className="modal-info-item">
+                  <span>Date & Slot</span>
+                  <strong>{selectedRequest.date} at {selectedRequest.time}</strong>
+                </div>
+
+                <div className="modal-info-item">
+                  <span>Current Clearance Status</span>
+                  <strong className={`status-text ${selectedRequest.status.toLowerCase()}`}>
+                    {selectedRequest.status}
+                  </strong>
+                </div>
               </div>
 
-              <div>
-                <strong>{request.patient}</strong>
-                <span>{request.patientId}</span>
+              <div className="modal-reason-box">
+                <h4>Clinical Purpose / Symptoms</h4>
+                <p>{selectedRequest.reason}</p>
               </div>
-
             </div>
 
-            <div className="mobile-details">
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setSelectedRequest(null)}>
+                Close
+              </button>
 
-              <div>
-                <span>Doctor</span>
-                <strong>{request.doctor}</strong>
-              </div>
-
-              <div>
-                <span>Date</span>
-                <strong>{request.date}</strong>
-              </div>
-
-              <div>
-                <span>Priority</span>
-                <strong>{request.priority}</strong>
-              </div>
-
-            </div>
-
-            <div className="mobile-actions">
-
-              {request.status === "Pending" && (
+              {selectedRequest.status === "Pending" && (
                 <>
                   <button
-                    className="mobile-approve"
-                    onClick={() =>
-                      updateStatus(
-                        request.id,
-                        "Approved"
-                      )
-                    }
+                    className="btn-danger"
+                    onClick={() => updateStatus(selectedRequest.id, "Rejected", selectedRequest.source)}
                   >
-                    ✓ Approve
+                    Reject Request
                   </button>
 
                   <button
-                    className="mobile-reject"
-                    onClick={() =>
-                      updateStatus(
-                        request.id,
-                        "Rejected"
-                      )
-                    }
+                    className="btn-primary"
+                    onClick={() => updateStatus(selectedRequest.id, "Approved", selectedRequest.source)}
                   >
-                    × Reject
+                    Approve Clearance
                   </button>
                 </>
               )}
-
-              <button
-                className="mobile-view"
-                onClick={() =>
-                  setSelectedRequest(request)
-                }
-              >
-                View
-              </button>
-
             </div>
-
-          </article>
-
-        ))}
-
-      </section>
-
-      {/* MODAL */}
-      {selectedRequest && (
-
-        <div
-          className="approval-modal-overlay"
-          onClick={() => setSelectedRequest(null)}
-        >
-
-          <div
-            className="approval-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
-
-            <div className="modal-header">
-
-              <div>
-                <span>REQUEST DETAILS</span>
-                <h2>{selectedRequest.id}</h2>
-              </div>
-
-              <button
-                className="modal-close"
-                onClick={() =>
-                  setSelectedRequest(null)
-                }
-              >
-                ×
-              </button>
-
-            </div>
-
-            <div className="modal-status-row">
-
-              <span
-                className={`approval-status ${selectedRequest.status.toLowerCase()}`}
-              >
-                <i></i>
-                {selectedRequest.status}
-              </span>
-
-              <span
-                className={
-                  selectedRequest.priority === "High"
-                    ? "priority high"
-                    : "priority normal"
-                }
-              >
-                {selectedRequest.priority} Priority
-              </span>
-
-            </div>
-
-            <div className="modal-details">
-
-              <div>
-                <span>Patient</span>
-                <strong>
-                  {selectedRequest.patient}
-                </strong>
-              </div>
-
-              <div>
-                <span>Patient ID</span>
-                <strong>
-                  {selectedRequest.patientId}
-                </strong>
-              </div>
-
-              <div>
-                <span>Doctor</span>
-                <strong>
-                  {selectedRequest.doctor}
-                </strong>
-              </div>
-
-              <div>
-                <span>Hospital</span>
-                <strong>
-                  {selectedRequest.hospital}
-                </strong>
-              </div>
-
-              <div>
-                <span>Request Type</span>
-                <strong>
-                  {selectedRequest.type}
-                </strong>
-              </div>
-
-              <div>
-                <span>Schedule</span>
-                <strong>
-                  {selectedRequest.date} •{" "}
-                  {selectedRequest.time}
-                </strong>
-              </div>
-
-            </div>
-
-            {selectedRequest.status === "Pending" && (
-
-              <div className="modal-actions">
-
-                <button
-                  className="modal-reject"
-                  onClick={() =>
-                    updateStatus(
-                      selectedRequest.id,
-                      "Rejected"
-                    )
-                  }
-                >
-                  × Reject
-                </button>
-
-                <button
-                  className="modal-approve"
-                  onClick={() =>
-                    updateStatus(
-                      selectedRequest.id,
-                      "Approved"
-                    )
-                  }
-                >
-                  ✓ Approve Request
-                </button>
-
-              </div>
-
-            )}
-
           </div>
-
         </div>
-
       )}
-
     </main>
   );
 }

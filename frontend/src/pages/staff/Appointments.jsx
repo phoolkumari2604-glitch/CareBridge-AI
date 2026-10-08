@@ -1,509 +1,344 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import {
+  CalendarDays,
+  Search,
+  CheckCircle2,
+  Clock3,
+  XCircle,
+  RefreshCw,
+  Loader2,
+  AlertCircle,
+  Building,
+  User,
+  Check,
+  X,
+} from "lucide-react";
+import doctorService from "../../services/doctorService";
 import "./Appointments.css";
 
-const initialAppointments = [
-  {
-    id: "APT-1001",
-    patient: "Ananya Sharma",
-    patientId: "P-20451",
-    doctor: "Dr. Naresh Trehan",
-    department: "Cardiovascular Surgery",
-    date: "02 Oct 2026",
-    time: "10:30 AM",
-    type: "Consultation",
-    status: "Confirmed",
-  },
-  {
-    id: "APT-1002",
-    patient: "Ravi Kumar",
-    patientId: "P-20452",
-    doctor: "Dr. Ashok Seth",
-    department: "Interventional Cardiology",
-    date: "02 Oct 2026",
-    time: "10:45 AM",
-    type: "Follow-up",
-    status: "Confirmed",
-  },
-  {
-    id: "APT-1003",
-    patient: "Meera Singh",
-    patientId: "P-20453",
-    doctor: "Dr. Arvinder Singh Soin",
-    department: "Liver Transplant",
-    date: "02 Oct 2026",
-    time: "11:00 AM",
-    type: "Consultation",
-    status: "Waiting",
-  },
-  {
-    id: "APT-1004",
-    patient: "Vikram Patel",
-    patientId: "P-20454",
-    doctor: "Dr. Sandeep Vaishya",
-    department: "Neurosurgery",
-    date: "02 Oct 2026",
-    time: "11:15 AM",
-    type: "Check-up",
-    status: "Completed",
-  },
-  {
-    id: "APT-1005",
-    patient: "Sana Khan",
-    patientId: "P-20455",
-    doctor: "Dr. Naresh Trehan",
-    department: "Cardiovascular Surgery",
-    date: "02 Oct 2026",
-    time: "11:30 AM",
-    type: "Consultation",
-    status: "Cancelled",
-  },
-  {
-    id: "APT-1006",
-    patient: "Arjun Verma",
-    patientId: "P-20456",
-    doctor: "Dr. Ashok Seth",
-    department: "Interventional Cardiology",
-    date: "02 Oct 2026",
-    time: "12:00 PM",
-    type: "Follow-up",
-    status: "Confirmed",
-  },
-];
-
 function Appointments() {
-  const [appointments, setAppointments] = useState(
-    initialAppointments
-  );
+  const [appointments, setAppointments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
+  const loadAppointments = useCallback(async () => {
+    try {
+      setError(null);
+      const [aptsRes, docsRes] = await Promise.allSettled([
+        doctorService.getAppointments(),
+        doctorService.getDoctors(),
+      ]);
+
+      const aptsList = aptsRes.status === "fulfilled" && Array.isArray(aptsRes.value) ? aptsRes.value : [];
+      const docsList = docsRes.status === "fulfilled" && Array.isArray(docsRes.value) ? docsRes.value : [];
+
+      setAppointments(aptsList);
+      setDoctors(docsList);
+    } catch (err) {
+      console.error("Failed to load staff appointments:", err);
+      setError("Failed to retrieve appointment roster from backend.");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAppointments();
+  }, [loadAppointments]);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    loadAppointments();
+  };
+
+  const getDoctorName = (doctorId) => {
+    const doc = doctors.find((d) => (d._id || d.id) === doctorId);
+    return doc ? doc.name : "Assigned Specialist";
+  };
+
+  const getDoctorSpecialty = (doctorId) => {
+    const doc = doctors.find((d) => (d._id || d.id) === doctorId);
+    return doc ? doc.specialty || doc.specialization : "General Medicine";
+  };
+
+  const updateStatus = async (id, newStatus) => {
+    try {
+      await doctorService.updateAppointment(id, {
+        status: newStatus,
+        approval_status: newStatus === "CANCELLED" ? "REJECTED" : "APPROVED",
+      });
+
+      setAppointments((current) =>
+        current.map((appointment) =>
+          (appointment._id || appointment.id) === id
+            ? { ...appointment, status: newStatus }
+            : appointment
+        )
+      );
+
+      setToastMessage(`Appointment marked as ${newStatus}.`);
+      setTimeout(() => setToastMessage(""), 3500);
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      alert(err.response?.data?.detail || "Failed to persist status change to server.");
+    }
+  };
+
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appointment) => {
-      const query = search.toLowerCase();
+      const query = search.toLowerCase().trim();
+      const patient = (appointment.patient_name || "").toLowerCase();
+      const reason = (appointment.reason || "").toLowerCase();
+      const docName = getDoctorName(appointment.doctor_id).toLowerCase();
+      const aptId = String(appointment._id || appointment.id || "").toLowerCase();
 
       const matchesSearch =
-        appointment.patient
-          .toLowerCase()
-          .includes(query) ||
-        appointment.patientId
-          .toLowerCase()
-          .includes(query) ||
-        appointment.doctor
-          .toLowerCase()
-          .includes(query) ||
-        appointment.id
-          .toLowerCase()
-          .includes(query);
+        !query ||
+        patient.includes(query) ||
+        reason.includes(query) ||
+        docName.includes(query) ||
+        aptId.includes(query);
 
+      const status = (appointment.status || "PENDING").toUpperCase();
       const matchesStatus =
-        statusFilter === "All" ||
-        appointment.status === statusFilter;
+        statusFilter === "All" || status === statusFilter.toUpperCase();
 
       return matchesSearch && matchesStatus;
     });
-  }, [appointments, search, statusFilter]);
+  }, [appointments, search, statusFilter, doctors]);
 
   const total = appointments.length;
-
   const confirmed = appointments.filter(
-    (item) => item.status === "Confirmed"
+    (item) => (item.status || "").toUpperCase() === "APPROVED" || (item.status || "").toUpperCase() === "CONFIRMED"
   ).length;
-
-  const waiting = appointments.filter(
-    (item) => item.status === "Waiting"
+  const pending = appointments.filter(
+    (item) => (item.status || "").toUpperCase() === "PENDING"
   ).length;
-
   const completed = appointments.filter(
-    (item) => item.status === "Completed"
+    (item) => (item.status || "").toUpperCase() === "COMPLETED"
   ).length;
-
-  const updateStatus = (id, newStatus) => {
-    setAppointments((current) =>
-      current.map((appointment) =>
-        appointment.id === id
-          ? {
-              ...appointment,
-              status: newStatus,
-            }
-          : appointment
-      )
-    );
-  };
 
   return (
     <div className="staff-appointments-page">
-
       {/* Header */}
       <section className="appointments-header">
         <div>
-          <span className="appointments-eyebrow">
-            STAFF / ADMIN
-          </span>
-
-          <h1>Appointments</h1>
-
+          <span className="appointments-eyebrow">CAREBRIDGE AI — CLINICAL SCHEDULING</span>
+          <h1>Appointment Operations</h1>
           <p>
-            Manage hospital appointments, schedules,
-            consultations, and patient bookings.
+            Manage hospital appointments, doctor consultation schedules, clearance approvals, and patient bookings.
           </p>
         </div>
 
-        <button className="appointment-add-btn">
-          + New Appointment
+        <button
+          className={`refresh-btn-secondary ${isRefreshing ? "spinning" : ""}`}
+          onClick={handleRefresh}
+          title="Refresh Appointments"
+          disabled={isRefreshing}
+        >
+          <RefreshCw size={16} />
+          <span>Refresh Schedule</span>
         </button>
       </section>
 
+      {/* Toast */}
+      {toastMessage && (
+        <div className="staff-apt-toast">
+          <CheckCircle2 size={16} />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="staff-apt-error">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Statistics */}
-      <section className="appointment-stats">
-
-        <div className="appointment-stat-card">
-          <div className="appointment-stat-icon blue">
-            ◫
-          </div>
-
-          <div>
-            <span>Total Appointments</span>
-            <strong>{total}</strong>
-            <small>Today's schedule</small>
-          </div>
+      <section className="appointments-stats">
+        <div className="stat-box">
+          <span>Total Bookings</span>
+          <strong>{total}</strong>
+          <small>Registered appointments</small>
         </div>
 
-        <div className="appointment-stat-card">
-          <div className="appointment-stat-icon green">
-            ✓
-          </div>
-
-          <div>
-            <span>Confirmed</span>
-            <strong>{confirmed}</strong>
-            <small>Confirmed bookings</small>
-          </div>
+        <div className="stat-box">
+          <span>Confirmed / Approved</span>
+          <strong>{confirmed}</strong>
+          <small>Active consultations</small>
         </div>
 
-        <div className="appointment-stat-card">
-          <div className="appointment-stat-icon orange">
-            ◷
-          </div>
-
-          <div>
-            <span>Waiting</span>
-            <strong>{waiting}</strong>
-            <small>Patients waiting</small>
-          </div>
+        <div className="stat-box">
+          <span>Pending Clearance</span>
+          <strong>{pending}</strong>
+          <small>Awaiting triage review</small>
         </div>
 
-        <div className="appointment-stat-card">
-          <div className="appointment-stat-icon purple">
-            ✓
-          </div>
-
-          <div>
-            <span>Completed</span>
-            <strong>{completed}</strong>
-            <small>Finished today</small>
-          </div>
+        <div className="stat-box">
+          <span>Completed Consults</span>
+          <strong>{completed}</strong>
+          <small>Concluded sessions</small>
         </div>
-
       </section>
 
-      {/* Main card */}
-      <section className="appointments-card">
-
-        <div className="appointments-card-header">
-
+      {/* Main Panel */}
+      <section className="appointments-panel">
+        <div className="panel-header">
           <div>
-            <h2>Appointment Schedule</h2>
-            <p>
-              View and manage today's patient appointments
-            </p>
+            <h2>Consultation Schedule</h2>
+            <p>{filteredAppointments.length} bookings displayed</p>
           </div>
 
-          <div className="schedule-date">
-            <span>▣</span>
-            02 October 2026
-          </div>
+          <div className="panel-controls">
+            <div className="search-input">
+              <Search size={16} />
+              <input
+                type="text"
+                placeholder="Search patient, doctor, ID..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
 
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="status-select"
+            >
+              <option value="All">All Statuses</option>
+              <option value="APPROVED">Approved / Confirmed</option>
+              <option value="PENDING">Pending</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
         </div>
 
-        {/* Controls */}
-        <div className="appointments-controls">
-
-          <div className="appointment-search">
-            <span>⌕</span>
-
-            <input
-              type="text"
-              placeholder="Search patient, doctor or appointment ID..."
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-            />
+        {/* Loading */}
+        {loading && (
+          <div className="appointments-loading-box">
+            <Loader2 size={32} className="spinner-icon" />
+            <p>Loading appointments from CareBridge AI backend...</p>
           </div>
-
-          <div className="appointment-filter">
-
-            {[
-              "All",
-              "Confirmed",
-              "Waiting",
-              "Completed",
-              "Cancelled",
-            ].map((status) => (
-              <button
-                key={status}
-                className={
-                  statusFilter === status
-                    ? "active"
-                    : ""
-                }
-                onClick={() =>
-                  setStatusFilter(status)
-                }
-              >
-                {status}
-              </button>
-            ))}
-
-          </div>
-
-        </div>
+        )}
 
         {/* Table */}
-        <div className="appointments-table-wrapper">
+        {!loading && (
+          <div className="appointments-table-container">
+            <table className="appointments-table">
+              <thead>
+                <tr>
+                  <th>Booking ID</th>
+                  <th>Patient Details</th>
+                  <th>Assigned Specialist</th>
+                  <th>Schedule Slot</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
 
-          <table className="appointments-table">
+              <tbody>
+                {filteredAppointments.map((apt) => {
+                  const aptId = apt._id || apt.id;
+                  const status = (apt.status || "PENDING").toUpperCase();
+                  const docName = getDoctorName(apt.doctor_id);
+                  const docSpec = getDoctorSpecialty(apt.doctor_id);
 
-            <thead>
-              <tr>
-                <th>Appointment</th>
-                <th>Patient</th>
-                <th>Doctor</th>
-                <th>Department</th>
-                <th>Date & Time</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+                  return (
+                    <tr key={aptId}>
+                      <td>
+                        <span className="apt-id">#{String(aptId).slice(-8).toUpperCase()}</span>
+                      </td>
 
-            <tbody>
-
-              {filteredAppointments.map(
-                (appointment) => (
-                  <tr key={appointment.id}>
-
-                    <td>
-                      <span className="appointment-id">
-                        {appointment.id}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="appointment-patient">
-
-                        <div className="appointment-avatar">
-                          {appointment.patient
-                            .charAt(0)
-                            .toUpperCase()}
+                      <td>
+                        <div className="patient-cell">
+                          <strong>{apt.patient_name || `Patient #${String(apt.patient_id || "").slice(-6)}`}</strong>
+                          <span>{apt.reason || "General Consultation"}</span>
                         </div>
+                      </td>
 
-                        <div>
-                          <strong>
-                            {appointment.patient}
-                          </strong>
-
-                          <small>
-                            {appointment.patientId}
-                          </small>
+                      <td>
+                        <div className="doctor-cell">
+                          <strong>{docName}</strong>
+                          <span>{docSpec}</span>
                         </div>
+                      </td>
 
-                      </div>
-                    </td>
+                      <td>
+                        <div className="schedule-cell">
+                          <strong>{apt.appointment_time || "10:00 AM"}</strong>
+                          <span>{apt.appointment_date || "Today"}</span>
+                        </div>
+                      </td>
 
-                    <td>
-                      <span className="appointment-doctor">
-                        {appointment.doctor}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span className="department-text">
-                        {appointment.department}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="appointment-time">
-
-                        <strong>
-                          {appointment.date}
-                        </strong>
-
-                        <span>
-                          {appointment.time}
+                      <td>
+                        <span className={`status-pill ${status.toLowerCase()}`}>
+                          {status}
                         </span>
+                      </td>
 
-                      </div>
-                    </td>
+                      <td>
+                        <div className="action-buttons-group">
+                          {status !== "APPROVED" && status !== "CONFIRMED" && (
+                            <button
+                              className="approve-btn"
+                              onClick={() => updateStatus(aptId, "APPROVED")}
+                              title="Approve Appointment"
+                            >
+                              <Check size={14} />
+                            </button>
+                          )}
 
-                    <td>
-                      <span className="type-badge">
-                        {appointment.type}
-                      </span>
-                    </td>
+                          {status !== "COMPLETED" && (
+                            <button
+                              className="complete-btn"
+                              onClick={() => updateStatus(aptId, "COMPLETED")}
+                              title="Mark Completed"
+                            >
+                              Done
+                            </button>
+                          )}
 
-                    <td>
-                      <span
-                        className={`appointment-status ${appointment.status
-                          .toLowerCase()
-                          .replace(" ", "-")}`}
-                      >
-                        <span></span>
-                        {appointment.status}
-                      </span>
-                    </td>
+                          {status !== "CANCELLED" && (
+                            <button
+                              className="cancel-btn"
+                              onClick={() => updateStatus(aptId, "CANCELLED")}
+                              title="Cancel Appointment"
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
 
-                    <td>
-                      <div className="appointment-actions">
-
-                        {appointment.status ===
-                          "Confirmed" && (
-                          <button
-                            className="action-wait"
-                            onClick={() =>
-                              updateStatus(
-                                appointment.id,
-                                "Waiting"
-                              )
-                            }
-                          >
-                            Check In
-                          </button>
-                        )}
-
-                        {appointment.status ===
-                          "Waiting" && (
-                          <button
-                            className="action-complete"
-                            onClick={() =>
-                              updateStatus(
-                                appointment.id,
-                                "Completed"
-                              )
-                            }
-                          >
-                            Complete
-                          </button>
-                        )}
-
-                        {appointment.status ===
-                          "Completed" && (
-                          <span className="completed-label">
-                            Done
-                          </span>
-                        )}
-
-                        {appointment.status ===
-                          "Cancelled" && (
-                          <span className="cancelled-label">
-                            Cancelled
-                          </span>
-                        )}
-
-                      </div>
-                    </td>
-
-                  </tr>
-                )
-              )}
-
-            </tbody>
-
-          </table>
-
-          {filteredAppointments.length === 0 && (
-            <div className="appointments-empty">
-
-              <div className="empty-calendar">
-                ▣
+            {filteredAppointments.length === 0 && (
+              <div className="empty-appointments">
+                <CalendarDays size={38} className="text-muted" />
+                <h3>No appointments found</h3>
+                <p>
+                  {appointments.length === 0
+                    ? "No appointments booked in the system."
+                    : "No appointments match your search and filter criteria."}
+                </p>
               </div>
-
-              <h3>No appointments found</h3>
-
-              <p>
-                Try changing your search or status filter.
-              </p>
-
-            </div>
-          )}
-
-        </div>
-
-        {/* Footer */}
-        <div className="appointments-footer">
-
-          <span>
-            Showing{" "}
-            <strong>
-              {filteredAppointments.length}
-            </strong>{" "}
-            of{" "}
-            <strong>{appointments.length}</strong>{" "}
-            appointments
-          </span>
-
-          <div className="appointment-pagination">
-            <button disabled>‹</button>
-            <button className="current-page">1</button>
-            <button>›</button>
+            )}
           </div>
-
-        </div>
-
+        )}
       </section>
-
-      {/* Information cards */}
-      <section className="appointment-info-grid">
-
-        <div className="appointment-info-card">
-
-          <div className="info-card-icon blue">
-            ✓
-          </div>
-
-          <div>
-            <h3>Appointment Management</h3>
-
-            <p>
-              Staff can check patients in, monitor
-              appointment status, and complete visits
-              from this screen.
-            </p>
-          </div>
-
-        </div>
-
-        <div className="appointment-info-card">
-
-          <div className="info-card-icon orange">
-            !
-          </div>
-
-          <div>
-            <h3>Schedule Monitoring</h3>
-
-            <p>
-              Keep track of confirmed, waiting,
-              completed, and cancelled appointments.
-            </p>
-          </div>
-
-        </div>
-
-      </section>
-
     </div>
   );
 }
