@@ -39,10 +39,12 @@ import Notifications from "./pages/patient/Notifications";
 // DOCTOR PAGES
 // ==================================================
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
-import DoctorApprovals from "./pages/doctor/Approvals";
+import PatientMonitoring from "./pages/doctor/PatientMonitoring";
 import DoctorAppointments from "./pages/doctor/Appointments";
-import DoctorVitals from "./pages/doctor/Vitals";
+import DoctorApprovals from "./pages/doctor/Approvals";
 import DoctorHealthRecords from "./pages/doctor/HealthRecords";
+import HealthMonitoring from "./pages/doctor/HealthMonitoring";
+import DoctorVitals from "./pages/doctor/Vitals";
 import DoctorAIAssistant from "./pages/doctor/AIAssistant";
 import DoctorNotifications from "./pages/doctor/Notifications";
 
@@ -184,52 +186,66 @@ function App() {
 
 
           {/* ==================================================
-              DOCTOR MODULE
+              DOCTOR MODULE (12 REQUIRED FEATURES)
           ================================================== */}
 
-          {/* Doctor Dashboard */}
+          {/* 1. Dashboard */}
           <Route
             path="/doctor/dashboard"
             element={<DoctorDashboard />}
           />
 
-          {/* Doctor Approvals */}
+          {/* 2. Patient Monitoring */}
           <Route
-            path="/doctor/approvals"
-            element={<DoctorApprovals />}
+            path="/doctor/patient-monitoring"
+            element={<PatientMonitoring />}
+          />
+          <Route
+            path="/doctor/patients"
+            element={<PatientMonitoring />}
           />
 
-          {/* Doctor Patients */}
-          {/* <Route
-            path="/doctor/patients"
-            element={<DoctorPatients />}
-          /> */}
-
-          {/* Doctor Appointments */}
+          {/* 3. Appointments */}
           <Route
             path="/doctor/appointments"
             element={<DoctorAppointments />}
           />
 
-          {/* Doctor Vitals */}
+          {/* 4. Approvals */}
+          <Route
+            path="/doctor/approvals"
+            element={<DoctorApprovals />}
+          />
+
+          {/* 5. Health Records */}
+          <Route
+            path="/doctor/records"
+            element={<DoctorHealthRecords />}
+          />
+          <Route
+            path="/doctor/health-records"
+            element={<DoctorHealthRecords />}
+          />
+
+          {/* 6. Health Monitoring */}
+          <Route
+            path="/doctor/health-monitoring"
+            element={<HealthMonitoring />}
+          />
+
+          {/* 7. Vitals */}
           <Route
             path="/doctor/vitals"
             element={<DoctorVitals />}
           />
 
-          {/* Doctor Health Records */}
-          <Route
-            path="/doctor/records"
-            element={<DoctorHealthRecords />}
-          />
-
-          {/* Doctor AI Assistant */}
+          {/* 8. AI Assistant */}
           <Route
             path="/doctor/ai-assistant"
             element={<DoctorAIAssistant />}
           />
 
-          {/* Doctor Notifications */}
+          {/* 9. Notifications */}
           <Route
             path="/doctor/notifications"
             element={<DoctorNotifications />}
@@ -312,6 +328,3 @@ function App() {
 }
 
 export default App;
-
-
-

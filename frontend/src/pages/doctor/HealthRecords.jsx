@@ -1,401 +1,795 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Search,
   FileText,
-  UserRound,
   CalendarDays,
-  Activity,
-  Download,
   Eye,
   Plus,
   Pill,
   Stethoscope,
   HeartPulse,
   AlertCircle,
+  Loader2,
+  RefreshCw,
+  X,
+  CheckCircle2,
 } from "lucide-react";
-
+import doctorService from "../../services/doctorService";
+import { useAuth } from "../../context/AuthContext";
 import "./HealthRecords.css";
 
 function HealthRecords() {
-  const records = [
-    {
-      id: 1,
-      patient: "Ananya Sharma",
-      age: 28,
-      date: "02 Oct 2026",
-      type: "General Consultation",
-      diagnosis: "Seasonal Allergy",
-      doctor: "Dr. Arjun Mehta",
-      status: "Reviewed",
-    },
-    {
-      id: 2,
-      patient: "Rahul Verma",
-      age: 45,
-      date: "02 Oct 2026",
-      type: "Cardiology",
-      diagnosis: "Hypertension",
-      doctor: "Dr. Arjun Mehta",
-      status: "Follow-up",
-    },
-    {
-      id: 3,
-      patient: "Priya Reddy",
-      age: 34,
-      date: "01 Oct 2026",
-      type: "General Consultation",
-      diagnosis: "Migraine",
-      doctor: "Dr. Arjun Mehta",
-      status: "Reviewed",
-    },
-    {
-      id: 4,
-      patient: "Arjun Kumar",
-      age: 52,
-      date: "30 Sep 2026",
-      type: "Diabetes",
-      diagnosis: "Type 2 Diabetes",
-      doctor: "Dr. Arjun Mehta",
-      status: "Follow-up",
-    },
-    {
-      id: 5,
-      patient: "Sneha Rao",
-      age: 31,
-      date: "29 Sep 2026",
-      type: "General Consultation",
-      diagnosis: "Viral Fever",
-      doctor: "Dr. Arjun Mehta",
-      status: "Reviewed",
-    },
-  ];
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const preselectedPatientId = searchParams.get("patientId") || "";
+
+  const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
+
+  const [patients, setPatients] = useState([]);
+  const [selectedPatientId, setSelectedPatientId] = useState(preselectedPatientId);
+  const [records, setRecords] = useState([]);
+
+  // Search & Filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+
+  // Modal states
+  const [viewingRecord, setViewingRecord] = useState(null);
+  const [isCreatingModalOpen, setIsCreatingModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // New Record Form State
+  const [formData, setFormData] = useState({
+    patient_id: preselectedPatientId || "",
+    record_type: "Consultation",
+    title: "",
+    description: "",
+    diagnosis: "",
+    medications: "",
+    doctor_name: user?.name || "Dr. Arjun Mehta",
+    hospital_name: "CareBridge Medical Center",
+    record_date: new Date().toISOString().split("T")[0],
+  });
+
+  const loadPatientsAndRecords = useCallback(async () => {
+    try {
+      setError(null);
+      const patientsList = await doctorService.getPatients();
+      const validPatients = Array.isArray(patientsList) ? patientsList : [];
+      setPatients(validPatients);
+
+      // If a patient is selected, fetch their records. Otherwise fetch for first patient or all
+      let targetPatientId = selectedPatientId;
+      if (!targetPatientId && validPatients.length > 0) {
+        targetPatientId = validPatients[0]._id || validPatients[0].id;
+        setSelectedPatientId(targetPatientId);
+      }
+
+      if (targetPatientId) {
+        const recordsData = await doctorService.getHealthRecords(targetPatientId);
+        setRecords(Array.isArray(recordsData) ? recordsData : []);
+      } else {
+        setRecords([]);
+      }
+    } catch (err) {
+      console.error("Error loading health records:", err);
+      setError("Failed to load patient health records.");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [selectedPatientId]);
+
+  useEffect(() => {
+    loadPatientsAndRecords();
+  }, [loadPatientsAndRecords]);
+
+  const handlePatientSelectChange = async (patientId) => {
+    setSelectedPatientId(patientId);
+    setLoading(true);
+    try {
+      const recordsData = await doctorService.getHealthRecords(patientId);
+      setRecords(Array.isArray(recordsData) ? recordsData : []);
+    } catch (err) {
+      console.warn("Failed to fetch records for selected patient:", err);
+      setRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    loadPatientsAndRecords();
+  };
+
+  const handleCreateRecord = async (e) => {
+    e.preventDefault();
+    if (!formData.patient_id || !formData.title.trim()) {
+      alert("Please select a patient and provide a record title.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const medsArray = formData.medications
+        ? formData.medications
+            .split(",")
+            .map((m) => m.trim())
+            .filter(Boolean)
+        : [];
+
+      await doctorService.createHealthRecord({
+        patient_id: formData.patient_id,
+        record_type: formData.record_type,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        diagnosis: formData.diagnosis.trim(),
+        medications: medsArray,
+        doctor_name: formData.doctor_name,
+        hospital_name: formData.hospital_name,
+        record_date: formData.record_date,
+      });
+
+      setToastMessage("Medical record created successfully.");
+      setTimeout(() => setToastMessage(""), 4000);
+      setIsCreatingModalOpen(false);
+
+      // Reset form & reload records
+      setFormData({
+        patient_id: selectedPatientId || "",
+        record_type: "Consultation",
+        title: "",
+        description: "",
+        diagnosis: "",
+        medications: "",
+        doctor_name: user?.name || "Dr. Arjun Mehta",
+        hospital_name: "CareBridge Medical Center",
+        record_date: new Date().toISOString().split("T")[0],
+      });
+
+      if (formData.patient_id === selectedPatientId) {
+        const updatedRecords = await doctorService.getHealthRecords(selectedPatientId);
+        setRecords(Array.isArray(updatedRecords) ? updatedRecords : []);
+      }
+    } catch (err) {
+      console.error("Failed to create health record:", err);
+      alert(err.response?.data?.detail || "Failed to create health record.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteRecord = async (recordId) => {
+    if (!window.confirm("Are you sure you want to delete this clinical health record?")) {
+      return;
+    }
+
+    try {
+      await doctorService.deleteHealthRecord(recordId);
+      setToastMessage("Health record deleted successfully.");
+      setTimeout(() => setToastMessage(""), 4000);
+      setRecords((prev) => prev.filter((r) => (r._id || r.id) !== recordId));
+      if (viewingRecord && (viewingRecord._id || viewingRecord.id) === recordId) {
+        setViewingRecord(null);
+      }
+    } catch (err) {
+      console.error("Delete record error:", err);
+      alert(err.response?.data?.detail || "Failed to delete record.");
+    }
+  };
+
+  const filteredRecords = records.filter((rec) => {
+    const typeUpper = (rec.record_type || "").toUpperCase();
+    const matchesType =
+      typeFilter === "all" ? true : typeUpper.includes(typeFilter.toUpperCase());
+
+    const title = rec.title || "";
+    const diagnosis = rec.diagnosis || "";
+    const doctor = rec.doctor_name || rec.doctor || "";
+    const query = searchQuery.toLowerCase().trim();
+
+    const matchesSearch =
+      !query ||
+      title.toLowerCase().includes(query) ||
+      diagnosis.toLowerCase().includes(query) ||
+      doctor.toLowerCase().includes(query);
+
+    return matchesType && matchesSearch;
+  });
+
+  const activePatientObj = patients.find(
+    (p) => (p._id || p.id) === selectedPatientId
+  );
 
   return (
     <div className="health-records-page">
-
-      {/* =========================
-          HEADER
-      ========================= */}
-
+      {/* HEADER */}
       <section className="records-header">
         <div>
-          <span className="records-kicker">
-            DOCTOR PORTAL
-          </span>
-
-          <h1>Health Records</h1>
-
+          <span className="records-kicker">DOCTOR PORTAL</span>
+          <h1>Clinical Health Records & Charts</h1>
           <p>
-            Access, review and manage patient medical records.
+            Access, document, and review patient medical histories, clinical diagnoses, and prescriptions.
           </p>
         </div>
 
-        <button className="create-record-btn">
-          <Plus size={18} />
-          Create Record
-        </button>
+        <div className="records-header-actions">
+          <button
+            className={`records-refresh-btn ${isRefreshing ? "spinning" : ""}`}
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw size={16} />
+            <span>{isRefreshing ? "Syncing..." : "Sync"}</span>
+          </button>
+
+          <button
+            className="create-record-btn"
+            onClick={() => {
+              setFormData((prev) => ({
+                ...prev,
+                patient_id: selectedPatientId || (patients[0]?._id || ""),
+              }));
+              setIsCreatingModalOpen(true);
+            }}
+          >
+            <Plus size={18} />
+            <span>Create Health Record</span>
+          </button>
+        </div>
       </section>
 
-      {/* =========================
-          SUMMARY
-      ========================= */}
+      {/* TOAST MESSAGE */}
+      {toastMessage && (
+        <div className="records-toast">
+          <CheckCircle2 size={18} />
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
+      {/* ERROR BANNER */}
+      {error && (
+        <div className="records-error">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+          <button onClick={loadPatientsAndRecords}>Retry</button>
+        </div>
+      )}
+
+      {/* PATIENT SELECTOR & QUICK STATS */}
+      <section className="patient-selector-banner">
+        <div className="patient-select-wrapper">
+          <label htmlFor="patient-select">
+            <strong>Select Patient Chart:</strong>
+          </label>
+          <select
+            id="patient-select"
+            value={selectedPatientId}
+            onChange={(e) => handlePatientSelectChange(e.target.value)}
+            className="patient-dropdown"
+          >
+            {patients.length === 0 ? (
+              <option value="">No patients available</option>
+            ) : (
+              patients.map((p) => (
+                <option key={p._id || p.id} value={p._id || p.id}>
+                  {p.name || "Patient"} (ID: {(p._id || p.id).slice(-6)})
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
+        {activePatientObj && (
+          <div className="selected-patient-meta">
+            <span>
+              <strong>Age/Gender:</strong> {activePatientObj.age || "N/A"} • {activePatientObj.gender || "N/A"}
+            </span>
+            <span>
+              <strong>Blood Group:</strong> {activePatientObj.blood_group || "N/A"}
+            </span>
+            <span>
+              <strong>Contact:</strong> {activePatientObj.phone || activePatientObj.email || "N/A"}
+            </span>
+          </div>
+        )}
+      </section>
+
+      {/* SUMMARY STATS */}
       <section className="records-summary">
-
         <div className="record-summary-card">
           <div className="record-summary-icon blue">
             <FileText size={21} />
           </div>
-
           <div>
-            <span>Total Records</span>
-            <strong>248</strong>
-            <small>All patient records</small>
+            <span>Patient Records</span>
+            <strong>{records.length}</strong>
+            <small>Total charts logged</small>
           </div>
         </div>
 
         <div className="record-summary-card">
           <div className="record-summary-icon green">
-            <UserRound size={21} />
+            <Stethoscope size={21} />
           </div>
-
           <div>
-            <span>Patients</span>
-            <strong>86</strong>
-            <small>Active patients</small>
+            <span>Consultations</span>
+            <strong>
+              {records.filter((r) => (r.record_type || "").toLowerCase().includes("consult")).length}
+            </strong>
+            <small>Clinical sessions</small>
+          </div>
+        </div>
+
+        <div className="record-summary-card">
+          <div className="record-summary-icon purple">
+            <Pill size={21} />
+          </div>
+          <div>
+            <span>Prescriptions</span>
+            <strong>
+              {records.filter((r) => r.medications && r.medications.length > 0).length}
+            </strong>
+            <small>Active regimens</small>
           </div>
         </div>
 
         <div className="record-summary-card">
           <div className="record-summary-icon orange">
-            <CalendarDays size={21} />
-          </div>
-
-          <div>
-            <span>Today's Records</span>
-            <strong>18</strong>
-            <small>Updated today</small>
-          </div>
-        </div>
-
-        <div className="record-summary-card">
-          <div className="record-summary-icon red">
-            <AlertCircle size={21} />
-          </div>
-
-          <div>
-            <span>Follow-ups</span>
-            <strong>12</strong>
-            <small>Require attention</small>
-          </div>
-        </div>
-
-      </section>
-
-      {/* =========================
-          QUICK ACTIONS
-      ========================= */}
-
-      <section className="record-actions">
-
-        <button className="record-action active">
-          <FileText size={18} />
-          All Records
-        </button>
-
-        <button className="record-action">
-          <Activity size={18} />
-          Vitals
-        </button>
-
-        <button className="record-action">
-          <Pill size={18} />
-          Prescriptions
-        </button>
-
-        <button className="record-action">
-          <Stethoscope size={18} />
-          Consultations
-        </button>
-
-      </section>
-
-      {/* =========================
-          SEARCH BAR
-      ========================= */}
-
-      <section className="records-toolbar">
-
-        <div className="records-search">
-          <Search size={18} />
-
-          <input
-            type="text"
-            placeholder="Search patient, diagnosis or record..."
-          />
-        </div>
-
-        <select className="records-filter">
-          <option>All Records</option>
-          <option>Consultations</option>
-          <option>Prescriptions</option>
-          <option>Vitals</option>
-          <option>Follow-ups</option>
-        </select>
-
-        <select className="records-filter">
-          <option>All Dates</option>
-          <option>Today</option>
-          <option>This Week</option>
-          <option>This Month</option>
-        </select>
-
-      </section>
-
-      {/* =========================
-          RECORDS TABLE
-      ========================= */}
-
-      <section className="records-panel">
-
-        <div className="records-panel-header">
-          <div>
-            <h2>Medical Records</h2>
-
-            <p>
-              Recently updated patient records
-            </p>
-          </div>
-
-          <span className="record-count">
-            {records.length} shown
-          </span>
-        </div>
-
-        <div className="records-table-wrapper">
-
-          <table className="records-table">
-
-            <thead>
-              <tr>
-                <th>Patient</th>
-                <th>Date</th>
-                <th>Record Type</th>
-                <th>Diagnosis</th>
-                <th>Doctor</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {records.map((record) => (
-                <tr key={record.id}>
-
-                  {/* PATIENT */}
-
-                  <td>
-                    <div className="record-patient">
-
-                      <div className="record-avatar">
-                        {record.patient.charAt(0)}
-                      </div>
-
-                      <div>
-                        <strong>
-                          {record.patient}
-                        </strong>
-
-                        <span>
-                          Age {record.age}
-                        </span>
-                      </div>
-
-                    </div>
-                  </td>
-
-                  {/* DATE */}
-
-                  <td>
-                    <div className="record-date">
-                      <CalendarDays size={15} />
-                      {record.date}
-                    </div>
-                  </td>
-
-                  {/* TYPE */}
-
-                  <td>
-                    <span className="record-type">
-                      {record.type}
-                    </span>
-                  </td>
-
-                  {/* DIAGNOSIS */}
-
-                  <td>
-                    <strong className="diagnosis">
-                      {record.diagnosis}
-                    </strong>
-                  </td>
-
-                  {/* DOCTOR */}
-
-                  <td>
-                    <span className="doctor-name">
-                      {record.doctor}
-                    </span>
-                  </td>
-
-                  {/* STATUS */}
-
-                  <td>
-                    <span
-                      className={`record-status ${
-                        record.status === "Reviewed"
-                          ? "reviewed"
-                          : "follow-up"
-                      }`}
-                    >
-                      {record.status}
-                    </span>
-                  </td>
-
-                  {/* ACTIONS */}
-
-                  <td>
-
-                    <div className="record-actions-cell">
-
-                      <button
-                        className="icon-action"
-                        title="View record"
-                      >
-                        <Eye size={17} />
-                      </button>
-
-                      <button
-                        className="icon-action"
-                        title="Download record"
-                      >
-                        <Download size={17} />
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </section>
-
-      {/* =========================
-          HEALTH OVERVIEW
-      ========================= */}
-
-      <section className="health-overview">
-
-        <div className="overview-card">
-
-          <div className="overview-icon">
             <HeartPulse size={21} />
           </div>
-
           <div>
-            <h3>Health monitoring</h3>
-            <p>
-              Patient vitals and medical history are available
-              from the records section.
-            </p>
+            <span>Diagnoses</span>
+            <strong>
+              {records.filter((r) => r.diagnosis && r.diagnosis.trim()).length}
+            </strong>
+            <small>Documented findings</small>
           </div>
-
         </div>
-
-        <div className="overview-card">
-
-          <div className="overview-icon">
-            <FileText size={21} />
-          </div>
-
-          <div>
-            <h3>Complete medical history</h3>
-            <p>
-              Review previous consultations, diagnoses and
-              treatment information.
-            </p>
-          </div>
-
-        </div>
-
       </section>
 
+      {/* SEARCH & FILTERS */}
+      <section className="records-toolbar">
+        <div className="records-search">
+          <Search size={18} />
+          <input
+            type="text"
+            placeholder="Search diagnosis, clinical title, doctor..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button className="clear-search" onClick={() => setSearchQuery("")}>
+              ✕
+            </button>
+          )}
+        </div>
+
+        <div className="records-filter-chips">
+          <button
+            className={`filter-chip ${typeFilter === "all" ? "active" : ""}`}
+            onClick={() => setTypeFilter("all")}
+          >
+            All ({records.length})
+          </button>
+          <button
+            className={`filter-chip ${typeFilter === "consult" ? "active" : ""}`}
+            onClick={() => setTypeFilter("consult")}
+          >
+            Consultations
+          </button>
+          <button
+            className={`filter-chip ${typeFilter === "diagnosis" ? "active" : ""}`}
+            onClick={() => setTypeFilter("diagnosis")}
+          >
+            Diagnoses
+          </button>
+          <button
+            className={`filter-chip ${typeFilter === "prescription" ? "active" : ""}`}
+            onClick={() => setTypeFilter("prescription")}
+          >
+            Prescriptions
+          </button>
+          <button
+            className={`filter-chip ${typeFilter === "checkup" ? "active" : ""}`}
+            onClick={() => setTypeFilter("checkup")}
+          >
+            Checkups
+          </button>
+        </div>
+      </section>
+
+      {/* RECORDS TABLE & CARDS */}
+      <section className="records-panel">
+        <div className="records-panel-header">
+          <div>
+            <h2>Documented Medical Charts</h2>
+            <p>
+              {activePatientObj
+                ? `Showing medical records for ${activePatientObj.name}`
+                : "Select a patient to review medical chart"}
+            </p>
+          </div>
+          <span className="record-count">{filteredRecords.length} records</span>
+        </div>
+
+        {loading ? (
+          <div className="records-loading">
+            <Loader2 size={32} className="spinning" />
+            <span>Loading medical records...</span>
+          </div>
+        ) : (
+          <div className="records-table-wrapper">
+            <table className="records-table">
+              <thead>
+                <tr>
+                  <th>Title & Record Type</th>
+                  <th>Date</th>
+                  <th>Diagnosis</th>
+                  <th>Medications / Rx</th>
+                  <th>Attending Doctor</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredRecords.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="empty-records-cell">
+                      <FileText size={38} />
+                      <h3>No medical records found for this patient</h3>
+                      <p>
+                        Click "Create Health Record" to document a consultation note, diagnosis, or prescription.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredRecords.map((record, index) => {
+                    const recordDate =
+                      record.record_date ||
+                      (record.created_at ? record.created_at.split("T")[0] : "Recent");
+
+                    return (
+                      <tr key={record._id || record.id || index}>
+                        <td>
+                          <div className="record-title-cell">
+                            <strong>{record.title || record.diagnosis || "Medical Note"}</strong>
+                            <span className="record-type-badge">
+                              {record.record_type || "General"}
+                            </span>
+                          </div>
+                        </td>
+
+                        <td>
+                          <div className="record-date-cell">
+                            <CalendarDays size={14} />
+                            <span>{recordDate}</span>
+                          </div>
+                        </td>
+
+                        <td>
+                          <strong className="diagnosis-text">
+                            {record.diagnosis || "--"}
+                          </strong>
+                        </td>
+
+                        <td>
+                          <div className="meds-cell">
+                            {record.medications && record.medications.length > 0 ? (
+                              <span className="meds-tag">
+                                {record.medications.join(", ")}
+                              </span>
+                            ) : (
+                              <span className="no-meds">None prescribed</span>
+                            )}
+                          </div>
+                        </td>
+
+                        <td>
+                          <span className="doctor-name-text">
+                            {record.doctor_name || record.doctor || user?.name || "Dr. Arjun Mehta"}
+                          </span>
+                        </td>
+
+                        <td>
+                          <div className="record-actions-cell">
+                            <button
+                              className="icon-action-btn view"
+                              title="View full record"
+                              onClick={() => setViewingRecord(record)}
+                            >
+                              <Eye size={16} />
+                            </button>
+
+                            <button
+                              className="icon-action-btn delete"
+                              title="Delete record"
+                              onClick={() => handleDeleteRecord(record._id || record.id)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* ============================================================
+          VIEW RECORD MODAL
+      ============================================================ */}
+      {viewingRecord && (
+        <div className="modal-overlay" onClick={() => setViewingRecord(null)}>
+          <div className="modal-view-record" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <span className="record-kicker">CLINICAL HEALTH RECORD</span>
+                <h2>{viewingRecord.title || viewingRecord.diagnosis || "Medical Chart"}</h2>
+                <span className="record-meta-sub">
+                  Type: {viewingRecord.record_type || "General"} • Date:{" "}
+                  {viewingRecord.record_date || viewingRecord.created_at || "Recent"}
+                </span>
+              </div>
+              <button className="modal-close" onClick={() => setViewingRecord(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-view-body">
+              <div className="detail-section">
+                <label>Primary Diagnosis</label>
+                <div className="detail-value diagnosis-box">
+                  {viewingRecord.diagnosis || "No primary diagnosis entered"}
+                </div>
+              </div>
+
+              {viewingRecord.description && (
+                <div className="detail-section">
+                  <label>Clinical Notes & Observations</label>
+                  <div className="detail-value text-body">
+                    {viewingRecord.description}
+                  </div>
+                </div>
+              )}
+
+              {viewingRecord.treatment && (
+                <div className="detail-section">
+                  <label>Treatment Plan</label>
+                  <div className="detail-value text-body">
+                    {viewingRecord.treatment}
+                  </div>
+                </div>
+              )}
+
+              <div className="detail-section">
+                <label>Prescribed Medications</label>
+                <div className="detail-value">
+                  {viewingRecord.medications && viewingRecord.medications.length > 0 ? (
+                    <div className="meds-list-view">
+                      {viewingRecord.medications.map((med, i) => (
+                        <span key={i} className="med-pill-item">
+                          <Pill size={13} /> {med}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span>No medications prescribed for this chart.</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="detail-meta-grid">
+                <div>
+                  <label>Attending Doctor</label>
+                  <span>{viewingRecord.doctor_name || viewingRecord.doctor || "Dr. Arjun Mehta"}</span>
+                </div>
+                <div>
+                  <label>Facility</label>
+                  <span>{viewingRecord.hospital_name || "CareBridge Medical Center"}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="btn-modal-action delete-btn"
+                onClick={() => handleDeleteRecord(viewingRecord._id || viewingRecord.id)}
+              >
+                <Trash2 size={15} /> Delete Record
+              </button>
+
+              <button
+                className="btn-modal-action close-btn"
+                onClick={() => setViewingRecord(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================
+          CREATE RECORD MODAL
+      ============================================================ */}
+      {isCreatingModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsCreatingModalOpen(false)}>
+          <div className="modal-create-record" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <span className="record-kicker">NEW CLINICAL DOCUMENT</span>
+                <h2>Create Patient Health Record</h2>
+              </div>
+              <button
+                className="modal-close"
+                onClick={() => setIsCreatingModalOpen(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateRecord} className="create-record-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="form-patient">Patient *</label>
+                  <select
+                    id="form-patient"
+                    value={formData.patient_id}
+                    onChange={(e) =>
+                      setFormData({ ...formData, patient_id: e.target.value })
+                    }
+                    required
+                  >
+                    <option value="">-- Select Patient --</option>
+                    {patients.map((p) => (
+                      <option key={p._id || p.id} value={p._id || p.id}>
+                        {p.name || "Patient"} (ID: {(p._id || p.id).slice(-6)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="form-type">Record Type *</label>
+                  <select
+                    id="form-type"
+                    value={formData.record_type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, record_type: e.target.value })
+                    }
+                    required
+                  >
+                    <option value="Consultation">Consultation</option>
+                    <option value="Diagnosis">Diagnosis Note</option>
+                    <option value="Prescription">Prescription</option>
+                    <option value="Checkup">Routine Checkup</option>
+                    <option value="Lab Report">Lab Report</option>
+                    <option value="Follow-up">Follow-up</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group full-width">
+                  <label htmlFor="form-title">Record Title *</label>
+                  <input
+                    id="form-title"
+                    type="text"
+                    placeholder="e.g., Acute Hypertension Consultation & Regimen Optimization"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group full-width">
+                  <label htmlFor="form-diagnosis">Clinical Diagnosis</label>
+                  <input
+                    id="form-diagnosis"
+                    type="text"
+                    placeholder="e.g., Primary Essential Hypertension (ICD-10 I10)"
+                    value={formData.diagnosis}
+                    onChange={(e) =>
+                      setFormData({ ...formData, diagnosis: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group full-width">
+                  <label htmlFor="form-meds">
+                    Prescribed Medications (Comma-separated)
+                  </label>
+                  <input
+                    id="form-meds"
+                    type="text"
+                    placeholder="e.g., Amlodipine 5mg OD, Telmisartan 40mg OD, Aspirin 75mg"
+                    value={formData.medications}
+                    onChange={(e) =>
+                      setFormData({ ...formData, medications: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group full-width">
+                  <label htmlFor="form-desc">
+                    Clinical Notes, Observations & Plan
+                  </label>
+                  <textarea
+                    id="form-desc"
+                    rows={4}
+                    placeholder="Document subjective symptoms, physical findings, and recommended care plan..."
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="form-doctor">Attending Doctor Name</label>
+                  <input
+                    id="form-doctor"
+                    type="text"
+                    value={formData.doctor_name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, doctor_name: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="form-date">Record Date</label>
+                  <input
+                    id="form-date"
+                    type="date"
+                    value={formData.record_date}
+                    onChange={(e) =>
+                      setFormData({ ...formData, record_date: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn-modal-cancel"
+                  onClick={() => setIsCreatingModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-modal-save"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Saving Record..." : "Save Record"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,8 @@
+in main name the CareBridge AI donot need to change main websites name inside the  CareBridge AI one of the menu dashboard like doctor so no need add it main websits 
+
+- while change the dr name and details it not showing save button, and coming to ai assistant it is not giving relevant information my websites for patience , doctor, staff and all over the world people can ask so many questions as they require as health related 
+
+-setting is not all good verfify it overall , layout is not good and missing required  change color to white and light and dark mode should work
+- add the patient vitals signup so inside the doctor board sign will happen
+so dr can check my every details 
+-

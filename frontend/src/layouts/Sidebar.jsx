@@ -14,7 +14,9 @@ import {
   X,
   Activity,
   ClipboardCheck,
-  FileText
+  FileText,
+  LineChart,
+  Users,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -81,8 +83,8 @@ function Sidebar({ open, isOpen, onClose }) {
     },
     {
       label: "Patient Monitoring",
-      path: "/doctor/vitals",
-      icon: Activity,
+      path: "/doctor/patient-monitoring",
+      icon: Users,
     },
     {
       label: "Appointments",
@@ -98,6 +100,16 @@ function Sidebar({ open, isOpen, onClose }) {
       label: "Health Records",
       path: "/doctor/records",
       icon: FileText,
+    },
+    {
+      label: "Health Monitoring",
+      path: "/doctor/health-monitoring",
+      icon: LineChart,
+    },
+    {
+      label: "Vitals",
+      path: "/doctor/vitals",
+      icon: HeartPulse,
     },
     {
       label: "AI Assistant",
@@ -176,7 +188,10 @@ function Sidebar({ open, isOpen, onClose }) {
         }`}
       >
         <div className="sidebar-mobile-header">
-          <strong>CareBridge AI</strong>
+          <div className="sidebar-brand-mini">
+            <span className="brand-badge-dot"></span>
+            <strong>CareBridge AI</strong>
+          </div>
           <button
             onClick={onClose}
             aria-label="Close navigation"
@@ -186,7 +201,7 @@ function Sidebar({ open, isOpen, onClose }) {
         </div>
 
         <div className="sidebar-section-title">
-          {currentRole.toUpperCase()} MENU
+          {currentRole ? `${currentRole.toUpperCase()} MENU` : "PORTAL MENU"}
         </div>
 
         <nav className="sidebar-nav">
@@ -214,7 +229,9 @@ function Sidebar({ open, isOpen, onClose }) {
         <div className="sidebar-bottom">
           <NavLink
             to="/profile"
-            className="sidebar-link"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
             onClick={onClose}
           >
             <UserCircle size={19} />
@@ -223,7 +240,9 @@ function Sidebar({ open, isOpen, onClose }) {
 
           <NavLink
             to="/settings"
-            className="sidebar-link"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
             onClick={onClose}
           >
             <Settings size={19} />

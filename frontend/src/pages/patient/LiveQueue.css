@@ -1,95 +1,98 @@
 /* =========================================================
-   CAREBRIDGE AI
-   LIVE QUEUE
+   CAREBRIDGE AI - PATIENT LIVE QUEUE
+   Dark Navy / Cyan Palette
 ========================================================= */
 
 .queue-page {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 32px;
-  color: #172033;
+  min-height: 100%;
+  padding: 30px;
+  box-sizing: border-box;
+  color: #f1f5f9;
 }
-
 
 /* =========================================================
    HEADER
 ========================================================= */
-
 .queue-header {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .queue-kicker {
   display: inline-block;
   margin-bottom: 8px;
-  color: #2563eb;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 1.4px;
+  color: #38bdf8;
+  text-transform: uppercase;
 }
 
 .queue-header h1 {
   margin: 0;
-  font-size: clamp(28px, 4vw, 38px);
-  line-height: 1.15;
+  font-size: clamp(26px, 3vw, 34px);
   font-weight: 800;
-  letter-spacing: -0.03em;
+  color: #ffffff;
 }
 
 .queue-header p {
-  margin: 9px 0 0;
-  color: #64748b;
-  font-size: 15px;
+  max-width: 680px;
+  margin: 8px 0 0;
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .queue-refresh-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  min-height: 42px;
-  padding: 0 16px;
-  border: 1px solid #dbe2ea;
+  padding: 10px 18px;
+  background: #111e38;
+  border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 10px;
-  background: #ffffff;
-  color: #475569;
-  font-family: inherit;
+  color: #cbd5e1;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-.queue-refresh-btn:hover {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #2563eb;
+.queue-refresh-btn:hover:not(:disabled) {
+  border-color: #38bdf8;
+  color: #38bdf8;
 }
 
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* =========================================================
-   LIVE BANNER
+   STATUS BANNER
 ========================================================= */
-
 .queue-live-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 24px;
-  padding: 15px 18px;
-  border: 1px solid #bfdbfe;
+  padding: 14px 20px;
+  background: #0b1528;
+  border: 1px solid rgba(16, 185, 129, 0.25);
   border-radius: 14px;
-  background: linear-gradient(
-    90deg,
-    #eff6ff,
-    #f8fbff
-  );
+  margin-bottom: 24px;
 }
 
 .queue-live-left {
@@ -98,332 +101,348 @@
   gap: 12px;
 }
 
-.queue-live-left strong {
-  display: block;
-  color: #1e3a8a;
-  font-size: 13px;
-}
-
-.queue-live-left span {
-  display: block;
-  margin-top: 2px;
-  color: #64748b;
-  font-size: 11px;
-}
-
 .live-pulse {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #dbeafe;
+  position: relative;
+  width: 12px;
+  height: 12px;
 }
 
 .live-pulse span {
-  width: 10px;
-  height: 10px;
-  margin: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  background: #2563eb;
-  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.12);
+  background: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
+  animation: pulseAnim 2s infinite;
+}
+
+@keyframes pulseAnim {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.queue-live-left strong {
+  display: block;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.queue-live-left span {
+  font-size: 11px;
+  color: #94a3b8;
 }
 
 .queue-live-status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 10px;
-  border-radius: 999px;
-  background: #ecfdf5;
-  color: #047857;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 700;
+  color: #34d399;
 }
-
 
 /* =========================================================
    MAIN GRID
 ========================================================= */
-
 .queue-main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
-  gap: 20px;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 22px;
+  margin-bottom: 24px;
 }
 
-
-/* =========================================================
-   COMMON CARDS
-========================================================= */
-
-.queue-position-card,
-.token-card,
-.queue-visual-card,
-.queue-info-card,
-.queue-summary-card {
-  border: 1px solid #e1e7ef;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
-}
-
-
-/* =========================================================
-   POSITION CARD
-========================================================= */
-
+/* Position Card */
 .queue-position-card {
-  padding: 26px;
+  background: #111e38;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .position-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .small-label {
-  display: block;
-  margin-bottom: 6px;
-  color: #2563eb;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  color: #38bdf8;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .position-top h2 {
-  margin: 0;
-  font-size: 22px;
-  letter-spacing: -0.02em;
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
 }
 
 .position-icon {
-  width: 43px;
-  height: 43px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  display: grid;
+  place-items: center;
 }
 
-
-/* =========================================================
-   QUEUE NUMBER
-========================================================= */
-
 .queue-number-area {
-  margin-top: 26px;
-  text-align: center;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .queue-number {
-  color: #1d4ed8;
-  font-size: clamp(68px, 10vw, 96px);
-  line-height: 1;
+  font-size: clamp(54px, 6vw, 76px);
   font-weight: 900;
-  letter-spacing: -0.07em;
+  line-height: 1;
+  color: #38bdf8;
+  font-family: monospace;
 }
 
-.queue-number-label {
-  margin-top: 7px;
-  color: #64748b;
+.queue-number-label span {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.queue-number-label small {
+  display: block;
   font-size: 12px;
-  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 2px;
 }
 
-
-/* =========================================================
-   PROGRESS
-========================================================= */
-
+/* Progress */
 .queue-progress {
-  margin-top: 28px;
+  margin-bottom: 20px;
 }
 
 .queue-progress-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 9px;
-  color: #64748b;
   font-size: 12px;
-}
-
-.queue-progress-header strong {
-  color: #2563eb;
+  color: #cbd5e1;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
 .queue-progress-track {
   width: 100%;
-  height: 9px;
+  height: 10px;
+  background: #0b1528;
+  border-radius: 999px;
   overflow: hidden;
-  border-radius: 99px;
-  background: #e8eef5;
+  border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .queue-progress-fill {
   height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    #2563eb,
-    #4f46e5
-  );
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+  border-radius: 999px;
+  transition: width 0.5s ease;
 }
 
 .queue-progress-meta {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
+  font-size: 11px;
   color: #94a3b8;
-  font-size: 10px;
+  margin-top: 6px;
 }
-
-
-/* =========================================================
-   ESTIMATE
-========================================================= */
 
 .queue-estimate {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 23px;
-  padding: 14px;
-  border-radius: 13px;
-  background: #f8fafc;
+  gap: 14px;
+  padding: 14px 18px;
+  background: #0b1528;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 .estimate-icon {
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #2563eb;
+  color: #f59e0b;
 }
 
 .queue-estimate span {
   display: block;
-  color: #64748b;
   font-size: 11px;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .queue-estimate strong {
   display: block;
-  margin-top: 3px;
-  color: #1e293b;
-  font-size: 17px;
+  font-size: 15px;
+  color: #f1f5f9;
 }
 
-
-/* =========================================================
-   TOKEN CARD
-========================================================= */
-
+/* Token Card */
 .token-card {
-  padding: 25px;
+  background: #111e38;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .token-card-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 15px;
 }
 
-.token-card h2 {
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: -0.03em;
+.token-card-top h2 {
+  margin: 4px 0 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: #ffffff;
+  font-family: monospace;
 }
 
-.token-status {
-  padding: 7px 10px;
-  border-radius: 999px;
-  background: #fff7ed;
-  color: #c2410c;
+.token-status-tag {
+  padding: 6px 12px;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 800;
+  text-transform: uppercase;
+}
+
+.token-status-tag.waiting {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.token-status-tag.in_consultation,
+.token-status-tag.called {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
 }
 
 .token-divider {
   height: 1px;
-  margin: 22px 0;
-  background: #edf1f5;
+  background: rgba(148, 163, 184, 0.1);
+  margin: 18px 0;
 }
 
 .token-info {
-  display: grid;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .token-info-row {
   display: flex;
-  align-items: flex-start;
-  gap: 11px;
-  color: #2563eb;
+  align-items: center;
+  gap: 12px;
 }
 
-.token-info-row > div {
-  min-width: 0;
+.token-info-row svg {
+  color: #38bdf8;
+  flex-shrink: 0;
 }
 
 .token-info-row span {
   display: block;
-  color: #94a3b8;
   font-size: 10px;
   font-weight: 700;
+  color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .token-info-row strong {
   display: block;
-  margin-top: 3px;
-  color: #334155;
   font-size: 13px;
+  color: #f1f5f9;
+  margin-top: 1px;
 }
 
+.token-pass-action {
+  margin-top: 20px;
+}
+
+.token-pass-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 12px;
+  color: #38bdf8;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.token-pass-btn:hover {
+  background: rgba(56, 189, 248, 0.2);
+}
 
 /* =========================================================
    QUEUE VISUALIZATION
 ========================================================= */
-
 .queue-visual-card {
-  margin-top: 20px;
-  padding: 26px;
+  background: #111e38;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  margin-bottom: 24px;
 }
 
 .section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
+  margin-bottom: 24px;
 }
 
 .section-heading h2 {
-  margin: 0;
-  font-size: 19px;
+  margin: 4px 0 0;
+  font-size: 18px;
+  color: #ffffff;
 }
 
 .live-tag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 9px;
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 999px;
-  background: #ecfdf5;
-  color: #047857;
-  font-size: 10px;
+  color: #34d399;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -434,286 +453,244 @@
   background: #10b981;
 }
 
-
-/* =========================================================
-   QUEUE TRACK
-========================================================= */
-
+/* Queue Track Steps */
 .queue-track {
-  position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin-top: 35px;
-}
-
-.queue-track-line {
-  position: absolute;
-  top: 15px;
-  left: 9%;
-  right: 9%;
-  height: 3px;
-  border-radius: 10px;
-  background: #e2e8f0;
-}
-
-.queue-track-progress {
-  width: 27%;
-  height: 100%;
-  border-radius: inherit;
-  background: #2563eb;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
 .queue-step {
-  position: relative;
-  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  padding: 16px 12px;
+  background: #0b1528;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 14px;
+  position: relative;
 }
 
 .queue-step-circle {
-  width: 31px;
-  height: 31px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 10px;
-  border: 2px solid #dbe2ea;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #ffffff;
-  color: #94a3b8;
-  font-size: 10px;
+  background: #111e38;
+  border: 2px solid #334155;
+  color: #cbd5e1;
+  font-size: 12px;
   font-weight: 800;
-}
-
-.queue-step.completed .queue-step-circle {
-  border-color: #22c55e;
-  background: #22c55e;
-  color: #ffffff;
-}
-
-.queue-step.current .queue-step-circle {
-  border-color: #2563eb;
-  background: #eff6ff;
-  color: #2563eb;
-  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.08);
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
 }
 
 .queue-step strong {
   display: block;
-  color: #334155;
   font-size: 12px;
+  color: #ffffff;
+  margin-bottom: 2px;
 }
 
 .queue-step span {
-  display: block;
-  margin-top: 3px;
+  font-size: 11px;
   color: #94a3b8;
-  font-size: 10px;
 }
 
-.queue-step.current strong {
-  color: #2563eb;
+.queue-step.completed .queue-step-circle {
+  border-color: #10b981;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
 }
 
+.queue-step.current {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.queue-step.current .queue-step-circle {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.queue-step.your-group {
+  border-color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+}
+
+.queue-step.your-group .queue-step-circle {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+}
 
 /* =========================================================
    BOTTOM GRID
 ========================================================= */
-
 .queue-bottom-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr;
   gap: 20px;
-  margin-top: 20px;
 }
 
 .queue-info-card {
   display: flex;
   align-items: flex-start;
-  gap: 13px;
-  padding: 21px;
-  background: linear-gradient(
-    135deg,
-    #eff6ff,
-    #f8fbff
-  );
+  gap: 16px;
+  padding: 20px;
+  background: #111e38;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
 }
 
 .info-card-icon {
-  width: 39px;
-  height: 39px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
-  border-radius: 11px;
-  background: #ffffff;
-  color: #2563eb;
 }
 
 .queue-info-card h3 {
-  margin: 1px 0 5px;
-  font-size: 14px;
+  margin: 0;
+  font-size: 15px;
+  color: #ffffff;
 }
 
 .queue-info-card p {
-  margin: 0;
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.6;
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.5;
 }
-
-
-/* =========================================================
-   SUMMARY
-========================================================= */
 
 .queue-summary-card {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  padding: 21px;
-}
-
-.queue-summary-card > div {
-  padding: 0 16px;
-  border-right: 1px solid #edf1f5;
-}
-
-.queue-summary-card > div:first-child {
-  padding-left: 0;
-}
-
-.queue-summary-card > div:last-child {
-  padding-right: 0;
-  border-right: 0;
+  gap: 12px;
+  padding: 20px;
+  background: #111e38;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  text-align: center;
 }
 
 .queue-summary-card span {
   display: block;
-  color: #94a3b8;
   font-size: 10px;
-  line-height: 1.4;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
 }
 
 .queue-summary-card strong {
   display: block;
-  margin-top: 7px;
-  color: #334155;
-  font-size: 17px;
+  font-size: 15px;
+  color: #ffffff;
+  margin-top: 4px;
 }
 
+/* =========================================================
+   EMPTY & LOADING STATES
+========================================================= */
+.queue-loading,
+.queue-empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  background: #111e38;
+  border-radius: 20px;
+  color: #94a3b8;
+}
+
+.queue-empty-state svg {
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
+.queue-empty-state h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.queue-empty-state p {
+  margin: 8px auto 20px;
+  font-size: 13px;
+  max-width: 440px;
+}
+
+.queue-empty-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.queue-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #0284c7;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.queue-outline-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 10px;
+  color: #38bdf8;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
 
 /* =========================================================
-   TABLET
+   RESPONSIVE
 ========================================================= */
-
-@media (max-width: 1000px) {
-
+@media (max-width: 900px) {
   .queue-page {
-    padding: 24px;
+    padding: 20px 16px;
   }
-
   .queue-main-grid {
     grid-template-columns: 1fr;
   }
-
   .queue-bottom-grid {
     grid-template-columns: 1fr;
   }
-
+  .queue-track {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
 @media (max-width: 640px) {
-
-  .queue-page {
-    padding: 18px 14px 28px;
-  }
-
   .queue-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .queue-header h1 {
-    font-size: 28px;
-  }
-
-  .queue-header p {
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .queue-refresh-btn {
-    width: 100%;
-  }
-
-  .queue-live-banner {
-    align-items: flex-start;
     flex-direction: column;
     gap: 12px;
   }
-
-  .queue-live-status {
-    align-self: flex-start;
+  .queue-live-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
-
-  .queue-position-card,
-  .token-card,
-  .queue-visual-card {
-    padding: 19px;
-    border-radius: 17px;
-  }
-
-  .queue-number {
-    font-size: 72px;
-  }
-
   .queue-track {
-    overflow-x: auto;
-    grid-template-columns: repeat(5, 105px);
-    padding-bottom: 8px;
-  }
-
-  .queue-track-line {
-    left: 45px;
-    right: 45px;
-    width: 435px;
-  }
-
-  .queue-bottom-grid {
     grid-template-columns: 1fr;
   }
-
   .queue-summary-card {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 14px;
   }
-
-  .queue-summary-card > div {
-    padding: 0 0 15px;
-    border-right: 0;
-    border-bottom: 1px solid #edf1f5;
-  }
-
-  .queue-summary-card > div:last-child {
-    padding-bottom: 0;
-    border-bottom: 0;
-  }
-
-}
-
-
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
-
-.queue-refresh-btn:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.25);
-  outline-offset: 2px;
 }
