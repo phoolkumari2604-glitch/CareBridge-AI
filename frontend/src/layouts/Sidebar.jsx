@@ -117,6 +117,11 @@ function Sidebar({ open, isOpen, onClose }) {
       icon: Bot,
     },
     {
+      label: "Hospitals",
+      path: "/doctor/hospitals",
+      icon: Hospital,
+    },
+    {
       label: "Notifications",
       path: "/doctor/notifications",
       icon: Bell,

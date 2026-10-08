@@ -18,10 +18,12 @@ def create_indexes():
     )
 
     # Hospitals
-    db.hospitals.create_index(
-        "city",
-        name="hospitals_city",
-    )
+    db.hospitals.create_index("city", name="hospitals_city")
+    db.hospitals.create_index("name", name="hospitals_name")
+    db.hospitals.create_index("state", name="hospitals_state")
+    db.hospitals.create_index("country", name="hospitals_country")
+    db.hospitals.create_index("facility_type", name="hospitals_facility_type")
+    db.hospitals.create_index("data_source", name="hospitals_data_source")
 
     # Doctors
     db.doctors.create_index(

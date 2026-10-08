@@ -85,9 +85,10 @@ def test_flask_e2e(client):
     print("\n--- 4. Testing Hospital & Leafmap Endpoints ---")
     hosp_res = client.get("/api/hospitals/", headers=headers)
     assert hosp_res.status_code == 200
-    hospitals = hosp_res.get_json()
+    hosp_data = hosp_res.get_json()
+    hospitals = hosp_data.get("hospitals") if isinstance(hosp_data, dict) else hosp_data
     assert len(hospitals) > 0
-    hospital_id = str(hospitals[0]["_id"])
+    hospital_id = str(hospitals[0].get("id") or hospitals[0].get("_id"))
     print(f"Fetched {len(hospitals)} registered hospitals")
 
     # Leafmap map generation

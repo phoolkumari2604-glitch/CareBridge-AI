@@ -14,6 +14,7 @@ import Unauthorized from "./pages/shared/Unauthorized";
 import NotFound from "./pages/shared/NotFound";
 import Profile from "./pages/shared/Profile";
 import Settings from "./pages/shared/Settings";
+import HospitalDashboard from "./pages/shared/HospitalDashboard";
 
 // ==================================================
 // AUTH / LAYOUT
@@ -25,7 +26,6 @@ import AppLayout from "./layouts/DashboardLayout";
 // PATIENT PAGES
 // ==================================================
 import PatientDashboard from "./pages/patient/PatientDashboard";
-import Hospitals from "./pages/patient/Hospitals";
 import Doctors from "./pages/patient/Doctors";
 import Appointments from "./pages/patient/Appointments";
 import Approval from "./pages/patient/Approval";
@@ -57,272 +57,86 @@ import StaffAppointments from "./pages/staff/Appointments";
 import StaffQueue from "./pages/staff/Queue";
 import StaffApprovals from "./pages/staff/Approvals";
 import StaffDoctors from "./pages/staff/Doctors";
-import StaffHospitals from "./pages/staff/Hospitals";
 import StaffNotifications from "./pages/staff/Notifications";
 import AuditSecurity from "./pages/staff/AuditSecurity";
 
 function App() {
   return (
     <Routes>
-
       {/* ==================================================
           PUBLIC ROUTES
       ================================================== */}
-
-      <Route
-        path="/"
-        element={<Landing />}
-      />
-
-      <Route
-        path="/login"
-        element={<Login />}
-      />
-
-      <Route
-        path="/register"
-        element={<Register />}
-      />
-
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       {/* ==================================================
           SHARED ROUTES
       ================================================== */}
-
-      <Route
-        path="/unauthorized"
-        element={<Unauthorized />}
-      />
-
+      <Route path="/unauthorized" element={<Unauthorized />} />
 
       {/* ==================================================
           PROTECTED APPLICATION
       ================================================== */}
-
       <Route element={<ProtectedRoute />}>
-
         <Route element={<AppLayout />}>
-
           {/* ==================================================
               SHARED PAGES
           ================================================== */}
-
-          {/* Profile */}
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
-
-          {/* Settings */}
-          <Route
-            path="/settings"
-            element={<Settings />}
-          />
-
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/hospitals" element={<HospitalDashboard />} />
+          <Route path="/hospital-dashboard" element={<HospitalDashboard />} />
 
           {/* ==================================================
               PATIENT MODULE
           ================================================== */}
-
-          {/* Patient Dashboard */}
-          <Route
-            path="/patient/dashboard"
-            element={<PatientDashboard />}
-          />
-
-          {/* Hospitals */}
-          <Route
-            path="/patient/hospitals"
-            element={<Hospitals />}
-          />
-
-          {/* Doctors */}
-          <Route
-            path="/patient/doctors"
-            element={<Doctors />}
-          />
-
-          {/* Appointments */}
-          <Route
-            path="/patient/appointments"
-            element={<Appointments />}
-          />
-
-          {/* Approval */}
-          <Route
-            path="/patient/approval"
-            element={<Approval />}
-          />
-
-          {/* Digital OPD Pass */}
-          <Route
-            path="/patient/opd-pass"
-            element={<DigitalOPDPass />}
-          />
-
-          {/* Live Queue */}
-          <Route
-            path="/patient/queue"
-            element={<LiveQueue />}
-          />
-
-          {/* Health */}
-          <Route
-            path="/patient/health"
-            element={<Health />}
-          />
-
-          {/* AI Assistant */}
-          <Route
-            path="/patient/ai-assistant"
-            element={<AIAssistant />}
-          />
-
-          {/* Notifications */}
-          <Route
-            path="/patient/notifications"
-            element={<Notifications />}
-          />
-
+          <Route path="/patient/dashboard" element={<PatientDashboard />} />
+          <Route path="/patient/hospitals" element={<HospitalDashboard />} />
+          <Route path="/patient/doctors" element={<Doctors />} />
+          <Route path="/patient/appointments" element={<Appointments />} />
+          <Route path="/patient/approval" element={<Approval />} />
+          <Route path="/patient/opd-pass" element={<DigitalOPDPass />} />
+          <Route path="/patient/queue" element={<LiveQueue />} />
+          <Route path="/patient/health" element={<Health />} />
+          <Route path="/patient/ai-assistant" element={<AIAssistant />} />
+          <Route path="/patient/notifications" element={<Notifications />} />
 
           {/* ==================================================
-              DOCTOR MODULE (12 REQUIRED FEATURES)
+              DOCTOR MODULE
           ================================================== */}
-
-          {/* 1. Dashboard */}
-          <Route
-            path="/doctor/dashboard"
-            element={<DoctorDashboard />}
-          />
-
-          {/* 2. Patient Monitoring */}
-          <Route
-            path="/doctor/patient-monitoring"
-            element={<PatientMonitoring />}
-          />
-          <Route
-            path="/doctor/patients"
-            element={<PatientMonitoring />}
-          />
-
-          {/* 3. Appointments */}
-          <Route
-            path="/doctor/appointments"
-            element={<DoctorAppointments />}
-          />
-
-          {/* 4. Approvals */}
-          <Route
-            path="/doctor/approvals"
-            element={<DoctorApprovals />}
-          />
-
-          {/* 5. Health Records */}
-          <Route
-            path="/doctor/records"
-            element={<DoctorHealthRecords />}
-          />
-          <Route
-            path="/doctor/health-records"
-            element={<DoctorHealthRecords />}
-          />
-
-          {/* 6. Health Monitoring */}
-          <Route
-            path="/doctor/health-monitoring"
-            element={<HealthMonitoring />}
-          />
-
-          {/* 7. Vitals */}
-          <Route
-            path="/doctor/vitals"
-            element={<DoctorVitals />}
-          />
-
-          {/* 8. AI Assistant */}
-          <Route
-            path="/doctor/ai-assistant"
-            element={<DoctorAIAssistant />}
-          />
-
-          {/* 9. Notifications */}
-          <Route
-            path="/doctor/notifications"
-            element={<DoctorNotifications />}
-          />
-
+          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+          <Route path="/doctor/hospitals" element={<HospitalDashboard />} />
+          <Route path="/doctor/patient-monitoring" element={<PatientMonitoring />} />
+          <Route path="/doctor/patients" element={<PatientMonitoring />} />
+          <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+          <Route path="/doctor/approvals" element={<DoctorApprovals />} />
+          <Route path="/doctor/records" element={<DoctorHealthRecords />} />
+          <Route path="/doctor/health-records" element={<DoctorHealthRecords />} />
+          <Route path="/doctor/health-monitoring" element={<HealthMonitoring />} />
+          <Route path="/doctor/vitals" element={<DoctorVitals />} />
+          <Route path="/doctor/ai-assistant" element={<DoctorAIAssistant />} />
+          <Route path="/doctor/notifications" element={<DoctorNotifications />} />
 
           {/* ==================================================
               STAFF / ADMIN MODULE
           ================================================== */}
-
-          {/* Staff Dashboard */}
-          <Route
-            path="/staff/dashboard"
-            element={<StaffDashboard />}
-          />
-
-          {/* Staff Patients */}
-          <Route
-            path="/staff/patients"
-            element={<StaffPatients />}
-          />
-
-          {/* Staff Appointments */}
-          <Route
-            path="/staff/appointments"
-            element={<StaffAppointments />}
-          />
-
-          {/* Staff Queue */}
-          <Route
-            path="/staff/queue"
-            element={<StaffQueue />}
-          />
-
-          {/* Staff Approvals */}
-          <Route
-            path="/staff/approvals"
-            element={<StaffApprovals />}
-          />
-
-          {/* Staff Doctors */}
-          <Route
-            path="/staff/doctors"
-            element={<StaffDoctors />}
-          />
-
-          {/* Staff Hospitals */}
-          <Route
-            path="/staff/hospitals"
-            element={<StaffHospitals />}
-          />
-
-          {/* Staff Notifications */}
-          <Route
-            path="/staff/notifications"
-            element={<StaffNotifications />}
-          />
-
-          {/* Audit / Security */}
-          <Route
-            path="/staff/audit"
-            element={<AuditSecurity />}
-          />
-
+          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+          <Route path="/staff/patients" element={<StaffPatients />} />
+          <Route path="/staff/appointments" element={<StaffAppointments />} />
+          <Route path="/staff/queue" element={<StaffQueue />} />
+          <Route path="/staff/approvals" element={<StaffApprovals />} />
+          <Route path="/staff/doctors" element={<StaffDoctors />} />
+          <Route path="/staff/hospitals" element={<HospitalDashboard />} />
+          <Route path="/staff/notifications" element={<StaffNotifications />} />
+          <Route path="/staff/audit" element={<AuditSecurity />} />
         </Route>
       </Route>
-
 
       {/* ==================================================
           404 FALLBACK
       ================================================== */}
-
-      <Route
-        path="*"
-        element={<NotFound />}
-      />
-
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
