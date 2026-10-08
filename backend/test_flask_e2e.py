@@ -165,8 +165,8 @@ def test_flask_e2e(client):
         "record_type": "Diagnostic Lab Report",
         "title": "Comprehensive Blood Profile",
         "diagnosis": "Normal lipid profile",
-        "doctor_name": "Dr. Sarah Jenkins",
-        "hospital_name": "CareBridge Memorial Hospital"
+        "doctor_name": "Dr. Naresh Trehan",
+        "hospital_name": "Medanta, Gurugram"
     }
     rec_res = client.post("/api/health-records/", json=rec_payload, headers=headers)
     assert rec_res.status_code == 201

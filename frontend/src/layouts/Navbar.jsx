@@ -185,7 +185,7 @@ function Navbar({ onMenuClick }) {
 
           <div className="navbar-user-info">
             <strong>
-              {user?.name || (isDoctor ? "Dr. Arjun Mehta" : "User")}
+              {user?.name || (isDoctor ? "Doctor" : "User")}
             </strong>
 
             <span className="user-role-tag">

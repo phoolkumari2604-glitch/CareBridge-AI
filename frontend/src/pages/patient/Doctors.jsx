@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -13,6 +13,12 @@ import {
   CheckCircle2,
   Calendar,
   ShieldCheck,
+  Globe,
+  ExternalLink,
+  BookOpen,
+  Award,
+  AlertTriangle,
+  History,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
@@ -30,8 +36,10 @@ function Doctors() {
   // Search and Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
-  const [selectedHospital, setSelectedHospital] = useState("");
-  const [sortBy, setSortBy] = useState("recommended");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedVerification, setSelectedVerification] = useState("");
+  const [sortBy, setSortBy] = useState("name");
 
   // Modals
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -72,59 +80,107 @@ function Doctors() {
     fetchDoctorsAndHospitals();
   }, [fetchDoctorsAndHospitals]);
 
-  // Map hospital ID to Hospital name
-  const getHospitalName = (hospitalId) => {
-    if (!hospitalId) return "CareBridge Medical Network";
-    const found = hospitals.find((h) => h._id === hospitalId || h.id === hospitalId);
-    return found ? found.name : "CareBridge Hospital";
+  // Map hospital name or fallback to doctor field
+  const getDoctorHospital = (doc) => {
+    if (doc.hospital_name) return doc.hospital_name;
+    if (doc.hospital) return doc.hospital;
+    if (doc.hospital_id) {
+      const found = hospitals.find((h) => h._id === doc.hospital_id || h.id === doc.hospital_id);
+      if (found) return found.name;
+    }
+    return "Not available";
   };
 
-  const getHospitalLocation = (hospitalId) => {
-    if (!hospitalId) return "Main Campus";
-    const found = hospitals.find((h) => h._id === hospitalId || h.id === hospitalId);
-    return found ? found.city || found.address || "City Center" : "City Center";
+  const getDoctorLocation = (doc) => {
+    const parts = [];
+    if (doc.city) parts.push(doc.city);
+    if (doc.country) parts.push(doc.country);
+    return parts.length > 0 ? parts.join(", ") : "Not available";
   };
 
-  // Distinct specialties list
-  const specialties = Array.from(
-    new Set(doctors.map((d) => d.specialization || d.specialty).filter(Boolean))
-  );
+  // Distinct lists for filters
+  const specialties = useMemo(() => {
+    return Array.from(
+      new Set(doctors.map((d) => d.specialty || d.specialization).filter(Boolean))
+    ).sort();
+  }, [doctors]);
+
+  const categories = useMemo(() => {
+    return Array.from(new Set(doctors.map((d) => d.category).filter(Boolean))).sort();
+  }, [doctors]);
+
+  const countries = useMemo(() => {
+    return Array.from(new Set(doctors.map((d) => d.country).filter(Boolean))).sort();
+  }, [doctors]);
 
   // Filter & search logic
-  const filteredDoctors = doctors.filter((doc) => {
-    const name = (doc.name || "").toLowerCase();
-    const spec = (doc.specialization || doc.specialty || "").toLowerCase();
-    const hosp = getHospitalName(doc.hospital_id).toLowerCase();
-    const q = searchQuery.toLowerCase();
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter((doc) => {
+      const name = (doc.name || "").toLowerCase();
+      const spec = (doc.specialty || doc.specialization || "").toLowerCase();
+      const hosp = (doc.hospital_name || doc.hospital || "").toLowerCase();
+      const city = (doc.city || "").toLowerCase();
+      const country = (doc.country || "").toLowerCase();
+      const cat = (doc.category || "").toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
 
-    const matchesSearch = !q || name.includes(q) || spec.includes(q) || hosp.includes(q);
-    const matchesSpec = !selectedSpecialty || (doc.specialization || doc.specialty) === selectedSpecialty;
-    const matchesHosp = !selectedHospital || doc.hospital_id === selectedHospital;
+      const matchesSearch =
+        !q ||
+        name.includes(q) ||
+        spec.includes(q) ||
+        hosp.includes(q) ||
+        city.includes(q) ||
+        country.includes(q) ||
+        cat.includes(q);
 
-    return matchesSearch && matchesSpec && matchesHosp;
-  });
+      const matchesSpec =
+        !selectedSpecialty || (doc.specialty || doc.specialization) === selectedSpecialty;
+
+      const matchesCat = !selectedCategory || doc.category === selectedCategory;
+
+      const matchesCountry = !selectedCountry || doc.country === selectedCountry;
+
+      const matchesVerification =
+        !selectedVerification || doc.verification_status === selectedVerification;
+
+      return matchesSearch && matchesSpec && matchesCat && matchesCountry && matchesVerification;
+    });
+  }, [
+    doctors,
+    searchQuery,
+    selectedSpecialty,
+    selectedCategory,
+    selectedCountry,
+    selectedVerification,
+  ]);
 
   // Sort logic
-  const sortedDoctors = [...filteredDoctors].sort((a, b) => {
-    if (sortBy === "name") {
-      return (a.name || "").localeCompare(b.name || "");
-    }
-    if (sortBy === "experience") {
-      const expA = parseInt(a.experience_years || a.experience || 0, 10);
-      const expB = parseInt(b.experience_years || b.experience || 0, 10);
-      return expB - expA;
-    }
-    return 0;
-  });
+  const sortedDoctors = useMemo(() => {
+    return [...filteredDoctors].sort((a, b) => {
+      if (sortBy === "name") {
+        return (a.name || "").localeCompare(b.name || "");
+      }
+      if (sortBy === "country") {
+        return (a.country || "").localeCompare(b.country || "");
+      }
+      if (sortBy === "category") {
+        return (a.category || "").localeCompare(b.category || "");
+      }
+      if (sortBy === "bookable") {
+        return (b.is_bookable === true ? 1 : 0) - (a.is_bookable === true ? 1 : 0);
+      }
+      return 0;
+    });
+  }, [filteredDoctors, sortBy]);
 
-  // Handle open booking modal
+  // Handle open booking modal (only for bookable doctors)
   const handleOpenBooking = (doc) => {
+    if (doc.is_bookable === false) return;
     setBookingDoctor(doc);
     setSelectedDoctor(null);
     setBookingSuccess(null);
     setBookingError(null);
     setBookingDate(new Date().toISOString().split("T")[0]);
-    // Pick first available slot if present
     const slots = doc.available_slots || [];
     setBookingTime(slots.length > 0 ? slots[0] : "10:00 AM");
     setBookingReason("");
@@ -149,7 +205,7 @@ function Doctors() {
 
       const bookingPayload = {
         patient_id: user.patient_id,
-        hospital_id: bookingDoctor.hospital_id || hospitals[0]?._id,
+        hospital_id: bookingDoctor.hospital_id || hospitals[0]?._id || null,
         doctor_id: bookingDoctor._id || bookingDoctor.id,
         appointment_date: bookingDate,
         appointment_time: bookingTime,
@@ -158,7 +214,6 @@ function Doctors() {
 
       const result = await patientService.bookAppointment(bookingPayload);
 
-      // Store in patient's local appointments sync
       if (result.appointment_id) {
         patientService.addStoredAppointmentId(user.patient_id, result.appointment_id);
       }
@@ -171,11 +226,45 @@ function Doctors() {
       });
     } catch (err) {
       console.error("Booking error:", err);
-      const message = err.response?.data?.detail || "Failed to schedule appointment. Please try another slot.";
+      const message =
+        err.response?.data?.detail || "Failed to schedule appointment. Please try another slot.";
       setBookingError(message);
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  // Helper badge renderer for Verification Status
+  const renderVerificationBadge = (status) => {
+    const s = status || "Needs Verification";
+    if (s === "Verified") {
+      return (
+        <span className="verification-badge verified" title="Verified against primary medical registry">
+          <ShieldCheck size={13} />
+          <span>Verified</span>
+        </span>
+      );
+    }
+    if (s === "Historical") {
+      return (
+        <span className="verification-badge historical" title="Historical Medical Pioneer / Deceased">
+          <History size={13} />
+          <span>Historical Pioneer</span>
+        </span>
+      );
+    }
+    return (
+      <span className="verification-badge unverified" title="Candidate record awaiting primary verification">
+        <AlertTriangle size={13} />
+        <span>Needs Verification</span>
+      </span>
+    );
+  };
+
+  // Helper badge renderer for Category
+  const renderCategoryBadge = (category) => {
+    const c = category || "Practicing Clinician";
+    return <span className={`category-tag cat-${c.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}>{c}</span>;
   };
 
   return (
@@ -183,10 +272,10 @@ function Doctors() {
       {/* HEADER */}
       <section className="doctors-header">
         <div>
-          <span className="doctors-kicker">HEALTHCARE PROVIDERS</span>
-          <h1>Find a Doctor</h1>
+          <span className="doctors-kicker">MEDICAL DIRECTORY</span>
+          <h1>Specialist &amp; Expert Directory</h1>
           <p>
-            Connect with verified specialists, review medical qualifications, check live consultation availability, and book appointments.
+            Explore verified specialists, medical researchers, academic faculty, and international leaders. Filter by specialty, institution, country, or clinical availability.
           </p>
         </div>
 
@@ -195,13 +284,13 @@ function Doctors() {
         </div>
       </section>
 
-      {/* SEARCH AND FILTERS */}
-      <section className="doctor-search-card">
-        <div className="doctor-search-box">
+      {/* SEARCH AND MULTI-FACET FILTERS */}
+      <section className="doctor-search-card multi-filter-card">
+        <div className="doctor-search-box full-width-search">
           <Search size={18} />
           <input
             type="text"
-            placeholder="Search by doctor name, specialty, or hospital..."
+            placeholder="Search by doctor name, specialty, hospital, city, country, or category..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -212,51 +301,80 @@ function Doctors() {
           )}
         </div>
 
-        <select
-          value={selectedSpecialty}
-          onChange={(e) => setSelectedSpecialty(e.target.value)}
-          className="doctor-filter-select"
-        >
-          <option value="">All Specialties</option>
-          {specialties.map((spec, i) => (
-            <option key={i} value={spec}>
-              {spec}
-            </option>
-          ))}
-        </select>
+        <div className="filters-subgrid">
+          <select
+            value={selectedSpecialty}
+            onChange={(e) => setSelectedSpecialty(e.target.value)}
+            className="doctor-filter-select"
+          >
+            <option value="">All Specialties ({specialties.length})</option>
+            {specialties.map((spec, i) => (
+              <option key={i} value={spec}>
+                {spec}
+              </option>
+            ))}
+          </select>
 
-        <select
-          value={selectedHospital}
-          onChange={(e) => setSelectedHospital(e.target.value)}
-          className="doctor-filter-select"
-        >
-          <option value="">All Hospitals</option>
-          {hospitals.map((hosp) => (
-            <option key={hosp._id || hosp.id} value={hosp._id || hosp.id}>
-              {hosp.name}
-            </option>
-          ))}
-        </select>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="doctor-filter-select"
+          >
+            <option value="">All Categories ({categories.length})</option>
+            {categories.map((cat, i) => (
+              <option key={i} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+            className="doctor-filter-select"
+          >
+            <option value="">All Countries ({countries.length})</option>
+            {countries.map((ctry, i) => (
+              <option key={i} value={ctry}>
+                {ctry}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedVerification}
+            onChange={(e) => setSelectedVerification(e.target.value)}
+            className="doctor-filter-select"
+          >
+            <option value="">All Verification Statuses</option>
+            <option value="Verified">Verified</option>
+            <option value="Needs Verification">Needs Verification</option>
+            <option value="Historical">Historical</option>
+          </select>
+        </div>
       </section>
 
       {/* TOOLBAR */}
       <div className="doctors-toolbar">
         <div>
-          <h2>Available Specialists</h2>
+          <h2>Medical Professionals &amp; Pioneers</h2>
           <p>
-            {sortedDoctors.length} {sortedDoctors.length === 1 ? "specialist" : "specialists"} found
+            Showing <strong>{sortedDoctors.length}</strong> of {doctors.length} directory records
           </p>
         </div>
 
-        <select
-          className="sort-select"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          <option value="recommended">Recommended</option>
-          <option value="name">Name (A-Z)</option>
-          <option value="experience">Most Experienced</option>
-        </select>
+        <div className="toolbar-controls">
+          <select
+            className="sort-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="name">Sort by Name (A-Z)</option>
+            <option value="country">Sort by Country</option>
+            <option value="category">Sort by Category</option>
+            <option value="bookable">Bookable First</option>
+          </select>
+        </div>
       </div>
 
       {/* ERROR BANNER */}
@@ -271,7 +389,7 @@ function Doctors() {
       {/* LOADING SKELETON */}
       {loading && (
         <div className="doctor-loading-grid">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="doctor-card-skeleton">
               <div className="skeleton-avatar" />
               <div className="skeleton-info">
@@ -289,15 +407,17 @@ function Doctors() {
         <div className="doctor-empty-state">
           <Stethoscope size={48} />
           <h3>No Doctors Found</h3>
-          <p>We could not find any doctors matching your search criteria.</p>
+          <p>We could not find any doctor records matching your filter criteria.</p>
           <button
             onClick={() => {
               setSearchQuery("");
               setSelectedSpecialty("");
-              setSelectedHospital("");
+              setSelectedCategory("");
+              setSelectedCountry("");
+              setSelectedVerification("");
             }}
           >
-            Clear Filters
+            Clear All Filters
           </button>
         </div>
       )}
@@ -308,61 +428,74 @@ function Doctors() {
           {sortedDoctors.map((doctor) => {
             const initials = doctor.name
               ? doctor.name
-                  .replace(/^(Dr\.|Dr)\s*/i, "")
+                  .replace(/^(Dr\.|Sir|Prof\.)\s*/i, "")
+                  .trim()
                   .split(" ")
                   .map((n) => n[0])
                   .join("")
                   .slice(0, 2)
                   .toUpperCase()
-              : "DR";
+              : "MD";
 
-            const specialty = doctor.specialization || doctor.specialty || "General Medicine";
-            const hospitalName = getHospitalName(doctor.hospital_id);
-            const location = getHospitalLocation(doctor.hospital_id);
-            const isAvailable = (doctor.status || "AVAILABLE").toUpperCase() === "AVAILABLE";
-            const availableSlots = doctor.available_slots || ["10:00 AM", "11:30 AM", "02:00 PM"];
-            const availableDays = doctor.available_days || ["Monday", "Wednesday", "Friday"];
+            const specialty = doctor.specialty || doctor.specialization || "Medical Specialist";
+            const hospitalName = getDoctorHospital(doctor);
+            const location = getDoctorLocation(doctor);
+            const isBookable = doctor.is_bookable === true;
+            const category = doctor.category || "Practicing Clinician";
+            const verificationStatus = doctor.verification_status || "Needs Verification";
 
             return (
               <article className="doctor-card" key={doctor._id || doctor.id}>
-                <div className="doctor-card-top">
-                  <div className="doctor-avatar">{initials}</div>
+                <div>
+                  <div className="doctor-card-top">
+                    <div className="doctor-avatar">{initials}</div>
 
-                  <div className="doctor-main-info">
-                    <h3>{doctor.name}</h3>
-                    <span className="doctor-specialty">{specialty}</span>
-
-                    <div className="doctor-status-tag">
-                      <span className={`status-indicator ${isAvailable ? "available" : "busy"}`} />
-                      <span>{isAvailable ? "Available for Booking" : "On Duty / Busy"}</span>
+                    <div className="doctor-main-info">
+                      <div className="badge-row-compact">
+                        {renderVerificationBadge(verificationStatus)}
+                        {renderCategoryBadge(category)}
+                      </div>
+                      <h3>{doctor.name}</h3>
+                      <span className="doctor-specialty">{specialty}</span>
                     </div>
                   </div>
-                </div>
 
-                <div className="doctor-details">
-                  {doctor.experience_years && (
+                  <div className="doctor-details">
                     <div className="doctor-detail">
-                      <ShieldCheck size={16} />
-                      <span>{doctor.experience_years} Years Clinical Practice</span>
+                      <Building size={16} />
+                      <span>{hospitalName}</span>
                     </div>
-                  )}
 
-                  <div className="doctor-detail">
-                    <Building size={16} />
-                    <span>{hospitalName}</span>
-                  </div>
-
-                  <div className="doctor-detail">
-                    <MapPin size={16} />
-                    <span>{location}</span>
-                  </div>
-
-                  <div className="doctor-availability">
-                    <Clock3 size={16} />
-                    <div>
-                      <strong>{availableDays.slice(0, 3).join(", ")}</strong>
-                      <span>{availableSlots.slice(0, 2).join(" & ")}</span>
+                    <div className="doctor-detail">
+                      <MapPin size={16} />
+                      <span>{location}</span>
                     </div>
+
+                    {isBookable ? (
+                      <div className="doctor-availability bookable-status">
+                        <Clock3 size={15} />
+                        <div>
+                          <strong>Accepting Consultations</strong>
+                          <span>
+                            {doctor.available_days && doctor.available_days.length > 0
+                              ? doctor.available_days.slice(0, 3).join(", ")
+                              : "Mon - Fri"}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="doctor-availability non-bookable-status">
+                        <BookOpen size={15} />
+                        <div>
+                          <strong>
+                            {verificationStatus === "Historical"
+                              ? "Historical Pioneer"
+                              : "Academic / Research Profile"}
+                          </strong>
+                          <span>Consultation not directly bookable</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -375,14 +508,23 @@ function Doctors() {
                     <ChevronRight size={15} />
                   </button>
 
-                  <button
-                    className="doctor-book-btn"
-                    onClick={() => handleOpenBooking(doctor)}
-                    disabled={!isAvailable}
-                  >
-                    <CalendarDays size={16} />
-                    Book Consultation
-                  </button>
+                  {isBookable ? (
+                    <button
+                      className="doctor-book-btn"
+                      onClick={() => handleOpenBooking(doctor)}
+                    >
+                      <CalendarDays size={16} />
+                      Book Consultation
+                    </button>
+                  ) : (
+                    <button
+                      className="doctor-book-btn disabled-btn"
+                      disabled
+                      title="Direct appointments not available for academic / historical profiles"
+                    >
+                      Non-Consultation
+                    </button>
+                  )}
                 </div>
               </article>
             );
@@ -398,12 +540,20 @@ function Doctors() {
               <div className="profile-modal-title">
                 <div className="doctor-avatar large">
                   {selectedDoctor.name
-                    ? selectedDoctor.name.charAt(0).toUpperCase()
+                    ? selectedDoctor.name
+                        .replace(/^(Dr\.|Sir|Prof\.)\s*/i, "")
+                        .trim()
+                        .charAt(0)
+                        .toUpperCase()
                     : "D"}
                 </div>
                 <div>
+                  <div className="badge-row-compact" style={{ marginBottom: 4 }}>
+                    {renderVerificationBadge(selectedDoctor.verification_status)}
+                    {renderCategoryBadge(selectedDoctor.category)}
+                  </div>
                   <h2>{selectedDoctor.name}</h2>
-                  <p>{selectedDoctor.specialization || selectedDoctor.specialty || "Medical Specialist"}</p>
+                  <p>{selectedDoctor.specialty || selectedDoctor.specialization || "Medical Specialist"}</p>
                 </div>
               </div>
               <button className="modal-close-btn" onClick={() => setSelectedDoctor(null)}>
@@ -412,70 +562,112 @@ function Doctors() {
             </div>
 
             <div className="modal-body">
+              {/* Profile Meta Cards */}
               <div className="doctor-profile-stats">
                 <div className="prof-stat">
-                  <span>Experience</span>
-                  <strong>{selectedDoctor.experience_years || 10} Years</strong>
+                  <span>Category</span>
+                  <strong>{selectedDoctor.category || "Practicing Clinician"}</strong>
                 </div>
                 <div className="prof-stat">
-                  <span>Rating</span>
-                  <strong>★ 4.9</strong>
+                  <span>Country</span>
+                  <strong>{selectedDoctor.country || "Not available"}</strong>
                 </div>
                 <div className="prof-stat">
-                  <span>Status</span>
-                  <strong className="text-green">{selectedDoctor.status || "AVAILABLE"}</strong>
+                  <span>Verification</span>
+                  <strong className={selectedDoctor.verification_status === "Verified" ? "text-green" : "text-amber"}>
+                    {selectedDoctor.verification_status || "Needs Verification"}
+                  </strong>
                 </div>
               </div>
 
               <div className="modal-section">
-                <h4>Hospital Affiliation</h4>
+                <h4>Hospital / Academic Institution</h4>
                 <p className="flex-row">
                   <Building size={16} />
-                  <span>{getHospitalName(selectedDoctor.hospital_id)} &middot; {getHospitalLocation(selectedDoctor.hospital_id)}</span>
+                  <span>{getDoctorHospital(selectedDoctor)}</span>
                 </p>
               </div>
 
               <div className="modal-section">
-                <h4>Available Consultation Days</h4>
-                <div className="modal-tags">
-                  {(selectedDoctor.available_days || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]).map(
-                    (day, idx) => (
-                      <span key={idx} className="modal-tag">
-                        {day}
-                      </span>
-                    )
-                  )}
-                </div>
-              </div>
-
-              <div className="modal-section">
-                <h4>Standard Consultation Slots</h4>
-                <div className="modal-tags">
-                  {(selectedDoctor.available_slots || ["09:00 AM", "10:30 AM", "02:00 PM", "03:30 PM"]).map(
-                    (slot, idx) => (
-                      <span key={idx} className="modal-tag secondary">
-                        <Clock3 size={12} /> {slot}
-                      </span>
-                    )
-                  )}
-                </div>
+                <h4>Primary Location</h4>
+                <p className="flex-row">
+                  <MapPin size={16} />
+                  <span>{getDoctorLocation(selectedDoctor)}</span>
+                </p>
               </div>
 
               {selectedDoctor.bio && (
                 <div className="modal-section">
-                  <h4>About Practitioner</h4>
+                  <h4>Professional Background &amp; Profile</h4>
                   <p className="doctor-bio-text">{selectedDoctor.bio}</p>
+                </div>
+              )}
+
+              {/* Source Verification info */}
+              <div className="modal-section verification-source-box">
+                <h4>Data Source &amp; Verification</h4>
+                <div className="verification-info-content">
+                  {selectedDoctor.source_url ? (
+                    <a
+                      href={selectedDoctor.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="source-url-link"
+                    >
+                      <Globe size={14} />
+                      <span>Primary Source Registry</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  ) : (
+                    <span className="not-avail-text">Source URL: Not available</span>
+                  )}
+                  {selectedDoctor.verification_date && (
+                    <span className="verif-date">
+                      Verified On: {selectedDoctor.verification_date}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {selectedDoctor.is_bookable === true ? (
+                <div className="modal-section">
+                  <h4>Clinical Consultation Schedule</h4>
+                  <div className="modal-tags">
+                    {(selectedDoctor.available_days || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]).map(
+                      (day, idx) => (
+                        <span key={idx} className="modal-tag">
+                          {day}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="modal-section non-consult-notice">
+                  <AlertCircle size={16} />
+                  <span>
+                    This profile is recorded for academic, research, or historical reference and is not eligible for direct outpatient consultation booking.
+                  </span>
                 </div>
               )}
             </div>
 
             <div className="modal-footer">
-              <button
-                className="doctor-book-btn full-btn"
-                onClick={() => handleOpenBooking(selectedDoctor)}
-              >
-                <CalendarDays size={16} /> Proceed to Book Appointment
-              </button>
+              {selectedDoctor.is_bookable === true ? (
+                <button
+                  className="doctor-book-btn full-btn"
+                  onClick={() => handleOpenBooking(selectedDoctor)}
+                >
+                  <CalendarDays size={16} /> Proceed to Book Appointment
+                </button>
+              ) : (
+                <button
+                  className="doctor-outline-btn full-btn"
+                  onClick={() => setSelectedDoctor(null)}
+                >
+                  Close Profile
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -541,8 +733,8 @@ function Doctors() {
                   </div>
                   <div>
                     <strong>{bookingDoctor.name}</strong>
-                    <span>{bookingDoctor.specialization || bookingDoctor.specialty}</span>
-                    <small>{getHospitalName(bookingDoctor.hospital_id)}</small>
+                    <span>{bookingDoctor.specialty || bookingDoctor.specialization}</span>
+                    <small>{getDoctorHospital(bookingDoctor)}</small>
                   </div>
                 </div>
 
@@ -585,7 +777,7 @@ function Doctors() {
                   </label>
                   <textarea
                     rows={3}
-                    placeholder="Describe your health symptoms or reason for visit (e.g. routine checkup, persistent cough, chest discomfort)..."
+                    placeholder="Describe your symptoms or reason for visit (e.g. routine checkup, specialist opinion)..."
                     value={bookingReason}
                     onChange={(e) => setBookingReason(e.target.value)}
                     required

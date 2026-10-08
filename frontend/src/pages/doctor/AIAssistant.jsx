@@ -39,7 +39,7 @@ function DoctorAIAssistant() {
     {
       id: 1,
       sender: "assistant",
-      text: `Hello Dr. ${user?.name || "Arjun Mehta"}. I am your CareBridge Clinical Decision Support AI.
+      text: `Hello ${user?.name ? (user.name.startsWith("Dr") ? user.name : `Dr. ${user.name}`) : "Doctor"}. I am your CareBridge Clinical Decision Support AI.
 
 I can assist your clinical workflow with:
 • Differential Diagnosis (DDx) & ICD-10 suggestions

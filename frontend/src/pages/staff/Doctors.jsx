@@ -1,160 +1,209 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import {
+  Search,
+  Building,
+  MapPin,
+  ShieldCheck,
+  History,
+  AlertTriangle,
+  Globe,
+  ExternalLink,
+  BookOpen,
+  Loader2,
+  RefreshCw,
+  Award,
+  Users,
+} from "lucide-react";
+import patientService from "../../services/patientService";
 import "./Doctors.css";
 
-const doctorsData = [
-  {
-    id: "DOC-001",
-    name: "Dr. Ananya Rao",
-    specialty: "Cardiology",
-    hospital: "CareBridge Central Hospital",
-    experience: "12 years",
-    patients: 428,
-    status: "Active",
-    availability: "Available",
-  },
-  {
-    id: "DOC-002",
-    name: "Dr. Rahul Sharma",
-    specialty: "General Medicine",
-    hospital: "CareBridge Central Hospital",
-    experience: "8 years",
-    patients: 316,
-    status: "Active",
-    availability: "Busy",
-  },
-  {
-    id: "DOC-003",
-    name: "Dr. Priya Reddy",
-    specialty: "Dermatology",
-    hospital: "CareBridge Skin & Care",
-    experience: "7 years",
-    patients: 285,
-    status: "Active",
-    availability: "Available",
-  },
-  {
-    id: "DOC-004",
-    name: "Dr. Arjun Mehta",
-    specialty: "Orthopedics",
-    hospital: "CareBridge Central Hospital",
-    experience: "15 years",
-    patients: 512,
-    status: "Inactive",
-    availability: "Unavailable",
-  },
-  {
-    id: "DOC-005",
-    name: "Dr. Sneha Kapoor",
-    specialty: "Pediatrics",
-    hospital: "CareBridge Children's Hospital",
-    experience: "10 years",
-    patients: 374,
-    status: "Active",
-    availability: "Available",
-  },
-  {
-    id: "DOC-006",
-    name: "Dr. Vikram Singh",
-    specialty: "Neurology",
-    hospital: "CareBridge Central Hospital",
-    experience: "14 years",
-    patients: 391,
-    status: "Active",
-    availability: "Busy",
-  },
-];
-
 function Doctors() {
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [search, setSearch] = useState("");
-  const [specialty, setSpecialty] = useState("All");
-  const [status, setStatus] = useState("All");
+  const [specialtyFilter, setSpecialtyFilter] = useState("All");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [countryFilter, setCountryFilter] = useState("All");
+  const [verificationFilter, setVerificationFilter] = useState("All");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
+  const fetchDoctors = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await patientService.getDoctors();
+      setDoctors(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load staff doctor directory:", err);
+      setError("Failed to load doctor directory from backend.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDoctors();
+  }, [fetchDoctors]);
+
+  const specialties = useMemo(() => {
+    return Array.from(
+      new Set(doctors.map((d) => d.specialty || d.specialization).filter(Boolean))
+    ).sort();
+  }, [doctors]);
+
+  const categories = useMemo(() => {
+    return Array.from(new Set(doctors.map((d) => d.category).filter(Boolean))).sort();
+  }, [doctors]);
+
+  const countries = useMemo(() => {
+    return Array.from(new Set(doctors.map((d) => d.country).filter(Boolean))).sort();
+  }, [doctors]);
+
   const filteredDoctors = useMemo(() => {
-    return doctorsData.filter((doctor) => {
+    return doctors.filter((doctor) => {
+      const name = (doctor.name || "").toLowerCase();
+      const spec = (doctor.specialty || doctor.specialization || "").toLowerCase();
+      const hosp = (doctor.hospital_name || doctor.hospital || "").toLowerCase();
+      const city = (doctor.city || "").toLowerCase();
+      const country = (doctor.country || "").toLowerCase();
+      const cat = (doctor.category || "").toLowerCase();
+      const s = search.toLowerCase().trim();
+
       const matchesSearch =
-        doctor.name.toLowerCase().includes(search.toLowerCase()) ||
-        doctor.specialty.toLowerCase().includes(search.toLowerCase()) ||
-        doctor.hospital.toLowerCase().includes(search.toLowerCase()) ||
-        doctor.id.toLowerCase().includes(search.toLowerCase());
+        !s ||
+        name.includes(s) ||
+        spec.includes(s) ||
+        hosp.includes(s) ||
+        city.includes(s) ||
+        country.includes(s) ||
+        cat.includes(s);
 
       const matchesSpecialty =
-        specialty === "All" || doctor.specialty === specialty;
+        specialtyFilter === "All" ||
+        (doctor.specialty || doctor.specialization) === specialtyFilter;
 
-      const matchesStatus =
-        status === "All" || doctor.status === status;
+      const matchesCategory =
+        categoryFilter === "All" || doctor.category === categoryFilter;
 
-      return matchesSearch && matchesSpecialty && matchesStatus;
+      const matchesCountry =
+        countryFilter === "All" || doctor.country === countryFilter;
+
+      const matchesVerification =
+        verificationFilter === "All" ||
+        doctor.verification_status === verificationFilter;
+
+      return (
+        matchesSearch &&
+        matchesSpecialty &&
+        matchesCategory &&
+        matchesCountry &&
+        matchesVerification
+      );
     });
-  }, [search, specialty, status]);
+  }, [
+    doctors,
+    search,
+    specialtyFilter,
+    categoryFilter,
+    countryFilter,
+    verificationFilter,
+  ]);
 
-  const activeDoctors = doctorsData.filter(
-    (doctor) => doctor.status === "Active"
+  const totalDoctors = doctors.length;
+  const verifiedDoctors = doctors.filter(
+    (d) => d.verification_status === "Verified"
+  ).length;
+  const practicingClinicians = doctors.filter(
+    (d) => d.category === "Practicing Clinician"
+  ).length;
+  const researchAndAcademics = doctors.filter((d) =>
+    ["Medical Researcher", "Academic", "Public Health Expert", "Historical Medical Pioneer"].includes(
+      d.category
+    )
   ).length;
 
-  const availableDoctors = doctorsData.filter(
-    (doctor) => doctor.availability === "Available"
-  ).length;
-
-  const totalPatients = doctorsData.reduce(
-    (total, doctor) => total + doctor.patients,
-    0
-  );
+  const renderVerificationBadge = (status) => {
+    const s = status || "Needs Verification";
+    if (s === "Verified") {
+      return (
+        <span className="status-badge active" title="Verified against primary registry">
+          Verified
+        </span>
+      );
+    }
+    if (s === "Historical") {
+      return (
+        <span
+          className="status-badge"
+          style={{ background: "#f5f3ff", color: "#7c3aed" }}
+          title="Historical Medical Pioneer"
+        >
+          Historical
+        </span>
+      );
+    }
+    return (
+      <span
+        className="status-badge"
+        style={{ background: "#fffbeb", color: "#b45309" }}
+        title="Candidate Record - Needs Verification"
+      >
+        Needs Verification
+      </span>
+    );
+  };
 
   return (
     <main className="staff-doctors-page">
       {/* HEADER */}
       <section className="doctors-header">
         <div>
-          <span className="doctors-eyebrow">
-            STAFF / ADMIN • MANAGEMENT
-          </span>
-
-          <h1>Doctors</h1>
-
+          <span className="doctors-eyebrow">STAFF / ADMIN • DIRECTORY MANAGEMENT</span>
+          <h1>Medical Specialist Directory</h1>
           <p>
-            Manage doctors, specialties, availability and hospital
-            assignments from one place.
+            Review master records for 50 medical specialists, academic researchers, and historical pioneers across institutions and countries.
           </p>
         </div>
 
-        <button className="add-doctor-btn">
-          <span>+</span>
-          Add Doctor
+        <button className="secondary-btn" onClick={fetchDoctors} disabled={loading}>
+          <RefreshCw size={14} className={loading ? "spinning" : ""} />
+          {loading ? "Syncing..." : "Refresh Records"}
         </button>
       </section>
 
-      {/* SUMMARY CARDS */}
+      {/* SUMMARY STATS (Real verified data only, no fake patient counts) */}
       <section className="doctor-stats">
         <div className="doctor-stat-card">
           <div className="stat-icon blue">◉</div>
           <div>
-            <span>Total Doctors</span>
-            <strong>{doctorsData.length}</strong>
+            <span>Total Specialists</span>
+            <strong>{totalDoctors}</strong>
           </div>
         </div>
 
         <div className="doctor-stat-card">
           <div className="stat-icon green">✓</div>
           <div>
-            <span>Active Doctors</span>
-            <strong>{activeDoctors}</strong>
+            <span>Verified Records</span>
+            <strong>{verifiedDoctors}</strong>
           </div>
         </div>
 
         <div className="doctor-stat-card">
           <div className="stat-icon purple">✦</div>
           <div>
-            <span>Available Now</span>
-            <strong>{availableDoctors}</strong>
+            <span>Practicing Clinicians</span>
+            <strong>{practicingClinicians}</strong>
           </div>
         </div>
 
         <div className="doctor-stat-card">
           <div className="stat-icon orange">♙</div>
           <div>
-            <span>Patients Managed</span>
-            <strong>{totalPatients.toLocaleString()}</strong>
+            <span>Research &amp; Pioneers</span>
+            <strong>{researchAndAcademics}</strong>
           </div>
         </div>
       </section>
@@ -163,215 +212,249 @@ function Doctors() {
       <section className="doctors-panel">
         <div className="panel-top">
           <div>
-            <h2>Doctor Directory</h2>
+            <h2>Doctor Directory &amp; Affiliations</h2>
             <p>
-              {filteredDoctors.length} doctor
-              {filteredDoctors.length !== 1 ? "s" : ""} found
+              Showing {filteredDoctors.length} of {totalDoctors} records
             </p>
-          </div>
-
-          <div className="doctor-actions">
-            <button className="secondary-btn">Export</button>
           </div>
         </div>
 
         {/* FILTERS */}
-        <div className="doctor-filters">
+        <div className="doctor-filters" style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr" }}>
           <div className="doctor-search">
             <span>⌕</span>
             <input
               type="text"
-              placeholder="Search doctor, specialty, hospital..."
+              placeholder="Search by name, specialty, hospital, country..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           <select
-            value={specialty}
-            onChange={(e) => setSpecialty(e.target.value)}
+            value={specialtyFilter}
+            onChange={(e) => setSpecialtyFilter(e.target.value)}
           >
-            <option value="All">All Specialties</option>
-            <option value="Cardiology">Cardiology</option>
-            <option value="General Medicine">General Medicine</option>
-            <option value="Dermatology">Dermatology</option>
-            <option value="Orthopedics">Orthopedics</option>
-            <option value="Pediatrics">Pediatrics</option>
-            <option value="Neurology">Neurology</option>
+            <option value="All">All Specialties ({specialties.length})</option>
+            {specialties.map((spec) => (
+              <option key={spec} value={spec}>
+                {spec}
+              </option>
+            ))}
           </select>
 
           <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
           >
-            <option value="All">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value="All">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={countryFilter}
+            onChange={(e) => setCountryFilter(e.target.value)}
+          >
+            <option value="All">All Countries ({countries.length})</option>
+            {countries.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
 
+        {/* LOADING */}
+        {loading && (
+          <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
+            <Loader2 size={28} className="spinning" style={{ margin: "0 auto 10px" }} />
+            <p>Loading medical directory records...</p>
+          </div>
+        )}
+
         {/* DESKTOP TABLE */}
-        <div className="doctors-table-wrapper">
-          <table className="doctors-table">
-            <thead>
-              <tr>
-                <th>Doctor</th>
-                <th>Specialty</th>
-                <th>Hospital</th>
-                <th>Experience</th>
-                <th>Patients</th>
-                <th>Availability</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+        {!loading && (
+          <div className="doctors-table-wrapper">
+            <table className="doctors-table">
+              <thead>
+                <tr>
+                  <th>Specialist</th>
+                  <th>Specialty</th>
+                  <th>Institution / Hospital</th>
+                  <th>Location</th>
+                  <th>Category</th>
+                  <th>Clinical Status</th>
+                  <th>Verification</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {filteredDoctors.map((doctor) => (
-                <tr key={doctor.id}>
-                  <td>
+              <tbody>
+                {filteredDoctors.map((doctor) => {
+                  const initials = doctor.name
+                    ? doctor.name
+                        .replace(/^(Dr\.|Sir|Prof\.)\s*/i, "")
+                        .trim()
+                        .split(" ")
+                        .map((w) => w[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()
+                    : "MD";
+
+                  const isBookable = doctor.is_bookable === true;
+
+                  return (
+                    <tr key={doctor._id || doctor.id || doctor.name}>
+                      <td>
+                        <div className="doctor-person">
+                          <div className="doctor-avatar">{initials}</div>
+                          <div>
+                            <strong>{doctor.name}</strong>
+                            <small>{doctor.country || "International"}</small>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className="specialty-text">
+                          {doctor.specialty || doctor.specialization}
+                        </span>
+                      </td>
+
+                      <td>{doctor.hospital_name || doctor.hospital || "Not available"}</td>
+
+                      <td>
+                        {[doctor.city, doctor.country].filter(Boolean).join(", ") ||
+                          "Not available"}
+                      </td>
+
+                      <td>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#475569" }}>
+                          {doctor.category || "Practicing Clinician"}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`availability ${
+                            isBookable ? "available" : "unavailable"
+                          }`}
+                        >
+                          <i></i>
+                          {isBookable ? "Consultations Open" : "Academic / Research"}
+                        </span>
+                      </td>
+
+                      <td>{renderVerificationBadge(doctor.verification_status)}</td>
+
+                      <td>
+                        <button
+                          className="view-btn"
+                          onClick={() => setSelectedDoctor(doctor)}
+                        >
+                          View Profile
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* MOBILE CARDS */}
+        {!loading && (
+          <div className="doctor-mobile-list">
+            {filteredDoctors.map((doctor) => {
+              const initials = doctor.name
+                ? doctor.name
+                    .replace(/^(Dr\.|Sir|Prof\.)\s*/i, "")
+                    .trim()
+                    .split(" ")
+                    .map((w) => w[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()
+                : "MD";
+
+              return (
+                <article
+                  className="doctor-mobile-card"
+                  key={doctor._id || doctor.id || doctor.name}
+                >
+                  <div className="mobile-doctor-head">
                     <div className="doctor-person">
-                      <div className="doctor-avatar">
-                        {doctor.name
-                          .replace("Dr. ", "")
-                          .split(" ")
-                          .map((word) => word[0])
-                          .join("")
-                          .slice(0, 2)}
-                      </div>
-
+                      <div className="doctor-avatar">{initials}</div>
                       <div>
                         <strong>{doctor.name}</strong>
-                        <small>{doctor.id}</small>
+                        <small>{doctor.country || "International"}</small>
                       </div>
                     </div>
-                  </td>
 
-                  <td>
-                    <span className="specialty-text">
-                      {doctor.specialty}
-                    </span>
-                  </td>
+                    {renderVerificationBadge(doctor.verification_status)}
+                  </div>
 
-                  <td>{doctor.hospital}</td>
+                  <div className="mobile-doctor-details">
+                    <div>
+                      <span>Specialty</span>
+                      <strong>{doctor.specialty || doctor.specialization}</strong>
+                    </div>
 
-                  <td>{doctor.experience}</td>
+                    <div>
+                      <span>Institution</span>
+                      <strong>
+                        {doctor.hospital_name || doctor.hospital || "Not available"}
+                      </strong>
+                    </div>
 
-                  <td>
-                    <strong className="patient-count">
-                      {doctor.patients}
-                    </strong>
-                  </td>
+                    <div>
+                      <span>Location</span>
+                      <strong>
+                        {[doctor.city, doctor.country].filter(Boolean).join(", ") ||
+                          "Not available"}
+                      </strong>
+                    </div>
 
-                  <td>
+                    <div>
+                      <span>Category</span>
+                      <strong>{doctor.category || "Practicing Clinician"}</strong>
+                    </div>
+                  </div>
+
+                  <div className="mobile-doctor-footer">
                     <span
-                      className={`availability ${doctor.availability
-                        .toLowerCase()
-                        .replace(" ", "-")}`}
+                      className={`availability ${
+                        doctor.is_bookable === true ? "available" : "unavailable"
+                      }`}
                     >
                       <i></i>
-                      {doctor.availability}
+                      {doctor.is_bookable === true ? "Consultations Open" : "Academic / Research"}
                     </span>
-                  </td>
 
-                  <td>
-                    <span
-                      className={`status-badge ${doctor.status.toLowerCase()}`}
-                    >
-                      {doctor.status}
-                    </span>
-                  </td>
-
-                  <td>
                     <button
                       className="view-btn"
                       onClick={() => setSelectedDoctor(doctor)}
                     >
-                      View
+                      View Details
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* MOBILE CARDS */}
-        <div className="doctor-mobile-list">
-          {filteredDoctors.map((doctor) => (
-            <article className="doctor-mobile-card" key={doctor.id}>
-              <div className="mobile-doctor-head">
-                <div className="doctor-person">
-                  <div className="doctor-avatar">
-                    {doctor.name
-                      .replace("Dr. ", "")
-                      .split(" ")
-                      .map((word) => word[0])
-                      .join("")
-                      .slice(0, 2)}
                   </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
 
-                  <div>
-                    <strong>{doctor.name}</strong>
-                    <small>{doctor.id}</small>
-                  </div>
-                </div>
-
-                <span
-                  className={`status-badge ${doctor.status.toLowerCase()}`}
-                >
-                  {doctor.status}
-                </span>
-              </div>
-
-              <div className="mobile-doctor-details">
-                <div>
-                  <span>Specialty</span>
-                  <strong>{doctor.specialty}</strong>
-                </div>
-
-                <div>
-                  <span>Hospital</span>
-                  <strong>{doctor.hospital}</strong>
-                </div>
-
-                <div>
-                  <span>Experience</span>
-                  <strong>{doctor.experience}</strong>
-                </div>
-
-                <div>
-                  <span>Patients</span>
-                  <strong>{doctor.patients}</strong>
-                </div>
-              </div>
-
-              <div className="mobile-doctor-footer">
-                <span
-                  className={`availability ${doctor.availability
-                    .toLowerCase()
-                    .replace(" ", "-")}`}
-                >
-                  <i></i>
-                  {doctor.availability}
-                </span>
-
-                <button
-                  className="view-btn"
-                  onClick={() => setSelectedDoctor(doctor)}
-                >
-                  View Details
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {filteredDoctors.length === 0 && (
+        {!loading && filteredDoctors.length === 0 && (
           <div className="doctors-empty">
             <div>⌕</div>
             <h3>No doctors found</h3>
-            <p>Try changing your search or filters.</p>
+            <p>Try changing your search or filter parameters.</p>
           </div>
         )}
       </section>
@@ -396,51 +479,94 @@ function Doctors() {
             <div className="modal-doctor-header">
               <div className="large-doctor-avatar">
                 {selectedDoctor.name
-                  .replace("Dr. ", "")
-                  .split(" ")
-                  .map((word) => word[0])
-                  .join("")
-                  .slice(0, 2)}
+                  ? selectedDoctor.name
+                      .replace(/^(Dr\.|Sir|Prof\.)\s*/i, "")
+                      .trim()
+                      .charAt(0)
+                      .toUpperCase()
+                  : "D"}
               </div>
 
               <div>
-                <span>Doctor Profile</span>
+                <span>{selectedDoctor.category || "Practicing Clinician"}</span>
                 <h2>{selectedDoctor.name}</h2>
-                <p>{selectedDoctor.specialty}</p>
+                <p>{selectedDoctor.specialty || selectedDoctor.specialization}</p>
               </div>
             </div>
 
             <div className="modal-details">
               <div>
-                <span>Doctor ID</span>
-                <strong>{selectedDoctor.id}</strong>
+                <span>Institution / Hospital</span>
+                <strong>
+                  {selectedDoctor.hospital_name ||
+                    selectedDoctor.hospital ||
+                    "Not available"}
+                </strong>
               </div>
 
               <div>
-                <span>Hospital</span>
-                <strong>{selectedDoctor.hospital}</strong>
+                <span>Location</span>
+                <strong>
+                  {[selectedDoctor.city, selectedDoctor.country]
+                    .filter(Boolean)
+                    .join(", ") || "Not available"}
+                </strong>
               </div>
 
               <div>
-                <span>Experience</span>
-                <strong>{selectedDoctor.experience}</strong>
+                <span>Category</span>
+                <strong>{selectedDoctor.category || "Practicing Clinician"}</strong>
               </div>
 
               <div>
-                <span>Patients Managed</span>
-                <strong>{selectedDoctor.patients}</strong>
+                <span>Verification Status</span>
+                <strong>
+                  {selectedDoctor.verification_status || "Needs Verification"}
+                </strong>
               </div>
 
               <div>
-                <span>Availability</span>
-                <strong>{selectedDoctor.availability}</strong>
+                <span>Clinical Appointments</span>
+                <strong>
+                  {selectedDoctor.is_bookable === true
+                    ? "Available for Consultations"
+                    : "Not Bookable (Academic / Historical)"}
+                </strong>
               </div>
 
               <div>
-                <span>Account Status</span>
-                <strong>{selectedDoctor.status}</strong>
+                <span>Verification Date</span>
+                <strong>
+                  {selectedDoctor.verification_date || "Not available"}
+                </strong>
               </div>
             </div>
+
+            {selectedDoctor.bio && (
+              <div style={{ marginTop: 20, padding: 14, background: "#f8fafc", borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                <span style={{ display: "block", marginBottom: 5, color: "#64748b", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>
+                  Professional Background
+                </span>
+                <p style={{ margin: 0, fontSize: 13, color: "#334155", lineHeight: 1.5 }}>
+                  {selectedDoctor.bio}
+                </p>
+              </div>
+            )}
+
+            {selectedDoctor.source_url && (
+              <div style={{ marginTop: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <a
+                  href={selectedDoctor.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#2563eb", fontSize: 12, fontWeight: 700, textDecoration: "none" }}
+                >
+                  <Globe size={14} />
+                  <span>Primary Source Registry</span>
+                  <ExternalLink size={12} />
+                </a>
+              </div>
+            )}
 
             <div className="modal-footer">
               <button
@@ -448,10 +574,6 @@ function Doctors() {
                 onClick={() => setSelectedDoctor(null)}
               >
                 Close
-              </button>
-
-              <button className="add-doctor-btn">
-                Edit Doctor
               </button>
             </div>
           </div>

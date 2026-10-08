@@ -50,7 +50,7 @@ function HealthRecords() {
     description: "",
     diagnosis: "",
     medications: "",
-    doctor_name: user?.name || "Dr. Arjun Mehta",
+    doctor_name: user?.name || "Doctor",
     hospital_name: "CareBridge Medical Center",
     record_date: new Date().toISOString().split("T")[0],
   });
@@ -147,7 +147,7 @@ function HealthRecords() {
         description: "",
         diagnosis: "",
         medications: "",
-        doctor_name: user?.name || "Dr. Arjun Mehta",
+        doctor_name: user?.name || "Doctor",
         hospital_name: "CareBridge Medical Center",
         record_date: new Date().toISOString().split("T")[0],
       });
@@ -492,7 +492,7 @@ function HealthRecords() {
 
                         <td>
                           <span className="doctor-name-text">
-                            {record.doctor_name || record.doctor || user?.name || "Dr. Arjun Mehta"}
+                            {record.doctor_name || record.doctor || user?.name || "Doctor"}
                           </span>
                         </td>
 
@@ -591,7 +591,7 @@ function HealthRecords() {
               <div className="detail-meta-grid">
                 <div>
                   <label>Attending Doctor</label>
-                  <span>{viewingRecord.doctor_name || viewingRecord.doctor || "Dr. Arjun Mehta"}</span>
+                  <span>{viewingRecord.doctor_name || viewingRecord.doctor || "Attending Physician"}</span>
                 </div>
                 <div>
                   <label>Facility</label>

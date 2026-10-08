@@ -45,14 +45,42 @@ def get_doctors():
     db = get_database()
     hospital_id = request.args.get("hospital_id")
     specialty = request.args.get("specialty")
+    category = request.args.get("category")
+    country = request.args.get("country")
+    city = request.args.get("city")
+    search = request.args.get("search")
+    is_bookable = request.args.get("is_bookable")
     
     query = {}
     if hospital_id and is_valid_object_id(hospital_id):
         query["hospital_id"] = ObjectId(hospital_id)
     if specialty:
         query["specialty"] = {"$regex": specialty, "$options": "i"}
+    if category and category != "All":
+        query["category"] = category
+    if country and country != "All":
+        query["country"] = {"$regex": country, "$options": "i"}
+    if city and city != "All":
+        query["city"] = {"$regex": city, "$options": "i"}
+    if is_bookable is not None:
+        if is_bookable.lower() == "true":
+            query["is_bookable"] = True
+        elif is_bookable.lower() == "false":
+            query["is_bookable"] = False
+            
+    if search:
+        s = search.strip()
+        query["$or"] = [
+            {"name": {"$regex": s, "$options": "i"}},
+            {"specialty": {"$regex": s, "$options": "i"}},
+            {"hospital": {"$regex": s, "$options": "i"}},
+            {"hospital_name": {"$regex": s, "$options": "i"}},
+            {"city": {"$regex": s, "$options": "i"}},
+            {"country": {"$regex": s, "$options": "i"}},
+            {"category": {"$regex": s, "$options": "i"}},
+        ]
         
-    doctors = list(db.doctors.find(query))
+    doctors = list(db.doctors.find(query).sort("name", 1))
     return jsonify(serialize_doc(doctors)), 200
 
 @doctor_bp.route("/me", methods=["GET"], strict_slashes=False)
