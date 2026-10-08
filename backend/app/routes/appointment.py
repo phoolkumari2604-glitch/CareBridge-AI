@@ -1,592 +1,179 @@
-from fastapi import APIRouter, HTTPException, Depends
+from datetime import datetime, timezone
+from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
-from datetime import datetime, UTC
-
 from app.core.database import get_database
-from app.core.dependencies import (
-    get_current_user,
-    require_staff_or_admin,
-)
-from app.schemas.appointment import (
-    AppointmentCreate,
-    AppointmentUpdate,
-)
+from app.utils.decorators import token_required
+from app.utils.helpers import serialize_doc, is_valid_object_id
 
+appointment_bp = Blueprint("appointments", __name__)
 
-router = APIRouter(
-    prefix="/appointments",
-    tags=["Appointments"]
-)
-
-
-# ============================================================
-# CREATE APPOINTMENT
-# PATIENT -> OWN PATIENT RECORD ONLY
-# STAFF/ADMIN -> ANY PATIENT
-# ============================================================
-
-@router.post("/")
-def create_appointment(
-    appointment: AppointmentCreate,
-    current_user: dict = Depends(get_current_user),
-):
+@appointment_bp.route("", methods=["POST"], strict_slashes=False)
+@appointment_bp.route("/", methods=["POST"], strict_slashes=False)
+@token_required
+def create_appointment():
     db = get_database()
-
-    # --------------------------------------------------------
-    # Validate patient ID
-    # --------------------------------------------------------
-
-    if not ObjectId.is_valid(appointment.patient_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid patient ID"
-        )
-
-    patient = db.patients.find_one(
-        {"_id": ObjectId(appointment.patient_id)}
-    )
-
+    current_user = g.current_user
+    data = request.get_json() or {}
+    
+    patient_id = data.get("patient_id")
+    hospital_id = data.get("hospital_id")
+    doctor_id = data.get("doctor_id")
+    appointment_date = data.get("appointment_date")
+    appointment_time = data.get("appointment_time")
+    reason = data.get("reason", "General Consultation")
+    
+    if not patient_id or not hospital_id or not doctor_id or not appointment_date or not appointment_time:
+        return jsonify({"error": "Validation Error", "detail": "patient_id, hospital_id, doctor_id, appointment_date, and appointment_time are required"}), 400
+        
+    if not is_valid_object_id(patient_id) or not is_valid_object_id(hospital_id) or not is_valid_object_id(doctor_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid ID format for patient, hospital, or doctor"}), 400
+        
+    # Check patient
+    patient = db.patients.find_one({"_id": ObjectId(patient_id)})
     if not patient:
-        raise HTTPException(
-            status_code=404,
-            detail="Patient not found"
-        )
-
-    # --------------------------------------------------------
-    # Patient ownership protection
-    # --------------------------------------------------------
-
-    if current_user.get("role") == "PATIENT":
-
-        current_user_id = str(
-            current_user["_id"]
-        )
-
-        owns_record = (
-            patient.get("user_id") == current_user_id
-            or patient.get("email")
-            == current_user.get("email")
-        )
-
-        if not owns_record:
-            raise HTTPException(
-                status_code=403,
-                detail="You can only create appointments for your own patient record"
-            )
-
-    # --------------------------------------------------------
-    # Validate hospital
-    # --------------------------------------------------------
-
-    if not ObjectId.is_valid(
-        appointment.hospital_id
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid hospital ID"
-        )
-
-    hospital = db.hospitals.find_one(
-        {
-            "_id": ObjectId(
-                appointment.hospital_id
-            )
-        }
-    )
-
-    if not hospital:
-        raise HTTPException(
-            status_code=404,
-            detail="Hospital not found"
-        )
-
-    # --------------------------------------------------------
-    # Validate doctor
-    # --------------------------------------------------------
-
-    if not ObjectId.is_valid(
-        appointment.doctor_id
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid doctor ID"
-        )
-
-    doctor = db.doctors.find_one(
-        {
-            "_id": ObjectId(
-                appointment.doctor_id
-            )
-        }
-    )
-
+        return jsonify({"error": "Not Found", "detail": "Patient not found"}), 404
+        
+    # Check doctor
+    doctor = db.doctors.find_one({"_id": ObjectId(doctor_id)})
     if not doctor:
-        raise HTTPException(
-            status_code=404,
-            detail="Doctor not found"
-        )
-
-    # --------------------------------------------------------
-    # Doctor must belong to selected hospital
-    # --------------------------------------------------------
-
-    if doctor.get("hospital_id") != ObjectId(
-        appointment.hospital_id
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Doctor does not belong to the selected hospital"
-        )
-
-    # --------------------------------------------------------
-    # Doctor status
-    # --------------------------------------------------------
-
-    if doctor.get(
-        "status",
-        "AVAILABLE"
-    ) != "AVAILABLE":
-
-        raise HTTPException(
-            status_code=400,
-            detail="Doctor is currently unavailable"
-        )
-
-    # --------------------------------------------------------
-    # Appointment slot validation
-    # --------------------------------------------------------
-
-    available_slots = doctor.get(
-        "available_slots",
-        []
-    )
-
-    if (
-        appointment.appointment_time
-        not in available_slots
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Selected appointment time is not available"
-        )
-
-    # --------------------------------------------------------
-    # Prevent duplicate appointment
-    # --------------------------------------------------------
-
-    existing_appointment = db.appointments.find_one(
-        {
-            "doctor_id": ObjectId(
-                appointment.doctor_id
-            ),
-            "appointment_date":
-                appointment.appointment_date,
-            "appointment_time":
-                appointment.appointment_time,
-            "status": {
-                "$in": [
-                    "PENDING",
-                    "APPROVED"
-                ]
-            }
-        }
-    )
-
-    if existing_appointment:
-        raise HTTPException(
-            status_code=409,
-            detail="This appointment slot is already booked"
-        )
-
-    # --------------------------------------------------------
-    # Prepare appointment
-    # --------------------------------------------------------
-
-    data = {
-        "patient_id": ObjectId(
-            appointment.patient_id
-        ),
-        "hospital_id": ObjectId(
-            appointment.hospital_id
-        ),
-        "doctor_id": ObjectId(
-            appointment.doctor_id
-        ),
-        "appointment_date":
-            appointment.appointment_date,
-        "appointment_time":
-            appointment.appointment_time,
-        "reason":
-            appointment.reason,
-        "status":
-            "PENDING",
-        "approval_status":
-            "PENDING",
-        "created_at":
-           datetime.now(UTC),
-        "updated_at":
-           datetime.now(UTC)
+        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
+        
+    # Check hospital
+    hospital = db.hospitals.find_one({"_id": ObjectId(hospital_id)})
+    if not hospital:
+        return jsonify({"error": "Not Found", "detail": "Hospital not found"}), 404
+        
+    # Prevent duplicate booking
+    existing = db.appointments.find_one({
+        "doctor_id": ObjectId(doctor_id),
+        "appointment_date": appointment_date,
+        "appointment_time": appointment_time,
+        "status": {"$in": ["PENDING", "APPROVED", "CONFIRMED"]}
+    })
+    if existing:
+        return jsonify({"error": "Conflict", "detail": "This appointment slot is already booked"}), 409
+        
+    appointment_doc = {
+        "patient_id": ObjectId(patient_id),
+        "hospital_id": ObjectId(hospital_id),
+        "doctor_id": ObjectId(doctor_id),
+        "doctor_name": doctor.get("name"),
+        "hospital_name": hospital.get("name"),
+        "patient_name": patient.get("name"),
+        "specialty": doctor.get("specialty"),
+        "appointment_date": appointment_date,
+        "appointment_time": appointment_time,
+        "reason": reason,
+        "status": "PENDING",
+        "approval_status": "PENDING",
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
     }
+    
+    result = db.appointments.insert_one(appointment_doc)
+    return jsonify({
+        "message": "Appointment created successfully",
+        "appointment_id": str(result.inserted_id),
+        "status": "PENDING",
+        "approval_status": "PENDING"
+    }), 201
 
-    result = db.appointments.insert_one(
-        data
-    )
-
-    return {
-        "message":
-            "Appointment created successfully",
-        "appointment_id":
-            str(result.inserted_id),
-        "status":
-            "PENDING",
-        "approval_status":
-            "PENDING"
-    }
-
-
-# ============================================================
-# GET ALL APPOINTMENTS
-# STAFF + ADMIN ONLY
-# ============================================================
-
-@router.get("/")
-def get_appointments(
-    current_user: dict = Depends(
-        require_staff_or_admin
-    ),
-):
+@appointment_bp.route("", methods=["GET"], strict_slashes=False)
+@appointment_bp.route("/", methods=["GET"], strict_slashes=False)
+@token_required
+def get_appointments():
     db = get_database()
+    current_user = g.current_user
+    role = current_user.get("role", "PATIENT")
+    
+    patient_id_arg = request.args.get("patient_id")
+    doctor_id_arg = request.args.get("doctor_id")
+    status_arg = request.args.get("status")
+    
+    query = {}
+    
+    if role == "PATIENT":
+        user_id = str(current_user["_id"])
+        email = current_user.get("email", "").lower()
+        patient = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": email}]})
+        if patient:
+            query["patient_id"] = patient["_id"]
+        elif patient_id_arg and is_valid_object_id(patient_id_arg):
+            query["patient_id"] = ObjectId(patient_id_arg)
+    else:
+        if patient_id_arg and is_valid_object_id(patient_id_arg):
+            query["patient_id"] = ObjectId(patient_id_arg)
+            
+    if doctor_id_arg and is_valid_object_id(doctor_id_arg):
+        query["doctor_id"] = ObjectId(doctor_id_arg)
+        
+    if status_arg:
+        query["status"] = status_arg.upper()
+        
+    appointments = list(db.appointments.find(query).sort("created_at", -1))
+    
+    # Enrich with doctor and hospital names if missing
+    for appt in appointments:
+        if not appt.get("doctor_name") and appt.get("doctor_id"):
+            doc = db.doctors.find_one({"_id": appt["doctor_id"]})
+            if doc:
+                appt["doctor_name"] = doc.get("name")
+                appt["specialty"] = doc.get("specialty")
+        if not appt.get("hospital_name") and appt.get("hospital_id"):
+            hosp = db.hospitals.find_one({"_id": appt["hospital_id"]})
+            if hosp:
+                appt["hospital_name"] = hosp.get("name")
+        if not appt.get("patient_name") and appt.get("patient_id"):
+            pat = db.patients.find_one({"_id": appt["patient_id"]})
+            if pat:
+                appt["patient_name"] = pat.get("name")
+                
+    return jsonify(serialize_doc(appointments)), 200
 
-    appointments = list(
-        db.appointments.find()
-    )
-
-    for appointment in appointments:
-
-        appointment["_id"] = str(
-            appointment["_id"]
-        )
-
-        appointment["patient_id"] = str(
-            appointment["patient_id"]
-        )
-
-        appointment["hospital_id"] = str(
-            appointment["hospital_id"]
-        )
-
-        appointment["doctor_id"] = str(
-            appointment["doctor_id"]
-        )
-
-    return appointments
-
-
-# ============================================================
-# GET APPOINTMENT BY ID
-# PATIENT -> OWN APPOINTMENT
-# STAFF/ADMIN -> ANY APPOINTMENT
-# ============================================================
-
-@router.get("/{appointment_id}")
-def get_appointment(
-    appointment_id: str,
-    current_user: dict = Depends(
-        get_current_user
-    ),
-):
+@appointment_bp.route("/<appointment_id>", methods=["GET"], strict_slashes=False)
+@token_required
+def get_appointment(appointment_id):
     db = get_database()
+    if not is_valid_object_id(appointment_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid appointment ID"}), 400
+        
+    appt = db.appointments.find_one({"_id": ObjectId(appointment_id)})
+    if not appt:
+        return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
+        
+    return jsonify(serialize_doc(appt)), 200
 
-    if not ObjectId.is_valid(
-        appointment_id
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid appointment ID"
-        )
-
-    appointment = db.appointments.find_one(
-        {
-            "_id": ObjectId(
-                appointment_id
-            )
-        }
-    )
-
-    if not appointment:
-        raise HTTPException(
-            status_code=404,
-            detail="Appointment not found"
-        )
-
-    # --------------------------------------------------------
-    # Patient ownership protection
-    # --------------------------------------------------------
-
-    if current_user.get("role") == "PATIENT":
-
-        patient_id = str(
-            appointment["patient_id"]
-        )
-
-        current_user_id = str(
-            current_user["_id"]
-        )
-
-        patient = db.patients.find_one(
-            {
-                "_id": ObjectId(
-                    patient_id
-                )
-            }
-        )
-
-        owns_record = (
-            patient
-            and (
-                patient.get("user_id")
-                == current_user_id
-                or patient.get("email")
-                == current_user.get("email")
-            )
-        )
-
-        if not owns_record:
-            raise HTTPException(
-                status_code=403,
-                detail="You can only access your own appointment"
-            )
-
-    appointment["_id"] = str(
-        appointment["_id"]
-    )
-
-    appointment["patient_id"] = str(
-        appointment["patient_id"]
-    )
-
-    appointment["hospital_id"] = str(
-        appointment["hospital_id"]
-    )
-
-    appointment["doctor_id"] = str(
-        appointment["doctor_id"]
-    )
-
-    return appointment
-
-
-# ============================================================
-# UPDATE APPOINTMENT
-# PATIENT -> OWN APPOINTMENT
-# STAFF/ADMIN -> ANY APPOINTMENT
-# ============================================================
-
-@router.put("/{appointment_id}")
-def update_appointment(
-    appointment_id: str,
-    appointment: AppointmentUpdate,
-    current_user: dict = Depends(
-        get_current_user
-    ),
-):
+@appointment_bp.route("/<appointment_id>", methods=["PUT"], strict_slashes=False)
+@token_required
+def update_appointment(appointment_id):
     db = get_database()
-
-    if not ObjectId.is_valid(
-        appointment_id
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid appointment ID"
-        )
-
-    existing_appointment = db.appointments.find_one(
-        {
-            "_id": ObjectId(
-                appointment_id
-            )
-        }
-    )
-
-    if not existing_appointment:
-        raise HTTPException(
-            status_code=404,
-            detail="Appointment not found"
-        )
-
-    # --------------------------------------------------------
-    # Patient ownership protection
-    # --------------------------------------------------------
-
+    if not is_valid_object_id(appointment_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid appointment ID"}), 400
+        
+    existing = db.appointments.find_one({"_id": ObjectId(appointment_id)})
+    if not existing:
+        return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
+        
+    data = request.get_json() or {}
+    data.pop("_id", None)
+    
+    current_user = g.current_user
     if current_user.get("role") == "PATIENT":
-
-        patient_id = str(
-            existing_appointment["patient_id"]
-        )
-
-        current_user_id = str(
-            current_user["_id"]
-        )
-
-        patient = db.patients.find_one(
-            {
-                "_id": ObjectId(
-                    patient_id
-                )
-            }
-        )
-
-        owns_record = (
-            patient
-            and (
-                patient.get("user_id")
-                == current_user_id
-                or patient.get("email")
-                == current_user.get("email")
-            )
-        )
-
-        if not owns_record:
-            raise HTTPException(
-                status_code=403,
-                detail="You can only update your own appointment"
-            )
-
-    # --------------------------------------------------------
-    # Prepare update data
-    # --------------------------------------------------------
-
-    data = {
-        key: value
-        for key, value in appointment.model_dump().items()
-        if value is not None
-    }
-
-    # --------------------------------------------------------
-    # Patients cannot manually modify workflow status
-    # --------------------------------------------------------
-
-    if current_user.get("role") == "PATIENT":
-
-        data.pop("status", None)
         data.pop("approval_status", None)
+        
+    data["updated_at"] = datetime.now(timezone.utc)
+    db.appointments.update_one({"_id": ObjectId(appointment_id)}, {"$set": data})
+    return jsonify({"message": "Appointment updated successfully"}), 200
 
-    data["updated_at"] =datetime.now(UTC)
-
-    result = db.appointments.update_one(
-        {
-            "_id": ObjectId(
-                appointment_id
-            )
-        },
-        {
-            "$set": data
-        }
-    )
-
-    if result.matched_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Appointment not found"
-        )
-
-    return {
-        "message":
-            "Appointment updated successfully"
-    }
-
-
-# ============================================================
-# DELETE APPOINTMENT
-# PATIENT -> OWN APPOINTMENT
-# STAFF/ADMIN -> ANY APPOINTMENT
-# ============================================================
-
-@router.delete("/{appointment_id}")
-def delete_appointment(
-    appointment_id: str,
-    current_user: dict = Depends(
-        get_current_user
-    ),
-):
+@appointment_bp.route("/<appointment_id>", methods=["DELETE"], strict_slashes=False)
+@token_required
+def delete_appointment(appointment_id):
     db = get_database()
-
-    if not ObjectId.is_valid(
-        appointment_id
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid appointment ID"
-        )
-
-    existing_appointment = db.appointments.find_one(
-        {
-            "_id": ObjectId(
-                appointment_id
-            )
-        }
-    )
-
-    if not existing_appointment:
-        raise HTTPException(
-            status_code=404,
-            detail="Appointment not found"
-        )
-
-    # --------------------------------------------------------
-    # Patient ownership protection
-    # --------------------------------------------------------
-
-    if current_user.get("role") == "PATIENT":
-
-        patient_id = str(
-            existing_appointment["patient_id"]
-        )
-
-        current_user_id = str(
-            current_user["_id"]
-        )
-
-        patient = db.patients.find_one(
-            {
-                "_id": ObjectId(
-                    patient_id
-                )
-            }
-        )
-
-        owns_record = (
-            patient
-            and (
-                patient.get("user_id")
-                == current_user_id
-                or patient.get("email")
-                == current_user.get("email")
-            )
-        )
-
-        if not owns_record:
-            raise HTTPException(
-                status_code=403,
-                detail="You can only delete your own appointment"
-            )
-
-    result = db.appointments.delete_one(
-        {
-            "_id": ObjectId(
-                appointment_id
-            )
-        }
-    )
-
+    if not is_valid_object_id(appointment_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid appointment ID"}), 400
+        
+    result = db.appointments.delete_one({"_id": ObjectId(appointment_id)})
     if result.deleted_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Appointment not found"
-        )
-
-    return {
-        "message":
-            "Appointment deleted successfully"
-    }
-
+        return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
+        
+    return jsonify({"message": "Appointment deleted/cancelled successfully"}), 200

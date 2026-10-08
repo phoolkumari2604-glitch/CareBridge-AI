@@ -1,269 +1,147 @@
-from fastapi import APIRouter, HTTPException, Depends
+from datetime import datetime, timezone
+from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
-from datetime import datetime, UTC
-
 from app.core.database import get_database
-from app.core.dependencies import (
-    get_current_user,
-    require_staff_or_admin,
-    require_admin,
-)
+from app.utils.decorators import token_required, staff_or_admin_required
+from app.utils.helpers import serialize_doc, is_valid_object_id
 
-router = APIRouter(
-    prefix="/approvals",
-    tags=["Approvals"],
-)
+approval_bp = Blueprint("approvals", __name__)
 
-
-@router.post("/{appointment_id}")
-def create_approval(
-    appointment_id: str,
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@approval_bp.route("/<appointment_id>", methods=["POST"], strict_slashes=False)
+@token_required
+def create_approval(appointment_id):
     db = get_database()
-
-    if not ObjectId.is_valid(appointment_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid appointment ID"
-        )
-
-    appointment = db.appointments.find_one(
-        {"_id": ObjectId(appointment_id)}
-    )
-
+    if not is_valid_object_id(appointment_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid appointment ID"}), 400
+        
+    appointment = db.appointments.find_one({"_id": ObjectId(appointment_id)})
     if not appointment:
-        raise HTTPException(
-            status_code=404,
-            detail="Appointment not found"
-        )
-
-    existing = db.approvals.find_one(
-        {"appointment_id": ObjectId(appointment_id)}
-    )
-
+        return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
+        
+    existing = db.approvals.find_one({"appointment_id": ObjectId(appointment_id)})
     if existing:
-        raise HTTPException(
-            status_code=409,
-            detail="Approval already exists"
-        )
-
+        return jsonify({"error": "Conflict", "detail": "Approval already exists"}), 409
+        
     approval = {
         "appointment_id": ObjectId(appointment_id),
         "patient_id": appointment["patient_id"],
+        "doctor_id": appointment.get("doctor_id"),
         "status": "PENDING",
         "approved_by": None,
-        "created_at":datetime.now(UTC),
-        "updated_at":datetime.now(UTC),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
     }
-
     result = db.approvals.insert_one(approval)
-
-    return {
+    return jsonify({
         "message": "Approval created successfully",
         "approval_id": str(result.inserted_id),
-        "status": "PENDING",
-    }
+        "status": "PENDING"
+    }), 201
 
-
-@router.get("/")
-def get_approvals(
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@approval_bp.route("", methods=["GET"], strict_slashes=False)
+@approval_bp.route("/", methods=["GET"], strict_slashes=False)
+@token_required
+def get_approvals():
     db = get_database()
+    current_user = g.current_user
+    role = current_user.get("role", "PATIENT")
+    
+    patient_id = request.args.get("patient_id")
+    doctor_id = request.args.get("doctor_id")
+    
+    query = {}
+    if role == "PATIENT":
+        user_id = str(current_user["_id"])
+        email = current_user.get("email", "").lower()
+        patient = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": email}]})
+        if patient:
+            query["patient_id"] = patient["_id"]
+        elif patient_id and is_valid_object_id(patient_id):
+            query["patient_id"] = ObjectId(patient_id)
+    else:
+        if patient_id and is_valid_object_id(patient_id):
+            query["patient_id"] = ObjectId(patient_id)
+            
+    if doctor_id and is_valid_object_id(doctor_id):
+        query["doctor_id"] = ObjectId(doctor_id)
+        
+    approvals = list(db.approvals.find(query).sort("created_at", -1))
+    
+    # Enrich with details
+    for app in approvals:
+        if app.get("appointment_id"):
+            appt = db.appointments.find_one({"_id": app["appointment_id"]})
+            if appt:
+                app["doctor_name"] = appt.get("doctor_name")
+                app["hospital_name"] = appt.get("hospital_name")
+                app["patient_name"] = appt.get("patient_name")
+                app["appointment_date"] = appt.get("appointment_date")
+                app["appointment_time"] = appt.get("appointment_time")
+                app["reason"] = appt.get("reason")
+                
+    return jsonify(serialize_doc(approvals)), 200
 
-    approvals = list(db.approvals.find())
-
-    for approval in approvals:
-        approval["_id"] = str(approval["_id"])
-        approval["appointment_id"] = str(
-            approval["appointment_id"]
-        )
-        approval["patient_id"] = str(
-            approval["patient_id"]
-        )
-
-        if approval.get("approved_by"):
-            approval["approved_by"] = str(
-                approval["approved_by"]
-            )
-
-    return approvals
-
-
-@router.get("/{approval_id}")
-def get_approval(
-    approval_id: str,
-    current_user: dict = Depends(get_current_user),
-):
+@approval_bp.route("/<approval_id>", methods=["GET"], strict_slashes=False)
+@token_required
+def get_approval(approval_id):
     db = get_database()
-
-    if not ObjectId.is_valid(approval_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid approval ID"
-        )
-
-    approval = db.approvals.find_one(
-        {"_id": ObjectId(approval_id)}
-    )
-
+    if not is_valid_object_id(approval_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid approval ID"}), 400
+        
+    approval = db.approvals.find_one({"_id": ObjectId(approval_id)})
     if not approval:
-        raise HTTPException(
-            status_code=404,
-            detail="Approval not found"
-        )
+        return jsonify({"error": "Not Found", "detail": "Approval not found"}), 404
+        
+    return jsonify(serialize_doc(approval)), 200
 
-    if current_user.get("role") == "PATIENT":
-
-        patient_id = str(approval["patient_id"])
-        current_user_id = str(current_user["_id"])
-
-        patient = db.patients.find_one(
-            {"_id": ObjectId(patient_id)}
-        )
-
-        owns_record = (
-            patient
-            and (
-                patient.get("user_id") == current_user_id
-                or patient.get("email")
-                == current_user.get("email")
-            )
-        )
-
-        if not owns_record:
-            raise HTTPException(
-                status_code=403,
-                detail="You can only access your own approval"
-            )
-
-    approval["_id"] = str(approval["_id"])
-    approval["appointment_id"] = str(
-        approval["appointment_id"]
-    )
-    approval["patient_id"] = str(
-        approval["patient_id"]
-    )
-
-    if approval.get("approved_by"):
-        approval["approved_by"] = str(
-            approval["approved_by"]
-        )
-
-    return approval
-
-
-@router.put("/{approval_id}")
-def update_approval(
-    approval_id: str,
-    status: str,
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@approval_bp.route("/<approval_id>", methods=["PUT"], strict_slashes=False)
+@token_required
+def update_approval(approval_id):
     db = get_database()
-
-    if not ObjectId.is_valid(approval_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid approval ID"
-        )
-
-    status = status.upper()
-
+    if not is_valid_object_id(approval_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid approval ID"}), 400
+        
+    data = request.get_json() or {}
+    status = (data.get("status") or request.args.get("status", "")).upper()
+    
     if status not in {"APPROVED", "REJECTED"}:
-        raise HTTPException(
-            status_code=400,
-            detail="Status must be APPROVED or REJECTED"
-        )
-
-    approval = db.approvals.find_one(
-        {"_id": ObjectId(approval_id)}
-    )
-
+        return jsonify({"error": "Validation Error", "detail": "Status must be APPROVED or REJECTED"}), 400
+        
+    approval = db.approvals.find_one({"_id": ObjectId(approval_id)})
     if not approval:
-        raise HTTPException(
-            status_code=404,
-            detail="Approval not found"
-        )
-
+        return jsonify({"error": "Not Found", "detail": "Approval not found"}), 404
+        
     update_data = {
         "status": status,
-        "approved_by": current_user["_id"],
-        "updated_at":datetime.now(UTC),
+        "approved_by": g.current_user["_id"],
+        "updated_at": datetime.now(timezone.utc),
     }
-
     if status == "APPROVED":
-        update_data["approved_at"] =datetime.now(UTC)
-
-    result = db.approvals.update_one(
-        {"_id": ObjectId(approval_id)},
-        {"$set": update_data}
-    )
-
-    if result.matched_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Approval not found"
-        )
-
-    # -----------------------------------------
-    # Synchronize appointment approval status
-    # -----------------------------------------
-    if status == "APPROVED":
-
+        update_data["approved_at"] = datetime.now(timezone.utc)
+        
+    db.approvals.update_one({"_id": ObjectId(approval_id)}, {"$set": update_data})
+    
+    # Sync with appointment
+    if approval.get("appointment_id"):
         db.appointments.update_one(
             {"_id": approval["appointment_id"]},
-            {
-                "$set": {
-                    "approval_status": "APPROVED",
-                    "updated_at":datetime.now(UTC),
-                }
-            }
+            {"$set": {"approval_status": status, "status": status, "updated_at": datetime.now(timezone.utc)}}
         )
-
-    elif status == "REJECTED":
-
-        db.appointments.update_one(
-            {"_id": approval["appointment_id"]},
-            {
-                "$set": {
-                    "approval_status": "REJECTED",
-                    "updated_at":datetime.now(UTC),
-                }
-            }
-        )
-
-    return {
+        
+    return jsonify({
         "message": f"Approval {status.lower()} successfully",
         "approval_id": approval_id,
-        "status": status,
-    }
+        "status": status
+    }), 200
 
-
-@router.delete("/{approval_id}")
-def delete_approval(
-    approval_id: str,
-    current_user: dict = Depends(require_admin),
-):
+@approval_bp.route("/<approval_id>", methods=["DELETE"], strict_slashes=False)
+@staff_or_admin_required
+def delete_approval(approval_id):
     db = get_database()
-
-    if not ObjectId.is_valid(approval_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid approval ID"
-        )
-
-    result = db.approvals.delete_one(
-        {"_id": ObjectId(approval_id)}
-    )
-
+    if not is_valid_object_id(approval_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid approval ID"}), 400
+        
+    result = db.approvals.delete_one({"_id": ObjectId(approval_id)})
     if result.deleted_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Approval not found"
-        )
-
-    return {
-        "message": "Approval deleted successfully"
-    }
-
+        return jsonify({"error": "Not Found", "detail": "Approval not found"}), 404
+    return jsonify({"message": "Approval deleted successfully"}), 200

@@ -1,6 +1,19 @@
 import api from "./api";
 
 const patientService = {
+  getCurrentPatientId() {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        return user.patient_id || user.id || user._id;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  },
+
   // ==========================================
   // PATIENT PROFILE & MANAGEMENT
   // ==========================================
@@ -22,8 +35,12 @@ const patientService = {
   // ==========================================
   // DOCTORS & AVAILABILITY
   // ==========================================
-  async getDoctors() {
-    const res = await api.get("/doctors/");
+  async getDoctors(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.specialty) params.append("specialty", filters.specialty);
+    if (filters.hospital_id) params.append("hospital_id", filters.hospital_id);
+    const queryString = params.toString() ? `?${params.toString()}` : "";
+    const res = await api.get(`/doctors/${queryString}`);
     return res.data;
   },
 
@@ -41,8 +58,14 @@ const patientService = {
   // APPOINTMENTS
   // ==========================================
   async bookAppointment(data) {
-    // data: { patient_id, hospital_id, doctor_id, appointment_date, appointment_time, reason }
     const res = await api.post("/appointments/", data);
+    return res.data;
+  },
+
+  async getAppointments(patientId) {
+    const pId = patientId || this.getCurrentPatientId();
+    const query = pId ? `?patient_id=${pId}` : "";
+    const res = await api.get(`/appointments/${query}`);
     return res.data;
   },
 
@@ -56,124 +79,44 @@ const patientService = {
     return res.data;
   },
 
+  async cancelAppointment(appointmentId) {
+    const res = await api.delete(`/appointments/${appointmentId}`);
+    return res.data;
+  },
+
   async deleteAppointment(appointmentId) {
     const res = await api.delete(`/appointments/${appointmentId}`);
     return res.data;
   },
 
-  // Local sync helper for tracking patient's appointments
-  getStoredAppointmentIds(patientId) {
-    if (!patientId) return [];
-    try {
-      const stored = localStorage.getItem(`carebridge_patient_apts_${patientId}`);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  },
-
-  addStoredAppointmentId(patientId, appointmentId) {
-    if (!patientId || !appointmentId) return;
-    try {
-      const existing = this.getStoredAppointmentIds(patientId);
-      if (!existing.includes(appointmentId)) {
-        existing.unshift(appointmentId);
-        localStorage.setItem(`carebridge_patient_apts_${patientId}`, JSON.stringify(existing));
-      }
-    } catch {
-      // storage quota or parse error
-    }
-  },
-
-  removeStoredAppointmentId(patientId, appointmentId) {
-    if (!patientId || !appointmentId) return;
-    try {
-      const existing = this.getStoredAppointmentIds(patientId).filter((id) => id !== appointmentId);
-      localStorage.setItem(`carebridge_patient_apts_${patientId}`, JSON.stringify(existing));
-    } catch {
-      // storage error
-    }
-  },
-
-  // Fetch full details of all stored appointments for patient
-  async getPatientAppointments(patientId) {
-    const ids = this.getStoredAppointmentIds(patientId);
-    if (!ids || ids.length === 0) return [];
-
-    const results = await Promise.allSettled(
-      ids.map((id) => this.getAppointment(id))
-    );
-
-    const appointments = [];
-    const validIds = [];
-
-    results.forEach((res, idx) => {
-      if (res.status === "fulfilled" && res.value) {
-        appointments.push(res.value);
-        validIds.push(ids[idx]);
-      }
-    });
-
-    // Clean up stale IDs if any failed due to 404
-    if (validIds.length !== ids.length) {
-      localStorage.setItem(`carebridge_patient_apts_${patientId}`, JSON.stringify(validIds));
-    }
-
-    return appointments;
-  },
-
   // ==========================================
   // DIGITAL OPD PASS
   // ==========================================
+  async getOPDPasses(patientId) {
+    const pId = patientId || this.getCurrentPatientId();
+    const query = pId ? `?patient_id=${pId}` : "";
+    const res = await api.get(`/opd-pass/${query}`);
+    return res.data;
+  },
+
   async getOPDPass(opdPassId) {
     const res = await api.get(`/opd-pass/${opdPassId}`);
     return res.data;
   },
 
-  getStoredOPDPassIds(patientId) {
-    if (!patientId) return [];
-    try {
-      const stored = localStorage.getItem(`carebridge_patient_opd_${patientId}`);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  },
-
-  addStoredOPDPassId(patientId, opdPassId) {
-    if (!patientId || !opdPassId) return;
-    try {
-      const existing = this.getStoredOPDPassIds(patientId);
-      if (!existing.includes(opdPassId)) {
-        existing.unshift(opdPassId);
-        localStorage.setItem(`carebridge_patient_opd_${patientId}`, JSON.stringify(existing));
-      }
-    } catch {
-      // error
-    }
-  },
-
-  async getPatientOPDPasses(patientId) {
-    const ids = this.getStoredOPDPassIds(patientId);
-    if (!ids || ids.length === 0) return [];
-
-    const results = await Promise.allSettled(
-      ids.map((id) => this.getOPDPass(id))
-    );
-
-    const passes = [];
-    results.forEach((res) => {
-      if (res.status === "fulfilled" && res.value) {
-        passes.push(res.value);
-      }
-    });
-
-    return passes;
+  async createOPDPass(appointmentId) {
+    const res = await api.post(`/opd-pass/${appointmentId}`);
+    return res.data;
   },
 
   // ==========================================
   // LIVE QUEUE
   // ==========================================
+  async getLiveQueue(departmentIdOrQuery) {
+    const res = await api.get("/queue/");
+    return res.data;
+  },
+
   async getQueue() {
     const res = await api.get("/queue/");
     return res.data;
@@ -185,59 +128,31 @@ const patientService = {
   },
 
   // ==========================================
-  // APPROVALS
+  // APPROVALS & SMARTFLOW
   // ==========================================
+  async getPatientApprovals(patientId) {
+    const pId = patientId || this.getCurrentPatientId();
+    const query = pId ? `?patient_id=${pId}` : "";
+    const res = await api.get(`/approvals/${query}`);
+    return res.data;
+  },
+
   async getApproval(approvalId) {
     const res = await api.get(`/approvals/${approvalId}`);
     return res.data;
   },
 
-  getStoredApprovalIds(patientId) {
-    if (!patientId) return [];
-    try {
-      const stored = localStorage.getItem(`carebridge_patient_approvals_${patientId}`);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  },
-
-  addStoredApprovalId(patientId, approvalId) {
-    if (!patientId || !approvalId) return;
-    try {
-      const existing = this.getStoredApprovalIds(patientId);
-      if (!existing.includes(approvalId)) {
-        existing.unshift(approvalId);
-        localStorage.setItem(`carebridge_patient_approvals_${patientId}`, JSON.stringify(existing));
-      }
-    } catch {
-      // error
-    }
-  },
-
-  async getPatientApprovals(patientId) {
-    const ids = this.getStoredApprovalIds(patientId);
-    if (!ids || ids.length === 0) return [];
-
-    const results = await Promise.allSettled(
-      ids.map((id) => this.getApproval(id))
-    );
-
-    const approvals = [];
-    results.forEach((res) => {
-      if (res.status === "fulfilled" && res.value) {
-        approvals.push(res.value);
-      }
-    });
-
-    return approvals;
+  async runSmartFlow(appointmentId) {
+    const res = await api.post(`/smartflow/${appointmentId}`);
+    return res.data;
   },
 
   // ==========================================
-  // HOSPITALS
+  // HOSPITALS & LEAFMAP GEOLOCATION
   // ==========================================
-  async getHospitals() {
-    const res = await api.get("/hospitals/");
+  async getHospitals(city) {
+    const query = city ? `?city=${encodeURIComponent(city)}` : "";
+    const res = await api.get(`/hospitals/${query}`);
     return res.data;
   },
 
@@ -251,16 +166,30 @@ const patientService = {
     return res.data;
   },
 
-  async getNearbyFacilities(lat, lng, radiusKm = 10) {
+  async getRealtimeNearbyHospitals(lat, lng, radiusKm = 10) {
     const res = await api.get(`/hospitals/nearby/realtime?lat=${lat}&lng=${lng}&radius_km=${radiusKm}`);
     return res.data;
   },
 
+  async getNearbyFacilities(lat, lng, radiusKm = 10) {
+    return this.getRealtimeNearbyHospitals(lat, lng, radiusKm);
+  },
+
+  getHospitalMapHtmlUrl(lat, lng) {
+    const base = api.defaults.baseURL || "http://127.0.0.1:5000/api";
+    const cleanBase = base.replace(/\/api\/?$/, "");
+    if (lat && lng) {
+      return `${cleanBase}/api/hospitals/map/html?lat=${lat}&lng=${lng}`;
+    }
+    return `${cleanBase}/api/hospitals/map/html`;
+  },
+
   // ==========================================
-  // HEALTH RECORDS & VITALS
+  // HEALTH RECORDS & FILE UPLOADS
   // ==========================================
   async getHealthRecords(patientId) {
-    const res = await api.get(`/health-records/${patientId}`);
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/health-records/${pId}`);
     return res.data;
   },
 
@@ -269,38 +198,53 @@ const patientService = {
     return res.data;
   },
 
-  async getVitals(patientId) {
-    const res = await api.get(`/vitals/${patientId}`);
+  async uploadHealthRecordFile(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await api.post("/health-records/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return res.data;
   },
 
-  async getLatestVital(patientId) {
-    const res = await api.get(`/vitals/${patientId}/latest`);
+  // ==========================================
+  // VITALS & ALERTS
+  // ==========================================
+  async getVitals(patientId) {
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/vitals/${pId}`);
+    return res.data;
+  },
+
+  async getLatestVitals(patientId) {
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/vitals/${pId}/latest`);
     return res.data;
   },
 
   async getHealthProfile(patientId) {
-    const res = await api.get(`/health-profiles/${patientId}`);
-    return res.data;
-  },
-
-  async createHealthProfile(data) {
-    const res = await api.post("/health-profiles/", data);
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/health-profiles/${pId}`);
     return res.data;
   },
 
   async updateHealthProfile(patientId, data) {
-    const res = await api.put(`/health-profiles/${patientId}`, data);
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.put(`/health-profiles/${pId}`, data);
     return res.data;
   },
 
   async getHealthAlerts(patientId) {
-    const res = await api.get(`/health-alerts/${patientId}`);
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/health-alerts/${pId}`);
     return res.data;
   },
 
   async getAlertSummary(patientId) {
-    const res = await api.get(`/health-alerts/${patientId}/summary`);
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/health-alerts/${pId}/summary`);
     return res.data;
   },
 
@@ -308,15 +252,17 @@ const patientService = {
   // AI ASSISTANT
   // ==========================================
   async chatWithAI(patientId, message) {
+    const pId = patientId || this.getCurrentPatientId();
     const res = await api.post("/ai-assistant/chat", {
-      patient_id: patientId,
+      patient_id: pId,
       message,
     });
     return res.data;
   },
 
   async getAIHistory(patientId) {
-    const res = await api.get(`/ai-assistant/history/${patientId}`);
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/ai-assistant/history/${pId}`);
     return res.data;
   },
 
@@ -324,12 +270,14 @@ const patientService = {
   // NOTIFICATIONS
   // ==========================================
   async getNotifications(patientId) {
-    const res = await api.get(`/notifications/${patientId}`);
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/notifications/${pId}`);
     return res.data;
   },
 
   async getUnreadCount(patientId) {
-    const res = await api.get(`/notifications/${patientId}/unread-count`);
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.get(`/notifications/${pId}/unread-count`);
     return res.data;
   },
 

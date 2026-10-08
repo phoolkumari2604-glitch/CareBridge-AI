@@ -1,243 +1,148 @@
-from fastapi import APIRouter, HTTPException, Depends
+from datetime import datetime, timezone
+import secrets
+from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
-from datetime import datetime, UTC
-
 from app.core.database import get_database
-from app.core.dependencies import (
-    get_current_user,
-    require_staff_or_admin,
-    require_admin,
-)
+from app.utils.decorators import token_required, staff_or_admin_required
+from app.utils.helpers import serialize_doc, is_valid_object_id
 
-router = APIRouter(
-    prefix="/opd-pass",
-    tags=["Digital OPD Pass"],
-)
+opd_pass_bp = Blueprint("opd_pass", __name__)
 
-
-@router.post("/{appointment_id}")
-def create_opd_pass(
-    appointment_id: str,
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@opd_pass_bp.route("/<appointment_id>", methods=["POST"], strict_slashes=False)
+@token_required
+def create_opd_pass(appointment_id):
     db = get_database()
-
-    if not ObjectId.is_valid(appointment_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid appointment ID"
-        )
-
-    appointment = db.appointments.find_one(
-        {"_id": ObjectId(appointment_id)}
-    )
-
+    if not is_valid_object_id(appointment_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid appointment ID"}), 400
+        
+    appointment = db.appointments.find_one({"_id": ObjectId(appointment_id)})
     if not appointment:
-        raise HTTPException(
-            status_code=404,
-            detail="Appointment not found"
-        )
-
-    existing_pass = db.opd_passes.find_one(
-        {"appointment_id": ObjectId(appointment_id)}
-    )
-
+        return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
+        
+    existing_pass = db.opd_passes.find_one({"appointment_id": ObjectId(appointment_id)})
     if existing_pass:
-        raise HTTPException(
-            status_code=409,
-            detail="OPD pass already exists"
-        )
-
-    pass_number = (
-        f"OPD-{datetime.utcnow().strftime('%Y%m%d')}-"
-        f"{str(appointment['_id'])[-6:].upper()}"
-    )
-
+        return jsonify({
+            "message": "Digital OPD pass already exists",
+            "opd_pass_id": str(existing_pass["_id"]),
+            "pass_number": existing_pass.get("pass_number"),
+            "status": existing_pass.get("status", "ACTIVE")
+        }), 200
+        
+    pass_number = f"OPD-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}"
     opd_pass = {
         "appointment_id": ObjectId(appointment_id),
         "patient_id": appointment["patient_id"],
-        "hospital_id": appointment["hospital_id"],
-        "doctor_id": appointment["doctor_id"],
+        "hospital_id": appointment.get("hospital_id"),
+        "doctor_id": appointment.get("doctor_id"),
+        "doctor_name": appointment.get("doctor_name"),
+        "hospital_name": appointment.get("hospital_name"),
+        "patient_name": appointment.get("patient_name"),
+        "appointment_date": appointment.get("appointment_date"),
+        "appointment_time": appointment.get("appointment_time"),
+        "reason": appointment.get("reason"),
         "pass_number": pass_number,
         "status": "ACTIVE",
-        "created_at":datetime.now(UTC),
-        "updated_at":datetime.now(UTC),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
     }
-
     result = db.opd_passes.insert_one(opd_pass)
-
-    return {
+    return jsonify({
         "message": "Digital OPD pass created successfully",
         "opd_pass_id": str(result.inserted_id),
         "pass_number": pass_number,
-        "status": "ACTIVE",
-    }
+        "status": "ACTIVE"
+    }), 201
 
-
-@router.get("/")
-def get_opd_passes(
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@opd_pass_bp.route("", methods=["GET"], strict_slashes=False)
+@opd_pass_bp.route("/", methods=["GET"], strict_slashes=False)
+@token_required
+def get_opd_passes():
     db = get_database()
+    current_user = g.current_user
+    role = current_user.get("role", "PATIENT")
+    
+    patient_id = request.args.get("patient_id")
+    query = {}
+    if role == "PATIENT":
+        user_id = str(current_user["_id"])
+        email = current_user.get("email", "").lower()
+        patient = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": email}]})
+        if patient:
+            query["patient_id"] = patient["_id"]
+        elif patient_id and is_valid_object_id(patient_id):
+            query["patient_id"] = ObjectId(patient_id)
+    elif patient_id and is_valid_object_id(patient_id):
+        query["patient_id"] = ObjectId(patient_id)
+        
+    passes = list(db.opd_passes.find(query).sort("created_at", -1))
+    
+    for op in passes:
+        if not op.get("doctor_name") and op.get("doctor_id"):
+            doc = db.doctors.find_one({"_id": op["doctor_id"]})
+            if doc:
+                op["doctor_name"] = doc.get("name")
+        if not op.get("hospital_name") and op.get("hospital_id"):
+            hosp = db.hospitals.find_one({"_id": op["hospital_id"]})
+            if hosp:
+                op["hospital_name"] = hosp.get("name")
+                
+    return jsonify(serialize_doc(passes)), 200
 
-    passes = list(db.opd_passes.find())
-
-    for opd_pass in passes:
-        opd_pass["_id"] = str(opd_pass["_id"])
-        opd_pass["appointment_id"] = str(
-            opd_pass["appointment_id"]
-        )
-        opd_pass["patient_id"] = str(
-            opd_pass["patient_id"]
-        )
-        opd_pass["hospital_id"] = str(
-            opd_pass["hospital_id"]
-        )
-        opd_pass["doctor_id"] = str(
-            opd_pass["doctor_id"]
-        )
-
-    return passes
-
-
-@router.get("/{opd_pass_id}")
-def get_opd_pass(
-    opd_pass_id: str,
-    current_user: dict = Depends(get_current_user),
-):
+@opd_pass_bp.route("/patient/<patient_id>", methods=["GET"], strict_slashes=False)
+@token_required
+def get_patient_opd_passes(patient_id):
     db = get_database()
+    if not is_valid_object_id(patient_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid patient ID"}), 400
+        
+    passes = list(db.opd_passes.find({"patient_id": ObjectId(patient_id)}).sort("created_at", -1))
+    return jsonify(serialize_doc(passes)), 200
 
-    if not ObjectId.is_valid(opd_pass_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid OPD pass ID"
-        )
-
-    opd_pass = db.opd_passes.find_one(
-        {"_id": ObjectId(opd_pass_id)}
-    )
-
+@opd_pass_bp.route("/<opd_pass_id>", methods=["GET"], strict_slashes=False)
+@token_required
+def get_opd_pass(opd_pass_id):
+    db = get_database()
+    if not is_valid_object_id(opd_pass_id):
+        # Maybe queried by patient_id directly
+        passes = list(db.opd_passes.find({"patient_id": opd_pass_id}).sort("created_at", -1))
+        if passes:
+            return jsonify(serialize_doc(passes[0])), 200
+        return jsonify({"error": "Validation Error", "detail": "Invalid OPD pass ID"}), 400
+        
+    opd_pass = db.opd_passes.find_one({"_id": ObjectId(opd_pass_id)})
     if not opd_pass:
-        raise HTTPException(
-            status_code=404,
-            detail="OPD pass not found"
-        )
+        # Check by patient_id
+        opd_pass = db.opd_passes.find_one({"patient_id": ObjectId(opd_pass_id)})
+        if not opd_pass:
+            return jsonify({"error": "Not Found", "detail": "OPD pass not found"}), 404
+            
+    return jsonify(serialize_doc(opd_pass)), 200
 
-    if current_user.get("role") == "PATIENT":
-
-        patient_id = str(opd_pass["patient_id"])
-        current_user_id = str(current_user["_id"])
-
-        patient = db.patients.find_one(
-            {"_id": ObjectId(patient_id)}
-        )
-
-        owns_record = (
-            patient
-            and (
-                patient.get("user_id") == current_user_id
-                or patient.get("email")
-                == current_user.get("email")
-            )
-        )
-
-        if not owns_record:
-            raise HTTPException(
-                status_code=403,
-                detail="You can only access your own OPD pass"
-            )
-
-    opd_pass["_id"] = str(opd_pass["_id"])
-    opd_pass["appointment_id"] = str(
-        opd_pass["appointment_id"]
-    )
-    opd_pass["patient_id"] = str(
-        opd_pass["patient_id"]
-    )
-    opd_pass["hospital_id"] = str(
-        opd_pass["hospital_id"]
-    )
-    opd_pass["doctor_id"] = str(
-        opd_pass["doctor_id"]
-    )
-
-    return opd_pass
-
-
-@router.put("/{opd_pass_id}")
-def update_opd_pass(
-    opd_pass_id: str,
-    status: str,
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@opd_pass_bp.route("/<opd_pass_id>", methods=["PUT"], strict_slashes=False)
+@staff_or_admin_required
+def update_opd_pass(opd_pass_id):
     db = get_database()
-
-    if not ObjectId.is_valid(opd_pass_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid OPD pass ID"
-        )
-
-    status = status.upper()
-
-    if status not in {
-        "ACTIVE",
-        "USED",
-        "EXPIRED",
-        "CANCELLED",
-    }:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid OPD pass status"
-        )
-
-    result = db.opd_passes.update_one(
+    if not is_valid_object_id(opd_pass_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid OPD pass ID"}), 400
+        
+    data = request.get_json() or {}
+    status = (data.get("status") or request.args.get("status", "")).upper()
+    if status not in {"ACTIVE", "USED", "EXPIRED", "CANCELLED"}:
+        return jsonify({"error": "Validation Error", "detail": "Invalid status"}), 400
+        
+    db.opd_passes.update_one(
         {"_id": ObjectId(opd_pass_id)},
-        {
-            "$set": {
-                "status": status,
-                "updated_at":datetime.now(UTC),
-            }
-        }
+        {"$set": {"status": status, "updated_at": datetime.now(timezone.utc)}}
     )
+    return jsonify({"message": "OPD pass updated successfully", "opd_pass_id": opd_pass_id, "status": status}), 200
 
-    if result.matched_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="OPD pass not found"
-        )
-
-    return {
-        "message": "OPD pass updated successfully",
-        "opd_pass_id": opd_pass_id,
-        "status": status,
-    }
-
-
-@router.delete("/{opd_pass_id}")
-def delete_opd_pass(
-    opd_pass_id: str,
-    current_user: dict = Depends(require_admin),
-):
+@opd_pass_bp.route("/<opd_pass_id>", methods=["DELETE"], strict_slashes=False)
+@staff_or_admin_required
+def delete_opd_pass(opd_pass_id):
     db = get_database()
-
-    if not ObjectId.is_valid(opd_pass_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid OPD pass ID"
-        )
-
-    result = db.opd_passes.delete_one(
-        {"_id": ObjectId(opd_pass_id)}
-    )
-
+    if not is_valid_object_id(opd_pass_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid OPD pass ID"}), 400
+    result = db.opd_passes.delete_one({"_id": ObjectId(opd_pass_id)})
     if result.deleted_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="OPD pass not found"
-        )
-
-    return {
-        "message": "OPD pass deleted successfully"
-    }
-
+        return jsonify({"error": "Not Found", "detail": "OPD pass not found"}), 404
+    return jsonify({"message": "OPD pass deleted successfully"}), 200

@@ -1,263 +1,124 @@
-from fastapi import APIRouter, HTTPException, Depends
+from datetime import datetime, timezone
+from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
-from datetime import datetime, UTC, UTC
-
 from app.core.database import get_database
-from app.core.dependencies import (
-    get_current_user,
-    require_admin,
-)
-from app.schemas.doctor import DoctorCreate, DoctorUpdate
+from app.utils.decorators import token_required, admin_required, staff_or_admin_required
+from app.utils.helpers import serialize_doc, is_valid_object_id
 
+doctor_bp = Blueprint("doctors", __name__)
 
-router = APIRouter(
-    prefix="/doctors",
-    tags=["Doctors"]
-)
-
-
-# ============================================================
-# CREATE DOCTOR
-# ADMIN ONLY
-# ============================================================
-
-@router.post("/")
-def create_doctor(
-    doctor: DoctorCreate,
-    current_user: dict = Depends(require_admin),
-):
+@doctor_bp.route("", methods=["POST"], strict_slashes=False)
+@doctor_bp.route("/", methods=["POST"], strict_slashes=False)
+@staff_or_admin_required
+def create_doctor():
     db = get_database()
-
-    # Check whether hospital exists
-    if not ObjectId.is_valid(doctor.hospital_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid hospital ID"
-        )
-
-    hospital = db.hospitals.find_one(
-        {"_id": ObjectId(doctor.hospital_id)}
-    )
-
-    if not hospital:
-        raise HTTPException(
-            status_code=404,
-            detail="Hospital not found"
-        )
-
-    data = doctor.model_dump()
-
-    data["hospital_id"] = ObjectId(doctor.hospital_id)
-    data["created_at"] = datetime.now(UTC)
-
+    data = request.get_json() or {}
+    
+    name = data.get("name")
+    specialty = data.get("specialty")
+    hospital_id = data.get("hospital_id")
+    
+    if not name or not specialty:
+        return jsonify({"error": "Validation Error", "detail": "Doctor name and specialty are required"}), 400
+        
+    if hospital_id and is_valid_object_id(hospital_id):
+        hospital = db.hospitals.find_one({"_id": ObjectId(hospital_id)})
+        if not hospital:
+            return jsonify({"error": "Not Found", "detail": "Hospital not found"}), 404
+        data["hospital_id"] = ObjectId(hospital_id)
+        
+    data["created_at"] = datetime.now(timezone.utc)
+    data["available_slots"] = data.get("available_slots", ["09:00 AM", "10:00 AM", "11:30 AM", "02:00 PM", "03:30 PM", "05:00 PM"])
+    data["available_days"] = data.get("available_days", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"])
+    data["status"] = data.get("status", "AVAILABLE")
+    
     result = db.doctors.insert_one(data)
-
-    return {
+    return jsonify({
         "message": "Doctor created successfully",
         "doctor_id": str(result.inserted_id)
-    }
+    }), 201
 
-
-# ============================================================
-# GET ALL DOCTORS
-# ALL AUTHENTICATED USERS
-# ============================================================
-
-@router.get("/")
-def get_doctors(
-    current_user: dict = Depends(get_current_user),
-):
+@doctor_bp.route("", methods=["GET"], strict_slashes=False)
+@doctor_bp.route("/", methods=["GET"], strict_slashes=False)
+@token_required
+def get_doctors():
     db = get_database()
+    hospital_id = request.args.get("hospital_id")
+    specialty = request.args.get("specialty")
+    
+    query = {}
+    if hospital_id and is_valid_object_id(hospital_id):
+        query["hospital_id"] = ObjectId(hospital_id)
+    if specialty:
+        query["specialty"] = {"$regex": specialty, "$options": "i"}
+        
+    doctors = list(db.doctors.find(query))
+    return jsonify(serialize_doc(doctors)), 200
 
-    doctors = list(db.doctors.find())
-
-    for doctor in doctors:
-        doctor["_id"] = str(doctor["_id"])
-        doctor["hospital_id"] = str(doctor["hospital_id"])
-
-    return doctors
-
-
-# ============================================================
-# GET SINGLE DOCTOR
-# ALL AUTHENTICATED USERS
-# ============================================================
-
-@router.get("/{doctor_id}")
-def get_doctor(
-    doctor_id: str,
-    current_user: dict = Depends(get_current_user),
-):
+@doctor_bp.route("/<doctor_id>", methods=["GET"], strict_slashes=False)
+@token_required
+def get_doctor(doctor_id):
     db = get_database()
-
-    if not ObjectId.is_valid(doctor_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid doctor ID"
-        )
-
-    doctor = db.doctors.find_one(
-        {"_id": ObjectId(doctor_id)}
-    )
-
+    if not is_valid_object_id(doctor_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
+        
+    doctor = db.doctors.find_one({"_id": ObjectId(doctor_id)})
     if not doctor:
-        raise HTTPException(
-            status_code=404,
-            detail="Doctor not found"
-        )
+        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
+        
+    return jsonify(serialize_doc(doctor)), 200
 
-    doctor["_id"] = str(doctor["_id"])
-    doctor["hospital_id"] = str(doctor["hospital_id"])
-
-    return doctor
-
-
-# ============================================================
-# GET DOCTOR AVAILABILITY
-# ALL AUTHENTICATED USERS
-# ============================================================
-
-@router.get("/{doctor_id}/availability")
-def get_doctor_availability(
-    doctor_id: str,
-    current_user: dict = Depends(get_current_user),
-):
+@doctor_bp.route("/<doctor_id>/availability", methods=["GET"], strict_slashes=False)
+@token_required
+def get_doctor_availability(doctor_id):
     db = get_database()
-
-    if not ObjectId.is_valid(doctor_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid doctor ID"
-        )
-
-    doctor = db.doctors.find_one(
-        {"_id": ObjectId(doctor_id)}
-    )
-
+    if not is_valid_object_id(doctor_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
+        
+    doctor = db.doctors.find_one({"_id": ObjectId(doctor_id)})
     if not doctor:
-        raise HTTPException(
-            status_code=404,
-            detail="Doctor not found"
-        )
+        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
+        
+    return jsonify({
+        "doctor_id": str(doctor["_id"]),
+        "doctor_name": doctor.get("name"),
+        "available_days": doctor.get("available_days", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]),
+        "available_slots": doctor.get("available_slots", ["09:00 AM", "10:00 AM", "11:30 AM", "02:00 PM", "03:30 PM", "05:00 PM"]),
+        "status": doctor.get("status", "AVAILABLE")
+    }), 200
 
-    return {
-        "doctor_id": doctor_id,
-        "doctor_name": doctor["name"],
-        "available_days": doctor.get(
-            "available_days",
-            []
-        ),
-        "available_slots": doctor.get(
-            "available_slots",
-            []
-        ),
-        "status": doctor.get(
-            "status",
-            "AVAILABLE"
-        )
-    }
-
-
-# ============================================================
-# UPDATE DOCTOR
-# ADMIN ONLY
-# ============================================================
-
-@router.put("/{doctor_id}")
-def update_doctor(
-    doctor_id: str,
-    doctor: DoctorUpdate,
-    current_user: dict = Depends(require_admin),
-):
+@doctor_bp.route("/<doctor_id>", methods=["PUT"], strict_slashes=False)
+@staff_or_admin_required
+def update_doctor(doctor_id):
     db = get_database()
-
-    if not ObjectId.is_valid(doctor_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid doctor ID"
-        )
-
-    data = {
-        key: value
-        for key, value in doctor.model_dump().items()
-        if value is not None
-    }
-
-    # If hospital_id is being updated,
-    # verify that the hospital exists.
-    if "hospital_id" in data:
-
-        if not ObjectId.is_valid(
-            data["hospital_id"]
-        ):
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid hospital ID"
-            )
-
-        hospital = db.hospitals.find_one(
-            {
-                "_id": ObjectId(
-                    data["hospital_id"]
-                )
-            }
-        )
-
-        if not hospital:
-            raise HTTPException(
-                status_code=404,
-                detail="Hospital not found"
-            )
-
-        data["hospital_id"] = ObjectId(
-            data["hospital_id"]
-        )
-
-    result = db.doctors.update_one(
-        {"_id": ObjectId(doctor_id)},
-        {"$set": data}
-    )
-
+    if not is_valid_object_id(doctor_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
+        
+    data = request.get_json() or {}
+    data.pop("_id", None)
+    
+    if "hospital_id" in data and data["hospital_id"]:
+        if is_valid_object_id(data["hospital_id"]):
+            data["hospital_id"] = ObjectId(data["hospital_id"])
+        else:
+            return jsonify({"error": "Validation Error", "detail": "Invalid hospital ID"}), 400
+            
+    data["updated_at"] = datetime.now(timezone.utc)
+    result = db.doctors.update_one({"_id": ObjectId(doctor_id)}, {"$set": data})
     if result.matched_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Doctor not found"
-        )
+        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
+        
+    return jsonify({"message": "Doctor updated successfully"}), 200
 
-    return {
-        "message": "Doctor updated successfully"
-    }
-
-
-# ============================================================
-# DELETE DOCTOR
-# ADMIN ONLY
-# ============================================================
-
-@router.delete("/{doctor_id}")
-def delete_doctor(
-    doctor_id: str,
-    current_user: dict = Depends(require_admin),
-):
+@doctor_bp.route("/<doctor_id>", methods=["DELETE"], strict_slashes=False)
+@staff_or_admin_required
+def delete_doctor(doctor_id):
     db = get_database()
-
-    if not ObjectId.is_valid(doctor_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid doctor ID"
-        )
-
-    result = db.doctors.delete_one(
-        {"_id": ObjectId(doctor_id)}
-    )
-
+    if not is_valid_object_id(doctor_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
+        
+    result = db.doctors.delete_one({"_id": ObjectId(doctor_id)})
     if result.deleted_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Doctor not found"
-        )
-
-    return {
-        "message": "Doctor deleted successfully"
-    }
-
+        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
+        
+    return jsonify({"message": "Doctor deleted successfully"}), 200

@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from app.core.config import MONGO_URI, DATABASE_NAME
+from app.config import MONGO_URI, DATABASE_NAME
 
 
 client = None

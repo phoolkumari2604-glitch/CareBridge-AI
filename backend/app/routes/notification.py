@@ -1,272 +1,82 @@
-﻿from datetime import datetime, timezone
-
+from datetime import datetime, timezone
+from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
-
 from app.core.database import get_database
-from app.core.dependencies import (
-    get_current_user,
-    require_staff_or_admin,
-)
-from app.schemas.notification import (
-    NotificationCreate,
-    NotificationUpdate,
-    NotificationResponse,
-)
+from app.utils.decorators import token_required, staff_or_admin_required
+from app.utils.helpers import serialize_doc, is_valid_object_id
 
+notification_bp = Blueprint("notifications", __name__)
 
-router = APIRouter(
-    prefix="/notifications",
-    tags=["Notifications"],
-)
-
-
-def check_patient_access(
-    patient_id: str,
-    current_user: dict,
-    db,
-):
-    if not ObjectId.is_valid(patient_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid patient ID",
-        )
-
-    patient = db.patients.find_one(
-        {"_id": ObjectId(patient_id)}
-    )
-
-    if not patient:
-        raise HTTPException(
-            status_code=404,
-            detail="Patient not found",
-        )
-
-    if current_user.get("role") == "PATIENT":
-        owns_patient = (
-            patient.get("user_id") == str(current_user["_id"])
-            or patient.get("email") == current_user.get("email")
-        )
-
-        if not owns_patient:
-            raise HTTPException(
-                status_code=403,
-                detail="You can only access your own notifications",
-            )
-
-    return patient
-
-
-@router.post(
-    "/",
-    response_model=NotificationResponse,
-)
-def create_notification(
-    request: NotificationCreate,
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@notification_bp.route("", methods=["POST"], strict_slashes=False)
+@notification_bp.route("/", methods=["POST"], strict_slashes=False)
+@token_required
+def create_notification():
     db = get_database()
-
-    if not ObjectId.is_valid(request.patient_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid patient ID",
-        )
-
-    patient = db.patients.find_one(
-        {"_id": ObjectId(request.patient_id)}
-    )
-
-    if not patient:
-        raise HTTPException(
-            status_code=404,
-            detail="Patient not found",
-        )
-
-    now = datetime.now(timezone.utc)
-
-    document = {
-        "patient_id": ObjectId(request.patient_id),
-        "title": request.title,
-        "message": request.message,
-        "notification_type": request.notification_type,
+    data = request.get_json() or {}
+    patient_id = data.get("patient_id")
+    title = data.get("title")
+    message = data.get("message")
+    
+    if not patient_id or not title or not message:
+        return jsonify({"error": "Validation Error", "detail": "patient_id, title, and message are required"}), 400
+        
+    doc = {
+        "patient_id": ObjectId(patient_id) if is_valid_object_id(patient_id) else patient_id,
+        "title": title,
+        "message": message,
+        "notification_type": data.get("notification_type", "GENERAL"),
         "is_read": False,
-        "created_at": now,
+        "created_at": datetime.now(timezone.utc)
     }
+    result = db.notifications.insert_one(doc)
+    return jsonify({
+        "message": "Notification created successfully",
+        "notification_id": str(result.inserted_id)
+    }), 201
 
-    result = db.notifications.insert_one(document)
+@notification_bp.route("/<patient_id>", methods=["GET"], strict_slashes=False)
+@token_required
+def get_patient_notifications(patient_id):
+    db = get_database()
+    query = {"patient_id": ObjectId(patient_id)} if is_valid_object_id(patient_id) else {"patient_id": patient_id}
+    notifications = list(db.notifications.find(query).sort("created_at", -1).limit(100))
+    return jsonify(serialize_doc(notifications)), 200
 
-    return {
-        "id": str(result.inserted_id),
-        "patient_id": request.patient_id,
-        "title": request.title,
-        "message": request.message,
-        "notification_type": request.notification_type,
+@notification_bp.route("/<patient_id>/unread-count", methods=["GET"], strict_slashes=False)
+@token_required
+def get_unread_count(patient_id):
+    db = get_database()
+    query = {
         "is_read": False,
-        "created_at": now.isoformat(),
+        "$or": [
+            {"patient_id": ObjectId(patient_id) if is_valid_object_id(patient_id) else None},
+            {"patient_id": patient_id}
+        ]
     }
+    count = db.notifications.count_documents(query)
+    return jsonify({"patient_id": patient_id, "unread_count": count}), 200
 
-
-@router.get(
-    "/{patient_id}",
-    response_model=list[NotificationResponse],
-)
-def get_patient_notifications(
-    patient_id: str,
-    current_user: dict = Depends(get_current_user),
-):
+@notification_bp.route("/<notification_id>", methods=["PUT"], strict_slashes=False)
+@token_required
+def update_notification(notification_id):
     db = get_database()
-
-    check_patient_access(
-        patient_id,
-        current_user,
-        db,
+    if not is_valid_object_id(notification_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid notification ID"}), 400
+        
+    data = request.get_json() or {}
+    is_read = data.get("is_read", True)
+    
+    db.notifications.update_one(
+        {"_id": ObjectId(notification_id)},
+        {"$set": {"is_read": is_read, "updated_at": datetime.now(timezone.utc)}}
     )
+    return jsonify({"message": "Notification updated successfully"}), 200
 
-    notifications = list(
-        db.notifications.find(
-            {"patient_id": ObjectId(patient_id)}
-        )
-        .sort("created_at", -1)
-        .limit(100)
-    )
-
-    return [
-        {
-            "id": str(notification["_id"]),
-            "patient_id": patient_id,
-            "title": notification["title"],
-            "message": notification["message"],
-            "notification_type": notification["notification_type"],
-            "is_read": notification.get("is_read", False),
-            "created_at": (
-                notification["created_at"].isoformat()
-                if notification.get("created_at")
-                else None
-            ),
-        }
-        for notification in notifications
-    ]
-
-
-@router.get(
-    "/{patient_id}/unread-count",
-)
-def get_unread_notification_count(
-    patient_id: str,
-    current_user: dict = Depends(get_current_user),
-):
+@notification_bp.route("/<notification_id>", methods=["DELETE"], strict_slashes=False)
+@token_required
+def delete_notification(notification_id):
     db = get_database()
-
-    check_patient_access(
-        patient_id,
-        current_user,
-        db,
-    )
-
-    count = db.notifications.count_documents(
-        {
-            "patient_id": ObjectId(patient_id),
-            "is_read": False,
-        }
-    )
-
-    return {
-        "patient_id": patient_id,
-        "unread_count": count,
-    }
-
-
-@router.put(
-    "/{notification_id}",
-    response_model=NotificationResponse,
-)
-def update_notification(
-    notification_id: str,
-    request: NotificationUpdate,
-    current_user: dict = Depends(get_current_user),
-):
-    db = get_database()
-
-    if not ObjectId.is_valid(notification_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid notification ID",
-        )
-
-    notification = db.notifications.find_one(
-        {"_id": ObjectId(notification_id)}
-    )
-
-    if not notification:
-        raise HTTPException(
-            status_code=404,
-            detail="Notification not found",
-        )
-
-    patient_id = str(notification["patient_id"])
-
-    check_patient_access(
-        patient_id,
-        current_user,
-        db,
-    )
-
-    update_data = {}
-
-    if request.is_read is not None:
-        update_data["is_read"] = request.is_read
-
-    if update_data:
-        db.notifications.update_one(
-            {"_id": ObjectId(notification_id)},
-            {"$set": update_data},
-        )
-
-    updated = db.notifications.find_one(
-        {"_id": ObjectId(notification_id)}
-    )
-
-    return {
-        "id": str(updated["_id"]),
-        "patient_id": str(updated["patient_id"]),
-        "title": updated["title"],
-        "message": updated["message"],
-        "notification_type": updated["notification_type"],
-        "is_read": updated.get("is_read", False),
-        "created_at": (
-            updated["created_at"].isoformat()
-            if updated.get("created_at")
-            else None
-        ),
-    }
-
-
-@router.delete(
-    "/{notification_id}",
-)
-def delete_notification(
-    notification_id: str,
-    current_user: dict = Depends(require_staff_or_admin),
-):
-    db = get_database()
-
-    if not ObjectId.is_valid(notification_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid notification ID",
-        )
-
-    result = db.notifications.delete_one(
-        {"_id": ObjectId(notification_id)}
-    )
-
-    if result.deleted_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Notification not found",
-        )
-
-    return {
-        "message": "Notification deleted successfully"
-    }
+    if not is_valid_object_id(notification_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid notification ID"}), 400
+    db.notifications.delete_one({"_id": ObjectId(notification_id)})
+    return jsonify({"message": "Notification deleted successfully"}), 200

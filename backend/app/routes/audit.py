@@ -1,146 +1,58 @@
-﻿from datetime import datetime, timezone
-
+from datetime import datetime, timezone
+from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
-
 from app.core.database import get_database
-from app.core.dependencies import require_admin, require_staff_or_admin
-from app.schemas.audit import AuditLogResponse
+from app.utils.decorators import token_required, staff_or_admin_required, admin_required
+from app.utils.helpers import serialize_doc, is_valid_object_id
 
+audit_bp = Blueprint("audit", __name__)
 
-router = APIRouter(
-    prefix="/audit-logs",
-    tags=["Security & Audit"],
-)
-
-
-@router.post("/", response_model=AuditLogResponse)
-def create_audit_log(
-    action: str,
-    resource: str | None = None,
-    resource_id: str | None = None,
-    details: str | None = None,
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@audit_bp.route("", methods=["POST"], strict_slashes=False)
+@audit_bp.route("/", methods=["POST"], strict_slashes=False)
+@staff_or_admin_required
+def create_audit():
     db = get_database()
-
+    data = request.get_json() or {}
+    
     document = {
-        "user_id": str(current_user["_id"]),
-        "user_role": current_user.get("role"),
-        "action": action,
-        "resource": resource,
-        "resource_id": resource_id,
-        "details": details,
-        "created_at": datetime.now(timezone.utc),
+        "user_id": str(g.current_user["_id"]),
+        "user_role": g.current_user.get("role"),
+        "action": data.get("action", "USER_ACTION"),
+        "resource": data.get("resource"),
+        "resource_id": data.get("resource_id"),
+        "details": data.get("details"),
+        "created_at": datetime.now(timezone.utc)
     }
-
     result = db.audit_logs.insert_one(document)
-
-    return {
+    return jsonify({
         "id": str(result.inserted_id),
-        "user_id": document["user_id"],
-        "user_role": document["user_role"],
-        "action": document["action"],
-        "resource": document["resource"],
-        "resource_id": document["resource_id"],
-        "details": document["details"],
-        "created_at": document["created_at"].isoformat(),
-    }
+        "message": "Audit log recorded"
+    }), 201
 
-
-@router.get("/", response_model=list[AuditLogResponse])
-def get_audit_logs(
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@audit_bp.route("", methods=["GET"], strict_slashes=False)
+@audit_bp.route("/", methods=["GET"], strict_slashes=False)
+@staff_or_admin_required
+def get_audit_logs():
     db = get_database()
+    logs = list(db.audit_logs.find().sort("created_at", -1).limit(200))
+    return jsonify(serialize_doc(logs)), 200
 
-    logs = list(
-        db.audit_logs.find()
-        .sort("created_at", -1)
-        .limit(200)
-    )
-
-    return [
-        {
-            "id": str(log["_id"]),
-            "user_id": log.get("user_id"),
-            "user_role": log.get("user_role"),
-            "action": log.get("action"),
-            "resource": log.get("resource"),
-            "resource_id": log.get("resource_id"),
-            "details": log.get("details"),
-            "created_at": (
-                log["created_at"].isoformat()
-                if log.get("created_at")
-                else None
-            ),
-        }
-        for log in logs
-    ]
-
-
-@router.get("/{log_id}", response_model=AuditLogResponse)
-def get_audit_log(
-    log_id: str,
-    current_user: dict = Depends(require_staff_or_admin),
-):
+@audit_bp.route("/<log_id>", methods=["GET"], strict_slashes=False)
+@staff_or_admin_required
+def get_audit_log(log_id):
     db = get_database()
-
-    if not ObjectId.is_valid(log_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid audit log ID",
-        )
-
-    log = db.audit_logs.find_one(
-        {"_id": ObjectId(log_id)}
-    )
-
+    if not is_valid_object_id(log_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid audit log ID"}), 400
+    log = db.audit_logs.find_one({"_id": ObjectId(log_id)})
     if not log:
-        raise HTTPException(
-            status_code=404,
-            detail="Audit log not found",
-        )
+        return jsonify({"error": "Not Found", "detail": "Audit log not found"}), 404
+    return jsonify(serialize_doc(log)), 200
 
-    return {
-        "id": str(log["_id"]),
-        "user_id": log.get("user_id"),
-        "user_role": log.get("user_role"),
-        "action": log.get("action"),
-        "resource": log.get("resource"),
-        "resource_id": log.get("resource_id"),
-        "details": log.get("details"),
-        "created_at": (
-            log["created_at"].isoformat()
-            if log.get("created_at")
-            else None
-        ),
-    }
-
-
-@router.delete("/{log_id}")
-def delete_audit_log(
-    log_id: str,
-    current_user: dict = Depends(require_admin),
-):
+@audit_bp.route("/<log_id>", methods=["DELETE"], strict_slashes=False)
+@admin_required
+def delete_audit_log(log_id):
     db = get_database()
-
-    if not ObjectId.is_valid(log_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid audit log ID",
-        )
-
-    result = db.audit_logs.delete_one(
-        {"_id": ObjectId(log_id)}
-    )
-
-    if result.deleted_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Audit log not found",
-        )
-
-    return {
-        "message": "Audit log deleted successfully"
-    }
+    if not is_valid_object_id(log_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid audit log ID"}), 400
+    db.audit_logs.delete_one({"_id": ObjectId(log_id)})
+    return jsonify({"message": "Audit log deleted successfully"}), 200

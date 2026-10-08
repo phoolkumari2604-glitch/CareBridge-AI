@@ -28,6 +28,7 @@ function Hospitals() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recommended");
   const [selectedHospital, setSelectedHospital] = useState(null);
+  const [showLeafmapModal, setShowLeafmapModal] = useState(false);
 
   useEffect(() => {
     fetchHospitals();
@@ -108,13 +109,34 @@ function Hospitals() {
   return (
     <div className="hospitals-page">
       {/* HEADER */}
-      <section className="hospitals-header">
+      <section className="hospitals-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <p className="hospitals-kicker">HEALTHCARE NETWORK</p>
           <h1>Find a Hospital</h1>
           <p className="hospitals-subtitle">
             Search our network of verified hospitals, specialty centers, and healthcare facilities.
           </p>
+        </div>
+        <div>
+          <button
+            onClick={() => setShowLeafmapModal(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 18px',
+              background: '#0f172a',
+              color: '#ffffff',
+              borderRadius: '8px',
+              border: 'none',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            <Navigation size={16} color="#38bdf8" />
+            View Leafmap Map
+          </button>
         </div>
       </section>
 
@@ -431,6 +453,35 @@ function Hospitals() {
               >
                 <Navigation size={16} /> Open in Google Maps
               </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LEAFMAP INTERACTIVE GEOSPATIAL MAP MODAL */}
+      {showLeafmapModal && (
+        <div className="modal-overlay" onClick={() => setShowLeafmapModal(false)}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '900px', width: '95%', height: '80vh', display: 'flex', flexDirection: 'column' }}
+          >
+            <div className="modal-header">
+              <div className="modal-title-group">
+                <Navigation size={22} color="#0d9488" />
+                <div>
+                  <h2>Leafmap Healthcare Geospatial Visualization</h2>
+                  <p>Real-time hospital coordinates & emergency clusters powered by Python Leafmap</p>
+                </div>
+              </div>
+              <button className="modal-close-btn" onClick={() => setShowLeafmapModal(false)}>✕</button>
+            </div>
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', borderRadius: '8px' }}>
+              <iframe
+                title="Leafmap Geospatial Map"
+                src="http://127.0.0.1:5000/api/hospitals/map/html"
+                style={{ width: '100%', height: '100%', border: 'none' }}
+              />
             </div>
           </div>
         </div>
