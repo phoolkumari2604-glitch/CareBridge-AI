@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
+import HospitalMap from "../../components/dashboard/HospitalMap";
+import LiveHeartRateMonitor from "../../components/patient/LiveHeartRateMonitor";
 import "./PatientDashboard.css";
 import {
   Activity,
@@ -28,14 +30,14 @@ import {
   Radio,
   ExternalLink,
   Sparkles,
+  LayoutDashboard,
 } from "lucide-react";
-import EmergencyFacilitiesMap from "../../components/patient/EmergencyFacilitiesMap";
-import LiveHeartRateMonitor from "../../components/patient/LiveHeartRateMonitor";
 
 const PatientDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState("overview"); // "overview" | "hospitals"
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -148,14 +150,14 @@ const PatientDashboard = () => {
           const firstApt = upcoming[0];
           setUpcomingAppointment(firstApt);
           const matchedDoc = allDocs.find((d) => (d._id || d.id) === firstApt.doctor_id);
-          setDoctor(matchedDoc || null);
-        } else {
-          setUpcomingAppointment(null);
+          if (matchedDoc) {
+            setDoctor(matchedDoc);
+          }
         }
       }
 
       setStats({
-        hospitalsCount: hospitalsCount || 15,
+        hospitalsCount: hospitalsCount || 10,
         alertsTotal,
         recordsCount,
         unreadNotifications,
@@ -166,86 +168,43 @@ const PatientDashboard = () => {
 
       if (isManualRefresh) {
         setRefreshToast(true);
-        setTimeout(() => setRefreshToast(false), 2500);
+        setTimeout(() => setRefreshToast(false), 3000);
       }
     } catch (err) {
-      console.error("Error fetching patient dashboard data:", err);
-      setError("Failed to load some dashboard telemetry. Please try again later.");
+      console.error("Error fetching dashboard telemetry:", err);
+      setError("Failed to synchronize live health metrics. Retrying connection...");
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [user, stats.hospitalsCount, loading]);
+  }, [user?.patient_id, loading, stats.hospitalsCount]);
 
-  // Initial load
   useEffect(() => {
     fetchDashboardData();
+
+    // 15s automatic background synchronization
+    const syncInterval = setInterval(() => {
+      fetchDashboardData();
+    }, 15000);
+
+    return () => clearInterval(syncInterval);
   }, [fetchDashboardData]);
 
-  // Background SSE Live Updates with Polling Fallback
-  useEffect(() => {
-    if (!user?.patient_id) return;
-
-    const patientId = user.patient_id;
-    let sseUrl = `http://127.0.0.1:5000/api/notifications/${patientId}/stream`;
-
-    try {
-      const source = new EventSource(sseUrl);
-      eventSourceRef.current = source;
-
-      source.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data && data.stats) {
-            setStats((prev) => ({
-              ...prev,
-              unreadNotifications: data.stats.unread_count ?? prev.unreadNotifications,
-              alertsTotal: data.stats.health_alerts ?? prev.alertsTotal,
-              upcomingAppointmentsCount: data.stats.appointments ?? prev.upcomingAppointmentsCount,
-            }));
-            setLastUpdated(new Date());
-          }
-        } catch {
-          // ignore keepalive parse
-        }
-      };
-
-      source.onerror = () => {
-        source.close();
-      };
-    } catch (err) {
-      console.warn("SSE stream unavailable on dashboard, falling back to interval polling:", err);
-    }
-
-    // Polling fallback every 20 seconds
-    const interval = setInterval(() => {
-      fetchDashboardData(false);
-    }, 20000);
-
-    return () => {
-      clearInterval(interval);
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
-    };
-  }, [user?.patient_id, fetchDashboardData]);
-
   const formatLastUpdated = (date) => {
-    try {
-      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    } catch {
-      return "Just now";
-    }
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   };
 
   const handleBookDoctor = () => {
     navigate("/patient/doctors");
   };
 
-  if (loading) {
+  if (loading && !isRefreshing && !stats.hospitalsCount) {
     return (
       <div className="dashboard-container">
-        <div className="skeleton-header"></div>
+        <div className="skeleton-header">
+          <div className="skeleton-line title"></div>
+          <div className="skeleton-line sub"></div>
+        </div>
         <div className="stats-grid">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="skeleton-card stat-skeleton"></div>
@@ -314,6 +273,32 @@ const PatientDashboard = () => {
         </div>
       </header>
 
+      {/* NAVIGATION TABS */}
+      <div className="patient-tabs-row" role="tablist" aria-label="Dashboard views">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "overview"}
+          className={`dash-tab-btn ${activeTab === "overview" ? "active" : ""}`}
+          onClick={() => setActiveTab("overview")}
+        >
+          <LayoutDashboard size={16} />
+          <span>Clinical Overview</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "hospitals"}
+          className={`dash-tab-btn ${activeTab === "hospitals" ? "active" : ""}`}
+          onClick={() => setActiveTab("hospitals")}
+        >
+          <Building size={16} />
+          <span>Find Hospitals & Radar</span>
+          <span className="tab-pill-badge">{stats.hospitalsCount} nearby</span>
+        </button>
+      </div>
+
       {error && (
         <div className="dashboard-error" role="alert">
           <AlertCircle size={18} />
@@ -322,9 +307,14 @@ const PatientDashboard = () => {
         </div>
       )}
 
-      {/* STATS CARDS (ALL CLICKABLE WITH HIGH-CONTRAST LABELS) */}
+      {/* STATS CARDS (CLICKABLE WITH HIGH CONTRAST) */}
       <section className="stats-grid" aria-label="Patient Health Key Metrics">
-        <Link to="/patient/hospitals" className="stat-card" aria-label="Nearby Hospitals">
+        <button
+          type="button"
+          onClick={() => setActiveTab("hospitals")}
+          className="stat-card stat-btn"
+          aria-label="Nearby Hospitals"
+        >
           <div className="stat-icon blue">
             <Building size={24} />
           </div>
@@ -332,7 +322,7 @@ const PatientDashboard = () => {
             <h3 className="stat-title">Nearby Hospitals</h3>
             <p className="stat-value">{stats.hospitalsCount}</p>
           </div>
-        </Link>
+        </button>
 
         <Link to="/patient/appointments" className="stat-card" aria-label="Upcoming Consultations">
           <div className="stat-icon cyan">
@@ -365,239 +355,253 @@ const PatientDashboard = () => {
         </Link>
       </section>
 
-      {/* ACTIVE APPOINTMENT & OPD PASS BANNER */}
-      {upcomingAppointment && (
-        <section className="dashboard-appointment-banner" aria-label="Upcoming Consultation Alert">
-          <div className="apt-banner-left">
-            <div className="apt-banner-badge">
-              <CalendarDays size={16} />
-              <span>Next Scheduled Consultation</span>
-            </div>
-            <h3 className="apt-banner-title">
-              {doctor?.name || "Specialist Physician"} &middot; {upcomingAppointment.appointment_date} at{" "}
-              {upcomingAppointment.appointment_time}
-            </h3>
-            <p className="apt-banner-reason">Reason: {upcomingAppointment.reason || "Outpatient Clinical Consultation"}</p>
-          </div>
-
-          <div className="apt-banner-actions">
-            <Link
-              to={`/patient/opd-pass?appointmentId=${upcomingAppointment._id || upcomingAppointment.id}`}
-              className="banner-opd-btn"
-            >
-              <Ticket size={16} />
-              <span>Digital OPD Pass</span>
-            </Link>
-            <Link to="/patient/queue" className="banner-queue-btn">
-              <Clock3 size={16} />
-              <span>Live Queue</span>
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* LIVE EMERGENCY FACILITIES MAP */}
-      <EmergencyFacilitiesMap />
-
-      {/* MAIN & SIDE LAYOUT */}
-      <div className="patient-dashboard-layout">
-        <div className="main-column">
-          {/* LATEST VITALS PANEL */}
-          <div className="panel vitals-panel">
-            <div className="panel-header">
-              <div>
-                <h2>Latest Vitals Telemetry</h2>
-                <span className="panel-sub">Monitored clinical parameters</span>
+      {/* TAB CONTENT: EITHER OVERVIEW OR FIND HOSPITALS */}
+      {activeTab === "hospitals" ? (
+        <HospitalMap />
+      ) : (
+        <>
+          {/* ACTIVE APPOINTMENT & OPD PASS BANNER */}
+          {upcomingAppointment && (
+            <section className="dashboard-appointment-banner" aria-label="Upcoming Consultation Alert">
+              <div className="apt-banner-left">
+                <div className="apt-banner-badge">
+                  <CalendarDays size={16} />
+                  <span>Next Scheduled Consultation</span>
+                </div>
+                <h3 className="apt-banner-title">
+                  {doctor?.name || "Specialist Physician"} &middot; {upcomingAppointment.appointment_date} at{" "}
+                  {upcomingAppointment.appointment_time}
+                </h3>
+                <p className="apt-banner-reason">Reason: {upcomingAppointment.reason || "Outpatient Clinical Consultation"}</p>
               </div>
-              <Link to="/patient/health" className="view-all">
-                Full Health App <ChevronRight size={16} />
-              </Link>
-            </div>
 
-            {/* LIVE REALISTIC HEART RATE MONITOR CARD */}
-            <LiveHeartRateMonitor />
-
-            {vitals ? (
-              <div className="vitals-grid">
-                <div className="vital-item">
-                  <Heart size={20} className="vital-icon red-text" />
-                  <div className="vital-info">
-                    <span className="vital-label">Heart Rate</span>
-                    <span className="vital-value">
-                      {vitals.heart_rate} <small>bpm</small>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="vital-item">
-                  <Activity size={20} className="vital-icon blue-text" />
-                  <div className="vital-info">
-                    <span className="vital-label">Blood Pressure</span>
-                    <span className="vital-value">
-                      {vitals.systolic_bp}/{vitals.diastolic_bp} <small>mmHg</small>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="vital-item">
-                  <Wind size={20} className="vital-icon teal-text" />
-                  <div className="vital-info">
-                    <span className="vital-label">SpO2</span>
-                    <span className="vital-value">
-                      {vitals.spo2} <small>%</small>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="vital-item">
-                  <Thermometer size={20} className="vital-icon orange-text" />
-                  <div className="vital-info">
-                    <span className="vital-label">Temperature</span>
-                    <span className="vital-value">
-                      {vitals.temperature} <small>°C</small>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="vital-item">
-                  <Droplets size={20} className="vital-icon red-text" />
-                  <div className="vital-info">
-                    <span className="vital-label">Blood Sugar</span>
-                    <span className="vital-value">
-                      {vitals.blood_sugar} <small>mg/dL</small>
-                    </span>
-                  </div>
-                </div>
+              <div className="apt-banner-actions">
+                <Link
+                  to={`/patient/opd-pass?appointmentId=${upcomingAppointment._id || upcomingAppointment.id}`}
+                  className="banner-opd-btn"
+                >
+                  <Ticket size={16} />
+                  <span>Digital OPD Pass</span>
+                </Link>
+                <Link to="/patient/queue" className="banner-queue-btn">
+                  <Clock3 size={16} />
+                  <span>Live Queue</span>
+                </Link>
               </div>
-            ) : (
-              <div className="empty-state">
-                <ShieldCheck size={28} color="#10b981" />
-                <p>No vital readings logged yet. Consultations will record your telemetry.</p>
-              </div>
-            )}
-          </div>
+            </section>
+          )}
 
-          {/* RECENT HEALTH RECORDS */}
-          <div className="panel records-panel">
-            <div className="panel-header">
-              <div>
-                <h2>Recent Health Dossier</h2>
-                <span className="panel-sub">Clinical files & prescriptions</span>
-              </div>
-              <Link to="/patient/health" className="view-all">
-                View All <ChevronRight size={16} />
-              </Link>
-            </div>
-
-            {recentRecords.length > 0 ? (
-              <div className="records-list">
-                {recentRecords.map((record) => (
-                  <Link
-                    to="/patient/health"
-                    key={record._id || record.id}
-                    className="record-item"
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <div className="record-icon">
-                      <Stethoscope size={20} />
-                    </div>
-                    <div className="record-content">
-                      <h4>{record.title || record.diagnosis || "Medical Record"}</h4>
-                      <p>
-                        Dr. {record.doctor_name || record.doctor || "Attending Doctor"} &middot;{" "}
-                        {record.record_date ||
-                          (record.created_at ? new Date(record.created_at).toLocaleDateString() : "--")}
-                      </p>
-                    </div>
-                    <ChevronRight size={16} className="text-muted" />
+          {/* MAIN & SIDE LAYOUT */}
+          <div className="patient-dashboard-layout">
+            <div className="main-column">
+              {/* LATEST VITALS PANEL */}
+              <div className="panel vitals-panel">
+                <div className="panel-header">
+                  <div>
+                    <h2>Latest Vitals Telemetry</h2>
+                    <span className="panel-sub">Monitored clinical parameters</span>
+                  </div>
+                  <Link to="/patient/health" className="view-all">
+                    Full Health App <ChevronRight size={16} />
                   </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <FileText size={28} />
-                <p>No health records on file yet.</p>
-                <Link to="/patient/health" className="small-link">
-                  Upload Record
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* SIDE COLUMN */}
-        <div className="side-column">
-          {/* QUICK ACTIONS HUB */}
-          <div className="panel quick-actions-panel">
-            <div className="panel-header">
-              <h2>Quick Actions Hub</h2>
-            </div>
-            <div className="quick-actions-grid">
-              <Link to="/patient/doctors" className="action-btn">
-                <Stethoscope size={20} />
-                <span>Find Doctor</span>
-              </Link>
-              <Link to="/patient/hospitals" className="action-btn">
-                <Building size={20} />
-                <span>Hospitals</span>
-              </Link>
-              <Link to="/patient/opd-pass" className="action-btn">
-                <Ticket size={20} />
-                <span>OPD Pass</span>
-              </Link>
-              <Link to="/patient/queue" className="action-btn">
-                <Clock3 size={20} />
-                <span>Live Queue</span>
-              </Link>
-              <Link to="/patient/health" className="action-btn">
-                <FileText size={20} />
-                <span>My Records</span>
-              </Link>
-              <Link to="/patient/ai-assistant" className="action-btn ai-btn">
-                <Bot size={20} />
-                <span>AI Assistant</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* ALERT SUMMARY */}
-          <div className="panel alert-summary-panel">
-            <div className="panel-header">
-              <h2>Health Safety Monitor</h2>
-              <AlertCircle className={`panel-icon ${stats.alertsTotal > 0 ? "red-text" : "teal-text"}`} size={20} />
-            </div>
-            {alertSummary && alertSummary.total_alerts > 0 ? (
-              <div className="alert-content">
-                <div className="alert-count-big">
-                  <span className="count">{alertSummary.total_alerts}</span>
-                  <span className="label">Active Alerts</span>
                 </div>
-                <ul className="alert-status-list">
-                  {alertSummary.high_priority > 0 && (
-                    <li className="alert-high">
-                      <span className="dot red"></span> {alertSummary.high_priority} High Priority Alerts
-                    </li>
-                  )}
-                  {alertSummary.medium_priority > 0 && (
-                    <li className="alert-medium">
-                      <span className="dot orange"></span> {alertSummary.medium_priority} Review Required
-                    </li>
-                  )}
-                </ul>
-                <Link to="/patient/health" className="alert-review-link">
-                  <span>Review Clinical Alerts</span>
-                  <ArrowRight size={14} />
-                </Link>
+
+                {/* LIVE REALISTIC HEART RATE MONITOR CARD */}
+                <LiveHeartRateMonitor />
+
+                {vitals ? (
+                  <div className="vitals-grid">
+                    <div className="vital-item">
+                      <Heart size={20} className="vital-icon red-text" />
+                      <div className="vital-info">
+                        <span className="vital-label">Heart Rate</span>
+                        <span className="vital-value">
+                          {vitals.heart_rate} <small>bpm</small>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="vital-item">
+                      <Activity size={20} className="vital-icon blue-text" />
+                      <div className="vital-info">
+                        <span className="vital-label">Blood Pressure</span>
+                        <span className="vital-value">
+                          {vitals.systolic_bp}/{vitals.diastolic_bp} <small>mmHg</small>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="vital-item">
+                      <Wind size={20} className="vital-icon teal-text" />
+                      <div className="vital-info">
+                        <span className="vital-label">SpO2</span>
+                        <span className="vital-value">
+                          {vitals.spo2} <small>%</small>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="vital-item">
+                      <Thermometer size={20} className="vital-icon orange-text" />
+                      <div className="vital-info">
+                        <span className="vital-label">Temperature</span>
+                        <span className="vital-value">
+                          {vitals.temperature} <small>°C</small>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="vital-item">
+                      <Droplets size={20} className="vital-icon red-text" />
+                      <div className="vital-info">
+                        <span className="vital-label">Blood Sugar</span>
+                        <span className="vital-value">
+                          {vitals.blood_sugar} <small>mg/dL</small>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <ShieldCheck size={28} color="#10b981" />
+                    <p>No vital readings logged yet. Consultations will record your telemetry.</p>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="empty-state success">
-                <ShieldCheck size={32} color="#10b981" />
-                <p>No active health alerts detected. All vitals in safe range.</p>
+
+              {/* RECENT HEALTH RECORDS */}
+              <div className="panel records-panel">
+                <div className="panel-header">
+                  <div>
+                    <h2>Recent Health Dossier</h2>
+                    <span className="panel-sub">Clinical files & prescriptions</span>
+                  </div>
+                  <Link to="/patient/health" className="view-all">
+                    View All <ChevronRight size={16} />
+                  </Link>
+                </div>
+
+                {recentRecords.length > 0 ? (
+                  <div className="records-list">
+                    {recentRecords.map((record) => (
+                      <Link
+                        to="/patient/health"
+                        key={record._id || record.id}
+                        className="record-item"
+                        style={{ textDecoration: "none", color: "inherit" }}
+                      >
+                        <div className="record-icon">
+                          <Stethoscope size={20} />
+                        </div>
+                        <div className="record-content">
+                          <h4>{record.title || record.diagnosis || "Medical Record"}</h4>
+                          <p>
+                            Dr. {record.doctor_name || record.doctor || "Attending Doctor"} &middot;{" "}
+                            {record.record_date ||
+                              (record.created_at ? new Date(record.created_at).toLocaleDateString() : "--")}
+                          </p>
+                        </div>
+                        <ChevronRight size={16} className="text-muted" />
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <FileText size={28} />
+                    <p>No health records on file yet.</p>
+                    <Link to="/patient/health" className="small-link">
+                      Upload Record
+                    </Link>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* SIDE COLUMN */}
+            <div className="side-column">
+              {/* QUICK ACTIONS HUB */}
+              <div className="panel quick-actions-panel">
+                <div className="panel-header">
+                  <h2>Quick Actions Hub</h2>
+                </div>
+                <div className="quick-actions-grid">
+                  <Link to="/patient/doctors" className="action-btn">
+                    <Stethoscope size={20} />
+                    <span>Find Doctor</span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("hospitals")}
+                    className="action-btn"
+                    style={{ background: "transparent", border: "none", font: "inherit", cursor: "pointer" }}
+                  >
+                    <Building size={20} />
+                    <span>Hospitals Map</span>
+                  </button>
+                  <Link to="/patient/opd-pass" className="action-btn">
+                    <Ticket size={20} />
+                    <span>OPD Pass</span>
+                  </Link>
+                  <Link to="/patient/queue" className="action-btn">
+                    <Clock3 size={20} />
+                    <span>Live Queue</span>
+                  </Link>
+                  <Link to="/patient/health" className="action-btn">
+                    <FileText size={20} />
+                    <span>My Records</span>
+                  </Link>
+                  <Link to="/patient/ai-assistant" className="action-btn ai-btn">
+                    <Bot size={20} />
+                    <span>AI Assistant</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* ALERT SUMMARY */}
+              <div className="panel alert-summary-panel">
+                <div className="panel-header">
+                  <h2>Health Safety Monitor</h2>
+                  <AlertCircle className={`panel-icon ${stats.alertsTotal > 0 ? "red-text" : "teal-text"}`} size={20} />
+                </div>
+                {alertSummary && alertSummary.total_alerts > 0 ? (
+                  <div className="alert-content">
+                    <div className="alert-count-big">
+                      <span className="count">{alertSummary.total_alerts}</span>
+                      <span className="label">Active Alerts</span>
+                    </div>
+                    <ul className="alert-status-list">
+                      {alertSummary.high_priority > 0 && (
+                        <li className="alert-high">
+                          <span className="dot red"></span> {alertSummary.high_priority} High Priority Alerts
+                        </li>
+                      )}
+                      {alertSummary.medium_priority > 0 && (
+                        <li className="alert-medium">
+                          <span className="dot orange"></span> {alertSummary.medium_priority} Review Required
+                        </li>
+                      )}
+                    </ul>
+                    <Link to="/patient/health" className="alert-review-link">
+                      <span>Review Clinical Alerts</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="empty-state success">
+                    <ShieldCheck size={32} color="#10b981" />
+                    <p>No active health alerts detected. All vitals in safe range.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* EMBEDDED HOSPITAL RADAR SECTION AT BOTTOM OF OVERVIEW */}
+          <div className="dash-bottom-radar-wrap">
+            <HospitalMap />
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -191,6 +191,68 @@
   margin-bottom: 20px;
 }
 
+/* TABS ROW */
+.patient-tabs-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  padding-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.dash-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--surface, #ffffff);
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dash-tab-btn:hover {
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+.dash-tab-btn.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+}
+
+.dash-tab-btn.active .tab-pill-badge {
+  background: rgba(20, 184, 166, 0.3);
+  color: #2dd4bf;
+}
+
+.tab-pill-badge {
+  background: #f0fdfa;
+  color: #0d9488;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.stat-btn {
+  border: 1px solid var(--border, #e2e8f0);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.dash-bottom-radar-wrap {
+  margin-top: 32px;
+}
+
 /* STATS GRID */
 .stats-grid {
   display: grid;
