@@ -6,6 +6,12 @@ import { Routes, Route } from "react-router-dom";
 import Landing from "./pages/public/Landing";
 import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
+import ForgotPassword from "./pages/public/ForgotPassword";
+import ResetPassword from "./pages/public/ResetPassword";
+import VerifyEmail from "./pages/public/VerifyEmail";
+import AcceptInvite from "./pages/public/AcceptInvite";
+import Terms from "./pages/public/Terms";
+import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 
 // ==================================================
 // SHARED PAGES
@@ -17,9 +23,15 @@ import Settings from "./pages/shared/Settings";
 import HospitalDashboard from "./pages/shared/HospitalDashboard";
 
 // ==================================================
-// AUTH / LAYOUT
+// ADMIN MANAGEMENT MODULE
+// ==================================================
+import AdminDashboard from "./pages/admin/AdminDashboard";
+
+// ==================================================
+// AUTH / ROUTE GUARDS / LAYOUT
 // ==================================================
 import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
 import AppLayout from "./layouts/DashboardLayout";
 
 // ==================================================
@@ -50,7 +62,7 @@ import DoctorNotifications from "./pages/doctor/Notifications";
 import DoctorEarnings from "./pages/doctor/DoctorEarnings";
 
 // ==================================================
-// STAFF / ADMIN PAGES
+// STAFF PAGES
 // ==================================================
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffPatients from "./pages/staff/Patients";
@@ -70,11 +82,24 @@ function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/accept-invite" element={<AcceptInvite />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
 
       {/* ==================================================
-          SHARED ROUTES
+          SHARED PUBLIC / ERROR
       ================================================== */}
       <Route path="/unauthorized" element={<Unauthorized />} />
+
+      {/* ==================================================
+          ADMIN MANAGEMENT (RBAC GUARDED)
+      ================================================== */}
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Route>
 
       {/* ==================================================
           PROTECTED APPLICATION
@@ -126,7 +151,7 @@ function App() {
           <Route path="/doctor/financial-reports" element={<DoctorEarnings />} />
 
           {/* ==================================================
-              STAFF / ADMIN MODULE
+              STAFF MODULE
           ================================================== */}
           <Route path="/staff/dashboard" element={<StaffDashboard />} />
           <Route path="/staff/profile" element={<Profile />} />

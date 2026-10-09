@@ -130,6 +130,8 @@ const Register = () => {
     setError("");
   };
 
+  const [agreeTerms, setAgreeTerms] = useState(false);
+
   const passwordStrength = useMemo(() => {
     const password = formData.password;
     if (!password) {
@@ -137,16 +139,16 @@ const Register = () => {
     }
 
     let score = 0;
-    if (password.length >= 8) score++;
-    if (password.length >= 12) score++;
+    if (password.length >= 10) score++;
+    if (password.length >= 14) score++;
     if (/[A-Z]/.test(password)) score++;
     if (/[a-z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
 
-    if (score <= 2) return { score, label: "Weak (add mixed case, numbers & symbols)", color: "#ef4444" };
+    if (score <= 2) return { score, label: "Weak (min 10 chars, mixed case, numbers & symbols)", color: "#ef4444" };
     if (score <= 4) return { score, label: "Good (add symbols for max strength)", color: "#f59e0b" };
-    return { score, label: "Strong (high security password)", color: "#10b981" };
+    return { score, label: "Strong (meets clinical security standards)", color: "#10b981" };
   }, [formData.password]);
 
   const handleSubmit = async (event) => {
@@ -155,7 +157,7 @@ const Register = () => {
     setSuccess("");
 
     const name = formData.name.trim();
-    const email = formData.email.trim();
+    const email = formData.email.trim().toLowerCase();
     const phone = formData.phone.trim();
 
     if (!name || !email || !phone || !formData.password) {
@@ -163,8 +165,8 @@ const Register = () => {
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError("Password must contain at least 8 characters (mixed case, numbers & symbols recommended).");
+    if (formData.password.length < 10) {
+      setError("Password must contain at least 10 characters (with uppercase, lowercase, numbers & symbols).");
       return;
     }
 
@@ -173,7 +175,15 @@ const Register = () => {
       return;
     }
 
+    if (!agreeTerms) {
+      setError("You must consent to the Terms of Service & DPDP Act 2023 Privacy Policy to register.");
+      return;
+    }
+
     setLoading(true);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
       const payload = {
@@ -198,25 +208,32 @@ const Register = () => {
       if (formData.allergies) payload.allergies = formData.allergies;
       if (formData.medical_history) payload.medical_history = formData.medical_history;
 
-      await authAPI.register(payload);
+      const res = await authAPI.register(payload, controller.signal);
+      clearTimeout(timeoutId);
 
-      setSuccess("Your account & baseline health record have been created successfully. Redirecting to login...");
+      setSuccess("Account registered successfully! A verification link has been sent to your email. Redirecting to login...");
       setTimeout(() => {
         navigate("/login");
-      }, 1200);
+      }, 2500);
     } catch (err) {
+      clearTimeout(timeoutId);
       console.error("Registration error:", err);
-      const errorDetail =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        (err.message === "Network Error"
-          ? "Unable to connect to CareBridge AI server. Please verify backend is running."
-          : err.message || "Registration failed. Please try again.");
 
-      if (Array.isArray(errorDetail)) {
-        setError(errorDetail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", "));
+      if (err.name === "AbortError") {
+        setError("Registration request timed out. Please check your internet connection.");
       } else {
-        setError(typeof errorDetail === "string" ? errorDetail : "Registration failed. Please check your information.");
+        const errorDetail =
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          (err.message === "Network Error"
+            ? "Unable to connect to CareBridge AI server. Please verify backend is running."
+            : err.message || "Registration failed. Please try again.");
+
+        if (Array.isArray(errorDetail)) {
+          setError(errorDetail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", "));
+        } else {
+          setError(typeof errorDetail === "string" ? errorDetail : "Registration failed. Please check your information.");
+        }
       }
     } finally {
       setLoading(false);
@@ -596,6 +613,29 @@ const Register = () => {
                 )}
               </div>
 
+              {/* DPDP Act 2023 Consent Checkbox */}
+              <div className="flex items-start gap-3 my-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                <input
+                  id="agree-dpdp"
+                  type="checkbox"
+                  checked={agreeTerms}
+                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-800 text-cyan-500 focus:ring-cyan-400 cursor-pointer"
+                  required
+                />
+                <label htmlFor="agree-dpdp" className="text-xs text-slate-300 leading-relaxed cursor-pointer">
+                  I consent to the collection and processing of my health profile under India's <strong>DPDP Act 2023</strong> and agree to the{" "}
+                  <Link to="/terms" target="_blank" className="text-cyan-400 hover:underline">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link to="/privacy" target="_blank" className="text-cyan-400 hover:underline">
+                    Privacy Policy
+                  </Link>
+                  .
+                </label>
+              </div>
+
               {/* Security note */}
               <div className="security-note">
                 <div className="security-icon">
@@ -608,7 +648,7 @@ const Register = () => {
               </div>
 
               {/* Button */}
-              <button type="submit" className="register-button" disabled={loading}>
+              <button type="submit" className="register-button" disabled={loading || !agreeTerms}>
                 {loading ? (
                   <>
                     <span className="button-spinner"></span>
@@ -629,9 +669,14 @@ const Register = () => {
               <Link to="/login">Sign in</Link>
             </div>
 
-            <p className="terms-text">
-              By creating an account, you agree to use CareBridge AI responsibly and provide accurate clinical information.
-            </p>
+            <div className="mt-4 text-center">
+              <span className="text-xs text-slate-500">
+                Need help? Email{" "}
+                <a href="mailto:phoolkumari2603@gmail.com" className="text-slate-400 hover:text-cyan-400">
+                  phoolkumari2603@gmail.com
+                </a>
+              </span>
+            </div>
           </div>
         </section>
       </section>

@@ -5,6 +5,7 @@ from app.core.database import connect_to_mongodb, close_mongodb_connection
 from app.core.indexes import create_indexes
 from app.routes import (
     auth_bp,
+    admin_bp,
     patient_bp,
     doctor_bp,
     hospital_bp,
@@ -88,6 +89,7 @@ def create_app():
     # ----------------------------------------------------
     blueprints = [
         (auth_bp, "/auth"),
+        (admin_bp, "/admin"),
         (patient_bp, "/patients"),
         (doctor_bp, "/doctors"),
         (hospital_bp, "/hospitals"),
