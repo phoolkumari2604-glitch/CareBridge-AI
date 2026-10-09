@@ -133,19 +133,20 @@ const Register = () => {
   const passwordStrength = useMemo(() => {
     const password = formData.password;
     if (!password) {
-      return { score: 0, label: "" };
+      return { score: 0, label: "", color: "" };
     }
 
     let score = 0;
-    if (password.length >= 6) score++;
-    if (password.length >= 10) score++;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
     if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
 
-    if (score <= 1) return { score, label: "Weak" };
-    if (score <= 3) return { score, label: "Good" };
-    return { score, label: "Strong" };
+    if (score <= 2) return { score, label: "Weak (add mixed case, numbers & symbols)", color: "#ef4444" };
+    if (score <= 4) return { score, label: "Good (add symbols for max strength)", color: "#f59e0b" };
+    return { score, label: "Strong (high security password)", color: "#10b981" };
   }, [formData.password]);
 
   const handleSubmit = async (event) => {
@@ -162,8 +163,8 @@ const Register = () => {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must contain at least 6 characters.");
+    if (formData.password.length < 8) {
+      setError("Password must contain at least 8 characters (mixed case, numbers & symbols recommended).");
       return;
     }
 
@@ -396,14 +397,20 @@ const Register = () => {
                   {formData.password && (
                     <div className="password-strength">
                       <div className="strength-bars">
-                        {[1, 2, 3, 4, 5].map((bar) => (
+                        {[1, 2, 3, 4, 5, 6].map((bar) => (
                           <span
                             key={bar}
+                            style={{
+                              backgroundColor:
+                                bar <= passwordStrength.score ? passwordStrength.color : "#e2e8f0",
+                            }}
                             className={bar <= passwordStrength.score ? "active" : ""}
-                          ></span>
+                          />
                         ))}
                       </div>
-                      <small>{passwordStrength.label}</small>
+                      <small style={{ color: passwordStrength.color, fontWeight: 700 }}>
+                        {passwordStrength.label}
+                      </small>
                     </div>
                   )}
                 </div>

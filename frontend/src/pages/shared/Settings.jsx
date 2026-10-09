@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   User,
   Shield,
@@ -132,6 +132,25 @@ function Settings() {
     }));
     showToast(`Interface appearance switched to ${newTheme === "dark" ? "Dark" : "Light"} mode.`);
   };
+
+  const newPasswordStrength = useMemo(() => {
+    const password = passwordForm.new_password;
+    if (!password) {
+      return { score: 0, label: "" };
+    }
+
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    if (score <= 2) return { score, label: "Weak (add numbers & symbols)", color: "#ef4444" };
+    if (score <= 4) return { score, label: "Medium (good password)", color: "#f59e0b" };
+    return { score, label: "Strong (high security)", color: "#10b981" };
+  }, [passwordForm.new_password]);
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -361,6 +380,7 @@ function Settings() {
                       onChange={(e) =>
                         setPasswordForm({ ...passwordForm, current_password: e.target.value })
                       }
+                      autoComplete="current-password"
                       required
                     />
                   </div>
@@ -375,8 +395,30 @@ function Settings() {
                       onChange={(e) =>
                         setPasswordForm({ ...passwordForm, new_password: e.target.value })
                       }
+                      autoComplete="new-password"
                       required
                     />
+                    {passwordForm.new_password && (
+                      <div className="settings-password-strength">
+                        <div className="settings-strength-bars">
+                          {[1, 2, 3, 4, 5, 6].map((bar) => (
+                            <span
+                              key={bar}
+                              style={{
+                                backgroundColor:
+                                  bar <= newPasswordStrength.score
+                                    ? newPasswordStrength.color
+                                    : "#e2e8f0",
+                              }}
+                              className={bar <= newPasswordStrength.score ? "active" : ""}
+                            />
+                          ))}
+                        </div>
+                        <small style={{ color: newPasswordStrength.color, fontWeight: 700 }}>
+                          {newPasswordStrength.label}
+                        </small>
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -389,6 +431,7 @@ function Settings() {
                       onChange={(e) =>
                         setPasswordForm({ ...passwordForm, confirm_password: e.target.value })
                       }
+                      autoComplete="new-password"
                       required
                     />
                   </div>

@@ -133,7 +133,7 @@ function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  autoComplete="email"
+                  autoComplete="username"
                   disabled={loading}
                 />
               </div>
@@ -192,7 +192,7 @@ function Login() {
               <button
                 type="button"
                 className="demo-btn"
-                onClick={() => fillDemoCredentials("patient@carebridge.ai", "Patient@123")}
+                onClick={() => fillDemoCredentials("patient@carebridge.ai", "CareBridge#Pt2026!Secure")}
               >
                 <User size={14} />
                 <span>Patient</span>
@@ -200,7 +200,7 @@ function Login() {
               <button
                 type="button"
                 className="demo-btn"
-                onClick={() => fillDemoCredentials("doctor@carebridge.ai", "Doctor@123")}
+                onClick={() => fillDemoCredentials("doctor@carebridge.ai", "CareBridge#Doc2026!Secure")}
               >
                 <Stethoscope size={14} />
                 <span>Doctor</span>
@@ -208,7 +208,7 @@ function Login() {
               <button
                 type="button"
                 className="demo-btn"
-                onClick={() => fillDemoCredentials("staff@carebridge.ai", "Staff@123")}
+                onClick={() => fillDemoCredentials("staff@carebridge.ai", "CareBridge#Staff2026!Admin")}
               >
                 <Building size={14} />
                 <span>Staff</span>
