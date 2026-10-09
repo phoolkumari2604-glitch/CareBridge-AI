@@ -93,6 +93,7 @@ def create_app():
         (patient_bp, "/patients"),
         (doctor_bp, "/doctors"),
         (hospital_bp, "/hospitals"),
+        (hospital_bp, "/facilities"),
         (appointment_bp, "/appointments"),
         (approval_bp, "/approvals"),
         (opd_pass_bp, "/opd-pass"),
@@ -108,10 +109,11 @@ def create_app():
     ]
 
     for bp, prefix in blueprints:
+        p_clean = prefix.strip("/").replace("-", "_")
         # Register under /api/<prefix>
-        app.register_blueprint(bp, url_prefix=f"/api{prefix}", name=f"api_{bp.name}")
+        app.register_blueprint(bp, url_prefix=f"/api{prefix}", name=f"api_{p_clean}")
         # Register under /<prefix> for direct backward compatibility
-        app.register_blueprint(bp, url_prefix=prefix, name=f"root_{bp.name}")
+        app.register_blueprint(bp, url_prefix=prefix, name=f"root_{p_clean}")
 
     # ----------------------------------------------------
     # GLOBAL ERROR HANDLERS

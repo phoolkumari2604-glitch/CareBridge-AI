@@ -12,11 +12,11 @@ import {
   User,
   Stethoscope,
   Building,
-  KeyRound,
-  RotateCcw
+  RotateCcw,
 } from "lucide-react";
 import authAPI from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
+import { isDemoMode, getDemoCredentials } from "../../config/demoAuth";
 import "./Login.css";
 
 function Login() {
@@ -38,9 +38,6 @@ function Login() {
   const [resendingOtp, setResendingOtp] = useState(false);
   const otpInputRefs = useRef([]);
 
-  // Check demo mode flag
-  const isDemoMode = import.meta.env.VITE_DEMO_MODE === "true";
-
   // Countdown timer for 2FA OTP
   useEffect(() => {
     let interval = null;
@@ -54,11 +51,18 @@ function Login() {
     };
   }, [require2FA, timerSeconds]);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async (e, customCredentials = null) => {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
 
-    const emailTrimmed = email.trim().toLowerCase();
-    if (!emailTrimmed || !password) {
+    // Prevent double submits
+    if (loading) return;
+
+    const loginEmail = (customCredentials?.email || email).trim().toLowerCase();
+    const loginPassword = customCredentials?.password || password;
+
+    if (!loginEmail || !loginPassword) {
       setError("Please enter both email and password.");
       return;
     }
@@ -67,13 +71,15 @@ function Login() {
     setLoading(true);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 15000);
 
     try {
       const data = await authAPI.login(
         {
-          email: emailTrimmed,
-          password,
+          email: loginEmail,
+          password: loginPassword,
         },
         controller.signal
       );
@@ -81,7 +87,7 @@ function Login() {
       clearTimeout(timeoutId);
 
       // Check if 2FA is required for Admin
-      if (data.require_2fa) {
+      if (data?.require_2fa) {
         setRequire2FA(true);
         setTempToken(data.temp_token);
         setTimerSeconds(600);
@@ -89,24 +95,27 @@ function Login() {
         return;
       }
 
-      // Complete login
+      // Complete login & redirect by role
       completeLoginSuccess(data);
     } catch (err) {
       clearTimeout(timeoutId);
-      console.error("Login error:", err);
+      console.error("CareBridge Login error:", err);
 
-      if (err.name === "AbortError" || err.code === "ECONNABORTED") {
-        setError("Connection timed out (15s). Please check your internet connection and try again.");
-      } else if (err.response?.status === 429) {
-        setError(err.response?.data?.detail || "Account temporarily locked due to failed attempts. Please try again later.");
-      } else if (err.response?.status === 403) {
-        setError(err.response?.data?.detail || "This account has been deactivated. Please contact support.");
+      if (err.name === "AbortError" || err.code === "ECONNABORTED" || controller.signal.aborted) {
+        setError("Unable to sign in. Check your connection and try again.");
       } else if (err.response?.status === 401) {
         setError(err.response?.data?.detail || "Invalid email or password. Please verify your credentials.");
+      } else if (err.response?.status === 429) {
+        setError(err.response?.data?.detail || "Too many sign-in attempts. Please wait a few minutes and try again.");
+      } else if (err.response?.status === 403) {
+        setError(err.response?.data?.detail || "This account has been deactivated. Please contact support.");
       } else if (err.response?.status >= 500) {
         setError("CareBridge clinical authentication service encountered an error. Please try again shortly.");
       } else {
-        const msg = err.response?.data?.detail || err.response?.data?.message || "Unable to sign in. Please verify your connection.";
+        const msg =
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Unable to sign in. Check your connection and try again.";
         setError(msg);
       }
     } finally {
@@ -114,8 +123,21 @@ function Login() {
     }
   };
 
+  const handleDemoSubmit = (role) => {
+    if (loading) return;
+    const creds = getDemoCredentials(role);
+    if (!creds) return;
+
+    setEmail(creds.email);
+    setPassword(creds.password);
+    setError("");
+    handleLogin(null, creds);
+  };
+
   const handle2FASubmit = async (e) => {
-    if (e) e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (loading) return;
+
     const otpCode = otpValues.join("");
 
     if (otpCode.length !== 6) {
@@ -142,8 +164,12 @@ function Login() {
       completeLoginSuccess(data);
     } catch (err) {
       clearTimeout(timeoutId);
-      if (err.name === "AbortError") {
-        setError("Verification timed out. Please try again.");
+      console.error("CareBridge 2FA verification error:", err);
+
+      if (err.name === "AbortError" || controller.signal.aborted) {
+        setError("Verification timed out. Check your connection and try again.");
+      } else if (err.response?.status === 401) {
+        setError("Invalid or expired OTP code.");
       } else {
         const msg = err.response?.data?.detail || err.response?.data?.message || "Invalid or expired OTP code.";
         setError(msg);
@@ -188,6 +214,7 @@ function Login() {
   };
 
   const handleResendOtp = async () => {
+    if (resendingOtp) return;
     setResendingOtp(true);
     setError("");
     try {
@@ -206,20 +233,20 @@ function Login() {
 
   const completeLoginSuccess = (data) => {
     // Save JWT token
-    if (data.access_token) {
+    if (data?.access_token) {
       localStorage.setItem("access_token", data.access_token);
     }
 
-    // Save user
-    if (data.user) {
+    // Save user in state and localStorage
+    if (data?.user) {
       localStorage.setItem("user", JSON.stringify(data.user));
       if (setUser) {
         setUser(data.user);
       }
     }
 
-    // Redirect strictly by role
-    const role = (data.user?.role || "").toUpperCase();
+    // Strictly redirect by role
+    const role = (data?.user?.role || "").toUpperCase();
 
     if (role === "ADMIN") {
       navigate("/admin");
@@ -232,23 +259,17 @@ function Login() {
     }
   };
 
-  const fillDemoCredentials = (demoEmail, demoPassword) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    setError("");
-  };
-
   return (
-    <div className="login-page">
+    <div className="login-page dark" data-theme="dark">
       <div className="login-container">
-        <div className="login-card">
+        <div className="login-card dark" data-theme="dark">
           <Link to="/" className="login-brand-link">
             <div className="login-logo">C</div>
             <div>
-              <span className="login-brand-name">
-                Care<span>Bridge</span> AI
+              <span className="login-brand-name text-white">
+                Care<span className="text-teal-400">Bridge</span> AI
               </span>
-              <span className="login-brand-tag">Clinical Portal</span>
+              <span className="login-brand-tag text-slate-400">Clinical Portal</span>
             </div>
           </Link>
 
@@ -256,7 +277,7 @@ function Login() {
             /* 2FA OTP STEP */
             <div className="twofa-container">
               <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck size={24} className="text-cyan-400" />
+                <ShieldCheck size={24} className="text-teal-400" />
                 <h1 className="text-xl font-bold text-white m-0">Admin 2FA Verification</h1>
               </div>
               <p className="text-sm text-slate-300 mb-4">
@@ -264,7 +285,7 @@ function Login() {
               </p>
 
               {error && (
-                <div className="login-error">
+                <div className="login-error" role="alert">
                   <AlertCircle size={18} />
                   <span>{error}</span>
                 </div>
@@ -282,7 +303,7 @@ function Login() {
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className="w-12 h-12 text-center text-xl font-mono font-bold rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 outline-none"
+                      className="w-12 h-12 text-center text-xl font-mono font-bold rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none"
                       disabled={loading}
                       autoFocus={idx === 0}
                     />
@@ -291,14 +312,14 @@ function Login() {
 
                 <div className="flex items-center justify-between text-xs text-slate-400 my-2">
                   <span>
-                    Expires in: <strong className="text-cyan-400">{Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, "0")}</strong>
+                    Expires in: <strong className="text-teal-400">{Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, "0")}</strong>
                   </span>
 
                   <button
                     type="button"
                     onClick={handleResendOtp}
                     disabled={resendingOtp || timerSeconds > 540}
-                    className="text-cyan-400 hover:underline inline-flex items-center gap-1 disabled:opacity-50"
+                    className="text-teal-400 hover:underline inline-flex items-center gap-1 disabled:opacity-50"
                   >
                     <RotateCcw size={12} className={resendingOtp ? "spin-icon" : ""} />
                     <span>Resend Code</span>
@@ -340,11 +361,13 @@ function Login() {
           ) : (
             /* STANDARD LOGIN FORM */
             <div>
-              <h1 className="text-white">Welcome back</h1>
-              <p className="text-slate-400">Access your personal health records, live queues, and appointments.</p>
+              <h1 className="text-white text-2xl font-bold tracking-tight mb-2">Welcome back</h1>
+              <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                Access your personal health records, live queues, and appointments.
+              </p>
 
               {error && (
-                <div className="login-error">
+                <div className="login-error" role="alert">
                   <AlertCircle size={18} />
                   <span>{error}</span>
                 </div>
@@ -352,7 +375,9 @@ function Login() {
 
               <form onSubmit={handleLogin} className="login-form">
                 <div className="login-field">
-                  <label htmlFor="login-email" className="text-slate-300">Email Address</label>
+                  <label htmlFor="login-email" className="text-slate-300 block text-xs font-semibold uppercase tracking-wider mb-1.5">
+                    Email Address
+                  </label>
                   <div className="input-wrap">
                     <Mail size={18} className="field-icon text-slate-500" />
                     <input
@@ -364,17 +389,19 @@ function Login() {
                       required
                       autoComplete="username"
                       disabled={loading}
-                      className="text-white placeholder:text-slate-500"
+                      className="login-input text-white placeholder:text-slate-500"
                     />
                   </div>
                 </div>
 
                 <div className="login-field">
-                  <div className="flex items-center justify-between mb-1">
-                    <label htmlFor="login-password" className="text-slate-300">Password</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label htmlFor="login-password" className="text-slate-300 block text-xs font-semibold uppercase tracking-wider">
+                      Password
+                    </label>
                     <Link
                       to="/forgot-password"
-                      className="text-xs text-cyan-400 hover:underline font-medium"
+                      className="text-xs text-teal-400 hover:underline font-medium"
                     >
                       Forgot password?
                     </Link>
@@ -390,7 +417,7 @@ function Login() {
                       required
                       autoComplete="current-password"
                       disabled={loading}
-                      className="text-white placeholder:text-slate-500"
+                      className="login-input text-white placeholder:text-slate-500"
                     />
                     <button
                       type="button"
@@ -425,30 +452,33 @@ function Login() {
               {/* QUICK DEMO LOGIN (Only rendered if VITE_DEMO_MODE=true) */}
               {isDemoMode && (
                 <div className="demo-accounts-section">
-                  <span className="demo-title">Quick Demo Login:</span>
+                  <span className="demo-title text-slate-400">Quick Demo Login:</span>
                   <div className="demo-buttons">
                     <button
                       type="button"
                       className="demo-btn"
-                      onClick={() => fillDemoCredentials("patient@carebridge.ai", "CareBridge#Pt2026!Secure")}
+                      disabled={loading}
+                      onClick={() => handleDemoSubmit("patient")}
                     >
-                      <User size={14} />
+                      <User size={14} className="text-teal-400" />
                       <span>Patient</span>
                     </button>
                     <button
                       type="button"
                       className="demo-btn"
-                      onClick={() => fillDemoCredentials("doctor@carebridge.ai", "CareBridge#Doc2026!Secure")}
+                      disabled={loading}
+                      onClick={() => handleDemoSubmit("doctor")}
                     >
-                      <Stethoscope size={14} />
+                      <Stethoscope size={14} className="text-teal-400" />
                       <span>Doctor</span>
                     </button>
                     <button
                       type="button"
                       className="demo-btn"
-                      onClick={() => fillDemoCredentials("staff@carebridge.ai", "CareBridge#Staff2026!Admin")}
+                      disabled={loading}
+                      onClick={() => handleDemoSubmit("staff")}
                     >
-                      <Building size={14} />
+                      <Building size={14} className="text-teal-400" />
                       <span>Staff</span>
                     </button>
                   </div>
@@ -457,7 +487,7 @@ function Login() {
 
               <div className="login-footer text-slate-400">
                 Don't have an account?{" "}
-                <Link to="/register" className="text-cyan-400 hover:underline">
+                <Link to="/register" className="text-teal-400 hover:underline font-semibold">
                   Create an account
                 </Link>
               </div>
@@ -467,7 +497,7 @@ function Login() {
           <div className="mt-6 pt-4 border-t border-slate-800 text-center">
             <span className="text-xs text-slate-400">
               Support & Inquiries:{" "}
-              <a href="mailto:phoolkumari2603@gmail.com" className="text-cyan-400 hover:underline">
+              <a href="mailto:phoolkumari2603@gmail.com" className="text-teal-400 hover:underline">
                 phoolkumari2603@gmail.com
               </a>
             </span>
