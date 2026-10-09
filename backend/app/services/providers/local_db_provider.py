@@ -47,28 +47,41 @@ def fetch_hospitals_from_local_db(
     Fetches verified hospitals from MongoDB.
     """
     db = get_database()
-    query: Dict[str, Any] = {}
+    and_conditions: List[Dict[str, Any]] = []
 
     if name:
-        query["name"] = {"$regex": name.strip(), "$options": "i"}
+        and_conditions.append({"name": {"$regex": name.strip(), "$options": "i"}})
     if city:
-        query["city"] = {"$regex": city.strip(), "$options": "i"}
+        and_conditions.append({"city": {"$regex": city.strip(), "$options": "i"}})
     if state:
-        query["state"] = {"$regex": state.strip(), "$options": "i"}
+        and_conditions.append({"state": {"$regex": state.strip(), "$options": "i"}})
     if country:
-        query["country"] = {"$regex": country.strip(), "$options": "i"}
-    if hospital_type:
-        query["$or"] = [
-            {"facility_type": {"$regex": hospital_type.strip(), "$options": "i"}},
-            {"type": {"$regex": hospital_type.strip(), "$options": "i"}},
-        ]
-    if ownership:
-        query["ownership"] = {"$regex": ownership.strip(), "$options": "i"}
+        # Handle country variations like India / US / USA
+        if country.lower() in ["india", "in"]:
+            and_conditions.append({"country": {"$regex": "^(India|IN)$", "$options": "i"}})
+        elif country.lower() in ["usa", "us", "united states"]:
+            and_conditions.append({"country": {"$regex": "^(USA|US|United States)$", "$options": "i"}})
+        else:
+            and_conditions.append({"country": {"$regex": country.strip(), "$options": "i"}})
+            
+    if hospital_type and hospital_type != "all":
+        and_conditions.append({
+            "$or": [
+                {"facility_type": {"$regex": hospital_type.strip(), "$options": "i"}},
+                {"type": {"$regex": hospital_type.strip(), "$options": "i"}},
+            ]
+        })
+    if ownership and ownership != "all":
+        and_conditions.append({"ownership": {"$regex": ownership.strip(), "$options": "i"}})
     if has_emergency is not None:
-        query["$or"] = [
-            {"emergency": has_emergency},
-            {"has_emergency": has_emergency},
-        ]
+        and_conditions.append({
+            "$or": [
+                {"emergency": has_emergency},
+                {"has_emergency": has_emergency},
+            ]
+        })
+
+    query = {"$and": and_conditions} if and_conditions else {}
 
     try:
         cursor = db.hospitals.find(query).limit(limit)

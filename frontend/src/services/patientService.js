@@ -122,6 +122,16 @@ const patientService = {
     return res.data;
   },
 
+  async requestOPDPassOTP(passNumber) {
+    const res = await api.post("/opd-pass/request-otp", { pass_number: passNumber });
+    return res.data;
+  },
+
+  async verifyOPDPassOTP(passNumber, otp) {
+    const res = await api.post("/opd-pass/verify-otp", { pass_number: passNumber, otp });
+    return res.data;
+  },
+
 
   // ==========================================
   // LIVE QUEUE

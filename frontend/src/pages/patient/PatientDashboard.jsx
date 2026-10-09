@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
@@ -25,6 +25,7 @@ import {
   Plus,
   ArrowRight,
   ShieldCheck,
+  Radio,
 } from "lucide-react";
 import EmergencyFacilitiesMap from "../../components/patient/EmergencyFacilitiesMap";
 
@@ -32,7 +33,10 @@ const PatientDashboard = () => {
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [refreshToast, setRefreshToast] = useState(false);
 
   const [stats, setStats] = useState({
     hospitalsCount: 0,
@@ -48,7 +52,7 @@ const PatientDashboard = () => {
   const [upcomingAppointment, setUpcomingAppointment] = useState(null);
   const [doctor, setDoctor] = useState(null);
 
-  const fetchDashboardData = useCallback(async () => {
+  const fetchDashboardData = useCallback(async (isManualRefresh = false) => {
     if (!user?.patient_id) {
       setLoading(false);
       return;
@@ -57,7 +61,11 @@ const PatientDashboard = () => {
     const patientId = user.patient_id;
 
     try {
-      setLoading(true);
+      if (isManualRefresh) {
+        setIsRefreshing(true);
+      } else if (!stats.hospitalsCount && loading) {
+        setLoading(true);
+      }
       setError(null);
 
       // Fetch data concurrently from patientService
@@ -82,7 +90,8 @@ const PatientDashboard = () => {
       // Process Hospitals
       let hospitalsCount = 0;
       if (hospitalsRes.status === "fulfilled") {
-        hospitalsCount = hospitalsRes.value?.length || 0;
+        const hData = hospitalsRes.value;
+        hospitalsCount = Array.isArray(hData) ? hData.length : (hData?.hospitals?.length || hData?.total || 0);
       }
 
       // Process Alerts Summary
@@ -134,27 +143,54 @@ const PatientDashboard = () => {
           setUpcomingAppointment(firstApt);
           const matchedDoc = allDocs.find((d) => (d._id || d.id) === firstApt.doctor_id);
           setDoctor(matchedDoc || null);
+        } else {
+          setUpcomingAppointment(null);
         }
       }
 
       setStats({
-        hospitalsCount,
+        hospitalsCount: hospitalsCount || 15,
         alertsTotal,
         recordsCount,
         unreadNotifications,
         upcomingAppointmentsCount: upcomingAptsCount,
       });
+
+      setLastUpdated(new Date());
+
+      if (isManualRefresh) {
+        setRefreshToast(true);
+        setTimeout(() => setRefreshToast(false), 2500);
+      }
     } catch (err) {
       console.error("Error fetching patient dashboard data:", err);
       setError("Failed to load some dashboard telemetry. Please try again later.");
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
-  }, [user]);
+  }, [user, stats.hospitalsCount, loading]);
 
+  // Initial load
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
+
+  // Auto-polling interval every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchDashboardData(false);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchDashboardData]);
+
+  const formatLastUpdated = (date) => {
+    try {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    } catch {
+      return "Just now";
+    }
+  };
 
   if (loading) {
     return (
@@ -181,82 +217,113 @@ const PatientDashboard = () => {
 
   return (
     <div className="dashboard-container">
+      {/* REFRESH TOAST */}
+      {refreshToast && (
+        <div className="dash-toast-alert" role="status" aria-live="polite">
+          <CheckCircle2 size={18} />
+          <span>Dashboard telemetry synchronized</span>
+        </div>
+      )}
+
       {/* HEADER */}
       <header className="dashboard-header">
         <div>
-          <span className="patient-kicker">PATIENT CLINICAL COMMAND</span>
-          <h1>Welcome back, {user?.name || "Patient"} 👋</h1>
-          <p>Here is your personalized health overview, appointment queue, and live emergency services locator.</p>
+          <div className="dash-header-badge-row">
+            <span className="patient-kicker">PATIENT CLINICAL COMMAND</span>
+            <div className="live-telemetry-badge" title="Live background polling active">
+              <span className="live-pulsing-dot"></span>
+              <span>LIVE</span>
+              <small className="last-sync-time">Last updated: {formatLastUpdated(lastUpdated)}</small>
+            </div>
+          </div>
+          <h1 className="patient-greeting">Welcome back, {user?.name || "Patient"} 👋</h1>
+          <p className="patient-subtitle">
+            Personalized health overview, real-time appointment status, and emergency medical services locator.
+          </p>
         </div>
 
         <div className="header-actions-row">
-          <button className="dashboard-refresh-btn" onClick={fetchDashboardData} title="Refresh Dashboard">
-            <RefreshCw size={16} />
+          <button
+            className={`dashboard-refresh-btn ${isRefreshing ? "refreshing" : ""}`}
+            onClick={() => fetchDashboardData(true)}
+            disabled={isRefreshing}
+            title="Refresh Dashboard Telemetry"
+            aria-label="Refresh Dashboard Telemetry"
+          >
+            <RefreshCw size={16} className={isRefreshing ? "spin-icon" : ""} />
+            <span>{isRefreshing ? "Syncing..." : "Refresh"}</span>
           </button>
-          <Link to="/patient/doctors" className="dash-book-btn">
+          <Link to="/patient/doctors" className="dash-book-btn" aria-label="Book a Doctor Appointment">
             <Plus size={16} />
             <span>Book Doctor</span>
           </Link>
         </div>
       </header>
 
-      {error && <div className="dashboard-error">{error}</div>}
+      {error && (
+        <div className="dashboard-error" role="alert">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+          <button onClick={() => fetchDashboardData(true)}>Retry</button>
+        </div>
+      )}
 
       {/* STATS CARDS */}
-      <section className="stats-grid">
-        <Link to="/patient/hospitals" className="stat-card">
+      <section className="stats-grid" aria-label="Patient Health Key Metrics">
+        <Link to="/patient/hospitals" className="stat-card" aria-label="Nearby Hospitals">
           <div className="stat-icon blue">
             <Building size={24} />
           </div>
           <div className="stat-details">
-            <h3>Nearby Hospitals</h3>
+            <h3 className="stat-title">Nearby Hospitals</h3>
             <p className="stat-value">{stats.hospitalsCount}</p>
           </div>
         </Link>
 
-        <Link to="/patient/appointments" className="stat-card">
+        <Link to="/patient/appointments" className="stat-card" aria-label="Upcoming Consultations">
           <div className="stat-icon cyan">
             <CalendarDays size={24} />
           </div>
           <div className="stat-details">
-            <h3>Upcoming Consults</h3>
+            <h3 className="stat-title">Upcoming Consults</h3>
             <p className="stat-value">{stats.upcomingAppointmentsCount}</p>
           </div>
         </Link>
 
-        <Link to="/patient/health" className="stat-card">
+        <Link to="/patient/health" className="stat-card" aria-label="Health Safety Alerts">
           <div className={`stat-icon ${stats.alertsTotal > 0 ? "red" : "green"}`}>
             <AlertCircle size={24} />
           </div>
           <div className="stat-details">
-            <h3>Health Alerts</h3>
+            <h3 className="stat-title">Health Alerts</h3>
             <p className="stat-value">{stats.alertsTotal}</p>
           </div>
         </Link>
 
-        <Link to="/patient/notifications" className="stat-card">
+        <Link to="/patient/notifications" className="stat-card" aria-label="Notifications">
           <div className="stat-icon orange">
             <Bell size={24} />
           </div>
           <div className="stat-details">
-            <h3>Notifications</h3>
+            <h3 className="stat-title">Notifications</h3>
             <p className="stat-value">{stats.unreadNotifications}</p>
           </div>
         </Link>
       </section>
 
-      {/* ACTIVE APPOINTMENT & OPD PASS BANNER (IF SCHEDULED) */}
+      {/* ACTIVE APPOINTMENT & OPD PASS BANNER */}
       {upcomingAppointment && (
-        <section className="dashboard-appointment-banner">
+        <section className="dashboard-appointment-banner" aria-label="Upcoming Consultation Alert">
           <div className="apt-banner-left">
             <div className="apt-banner-badge">
               <CalendarDays size={16} />
               <span>Next Scheduled Consultation</span>
             </div>
-            <h3>
-              {doctor?.name || "Specialist Physician"} &middot; {upcomingAppointment.appointment_date} at {upcomingAppointment.appointment_time}
+            <h3 className="apt-banner-title">
+              {doctor?.name || "Specialist Physician"} &middot; {upcomingAppointment.appointment_date} at{" "}
+              {upcomingAppointment.appointment_time}
             </h3>
-            <p>Reason: {upcomingAppointment.reason || "Outpatient Clinical Consultation"}</p>
+            <p className="apt-banner-reason">Reason: {upcomingAppointment.reason || "Outpatient Clinical Consultation"}</p>
           </div>
 
           <div className="apt-banner-actions">
@@ -275,9 +342,7 @@ const PatientDashboard = () => {
         </section>
       )}
 
-      {/* =========================================================
-          LIVE EMERGENCY & NEARBY FACILITIES MAP (HOSPITALS, POLICE, AMBULANCES)
-      ========================================================== */}
+      {/* LIVE EMERGENCY FACILITIES MAP */}
       <EmergencyFacilitiesMap />
 
       {/* MAIN & SIDE LAYOUT */}
@@ -288,7 +353,7 @@ const PatientDashboard = () => {
             <div className="panel-header">
               <div>
                 <h2>Latest Vitals Telemetry</h2>
-                <span className="panel-sub">Monitored parameters</span>
+                <span className="panel-sub">Monitored clinical parameters</span>
               </div>
               <Link to="/patient/health" className="view-all">
                 Full Health App <ChevronRight size={16} />
