@@ -22,20 +22,14 @@
   top: 0;
   right: 0;
   left: 0;
-
-  height: 72px;
-
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  padding: 0 28px;
-
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(16px);
-
-  border-bottom: 1px solid #e6ebf2;
-
+  padding: 0 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   z-index: 1000;
 }
 
@@ -186,22 +180,15 @@
 
 .app-sidebar {
   position: fixed;
-
-  top: 72px;
+  top: 64px;
   left: 0;
   bottom: 0;
-
   width: 250px;
-
   display: flex;
   flex-direction: column;
-
   padding: 24px 14px;
-
   background: #ffffff;
-
   border-right: 1px solid #e6ebf2;
-
   z-index: 900;
 }
 
@@ -287,8 +274,7 @@
 
 .app-main {
   min-height: 100vh;
-
-  padding-top: 72px;
+  padding-top: 64px;
   padding-left: 250px;
 }
 
