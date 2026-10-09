@@ -1,3 +1,5 @@
+import re
+import math
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
@@ -14,29 +16,63 @@ def create_doctor():
     db = get_database()
     data = request.get_json() or {}
     
-    name = data.get("name")
-    specialty = data.get("specialty")
+    name = (data.get("name") or "").strip()
+    specialty = (data.get("specialty") or "").strip()
+    department = (data.get("department") or specialty).strip()
+    hospital_name = (data.get("hospital_name") or data.get("hospital") or "CareBridge Hospital").strip()
     hospital_id = data.get("hospital_id")
+    email = (data.get("email") or "").strip().lower()
+    phone = (data.get("phone") or "").strip()
+    license_number = (data.get("license_number") or "").strip()
     
     if not name or not specialty:
         return jsonify({"error": "Validation Error", "detail": "Doctor name and specialty are required"}), 400
         
     if hospital_id and is_valid_object_id(hospital_id):
         hospital = db.hospitals.find_one({"_id": ObjectId(hospital_id)})
-        if not hospital:
-            return jsonify({"error": "Not Found", "detail": "Hospital not found"}), 404
-        data["hospital_id"] = ObjectId(hospital_id)
-        
-    data["created_at"] = datetime.now(timezone.utc)
-    data["available_slots"] = data.get("available_slots", ["09:00 AM", "10:00 AM", "11:30 AM", "02:00 PM", "03:30 PM", "05:00 PM"])
-    data["available_days"] = data.get("available_days", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"])
-    data["status"] = data.get("status", "AVAILABLE")
+        if hospital:
+            hospital_name = hospital.get("name", hospital_name)
+            data["hospital_id"] = ObjectId(hospital_id)
+            
+    doctor_doc = {
+        "name": name,
+        "specialty": specialty,
+        "department": department,
+        "hospital": hospital_name,
+        "hospital_name": hospital_name,
+        "hospital_id": ObjectId(hospital_id) if hospital_id and is_valid_object_id(hospital_id) else None,
+        "email": email or None,
+        "phone": phone or None,
+        "city": data.get("city", "New Delhi"),
+        "country": data.get("country", "India"),
+        "category": data.get("category", "Practicing Clinician"),
+        "verification_status": "Verified",
+        "verification_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "is_bookable": True,
+        "experience_years": int(data.get("experience_years", 10)) if str(data.get("experience_years", "")).isdigit() else 10,
+        "consultation_fee": int(data.get("consultation_fee", 800)) if str(data.get("consultation_fee", "")).isdigit() else 800,
+        "room_number": data.get("room_number", "OPD-101"),
+        "license_number": license_number or f"MCI-IND-{secrets_hex(3)}",
+        "bio": data.get("bio", f"Senior consultant in {specialty} at {hospital_name}."),
+        "status": (data.get("status") or "AVAILABLE").upper(),
+        "available_days": data.get("available_days", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]),
+        "available_slots": data.get("available_slots", ["09:00 AM", "10:00 AM", "11:30 AM", "02:00 PM", "03:30 PM", "05:00 PM"]),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
     
-    result = db.doctors.insert_one(data)
+    result = db.doctors.insert_one(doctor_doc)
+    doctor_doc["_id"] = result.inserted_id
+    
     return jsonify({
-        "message": "Doctor created successfully",
-        "doctor_id": str(result.inserted_id)
+        "message": "Doctor registered successfully",
+        "doctor_id": str(result.inserted_id),
+        "doctor": serialize_doc(doctor_doc)
     }), 201
+
+def secrets_hex(nbytes):
+    import secrets
+    return secrets.token_hex(nbytes).upper()
 
 @doctor_bp.route("", methods=["GET"], strict_slashes=False)
 @doctor_bp.route("/", methods=["GET"], strict_slashes=False)
@@ -45,43 +81,81 @@ def get_doctors():
     db = get_database()
     hospital_id = request.args.get("hospital_id")
     specialty = request.args.get("specialty")
-    category = request.args.get("category")
-    country = request.args.get("country")
-    city = request.args.get("city")
-    search = request.args.get("search")
-    is_bookable = request.args.get("is_bookable")
+    status_arg = request.args.get("status")
+    search = request.args.get("search", "").strip()
     
+    try:
+        page = max(1, int(request.args.get("page", 1)))
+    except (ValueError, TypeError):
+        page = 1
+        
+    try:
+        limit = int(request.args.get("limit", 10))
+    except (ValueError, TypeError):
+        limit = 10
+        
     query = {}
     if hospital_id and is_valid_object_id(hospital_id):
         query["hospital_id"] = ObjectId(hospital_id)
-    if specialty:
-        query["specialty"] = {"$regex": specialty, "$options": "i"}
-    if category and category != "All":
-        query["category"] = category
-    if country and country != "All":
-        query["country"] = {"$regex": country, "$options": "i"}
-    if city and city != "All":
-        query["city"] = {"$regex": city, "$options": "i"}
-    if is_bookable is not None:
-        if is_bookable.lower() == "true":
-            query["is_bookable"] = True
-        elif is_bookable.lower() == "false":
-            query["is_bookable"] = False
-            
+        
+    if specialty and specialty != "All" and specialty != "ALL":
+        query["specialty"] = {"$regex": re.escape(specialty), "$options": "i"}
+        
     if search:
-        s = search.strip()
+        s_clean = re.escape(search)
         query["$or"] = [
-            {"name": {"$regex": s, "$options": "i"}},
-            {"specialty": {"$regex": s, "$options": "i"}},
-            {"hospital": {"$regex": s, "$options": "i"}},
-            {"hospital_name": {"$regex": s, "$options": "i"}},
-            {"city": {"$regex": s, "$options": "i"}},
-            {"country": {"$regex": s, "$options": "i"}},
-            {"category": {"$regex": s, "$options": "i"}},
+            {"name": {"$regex": s_clean, "$options": "i"}},
+            {"specialty": {"$regex": s_clean, "$options": "i"}},
+            {"department": {"$regex": s_clean, "$options": "i"}},
+            {"hospital": {"$regex": s_clean, "$options": "i"}},
+            {"hospital_name": {"$regex": s_clean, "$options": "i"}},
+            {"city": {"$regex": s_clean, "$options": "i"}},
+            {"license_number": {"$regex": s_clean, "$options": "i"}},
         ]
         
-    doctors = list(db.doctors.find(query).sort("name", 1))
-    return jsonify(serialize_doc(doctors)), 200
+    # Calculate live stats
+    base_query = {k: v for k, v in query.items()}
+    total_count = db.doctors.count_documents(base_query)
+    verified_count = db.doctors.count_documents({**base_query, "verification_status": "Verified"})
+    available_count = db.doctors.count_documents({**base_query, "status": "AVAILABLE"})
+    on_leave_count = db.doctors.count_documents({**base_query, "status": {"$in": ["ON_LEAVE", "LEAVE", "UNAVAILABLE"]}})
+    
+    # Status filter
+    if status_arg and status_arg.upper() != "ALL":
+        stat_up = status_arg.upper()
+        if stat_up == "VERIFIED":
+            query["verification_status"] = "Verified"
+        elif stat_up in ["AVAILABLE", "ON_LEAVE"]:
+            query["status"] = stat_up
+            
+    filtered_total = db.doctors.count_documents(query)
+    total_pages = max(1, math.ceil(filtered_total / limit)) if limit > 0 else 1
+    skip_val = (page - 1) * limit if limit > 0 else 0
+    
+    cursor = db.doctors.find(query).sort("name", 1)
+    if limit > 0:
+        cursor = cursor.skip(skip_val).limit(limit)
+        
+    doctors = list(cursor)
+    serialized = serialize_doc(doctors)
+    
+    # If legacy client requested without pagination parameter limit=0
+    if request.args.get("all") == "true" or limit == 0:
+        return jsonify(serialized), 200
+        
+    return jsonify({
+        "doctors": serialized,
+        "total": filtered_total,
+        "page": page,
+        "limit": limit,
+        "pages": total_pages,
+        "stats": {
+            "total": total_count,
+            "verified": verified_count,
+            "available_today": available_count,
+            "on_leave": on_leave_count
+        }
+    }), 200
 
 @doctor_bp.route("/me", methods=["GET"], strict_slashes=False)
 @doctor_bp.route("/profile", methods=["GET"], strict_slashes=False)
@@ -109,10 +183,12 @@ def get_doctor_profile():
             "specialty": "Cardiology & Internal Medicine",
             "department": "Cardiovascular Sciences",
             "hospital": "CareBridge Multi-Specialty Hospital",
+            "hospital_name": "CareBridge Multi-Specialty Hospital",
             "license_number": "MCI-IND-" + str(user_id)[-6:].upper(),
             "experience_years": 10,
             "consultation_fee": 800,
             "room_number": "OPD-304",
+            "verification_status": "Verified",
             "available_slots": ["09:00 AM", "10:00 AM", "11:30 AM", "02:00 PM", "03:30 PM", "05:00 PM"],
             "available_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
             "status": "AVAILABLE",
@@ -128,7 +204,6 @@ def get_doctor_profile():
 def get_doctor(doctor_id):
     db = get_database()
     if not is_valid_object_id(doctor_id):
-        # Fallback search by user_id
         doctor = db.doctors.find_one({"user_id": doctor_id})
         if not doctor:
             return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
@@ -140,25 +215,6 @@ def get_doctor(doctor_id):
         
     return jsonify(serialize_doc(doctor)), 200
 
-@doctor_bp.route("/<doctor_id>/availability", methods=["GET"], strict_slashes=False)
-@token_required
-def get_doctor_availability(doctor_id):
-    db = get_database()
-    if not is_valid_object_id(doctor_id):
-        return jsonify({"error": "Validation Error", "detail": "Invalid doctor ID"}), 400
-        
-    doctor = db.doctors.find_one({"_id": ObjectId(doctor_id)})
-    if not doctor:
-        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
-        
-    return jsonify({
-        "doctor_id": str(doctor["_id"]),
-        "doctor_name": doctor.get("name"),
-        "available_days": doctor.get("available_days", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]),
-        "available_slots": doctor.get("available_slots", ["09:00 AM", "10:00 AM", "11:30 AM", "02:00 PM", "03:30 PM", "05:00 PM"]),
-        "status": doctor.get("status", "AVAILABLE")
-    }), 200
-
 @doctor_bp.route("/<doctor_id>", methods=["PUT"], strict_slashes=False)
 @token_required
 def update_doctor(doctor_id):
@@ -167,7 +223,6 @@ def update_doctor(doctor_id):
     user_role = user.get("role", "PATIENT")
     user_id = str(user["_id"])
     
-    # Check permissions: Admin, Staff, or the doctor themselves
     is_authorized = user_role in ["ADMIN", "STAFF"]
     
     doctor = None
@@ -194,23 +249,10 @@ def update_doctor(doctor_id):
         if is_valid_object_id(data["hospital_id"]):
             data["hospital_id"] = ObjectId(data["hospital_id"])
         else:
-            return jsonify({"error": "Validation Error", "detail": "Invalid hospital ID"}), 400
+            data.pop("hospital_id", None)
             
     data["updated_at"] = datetime.now(timezone.utc)
     
-    # If doctor name or phone is updated, also update user record
-    if "name" in data or "phone" in data:
-        user_updates = {}
-        if "name" in data and data["name"]:
-            user_updates["name"] = data["name"]
-        if "phone" in data and data["phone"]:
-            user_updates["phone"] = data["phone"]
-        if user_updates and doctor.get("user_id"):
-            try:
-                db.users.update_one({"_id": ObjectId(doctor["user_id"])}, {"$set": user_updates})
-            except Exception:
-                pass
-                
     db.doctors.update_one({"_id": doctor["_id"]}, {"$set": data})
     updated_doc = db.doctors.find_one({"_id": doctor["_id"]})
     
@@ -230,8 +272,7 @@ def delete_doctor(doctor_id):
     if result.deleted_count == 0:
         return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
         
-    return jsonify({"message": "Doctor deleted successfully"}), 200
-
+    return jsonify({"message": "Doctor record deleted successfully"}), 200
 
 @doctor_bp.route("/earnings", methods=["GET"], strict_slashes=False)
 @doctor_bp.route("/<doctor_id>/earnings", methods=["GET"], strict_slashes=False)
@@ -262,9 +303,7 @@ def get_doctor_earnings(doctor_id=None):
     doc_id = doctor["_id"]
     fee_per_consult = doctor.get("consultation_fee", 800)
     
-    # Query appointments for this doctor
     appts = list(db.appointments.find({"doctor_id": doc_id}).sort("created_at", -1))
-    
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     current_month_str = datetime.now(timezone.utc).strftime("%Y-%m")
     
@@ -321,4 +360,3 @@ def get_doctor_earnings(doctor_id=None):
         },
         "transactions": transactions
     }), 200
-
