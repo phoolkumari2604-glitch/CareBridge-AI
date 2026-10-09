@@ -268,6 +268,45 @@ def create_patient():
         "temp_password": temp_password
     }), 201
 
+def determine_patient_telemetry_status(patient_doc: dict, latest_vital: dict = None, alert_summary: dict = None) -> tuple:
+    """Determine patient's clinical monitoring status (critical, attention, stable) and reason."""
+    if alert_summary and (alert_summary.get("status") == "ALERT" or alert_summary.get("high_alerts", 0) > 0):
+        return "critical", "Critical", alert_summary.get("message") or "Acute health threshold flagged"
+
+    if latest_vital:
+        hr = latest_vital.get("heart_rate")
+        sbp = latest_vital.get("systolic_bp")
+        dbp = latest_vital.get("diastolic_bp")
+        spo2 = latest_vital.get("spo2")
+        temp = latest_vital.get("temperature")
+        bs = latest_vital.get("blood_sugar")
+
+        # Critical thresholds
+        if (hr and (hr > 120 or hr < 45)) or \
+           (spo2 and spo2 < 90) or \
+           (sbp and sbp >= 160) or (dbp and dbp >= 100) or \
+           (bs and (bs > 200 or bs < 60)) or \
+           (temp and temp >= 39.0):
+            return "critical", "Critical", "Acute physiological threshold breach"
+
+        # Attention thresholds
+        if (hr and (hr > 100 or hr < 55)) or \
+           (spo2 and spo2 < 95) or \
+           (sbp and sbp >= 135) or (dbp and dbp >= 88) or \
+           (bs and (bs > 140 or bs < 70)) or \
+           (temp and temp >= 37.8):
+            return "attention", "Needs Attention", "Borderline vital readings"
+
+        return "stable", "Stable", "Normal physiological parameters"
+
+    # Default baseline
+    status_str = str(patient_doc.get("status", "Active")).lower()
+    if status_str == "pending":
+        return "attention", "Needs Attention", "Pending baseline intake review"
+    elif status_str == "inactive":
+        return "stable", "Stable", "Inactive monitoring baseline"
+    return "stable", "Stable", "Normal baseline"
+
 @patient_bp.route("", methods=["GET"], strict_slashes=False)
 @patient_bp.route("/", methods=["GET"], strict_slashes=False)
 @token_required
@@ -300,24 +339,39 @@ def get_patients():
     except (ValueError, TypeError):
         limit = 10
 
-    # Build MongoDB Filter
-    filter_query = {
+    # Base Filter: exclude junk / "string"
+    base_filter = {
         "name": {"$nin": ["string", "None", "", None]}
     }
 
-    if status_filter and status_filter.lower() != "all":
-        filter_query["status"] = {"$regex": f"^{status_filter}$", "$options": "i"}
-
+    # Handle Search
     if search:
-        search_regex = {"$regex": re.escape(search), "$options": "i"}
+        search_lower = search.lower()
         or_conditions = [
-            {"name": search_regex},
-            {"email": search_regex},
-            {"phone": search_regex}
+            {"name": {"$regex": re.escape(search), "$options": "i"}},
+            {"email": {"$regex": re.escape(search), "$options": "i"}}
         ]
-        if is_valid_object_id(search):
+        
+        # Phone search: strip non-digits to match flexible input
+        digits = re.sub(r"\D", "", search)
+        if digits:
+            digit_pattern = r"[\s\-\+\(\)]*".join(list(digits))
+            or_conditions.append({"phone": {"$regex": digit_pattern, "$options": "i"}})
+        else:
+            or_conditions.append({"phone": {"$regex": re.escape(search), "$options": "i"}})
+
+        # Patient ID search
+        if search_lower.startswith("pt-"):
+            clean_code = search[3:].strip()
+            or_conditions.append({"patient_id_code": {"$regex": re.escape(search), "$options": "i"}})
+            if is_valid_object_id(clean_code):
+                or_conditions.append({"_id": ObjectId(clean_code)})
+        elif is_valid_object_id(search):
             or_conditions.append({"_id": ObjectId(search)})
-        filter_query["$or"] = or_conditions
+        else:
+            or_conditions.append({"patient_id_code": {"$regex": re.escape(search), "$options": "i"}})
+
+        base_filter["$or"] = or_conditions
 
     # Sorting
     if sort_by == "oldest":
@@ -329,51 +383,113 @@ def get_patients():
     else:  # newest default
         sort_criteria = [("created_at", -1), ("_id", -1)]
 
-    # Calculate overall stats
-    total_all = db.patients.count_documents({"name": {"$nin": ["string", "None", "", None]}})
-    active_count = db.patients.count_documents({
-        "name": {"$nin": ["string", "None", "", None]},
-        "status": {"$in": ["Active", None]}
-    })
-    telemetry_count = db.patients.count_documents({
-        "name": {"$nin": ["string", "None", "", None]},
-        "$or": [
-            {"blood_group": {"$exists": True, "$ne": None}},
-            {"medical_history": {"$exists": True, "$ne": []}}
-        ]
-    })
+    # Fetch all candidate patients matching base filter for telemetry calculation & status filtering
+    cursor = db.patients.find(base_filter).sort(sort_criteria)
+    all_matched = list(cursor)
 
-    # Count matching records
-    filtered_total = db.patients.count_documents(filter_query)
+    if not all_matched:
+        return jsonify({
+            "patients": [],
+            "total": 0,
+            "page": page,
+            "limit": limit,
+            "total_pages": 1,
+            "stats": {
+                "total": 0,
+                "critical": 0,
+                "attention": 0,
+                "stable": 0,
+                "active": 0,
+                "telemetry": 0
+            }
+        }), 200
 
-    # Fetch records
-    cursor = db.patients.find(filter_query).sort(sort_criteria)
-    if limit > 0:
-        cursor = cursor.skip((page - 1) * limit).limit(limit)
+    # Batch fetch latest vitals for matched patients
+    patient_ids = [p["_id"] for p in all_matched]
+    vitals_cursor = db.vital_signs.aggregate([
+        {"$match": {"patient_id": {"$in": patient_ids}}},
+        {"$sort": {"recorded_at": -1}},
+        {"$group": {
+            "_id": "$patient_id",
+            "latest_vital": {"$first": "$$ROOT"}
+        }}
+    ])
+    vitals_map = {str(v["_id"]): v["latest_vital"] for v in vitals_cursor}
 
-    raw_patients = list(cursor)
-    serialized_patients = []
-    for p in raw_patients:
+    # Batch fetch alert summaries
+    alerts_cursor = db.health_alerts.aggregate([
+        {"$match": {"patient_id": {"$in": patient_ids}, "is_acknowledged": {"$ne": True}}},
+        {"$group": {
+            "_id": "$patient_id",
+            "total_alerts": {"$sum": 1},
+            "high_alerts": {"$sum": {"$cond": [{"$in": ["$severity", ["Critical", "CRITICAL", "High", "HIGH"]]}, 1, 0]}}
+        }}
+    ])
+    alerts_map = {str(a["_id"]): a for a in alerts_cursor}
+
+    # Enrich each patient and count telemetry statuses
+    total_stat_count = len(all_matched)
+    critical_stat_count = 0
+    attention_stat_count = 0
+    stable_stat_count = 0
+
+    enriched_all = []
+    for p in all_matched:
+        pid_str = str(p["_id"])
+        vital = vitals_map.get(pid_str)
+        alert = alerts_map.get(pid_str)
+
+        level, label, reason = determine_patient_telemetry_status(p, vital, alert)
+        if level == "critical":
+            critical_stat_count += 1
+        elif level == "attention":
+            attention_stat_count += 1
+        else:
+            stable_stat_count += 1
+
         doc = serialize_doc(p)
-        doc["patientId"] = doc.get("patient_id_code") or f"PT-{str(doc['_id'])[-6:].upper()}"
+        doc["patientId"] = doc.get("patient_id_code") or f"PT-{pid_str[-6:].upper()}"
         doc["createdAt"] = doc.get("created_at") or doc.get("createdAt")
-        serialized_patients.append(doc)
+        doc["telemetry_level"] = level
+        doc["telemetry_label"] = label
+        doc["telemetry_reason"] = reason
+        doc["latest_vital"] = serialize_doc(vital) if vital else None
+        doc["last_vitals_time"] = vital.get("recorded_at").isoformat() if vital and vital.get("recorded_at") else (p.get("last_vitals_at").isoformat() if p.get("last_vitals_at") else None)
+        enriched_all.append(doc)
 
+    # Apply Status Filter if active
+    if status_filter and status_filter.lower() != "all":
+        sf_lower = status_filter.lower()
+        if sf_lower in ["critical", "attention", "stable"]:
+            filtered_patients = [p for p in enriched_all if p["telemetry_level"] == sf_lower]
+        else:
+            filtered_patients = [p for p in enriched_all if str(p.get("status", "")).lower() == sf_lower]
+    else:
+        filtered_patients = enriched_all
+
+    filtered_total = len(filtered_patients)
     total_pages = math.ceil(filtered_total / limit) if limit > 0 else 1
 
-    # Check if caller wants pure list or full metadata
-    # If limit is 0 or full_meta is false, we can still provide the full payload.
-    # To be fully compatible with array consumers:
+    # Slice page
+    if limit > 0:
+        start_idx = (page - 1) * limit
+        page_slice = filtered_patients[start_idx : start_idx + limit]
+    else:
+        page_slice = filtered_patients
+
     return jsonify({
-        "patients": serialized_patients,
+        "patients": page_slice,
         "total": filtered_total,
         "page": page,
         "limit": limit,
         "total_pages": total_pages,
         "stats": {
-            "total": total_all,
-            "active": active_count,
-            "telemetry": telemetry_count
+            "total": total_stat_count,
+            "critical": critical_stat_count,
+            "attention": attention_stat_count,
+            "stable": stable_stat_count,
+            "active": total_stat_count,
+            "telemetry": total_stat_count
         }
     }), 200
 

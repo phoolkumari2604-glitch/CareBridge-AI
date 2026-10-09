@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Users,
@@ -19,626 +19,1212 @@ import {
   RefreshCw,
   X,
   Plus,
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  Clock,
+  ArrowUpDown,
+  Filter,
+  User,
+  ExternalLink,
+  ShieldAlert,
 } from "lucide-react";
+import patientService from "../../services/patientService";
 import doctorService from "../../services/doctorService";
 import "./PatientMonitoring.css";
 
+function formatTimeAgo(dateStr) {
+  if (!dateStr) return "No vitals logged";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "—";
+    const now = new Date();
+    const diffSec = Math.floor((now - d) / 1000);
+
+    if (diffSec < 60) return "Just now";
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)} mins ago`;
+    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} hours ago`;
+    if (diffSec < 172800) return "Yesterday";
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "—";
+  }
+}
+
 function PatientMonitoring() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
 
+  // Data & Pagination State
+  const [patients, setPatients] = useState([]);
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [stats, setStats] = useState({ total: 0, critical: 0, attention: 0, stable: 0 });
+
+  // Filter & Search State
+  const [searchInput, setSearchInput] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  const [statusFilter, setStatusFilter] = useState("all"); // all, critical, attention, stable
+  const [sortBy, setSortBy] = useState("newest");
+
+  // Loading & Refresh State
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  const [searchTerm, setSearchTerm] = useState(initialSearch);
-  const [statusFilter, setStatusFilter] = useState("all"); // all, critical, attention, stable
+  // Toast Notification State
+  const [toast, setToast] = useState(null);
+  const toastTimeoutRef = useRef(null);
 
-  const [patients, setPatients] = useState([]);
-  const [vitalsMap, setVitalsMap] = useState({});
-  const [alertsMap, setAlertsMap] = useState({});
-
-  // Selected patient for details drawer / modal
+  // Selected Patient Details Drawer / Modal
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [selectedPatientVitalsHistory, setSelectedPatientVitalsHistory] = useState([]);
-  const [selectedPatientRecords, setSelectedPatientRecords] = useState([]);
-  const [loadingPatientDetails, setLoadingPatientDetails] = useState(false);
+  const [vitalsHistory, setVitalsHistory] = useState([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
 
-  const loadPatientsData = useCallback(async () => {
+  // Record Vitals Modal State
+  const [showVitalsModal, setShowVitalsModal] = useState(false);
+  const [vitalsForm, setVitalsForm] = useState({
+    patient_id: "",
+    systolic_bp: "",
+    diastolic_bp: "",
+    heart_rate: "",
+    spo2: "",
+    temperature: "",
+    blood_sugar: "",
+    notes: "",
+  });
+  const [vitalsErrors, setVitalsErrors] = useState({});
+  const [savingVitals, setSavingVitals] = useState(false);
+
+  // Show Toast
+  const showToast = useCallback((type, message, duration = 4000) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToast({ type, message });
+    toastTimeoutRef.current = setTimeout(() => setToast(null), duration);
+  }, []);
+
+  // Debounce search input (300ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchInput.trim());
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
+
+  // Load Patients from API
+  const loadPatientsData = useCallback(async (isSilent = false) => {
     try {
+      if (!isSilent) setLoading(true);
       setError(null);
-      const data = await doctorService.getPatients();
-      const patientList = Array.isArray(data) ? data : [];
-      setPatients(patientList);
 
-      const vitalsTemp = {};
-      const alertsTemp = {};
+      const params = {
+        page: currentPage,
+        limit: pageSize,
+        search: debouncedSearch || undefined,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        sort: sortBy,
+      };
 
-      if (patientList.length > 0) {
-        await Promise.all(
-          patientList.map(async (pat) => {
-            const pid = pat._id || pat.id;
-            try {
-              const [vital, alertSummary] = await Promise.all([
-                doctorService.getLatestVitals(pid),
-                doctorService.getHealthAlertSummary(pid),
-              ]);
-              if (vital) vitalsTemp[pid] = vital;
-              if (alertSummary) alertsTemp[pid] = alertSummary;
-            } catch (e) {
-              // Ignore single patient error
-            }
-          })
+      const res = await patientService.getPatients(params);
+
+      if (res && res.patients) {
+        // Filter out any junk placeholder records named "string"
+        const cleanList = (Array.isArray(res.patients) ? res.patients : []).filter(
+          (p) => (p.name || "").toLowerCase() !== "string"
         );
+        setPatients(cleanList);
+        setTotalPatients(res.total || cleanList.length);
+        setTotalPages(res.total_pages || 1);
+        if (res.stats) {
+          setStats(res.stats);
+        }
+      } else if (Array.isArray(res)) {
+        const cleanList = res.filter((p) => (p.name || "").toLowerCase() !== "string");
+        setPatients(cleanList);
+        setTotalPatients(cleanList.length);
+        setTotalPages(Math.ceil(cleanList.length / pageSize) || 1);
+      } else {
+        setPatients([]);
+        setTotalPatients(0);
+        setTotalPages(1);
       }
-
-      setVitalsMap(vitalsTemp);
-      setAlertsMap(alertsTemp);
     } catch (err) {
       console.error("Error loading patient monitoring data:", err);
-      setError("Failed to load patient monitoring registry.");
+      const msg = err.response?.data?.detail || "Failed to load patient monitoring registry.";
+      setError(msg);
+      showToast("error", msg);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [currentPage, pageSize, debouncedSearch, statusFilter, sortBy, showToast]);
 
   useEffect(() => {
     loadPatientsData();
   }, [loadPatientsData]);
 
+  // Refresh Handler
   const handleRefresh = () => {
     setIsRefreshing(true);
-    loadPatientsData();
+    loadPatientsData(true).then(() => {
+      showToast("info", "Patient telemetry registry refreshed.");
+    });
   };
 
-  const getPatientStatus = (patientId) => {
-    const alertSummary = alertsMap[patientId];
-    const vit = vitalsMap[patientId];
-
-    if (alertSummary?.status === "ALERT" || alertSummary?.high_alerts > 0) {
-      return {
-        level: "critical",
-        label: "Critical",
-        reason: alertSummary.message || "Acute threshold flagged",
-      };
-    }
-    if (vit) {
-      if (
-        (vit.heart_rate && (vit.heart_rate > 105 || vit.heart_rate < 55)) ||
-        (vit.systolic_bp && vit.systolic_bp >= 140) ||
-        (vit.spo2 && vit.spo2 < 95) ||
-        (vit.blood_sugar && (vit.blood_sugar > 140 || vit.blood_sugar < 70))
-      ) {
-        return {
-          level: "attention",
-          label: "Needs Review",
-          reason: "Borderline vital readings",
-        };
-      }
-      return {
-        level: "stable",
-        label: "Stable",
-        reason: "Normal physiological range",
-      };
-    }
-    return {
-      level: "stable",
-      label: "Stable",
-      reason: "No active acute alerts",
-    };
-  };
-
-  // Open full patient details drawer
-  const handleOpenPatientDetails = async (patient) => {
+  // Open Full Patient Profile / Dossier
+  const handleOpenPatientProfile = async (patient) => {
     setSelectedPatient(patient);
-    setLoadingPatientDetails(true);
+    setLoadingDetails(true);
     const pid = patient._id || patient.id;
 
     try {
-      const [history, records] = await Promise.all([
-        doctorService.getPatientVitals(pid),
-        doctorService.getHealthRecords(pid),
-      ]);
-      setSelectedPatientVitalsHistory(Array.isArray(history) ? history : []);
-      setSelectedPatientRecords(Array.isArray(records) ? records : []);
-    } catch (err) {
-      console.warn("Failed to fetch detailed sub-data:", err);
+      const history = await doctorService.getPatientVitals(pid);
+      setVitalsHistory(Array.isArray(history) ? history : []);
+    } catch (e) {
+      console.warn("Failed to load vitals history:", e);
+      setVitalsHistory([]);
     } finally {
-      setLoadingPatientDetails(false);
+      setLoadingDetails(false);
     }
   };
 
-  const filteredPatients = patients.filter((pat) => {
-    const pid = pat._id || pat.id;
-    const { level } = getPatientStatus(pid);
+  // Open Record Vitals Modal
+  const handleOpenRecordVitals = (patient = null) => {
+    setVitalsErrors({});
+    if (patient) {
+      const pid = patient._id || patient.id;
+      setVitalsForm({
+        patient_id: pid,
+        systolic_bp: patient.latest_vital?.systolic_bp || "",
+        diastolic_bp: patient.latest_vital?.diastolic_bp || "",
+        heart_rate: patient.latest_vital?.heart_rate || "",
+        spo2: patient.latest_vital?.spo2 || "",
+        temperature: patient.latest_vital?.temperature || "",
+        blood_sugar: patient.latest_vital?.blood_sugar || "",
+        notes: "",
+      });
+    } else {
+      setVitalsForm({
+        patient_id: patients[0]?._id || patients[0]?.id || "",
+        systolic_bp: "",
+        diastolic_bp: "",
+        heart_rate: "",
+        spo2: "",
+        temperature: "",
+        blood_sugar: "",
+        notes: "",
+      });
+    }
+    setShowVitalsModal(true);
+  };
 
-    const matchesStatus =
-      statusFilter === "all" ? true : level === statusFilter;
+  // Validate Vitals Form
+  const validateVitalsForm = () => {
+    const errs = {};
+    if (!vitalsForm.patient_id) {
+      errs.patient_id = "Please select a patient.";
+    }
 
-    const query = searchTerm.toLowerCase().trim();
-    const matchesSearch =
-      !query ||
-      (pat.name || "").toLowerCase().includes(query) ||
-      (pat.email || "").toLowerCase().includes(query) ||
-      (pat.phone || "").toLowerCase().includes(query) ||
-      (pid || "").toLowerCase().includes(query);
+    const sbp = Number(vitalsForm.systolic_bp);
+    if (!vitalsForm.systolic_bp || isNaN(sbp) || sbp < 50 || sbp > 260) {
+      errs.systolic_bp = "Systolic BP must be between 50 and 260 mmHg.";
+    }
 
-    return matchesStatus && matchesSearch;
-  });
+    const dbp = Number(vitalsForm.diastolic_bp);
+    if (!vitalsForm.diastolic_bp || isNaN(dbp) || dbp < 30 || dbp > 160) {
+      errs.diastolic_bp = "Diastolic BP must be between 30 and 160 mmHg.";
+    }
 
-  const criticalCount = patients.filter(
-    (p) => getPatientStatus(p._id || p.id).level === "critical"
-  ).length;
-  const attentionCount = patients.filter(
-    (p) => getPatientStatus(p._id || p.id).level === "attention"
-  ).length;
-  const stableCount = patients.filter(
-    (p) => getPatientStatus(p._id || p.id).level === "stable"
-  ).length;
+    const hr = Number(vitalsForm.heart_rate);
+    if (!vitalsForm.heart_rate || isNaN(hr) || hr < 30 || hr > 220) {
+      errs.heart_rate = "Heart rate must be between 30 and 220 BPM.";
+    }
+
+    const spo2 = Number(vitalsForm.spo2);
+    if (!vitalsForm.spo2 || isNaN(spo2) || spo2 < 50 || spo2 > 100) {
+      errs.spo2 = "SpO2 must be between 50% and 100%.";
+    }
+
+    if (vitalsForm.temperature) {
+      const temp = Number(vitalsForm.temperature);
+      if (isNaN(temp) || temp < 30.0 || temp > 45.0) {
+        errs.temperature = "Temperature must be between 30.0°C and 45.0°C.";
+      }
+    }
+
+    setVitalsErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  // Submit Vitals Form
+  const handleVitalsSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateVitalsForm()) {
+      showToast("error", "Please correct the highlighted vitals values.");
+      return;
+    }
+
+    try {
+      setSavingVitals(true);
+      const payload = {
+        patient_id: vitalsForm.patient_id,
+        systolic_bp: parseInt(vitalsForm.systolic_bp, 10),
+        diastolic_bp: parseInt(vitalsForm.diastolic_bp, 10),
+        heart_rate: parseInt(vitalsForm.heart_rate, 10),
+        spo2: parseFloat(vitalsForm.spo2),
+        temperature: vitalsForm.temperature ? parseFloat(vitalsForm.temperature) : undefined,
+        blood_sugar: vitalsForm.blood_sugar ? parseFloat(vitalsForm.blood_sugar) : undefined,
+        notes: vitalsForm.notes?.trim() || undefined,
+      };
+
+      await doctorService.recordVitals(payload);
+
+      const targetPatient = patients.find(
+        (p) => (p._id || p.id) === vitalsForm.patient_id
+      );
+      const name = targetPatient?.name || "Patient";
+
+      setShowVitalsModal(false);
+      showToast("success", `Vitals recorded successfully for ${name}`);
+      await loadPatientsData(true);
+
+      // If drawer is open for this patient, update history
+      if (selectedPatient && (selectedPatient._id || selectedPatient.id) === vitalsForm.patient_id) {
+        const history = await doctorService.getPatientVitals(vitalsForm.patient_id);
+        setVitalsHistory(Array.isArray(history) ? history : []);
+      }
+    } catch (err) {
+      console.error("Failed to save vitals:", err);
+      const msg = err.response?.data?.detail || "Failed to record vital signs.";
+      showToast("error", msg);
+    } finally {
+      setSavingVitals(false);
+    }
+  };
+
+  // Copy ID helper
+  const copyPatientId = (idText) => {
+    if (!idText) return;
+    navigator.clipboard.writeText(idText);
+    setCopiedId(idText);
+    setTimeout(() => setCopiedId(null), 2000);
+    showToast("info", "Patient ID copied to clipboard!");
+  };
 
   return (
     <div className="patient-monitoring-page">
-      {/* HEADER */}
-      <section className="monitoring-hero-header">
-        <div className="hero-left">
-          <div className="portal-kicker">
-            <Users size={14} /> PATIENT REGISTRY & SURVEILLANCE
+      {/* GLOBAL TOAST */}
+      {toast && (
+        <div className={`monitoring-toast toast-${toast.type}`} role="alert">
+          {toast.type === "success" && <CheckCircle2 size={18} />}
+          {toast.type === "error" && <AlertCircle size={18} />}
+          {toast.type === "info" && <ShieldCheck size={18} />}
+          <span>{toast.message}</span>
+          <button onClick={() => setToast(null)} aria-label="Close">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* HERO BANNER */}
+      <section className="monitoring-hero-banner">
+        <div className="hero-banner-content">
+          <div className="platform-eyebrow-pill">
+            <Sparkles size={13} />
+            <span>CareBridge AI Clinical Platform</span>
           </div>
-          <h1>Patient Monitoring Hub</h1>
-          <p>
-            Comprehensive surveillance of all active patients, physiological parameters, acute alerts, and clinical histories.
+          <h1 className="hero-banner-title">
+            Patient Monitoring: Real-time Telemetry & Patient Registry
+          </h1>
+          <p className="hero-banner-desc">
+            Continuous physiological surveillance of active hospital registrations, vital parameters, critical alerts, and longitudinal health records.
           </p>
         </div>
 
-        <div className="hero-actions">
+        <div className="hero-banner-actions">
           <button
-            className={`sync-btn ${isRefreshing ? "spinning" : ""}`}
+            className={`btn-sync-registry ${isRefreshing ? "is-spinning" : ""}`}
             onClick={handleRefresh}
-            disabled={isRefreshing}
+            disabled={isRefreshing || loading}
+            title="Refresh Telemetry Registry"
           >
             <RefreshCw size={16} />
-            <span>{isRefreshing ? "Refreshing..." : "Refresh Registry"}</span>
+            <span>{isRefreshing ? "Syncing..." : "Refresh Registry"}</span>
           </button>
 
           <button
-            className="record-vital-primary-btn"
-            onClick={() => navigate("/doctor/vitals")}
+            className="btn-record-vital-primary"
+            onClick={() => handleOpenRecordVitals()}
+            id="btn-open-vitals-modal"
           >
-            <Plus size={16} />
+            <Plus size={17} />
             <span>Record Patient Vitals</span>
           </button>
         </div>
       </section>
 
-      {/* KPI TABS */}
-      <section className="monitoring-kpi-bar">
+      {/* 4-COLUMN STAT GRID (ALL, CRITICAL, NEEDS ATTENTION, STABLE) */}
+      <section className="monitoring-stat-grid">
+        {/* ALL PATIENTS */}
         <button
-          className={`kpi-chip ${statusFilter === "all" ? "active" : ""}`}
-          onClick={() => setStatusFilter("all")}
+          className={`stat-kpi-card card-all ${statusFilter === "all" ? "is-active" : ""}`}
+          onClick={() => {
+            setStatusFilter("all");
+            setCurrentPage(1);
+          }}
         >
-          <Users size={16} />
-          <span>All Monitored Patients</span>
-          <strong>{patients.length}</strong>
+          <div className="stat-card-icon-wrap">
+            <Users size={20} />
+          </div>
+          <div className="stat-card-text">
+            <span className="stat-card-label">All Monitored</span>
+            <strong className="stat-card-count">{stats.total || totalPatients}</strong>
+            <span className="stat-card-sub">Total Active Records</span>
+          </div>
         </button>
 
+        {/* CRITICAL ALERTS */}
         <button
-          className={`kpi-chip critical ${statusFilter === "critical" ? "active" : ""}`}
-          onClick={() => setStatusFilter("critical")}
+          className={`stat-kpi-card card-critical ${statusFilter === "critical" ? "is-active" : ""}`}
+          onClick={() => {
+            setStatusFilter("critical");
+            setCurrentPage(1);
+          }}
         >
-          <AlertCircle size={16} />
-          <span>Critical Alerts</span>
-          <strong className="badge-critical">{criticalCount}</strong>
+          <div className="stat-card-icon-wrap">
+            <ShieldAlert size={20} />
+          </div>
+          <div className="stat-card-text">
+            <span className="stat-card-label">Critical Alerts</span>
+            <strong className="stat-card-count text-critical">{stats.critical || 0}</strong>
+            <span className="stat-card-sub">Acute Breaches</span>
+          </div>
         </button>
 
+        {/* NEEDS ATTENTION */}
         <button
-          className={`kpi-chip attention ${statusFilter === "attention" ? "active" : ""}`}
-          onClick={() => setStatusFilter("attention")}
+          className={`stat-kpi-card card-attention ${statusFilter === "attention" ? "is-active" : ""}`}
+          onClick={() => {
+            setStatusFilter("attention");
+            setCurrentPage(1);
+          }}
         >
-          <AlertTriangle size={16} />
-          <span>Needs Attention</span>
-          <strong className="badge-attention">{attentionCount}</strong>
+          <div className="stat-card-icon-wrap">
+            <AlertTriangle size={20} />
+          </div>
+          <div className="stat-card-text">
+            <span className="stat-card-label">Needs Attention</span>
+            <strong className="stat-card-count text-attention">{stats.attention || 0}</strong>
+            <span className="stat-card-sub">Borderline Readings</span>
+          </div>
         </button>
 
+        {/* STABLE BASELINE */}
         <button
-          className={`kpi-chip stable ${statusFilter === "stable" ? "active" : ""}`}
-          onClick={() => setStatusFilter("stable")}
+          className={`stat-kpi-card card-stable ${statusFilter === "stable" ? "is-active" : ""}`}
+          onClick={() => {
+            setStatusFilter("stable");
+            setCurrentPage(1);
+          }}
         >
-          <CheckCircle2 size={16} />
-          <span>Stable Baseline</span>
-          <strong>{stableCount}</strong>
+          <div className="stat-card-icon-wrap">
+            <CheckCircle2 size={20} />
+          </div>
+          <div className="stat-card-text">
+            <span className="stat-card-label">Stable Baseline</span>
+            <strong className="stat-card-count text-stable">{stats.stable || 0}</strong>
+            <span className="stat-card-sub">Normal Parameters</span>
+          </div>
         </button>
-      </section>
-
-      {/* PROMINENT SEARCH BAR */}
-      <section className="prominent-search-section">
-        <div className="prominent-search-input-wrap">
-          <Search size={20} className="search-icon" />
-          <input
-            type="search"
-            placeholder="Search patients by Full Name, Patient ID, Email address, or Phone number..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="prominent-search-input"
-          />
-          {searchTerm && (
-            <button
-              className="clear-search-btn"
-              onClick={() => setSearchTerm("")}
-              aria-label="Clear search"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-
-        <div className="search-results-meta">
-          Showing <strong>{filteredPatients.length}</strong> of {patients.length} patients
-        </div>
       </section>
 
       {/* ERROR NOTICE */}
       {error && (
-        <div className="error-banner">
-          <AlertCircle size={18} />
-          <span>{error}</span>
-          <button onClick={loadPatientsData}>Retry</button>
+        <div className="monitoring-error-banner" role="alert">
+          <AlertCircle size={20} />
+          <div>
+            <strong>Error Loading Telemetry Data</strong>
+            <span>{error}</span>
+          </div>
+          <button onClick={() => loadPatientsData(false)}>Retry</button>
         </div>
       )}
 
-      {/* LOADING STATE */}
-      {loading && !error && (
-        <div className="monitoring-loading">
-          <Loader2 size={36} className="spinning" />
-          <h3>Loading patient telemetry registry...</h3>
+      {/* SEARCH AND CONTROLS BAR */}
+      <section className="monitoring-controls-bar">
+        <div className="search-bar-wrap">
+          <Search size={18} className="search-lens" />
+          <input
+            type="text"
+            placeholder="Search by name, patient ID, email address, or phone number..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="monitoring-search-input"
+            aria-label="Search patients"
+          />
+          {searchInput && (
+            <button
+              className="btn-clear-search"
+              onClick={() => setSearchInput("")}
+              title="Clear search"
+              aria-label="Clear search"
+            >
+              <X size={15} />
+            </button>
+          )}
         </div>
-      )}
 
-      {/* PATIENT REGISTRY TABLE & CARDS */}
-      {!loading && (
-        <div className="patient-cards-grid">
-          {filteredPatients.length === 0 ? (
-            <div className="empty-registry-state">
-              <Users size={48} />
-              <h3>No patients found</h3>
-              <p>
-                {searchTerm
-                  ? `No patient records match "${searchTerm}". Try adjusting your query or filter.`
-                  : "No patients currently registered in the database."}
-              </p>
-              {searchTerm && (
-                <button
-                  className="clear-filter-button"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                  }}
-                >
-                  Reset Search & Filters
-                </button>
-              )}
+        <div className="controls-right-wrap">
+          <div className="sort-select-wrap">
+            <ArrowUpDown size={14} className="sort-icon-muted" />
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="select-monitoring-sort"
+              aria-label="Sort order"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="name_asc">Name (A – Z)</option>
+              <option value="name_desc">Name (Z – A)</option>
+            </select>
+          </div>
+
+          <span className="monitoring-results-pill">
+            Showing <strong>{patients.length}</strong> of {totalPatients} patients
+          </span>
+        </div>
+      </section>
+
+      {/* SKELETON LOADERS */}
+      {loading && (
+        <div className="monitoring-skeletons-wrapper">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="monitoring-skeleton-card">
+              <div className="sk-avatar sk-shimmer" />
+              <div className="sk-line title sk-shimmer" />
+              <div className="sk-line subtitle sk-shimmer" />
+              <div className="sk-line vitals sk-shimmer" />
+              <div className="sk-line btn sk-shimmer" />
             </div>
-          ) : (
-            filteredPatients.map((patient) => {
-              const pid = patient._id || patient.id;
-              const vit = vitalsMap[pid];
-              const { level, label, reason } = getPatientStatus(pid);
+          ))}
+        </div>
+      )}
 
-              return (
-                <article key={pid} className={`patient-registry-card ${level}`}>
-                  {/* Top Bar */}
-                  <div className="registry-card-top">
-                    <div className="patient-avatar-badge">
-                      {patient.name
-                        ? patient.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .toUpperCase()
-                            .slice(0, 2)
-                        : "PT"}
-                    </div>
+      {/* ============================================================ */}
+      {/* DESKTOP TABLE VIEW */}
+      {/* ============================================================ */}
+      {!loading && patients.length > 0 && (
+        <div className="monitoring-table-container monitoring-table-desktop">
+          <table className="monitoring-data-table">
+            <thead>
+              <tr>
+                <th>Patient & Demographics</th>
+                <th>Patient ID</th>
+                <th>Contact (Phone / Email)</th>
+                <th>Status</th>
+                <th>Latest Telemetry</th>
+                <th>Last Reading</th>
+                <th className="th-action">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {patients.map((patient) => {
+                const pid = String(patient._id || patient.id || "");
+                const formattedId = patient.patientId || `PT-${pid.slice(-6).toUpperCase()}`;
+                const level = patient.telemetry_level || "stable";
+                const label = patient.telemetry_label || "Stable";
+                const vital = patient.latest_vital;
+                const lastTime = formatTimeAgo(patient.last_vitals_time || vital?.recorded_at);
 
-                    <div className="patient-main-info">
-                      <div className="name-row">
-                        <h3>{patient.name || "Patient Record"}</h3>
-                        <span className={`status-badge-mini ${level}`}>
-                          {label}
+                return (
+                  <tr key={pid || Math.random()} className="monitoring-patient-row">
+                    {/* Patient & Demographics */}
+                    <td>
+                      <div className="patient-id-cell">
+                        <div className={`avatar-pill avatar-${(patient.gender || "other").toLowerCase()}`}>
+                          {(patient.name || "P").charAt(0).toUpperCase()}
+                        </div>
+                        <div className="patient-text-group">
+                          <strong className="p-name">{patient.name || "Unnamed Patient"}</strong>
+                          <span className="p-demographics">
+                            {patient.age ? `${patient.age} yrs` : "—"} • {patient.gender || "—"} •{" "}
+                            <span className="text-bold-bg">{patient.blood_group || "—"}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Patient ID */}
+                    <td>
+                      <div className="id-copy-group">
+                        <span className="id-code-badge">#{formattedId}</span>
+                        <button
+                          className="btn-mini-copy"
+                          onClick={() => copyPatientId(formattedId)}
+                          title="Copy ID"
+                        >
+                          {copiedId === formattedId ? (
+                            <Check size={12} className="text-success" />
+                          ) : (
+                            <Copy size={12} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+
+                    {/* Phone / Email */}
+                    <td>
+                      <div className="contact-column">
+                        <span className="contact-line">
+                          <Phone size={12} className="text-muted" />
+                          <span>{patient.phone || "—"}</span>
+                        </span>
+                        <span className="contact-line email-line">
+                          <Mail size={12} className="text-muted" />
+                          <span>{patient.email || "—"}</span>
                         </span>
                       </div>
-                      <div className="id-contact-row">
-                        <span className="id-chip">ID: {pid.slice(-6)}</span>
-                        {patient.age && <span>Age: {patient.age}</span>}
-                        {patient.gender && <span>• {patient.gender}</span>}
-                        {patient.blood_group && <span>• Blood: {patient.blood_group}</span>}
+                    </td>
+
+                    {/* Status */}
+                    <td>
+                      <span className={`status-badge-pill badge-${level}`}>
+                        <span className="pulse-indicator-dot" />
+                        {label}
+                      </span>
+                    </td>
+
+                    {/* Latest Telemetry */}
+                    <td>
+                      {vital ? (
+                        <div className="telemetry-badges-row">
+                          <span className="vital-chip hr" title="Heart Rate">
+                            <HeartPulse size={12} /> {vital.heart_rate || "—"} bpm
+                          </span>
+                          <span className="vital-chip bp" title="Blood Pressure">
+                            <Activity size={12} /> {vital.systolic_bp && vital.diastolic_bp ? `${vital.systolic_bp}/${vital.diastolic_bp}` : "—"}
+                          </span>
+                          <span className="vital-chip spo2" title="Oxygen Saturation">
+                            <Droplets size={12} /> {vital.spo2 ? `${vital.spo2}%` : "—"}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="no-vitals-dash">No vitals on file</span>
+                      )}
+                    </td>
+
+                    {/* Last Reading Time */}
+                    <td>
+                      <span className="last-vitals-time">
+                        <Clock size={12} className="text-muted" />
+                        {lastTime}
+                      </span>
+                    </td>
+
+                    {/* Action Buttons */}
+                    <td className="td-action">
+                      <div className="row-action-buttons">
+                        <button
+                          className="btn-quick-log"
+                          onClick={() => handleOpenRecordVitals(patient)}
+                          title="Record Vitals"
+                        >
+                          <Plus size={13} />
+                          <span>Log Vitals</span>
+                        </button>
+                        <button
+                          className="btn-view-profile"
+                          onClick={() => handleOpenPatientProfile(patient)}
+                          title="View Patient Dossier"
+                        >
+                          <span>Profile</span>
+                          <ExternalLink size={13} />
+                        </button>
                       </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* MOBILE / TABLET STACKED CARDS VIEW */}
+      {/* ============================================================ */}
+      {!loading && patients.length > 0 && (
+        <div className="monitoring-cards-mobile">
+          {patients.map((patient) => {
+            const pid = String(patient._id || patient.id || "");
+            const formattedId = patient.patientId || `PT-${pid.slice(-6).toUpperCase()}`;
+            const level = patient.telemetry_level || "stable";
+            const label = patient.telemetry_label || "Stable";
+            const vital = patient.latest_vital;
+            const lastTime = formatTimeAgo(patient.last_vitals_time || vital?.recorded_at);
+
+            return (
+              <article key={pid || Math.random()} className={`mobile-patient-tile border-${level}`}>
+                <div className="mobile-tile-top">
+                  <div className="mobile-avatar-name">
+                    <div className={`avatar-pill avatar-${(patient.gender || "other").toLowerCase()}`}>
+                      {(patient.name || "P").charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="m-patient-name">{patient.name || "Unnamed Patient"}</h3>
+                      <span className="m-patient-id">#{formattedId}</span>
                     </div>
                   </div>
 
-                  {/* Contact Snippets */}
-                  <div className="patient-contacts-strip">
-                    {patient.email && (
-                      <span className="contact-item">
-                        <Mail size={13} /> {patient.email}
-                      </span>
-                    )}
-                    {patient.phone && (
-                      <span className="contact-item">
-                        <Phone size={13} /> {patient.phone}
-                      </span>
-                    )}
+                  <span className={`status-badge-pill badge-${level}`}>
+                    <span className="pulse-indicator-dot" />
+                    {label}
+                  </span>
+                </div>
+
+                <div className="mobile-tile-details-grid">
+                  <div className="m-detail-item">
+                    <span className="m-label">Phone</span>
+                    <span className="m-value">{patient.phone || "—"}</span>
                   </div>
-
-                  {/* Vitals Summary Pill Matrix */}
-                  <div className="card-vitals-summary">
-                    <div className="vital-mini-chip">
-                      <HeartPulse size={14} className="icon-bp" />
-                      <span className="label">BP:</span>
-                      <strong>
-                        {vit?.systolic_bp && vit?.diastolic_bp
-                          ? `${vit.systolic_bp}/${vit.diastolic_bp}`
-                          : "--"}
-                      </strong>
-                    </div>
-
-                    <div className="vital-mini-chip">
-                      <Activity size={14} className="icon-hr" />
-                      <span className="label">HR:</span>
-                      <strong>{vit?.heart_rate ? `${vit.heart_rate} bpm` : "--"}</strong>
-                    </div>
-
-                    <div className="vital-mini-chip">
-                      <Droplets size={14} className="icon-spo2" />
-                      <span className="label">SpO₂:</span>
-                      <strong>{vit?.spo2 ? `${vit.spo2}%` : "--"}</strong>
-                    </div>
-
-                    <div className="vital-mini-chip">
-                      <Thermometer size={14} className="icon-temp" />
-                      <span className="label">Temp:</span>
-                      <strong>{vit?.temperature ? `${vit.temperature}°` : "--"}</strong>
-                    </div>
-
-                    <div className="vital-mini-chip">
-                      <TrendingUp size={14} className="icon-sugar" />
-                      <span className="label">Sugar:</span>
-                      <strong>{vit?.blood_sugar ? `${vit.blood_sugar} mg/dL` : "--"}</strong>
-                    </div>
+                  <div className="m-detail-item">
+                    <span className="m-label">Email</span>
+                    <span className="m-value m-email">{patient.email || "—"}</span>
                   </div>
-
-                  {/* Clinical Alert reason */}
-                  <div className="card-alert-line">
-                    <span className="alert-reason-text">
-                      <strong>Status Note: </strong> {reason}
+                  <div className="m-detail-item">
+                    <span className="m-label">Age / Gender / Blood</span>
+                    <span className="m-value">
+                      {patient.age ? `${patient.age}y` : "—"} / {patient.gender || "—"} /{" "}
+                      <strong>{patient.blood_group || "—"}</strong>
                     </span>
                   </div>
-
-                  {/* Action Buttons */}
-                  <div className="card-actions-bar">
-                    <button
-                      className="action-btn view-details"
-                      onClick={() => handleOpenPatientDetails(patient)}
-                      title="View complete patient dossier"
-                    >
-                      <span>Patient Details</span>
-                    </button>
-
-                    <button
-                      className="action-btn telemetry"
-                      onClick={() => navigate(`/doctor/health-monitoring?patientId=${pid}`)}
-                      title="View telemetry trend charts"
-                    >
-                      <Activity size={14} />
-                      <span>Trends</span>
-                    </button>
-
-                    <button
-                      className="action-btn chart"
-                      onClick={() => navigate(`/doctor/records?patientId=${pid}`)}
-                      title="View health records"
-                    >
-                      <FileText size={14} />
-                      <span>Records</span>
-                    </button>
-
-                    <button
-                      className="action-btn ai-btn"
-                      onClick={() => navigate(`/doctor/ai-assistant?patientId=${pid}`)}
-                      title="AI Triage & Clinical note"
-                    >
-                      <Sparkles size={14} />
-                      <span>AI Triage</span>
-                    </button>
+                  <div className="m-detail-item">
+                    <span className="m-label">Last Telemetry</span>
+                    <span className="m-value">{lastTime}</span>
                   </div>
-                </article>
-              );
-            })
+                </div>
+
+                {vital && (
+                  <div className="mobile-telemetry-chips">
+                    <span className="vital-chip hr">
+                      <HeartPulse size={12} /> {vital.heart_rate || "—"} bpm
+                    </span>
+                    <span className="vital-chip bp">
+                      <Activity size={12} /> {vital.systolic_bp && vital.diastolic_bp ? `${vital.systolic_bp}/${vital.diastolic_bp}` : "—"}
+                    </span>
+                    <span className="vital-chip spo2">
+                      <Droplets size={12} /> {vital.spo2 ? `${vital.spo2}%` : "—"}
+                    </span>
+                  </div>
+                )}
+
+                <div className="mobile-tile-actions">
+                  <button
+                    className="btn-mobile-log-vitals"
+                    onClick={() => handleOpenRecordVitals(patient)}
+                  >
+                    <Plus size={14} />
+                    <span>Log Vitals</span>
+                  </button>
+                  <button
+                    className="btn-mobile-view-profile"
+                    onClick={() => handleOpenPatientProfile(patient)}
+                  >
+                    <span>View Profile</span>
+                    <ExternalLink size={14} />
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      {/* EMPTY STATE */}
+      {!loading && patients.length === 0 && (
+        <div className="monitoring-empty-state">
+          <div className="empty-icon-bubble">
+            <Users size={40} />
+          </div>
+          <h3>No patients found</h3>
+          <p>
+            {searchInput || statusFilter !== "all"
+              ? `No patient records match "${searchInput || statusFilter}". Try adjusting your search query or filter.`
+              : "No patient records registered in the clinical telemetry database."}
+          </p>
+          {(searchInput || statusFilter !== "all") && (
+            <button
+              className="btn-reset-filters"
+              onClick={() => {
+                setSearchInput("");
+                setStatusFilter("all");
+              }}
+            >
+              Reset Search & Filters
+            </button>
           )}
         </div>
       )}
 
-      {/* ============================================================
-          PATIENT DETAILS DRAWER / MODAL
-      ============================================================ */}
-      {selectedPatient && (
-        <div className="patient-modal-overlay" onClick={() => setSelectedPatient(null)}>
-          <div className="patient-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div>
-                <span className="modal-kicker">PATIENT CLINICAL DOSSIER</span>
-                <h2>{selectedPatient.name || "Patient Overview"}</h2>
-                <span className="patient-uid">
-                  System ID: {selectedPatient._id || selectedPatient.id}
-                </span>
+      {/* PAGINATION BAR */}
+      {!loading && totalPatients > 0 && (
+        <footer className="monitoring-pagination-footer">
+          <span className="pagination-counter-text">
+            Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong> (
+            <strong>{totalPatients}</strong> total patients)
+          </span>
+
+          <div className="pagination-control-btns">
+            <button
+              className="btn-page-step"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              aria-label="Previous Page"
+            >
+              <ChevronLeft size={16} />
+              <span>Previous</span>
+            </button>
+
+            <div className="page-pill-numbers">
+              {[...Array(totalPages)].map((_, i) => {
+                const pageNum = i + 1;
+                if (
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                ) {
+                  return (
+                    <button
+                      key={pageNum}
+                      className={`btn-page-pill ${currentPage === pageNum ? "page-active" : ""}`}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                  return (
+                    <span key={pageNum} className="page-ellipsis">
+                      …
+                    </span>
+                  );
+                }
+                return null;
+              })}
+            </div>
+
+            <button
+              className="btn-page-step"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Next Page"
+            >
+              <span>Next</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </footer>
+      )}
+
+      {/* ============================================================ */}
+      {/* RECORD VITALS MODAL */}
+      {/* ============================================================ */}
+      {showVitalsModal && (
+        <div className="monitoring-modal-backdrop" onClick={() => !savingVitals && setShowVitalsModal(false)}>
+          <div
+            className="monitoring-modal-card record-vitals-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+          >
+            <div className="modal-top-bar">
+              <div className="modal-title-wrap">
+                <div className="modal-icon-pill">
+                  <HeartPulse size={18} />
+                </div>
+                <div>
+                  <h2>Record Patient Vitals</h2>
+                  <p>Log updated physiological telemetry and threshold parameters</p>
+                </div>
               </div>
               <button
-                className="close-modal-btn"
-                onClick={() => setSelectedPatient(null)}
-                aria-label="Close modal"
+                className="btn-close-modal"
+                onClick={() => setShowVitalsModal(false)}
+                disabled={savingVitals}
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="modal-scrollable-body">
-              {/* Demographics Card */}
-              <div className="modal-section-card">
-                <h3>Demographics & Contact Information</h3>
-                <div className="info-grid-2">
-                  <div className="info-item">
-                    <label>Full Name</label>
-                    <span>{selectedPatient.name || "--"}</span>
+            <form onSubmit={handleVitalsSubmit} className="vitals-form-body">
+              <div className="modal-scroll-area">
+                {/* PATIENT SELECT */}
+                <div className="vitals-form-group">
+                  <label htmlFor="vital_patient_id" className="vlabel required">
+                    Select Patient *
+                  </label>
+                  <select
+                    id="vital_patient_id"
+                    value={vitalsForm.patient_id}
+                    onChange={(e) => setVitalsForm({ ...vitalsForm, patient_id: e.target.value })}
+                    className={vitalsErrors.patient_id ? "vinput-error" : ""}
+                    required
+                  >
+                    {patients.map((p) => (
+                      <option key={p._id || p.id} value={p._id || p.id}>
+                        {p.name} ({p.patientId || `PT-${String(p._id || p.id).slice(-6).toUpperCase()}`})
+                      </option>
+                    ))}
+                  </select>
+                  {vitalsErrors.patient_id && <span className="verror-text">{vitalsErrors.patient_id}</span>}
+                </div>
+
+                {/* BLOOD PRESSURE GRID */}
+                <div className="vitals-grid-2">
+                  <div className="vitals-form-group">
+                    <label htmlFor="vital_sbp" className="vlabel required">
+                      Systolic BP (mmHg) *
+                    </label>
+                    <input
+                      id="vital_sbp"
+                      type="number"
+                      placeholder="e.g. 120"
+                      value={vitalsForm.systolic_bp}
+                      onChange={(e) => setVitalsForm({ ...vitalsForm, systolic_bp: e.target.value })}
+                      className={vitalsErrors.systolic_bp ? "vinput-error" : ""}
+                      required
+                    />
+                    {vitalsErrors.systolic_bp && <span className="verror-text">{vitalsErrors.systolic_bp}</span>}
                   </div>
-                  <div className="info-item">
-                    <label>Email Address</label>
-                    <span>{selectedPatient.email || "--"}</span>
+
+                  <div className="vitals-form-group">
+                    <label htmlFor="vital_dbp" className="vlabel required">
+                      Diastolic BP (mmHg) *
+                    </label>
+                    <input
+                      id="vital_dbp"
+                      type="number"
+                      placeholder="e.g. 80"
+                      value={vitalsForm.diastolic_bp}
+                      onChange={(e) => setVitalsForm({ ...vitalsForm, diastolic_bp: e.target.value })}
+                      className={vitalsErrors.diastolic_bp ? "vinput-error" : ""}
+                      required
+                    />
+                    {vitalsErrors.diastolic_bp && <span className="verror-text">{vitalsErrors.diastolic_bp}</span>}
                   </div>
-                  <div className="info-item">
-                    <label>Phone Number</label>
-                    <span>{selectedPatient.phone || "--"}</span>
+                </div>
+
+                {/* HEART RATE & SPO2 */}
+                <div className="vitals-grid-2">
+                  <div className="vitals-form-group">
+                    <label htmlFor="vital_hr" className="vlabel required">
+                      Heart Rate (BPM) *
+                    </label>
+                    <input
+                      id="vital_hr"
+                      type="number"
+                      placeholder="e.g. 72"
+                      value={vitalsForm.heart_rate}
+                      onChange={(e) => setVitalsForm({ ...vitalsForm, heart_rate: e.target.value })}
+                      className={vitalsErrors.heart_rate ? "vinput-error" : ""}
+                      required
+                    />
+                    {vitalsErrors.heart_rate && <span className="verror-text">{vitalsErrors.heart_rate}</span>}
                   </div>
-                  <div className="info-item">
-                    <label>Age & Gender</label>
-                    <span>
-                      {selectedPatient.age ? `Age ${selectedPatient.age}` : "Age N/A"} •{" "}
-                      {selectedPatient.gender || "N/A"}
+
+                  <div className="vitals-form-group">
+                    <label htmlFor="vital_spo2" className="vlabel required">
+                      SpO2 Saturation (%) *
+                    </label>
+                    <input
+                      id="vital_spo2"
+                      type="number"
+                      step="0.1"
+                      placeholder="e.g. 98.5"
+                      value={vitalsForm.spo2}
+                      onChange={(e) => setVitalsForm({ ...vitalsForm, spo2: e.target.value })}
+                      className={vitalsErrors.spo2 ? "vinput-error" : ""}
+                      required
+                    />
+                    {vitalsErrors.spo2 && <span className="verror-text">{vitalsErrors.spo2}</span>}
+                  </div>
+                </div>
+
+                {/* TEMPERATURE & BLOOD SUGAR */}
+                <div className="vitals-grid-2">
+                  <div className="vitals-form-group">
+                    <label htmlFor="vital_temp" className="vlabel">
+                      Temperature (°C)
+                    </label>
+                    <input
+                      id="vital_temp"
+                      type="number"
+                      step="0.1"
+                      placeholder="e.g. 36.8"
+                      value={vitalsForm.temperature}
+                      onChange={(e) => setVitalsForm({ ...vitalsForm, temperature: e.target.value })}
+                      className={vitalsErrors.temperature ? "vinput-error" : ""}
+                    />
+                    {vitalsErrors.temperature && <span className="verror-text">{vitalsErrors.temperature}</span>}
+                  </div>
+
+                  <div className="vitals-form-group">
+                    <label htmlFor="vital_sugar" className="vlabel">
+                      Blood Sugar (mg/dL)
+                    </label>
+                    <input
+                      id="vital_sugar"
+                      type="number"
+                      step="1"
+                      placeholder="e.g. 95"
+                      value={vitalsForm.blood_sugar}
+                      onChange={(e) => setVitalsForm({ ...vitalsForm, blood_sugar: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {/* CLINICAL NOTES */}
+                <div className="vitals-form-group">
+                  <label htmlFor="vital_notes" className="vlabel">
+                    Clinical Observations / Notes
+                  </label>
+                  <textarea
+                    id="vital_notes"
+                    rows="2"
+                    placeholder="e.g. Patient resting comfortably, regular sinus rhythm"
+                    value={vitalsForm.notes}
+                    onChange={(e) => setVitalsForm({ ...vitalsForm, notes: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* FOOTER */}
+              <div className="modal-bottom-bar">
+                <button
+                  type="button"
+                  className="btn-modal-cancel"
+                  onClick={() => setShowVitalsModal(false)}
+                  disabled={savingVitals}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-modal-save"
+                  disabled={savingVitals}
+                  id="btn-submit-vitals"
+                >
+                  {savingVitals ? (
+                    <>
+                      <Loader2 size={16} className="spinning" />
+                      <span>Saving Vitals...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={16} />
+                      <span>Save Readings</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* PATIENT CLINICAL DOSSIER DRAWER / MODAL */}
+      {/* ============================================================ */}
+      {selectedPatient && (
+        <div className="monitoring-modal-backdrop" onClick={() => setSelectedPatient(null)}>
+          <div
+            className="monitoring-modal-card dossier-drawer-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+          >
+            <div className="modal-top-bar dossier-top">
+              <div className="modal-title-wrap">
+                <div className={`avatar-pill lg avatar-${(selectedPatient.gender || "other").toLowerCase()}`}>
+                  {(selectedPatient.name || "P").charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h2>{selectedPatient.name}</h2>
+                  <div className="dossier-id-chips">
+                    <span className="id-code-badge">
+                      #{selectedPatient.patientId || `PT-${String(selectedPatient._id || selectedPatient.id).slice(-6).toUpperCase()}`}
+                    </span>
+                    <span className={`status-badge-pill badge-${selectedPatient.telemetry_level || "stable"}`}>
+                      <span className="pulse-indicator-dot" />
+                      {selectedPatient.telemetry_label || "Stable"}
                     </span>
                   </div>
-                  <div className="info-item">
-                    <label>Blood Group</label>
-                    <span>{selectedPatient.blood_group || "N/A"}</span>
+                </div>
+              </div>
+              <button
+                className="btn-close-modal"
+                onClick={() => setSelectedPatient(null)}
+              >
+                <X size={19} />
+              </button>
+            </div>
+
+            <div className="modal-scroll-area dossier-scroll-area">
+              {/* PRIMARY STATS GRID */}
+              <div className="dossier-quick-stats">
+                <div className="dquick-item">
+                  <span>Age</span>
+                  <strong>{selectedPatient.age ? `${selectedPatient.age} Yrs` : "—"}</strong>
+                </div>
+                <div className="dquick-item">
+                  <span>Gender</span>
+                  <strong>{selectedPatient.gender || "—"}</strong>
+                </div>
+                <div className="dquick-item">
+                  <span>Blood Group</span>
+                  <strong className="text-red">{selectedPatient.blood_group || "—"}</strong>
+                </div>
+                <div className="dquick-item">
+                  <span>Status</span>
+                  <strong>{selectedPatient.status || "Active"}</strong>
+                </div>
+              </div>
+
+              {/* CONTACT & EMERGENCY */}
+              <div className="dossier-info-card">
+                <h4>Contact & Emergency</h4>
+                <div className="dcontact-grid">
+                  <div className="dcontact-line">
+                    <Phone size={14} className="text-primary" />
+                    <span>{selectedPatient.phone || "No phone listed"}</span>
+                  </div>
+                  <div className="dcontact-line">
+                    <Mail size={14} className="text-primary" />
+                    <span>{selectedPatient.email || "No email listed"}</span>
+                  </div>
+                  <div className="dcontact-line">
+                    <AlertTriangle size={14} className="text-warning" />
+                    <span>Emergency: <strong>{selectedPatient.emergency_contact || "—"}</strong></span>
                   </div>
                 </div>
               </div>
 
-              {/* Latest Vitals Snapshot */}
-              <div className="modal-section-card">
-                <div className="section-title-row">
-                  <h3>Latest Physiological Telemetry</h3>
-                  <button
-                    className="modal-action-link"
-                    onClick={() => {
-                      const pid = selectedPatient._id || selectedPatient.id;
-                      setSelectedPatient(null);
-                      navigate(`/doctor/vitals?patientId=${pid}`);
-                    }}
-                  >
-                    + Record New Vitals
-                  </button>
-                </div>
-
-                {vitalsMap[selectedPatient._id || selectedPatient.id] ? (
-                  <div className="modal-vitals-grid">
-                    {(() => {
-                      const vit = vitalsMap[selectedPatient._id || selectedPatient.id];
-                      return (
-                        <>
-                          <div className="modal-vital-box">
-                            <span className="box-title">Blood Pressure</span>
-                            <strong>
-                              {vit.systolic_bp && vit.diastolic_bp
-                                ? `${vit.systolic_bp}/${vit.diastolic_bp}`
-                                : "--"}
-                            </strong>
-                            <small>mmHg (Target &lt;120/80)</small>
-                          </div>
-                          <div className="modal-vital-box">
-                            <span className="box-title">Heart Rate</span>
-                            <strong>{vit.heart_rate || "--"} bpm</strong>
-                            <small>Normal 60-100</small>
-                          </div>
-                          <div className="modal-vital-box">
-                            <span className="box-title">SpO₂ Oxygen</span>
-                            <strong>{vit.spo2 ? `${vit.spo2}%` : "--"}</strong>
-                            <small>Target &gt;95%</small>
-                          </div>
-                          <div className="modal-vital-box">
-                            <span className="box-title">Body Temperature</span>
-                            <strong>{vit.temperature ? `${vit.temperature}°` : "--"}</strong>
-                            <small>Normal 36.5-37.5°C</small>
-                          </div>
-                          <div className="modal-vital-box">
-                            <span className="box-title">Blood Sugar</span>
-                            <strong>{vit.blood_sugar ? `${vit.blood_sugar} mg/dL` : "--"}</strong>
-                            <small>Normal 70-120</small>
-                          </div>
-                        </>
-                      );
-                    })()}
+              {/* ALLERGIES & HISTORY */}
+              <div className="dossier-info-card">
+                <h4>Allergies & Contraindications</h4>
+                {selectedPatient.allergies &&
+                (Array.isArray(selectedPatient.allergies)
+                  ? selectedPatient.allergies.length > 0
+                  : Boolean(selectedPatient.allergies)) ? (
+                  <div className="tag-badges-wrap">
+                    {(Array.isArray(selectedPatient.allergies)
+                      ? selectedPatient.allergies
+                      : String(selectedPatient.allergies).split(",")
+                    ).map((al, idx) => (
+                      <span key={idx} className="allergy-chip">
+                        {al.trim()}
+                      </span>
+                    ))}
                   </div>
                 ) : (
-                  <p className="empty-subtext">No vitals recorded for this patient yet.</p>
+                  <p className="no-data-note">No allergies documented.</p>
                 )}
               </div>
 
-              {/* Recent Medical Records */}
-              <div className="modal-section-card">
-                <div className="section-title-row">
-                  <h3>Medical Records & Diagnoses</h3>
+              <div className="dossier-info-card">
+                <h4>Medical History & Diagnoses</h4>
+                {selectedPatient.medical_history &&
+                (Array.isArray(selectedPatient.medical_history)
+                  ? selectedPatient.medical_history.length > 0
+                  : Boolean(selectedPatient.medical_history)) ? (
+                  <div className="tag-badges-wrap">
+                    {(Array.isArray(selectedPatient.medical_history)
+                      ? selectedPatient.medical_history
+                      : String(selectedPatient.medical_history).split(",")
+                    ).map((mh, idx) => (
+                      <span key={idx} className="history-chip">
+                        {mh.trim()}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="no-data-note">No chronic medical conditions documented.</p>
+                )}
+              </div>
+
+              {/* VITALS HISTORY */}
+              <div className="dossier-info-card">
+                <div className="card-header-flex">
+                  <h4>Recorded Vitals History</h4>
                   <button
-                    className="modal-action-link"
+                    className="btn-card-action-log"
                     onClick={() => {
-                      const pid = selectedPatient._id || selectedPatient.id;
-                      setSelectedPatient(null);
-                      navigate(`/doctor/records?patientId=${pid}`);
+                      handleOpenRecordVitals(selectedPatient);
                     }}
                   >
-                    Open Health Records
+                    <Plus size={13} />
+                    <span>Log Vitals</span>
                   </button>
                 </div>
 
-                {loadingPatientDetails ? (
-                  <div className="modal-loader">
+                {loadingDetails ? (
+                  <div className="vitals-loading-spinner">
                     <Loader2 size={24} className="spinning" />
-                    <span>Loading patient records...</span>
+                    <span>Fetching historical telemetry...</span>
                   </div>
-                ) : selectedPatientRecords.length === 0 ? (
-                  <p className="empty-subtext">No health records recorded yet.</p>
+                ) : vitalsHistory.length > 0 ? (
+                  <div className="vitals-history-table-wrap">
+                    <table className="vhistory-table">
+                      <thead>
+                        <tr>
+                          <th>Timestamp</th>
+                          <th>BP (mmHg)</th>
+                          <th>HR (bpm)</th>
+                          <th>SpO2</th>
+                          <th>Temp</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {vitalsHistory.slice(0, 5).map((v, i) => (
+                          <tr key={v._id || i}>
+                            <td>{v.recorded_at ? new Date(v.recorded_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                            <td>{v.systolic_bp && v.diastolic_bp ? `${v.systolic_bp}/${v.diastolic_bp}` : "—"}</td>
+                            <td>{v.heart_rate || "—"}</td>
+                            <td>{v.spo2 ? `${v.spo2}%` : "—"}</td>
+                            <td>{v.temperature ? `${v.temperature}°C` : "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 ) : (
-                  <div className="modal-records-list">
-                    {selectedPatientRecords.slice(0, 3).map((rec) => (
-                      <div key={rec._id || rec.id} className="modal-record-item">
-                        <div className="rec-header">
-                          <strong>{rec.title || rec.diagnosis || "Health Record"}</strong>
-                          <span className="rec-type">{rec.record_type || "General"}</span>
-                        </div>
-                        {rec.description && <p className="rec-desc">{rec.description}</p>}
-                        {rec.medications && rec.medications.length > 0 && (
-                          <div className="rec-meds">
-                            <span>Medications: </span>
-                            {rec.medications.join(", ")}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  <p className="no-data-note">No prior telemetry history recorded for this patient.</p>
                 )}
               </div>
             </div>
 
-            {/* Modal Footer Actions */}
-            <div className="modal-footer">
+            <div className="modal-bottom-bar">
               <button
-                className="btn-modal-action secondary"
-                onClick={() => {
-                  const pid = selectedPatient._id || selectedPatient.id;
-                  setSelectedPatient(null);
-                  navigate(`/doctor/health-monitoring?patientId=${pid}`);
-                }}
+                className="btn-modal-cancel"
+                onClick={() => setSelectedPatient(null)}
               >
-                <Activity size={15} /> Telemetry Trends
+                Close Dossier
               </button>
-
               <button
-                className="btn-modal-action ai"
-                onClick={() => {
-                  const pid = selectedPatient._id || selectedPatient.id;
-                  setSelectedPatient(null);
-                  navigate(`/doctor/ai-assistant?patientId=${pid}`);
-                }}
+                className="btn-modal-save"
+                onClick={() => handleOpenRecordVitals(selectedPatient)}
               >
-                <Sparkles size={15} /> AI Clinical Triage
+                <Plus size={15} />
+                <span>Log New Vitals</span>
               </button>
             </div>
           </div>
