@@ -1,0 +1,256 @@
+/* =========================================================
+   CAREBRIDGE AI - INTERACTIVE PHYSIOLOGICAL BODY MAP
+   Dark Navy / Glowing Anatomical Nodes
+========================================================= */
+
+.body-map-card {
+  background: #0f172a;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.body-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.body-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.body-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.body-header-title h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.body-header-title span {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.body-map-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* =========================================================
+   CONTENT & SVG ANATOMY
+========================================================= */
+.body-map-content {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  padding: 24px;
+  background: radial-gradient(circle at left, #132238 0%, #0b1322 100%);
+  align-items: center;
+}
+
+.body-svg-container {
+  display: flex;
+  justify-content: center;
+}
+
+.body-anatomy-svg {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.15));
+}
+
+.organ-node {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.organ-node:hover {
+  transform-origin: center;
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 8px #ffffff);
+}
+
+.organ-node.selected {
+  stroke-dasharray: 4;
+  animation: dashSpin 3s linear infinite;
+}
+
+@keyframes dashSpin {
+  to { stroke-dashoffset: 20; }
+}
+
+/* =========================================================
+   DRAWER
+========================================================= */
+.organ-detail-drawer {
+  display: flex;
+  flex-direction: column;
+}
+
+.organ-detail-card {
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-left: 4px solid #10b981;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.organ-detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.organ-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.organ-name-row h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.organ-status-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.organ-reading-box {
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.organ-reading-box span {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.organ-reading-box strong {
+  display: block;
+  font-size: 14px;
+  color: #38bdf8;
+}
+
+.organ-clinical-note {
+  margin: 0;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.organ-chips-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.organ-select-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.organ-select-chip:hover {
+  background: #253349;
+  color: #ffffff;
+}
+
+.organ-select-chip.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.organ-drawer-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 800px) {
+  .body-map-content {
+    grid-template-columns: 1fr;
+  }
+  .body-svg-container {
+    margin-bottom: 16px;
+  }
+}

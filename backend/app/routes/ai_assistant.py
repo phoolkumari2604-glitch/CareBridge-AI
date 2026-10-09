@@ -1,11 +1,15 @@
 from datetime import datetime, timezone
+import os
 import re
+import secrets
 from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
 from app.core.database import get_database
 from app.utils.decorators import token_required
 from app.utils.helpers import serialize_doc, is_valid_object_id
 from app.services.ai_safety import detect_emergency, get_emergency_response
+from app.services.ai_vision import strip_exif_and_sanitize, analyze_medical_images, MAX_IMAGES, MAX_IMAGE_SIZE_BYTES, ALLOWED_EXTENSIONS
+from app.config import UPLOAD_FOLDER
 
 ai_assistant_bp = Blueprint("ai_assistant", __name__)
 
@@ -23,7 +27,7 @@ def generate_clinical_ai_response(role: str, message: str, context: dict) -> str
     role = (role or "PATIENT").upper()
     
     patient_name = context.get("patient_name", "Patient")
-    vital = context.get("vitals", {})
+    vital = context.get("vitals") or {}
     alerts = context.get("alerts", [])
     records = context.get("records", [])
     
@@ -67,12 +71,15 @@ def generate_clinical_ai_response(role: str, message: str, context: dict) -> str
                     f"• **Clinical Status**: {vital.get('status', 'STABLE')}\n\n"
                     + ("*Active Alerts Detected*: " + ", ".join(alerts) if alerts else "*All recorded vital metrics fall within expected clinical parameters.*")
                 )
-            return "No recent telemetry stream found for the specified patient ID. Please verify patient registry or select a patient from the dropdown."
+            return (
+                "**Patient Telemetry Notice:**\n"
+                "No recent vital telemetry stream is on file for this patient. You can record fresh vitals in the **Vital Signs** tab or perform a bed-side intake assessment."
+            )
         else:
             return (
                 f"**Clinical rounds assistance for Dr. {context.get('doctor_name', 'Doctor')}:**\n\n"
                 "I am ready to assist with clinical summaries, ICD-10 coding queries, drug interaction verification, or telemetry vital trend analysis. "
-                "You can also attach clinical observations or query specific patient vitals."
+                "You can also attach clinical observations, imaging photos, or query specific patient vitals."
             )
 
     # -------------------------------------------------------------
@@ -114,12 +121,12 @@ def generate_clinical_ai_response(role: str, message: str, context: dict) -> str
                 + (f"⚠️ *Notice*: Elevated or alerted parameters noted for {', '.join(alerts)}. Please consider scheduling a consultation with your doctor." if alerts else "✅ All your current vital parameters are within stable reference ranges.")
             )
         return (
-            "Standard healthy adult vital ranges are:\n"
-            "• **Heart Rate**: 60–100 beats/min at rest\n"
-            "• **Blood Pressure**: Less than 120/80 mmHg\n"
-            "• **Oxygen (SpO2)**: 95%–100%\n"
-            "• **Temperature**: 36.5°C–37.5°C (97.7°F–99.5°F)\n"
-            "You can log your own vitals in the Vitals section or during your doctor visit."
+            "**Welcome to CareBridge Health Monitoring!**\n\n"
+            "We don't have your latest vital readings recorded yet. Here is how you can easily get started:\n"
+            "1. **Log Your Vitals**: Visit your **My Health** section to enter your current Blood Pressure, Heart Rate, and Blood Sugar.\n"
+            "2. **Upload a Report**: Click the 📎 paperclip icon or 📷 camera below to share a photo of your recent lab report or prescription.\n"
+            "3. **Book a Checkup**: Click **Find Doctor** to schedule a quick routine checkup.\n\n"
+            "In the meantime, healthy adult benchmarks are: Heart Rate 60–100 BPM, Blood Pressure < 120/80 mmHg, and SpO2 95–100%."
         )
 
     # General Medical Questions: Blood Pressure
@@ -207,16 +214,16 @@ def generate_clinical_ai_response(role: str, message: str, context: dict) -> str
     if "record" in msg or "report" in msg or "lab" in msg:
         return (
             f"You currently have {len(records)} medical document(s) uploaded in your Health Records repository. "
-            "You can securely upload new diagnostic reports, prescriptions, and lab test PDFs anytime from the **Health Records** tab."
+            "You can securely upload new diagnostic reports, prescriptions, and lab test PDFs anytime from the **Health Records** tab or by attaching them here."
         )
 
     # General Greeting / Default Patient Response
     return (
         f"Hello {patient_name}! I am your CareBridge AI Health Assistant.\n\n"
         "You can ask me about:\n"
-        "• Your recorded vital signs and health history\n"
-        "• Common symptoms, first aid, and wellness guidance\n"
-        "• Blood pressure, blood glucose, and nutrition advice\n"
+        "• Your recorded vital signs and physiological status\n"
+        "• Explaining prescriptions, diagnostic photos, or lab reports (use 📎 or 📷)\n"
+        "• Symptoms, first aid, and wellness questions\n"
         "• Scheduling appointments or checking your live OPD queue\n\n"
         "How can I assist you with your health today?"
     )
@@ -229,15 +236,59 @@ def chat_with_ai():
     user_id = str(current_user["_id"])
     user_role = current_user.get("role", "PATIENT").upper()
     
-    data = request.get_json() or {}
-    message = data.get("message", "").strip()
-    patient_id = data.get("patient_id")
+    # Handle multipart/form-data or JSON payloads
+    message = ""
+    patient_id = None
+    uploaded_files_list = []
     
-    if not message:
-        return jsonify({"error": "Validation Error", "detail": "Message is required"}), 400
+    if request.content_type and "multipart/form-data" in request.content_type:
+        message = request.form.get("message", "").strip()
+        patient_id = request.form.get("patient_id")
+        
+        # Check files in request
+        raw_files = request.files.getlist("images") or request.files.getlist("file") or request.files.getlist("photos")
+        if not raw_files and "image" in request.files:
+            raw_files = [request.files["image"]]
+            
+        if len(raw_files) > MAX_IMAGES:
+            return jsonify({"error": "Validation Error", "detail": f"Maximum {MAX_IMAGES} images allowed per request"}), 400
+            
+        for file in raw_files:
+            if not file or not file.filename:
+                continue
+            ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+            if ext not in ALLOWED_EXTENSIONS:
+                return jsonify({"error": "Validation Error", "detail": f"Invalid format '{ext}'. Allowed formats: PNG, JPG, WEBP"}), 400
+                
+            file_bytes = file.read()
+            if len(file_bytes) > MAX_IMAGE_SIZE_BYTES:
+                return jsonify({"error": "Validation Error", "detail": f"File '{file.filename}' exceeds 5 MB limit"}), 400
+                
+            # Strip EXIF & privacy sanitization
+            clean_bytes, clean_name = strip_exif_and_sanitize(file_bytes, file.filename)
+            unique_filename = f"ai_img_{int(datetime.now(timezone.utc).timestamp())}_{secrets.token_hex(4)}_{clean_name}"
+            save_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+            
+            with open(save_path, "wb") as f:
+                f.write(clean_bytes)
+                
+            uploaded_files_list.append({
+                "filename": clean_name,
+                "file_url": f"/api/health-records/files/{unique_filename}",
+                "size_bytes": len(clean_bytes)
+            })
+    else:
+        data = request.get_json() or {}
+        message = data.get("message", "").strip()
+        patient_id = data.get("patient_id")
+        # May contain pre-uploaded file URLs or image metadata
+        uploaded_files_list = data.get("attachments") or data.get("images") or []
 
-    # Emergency safety check
-    if detect_emergency(message):
+    if not message and not uploaded_files_list:
+        return jsonify({"error": "Validation Error", "detail": "Message or image is required"}), 400
+
+    # Emergency safety check on text query
+    if message and detect_emergency(message):
         emergency_text = get_emergency_response()
         full_emergency_response = (
             "🚨 **CRITICAL MEDICAL EMERGENCY DETECTED**\n\n"
@@ -254,6 +305,7 @@ def chat_with_ai():
             "patient_id": ObjectId(patient_id) if is_valid_object_id(patient_id) else None,
             "role": user_role,
             "message": message,
+            "attachments": uploaded_files_list,
             "sender": "USER",
             "created_at": datetime.now(timezone.utc)
         })
@@ -271,6 +323,7 @@ def chat_with_ai():
             "message": message,
             "response": full_emergency_response,
             "is_emergency": True,
+            "attachments": uploaded_files_list,
             "disclaimer": CLINICAL_DISCLAIMER
         }), 200
 
@@ -313,15 +366,19 @@ def chat_with_ai():
 
         context["records"] = list(db.health_records.find({"patient_id": patient_obj_id}).sort("created_at", -1).limit(5))
 
-    # Generate response
-    ai_response = generate_clinical_ai_response(user_role, message, context)
+    # Generate response (Vision vs Text Reasoning)
+    if uploaded_files_list:
+        ai_response = analyze_medical_images(uploaded_files_list, message, context)
+    else:
+        ai_response = generate_clinical_ai_response(user_role, message, context)
 
     # Persist conversation
     db.ai_conversations.insert_one({
         "user_id": user_id,
         "patient_id": patient_obj_id,
         "role": user_role,
-        "message": message,
+        "message": message or f"[{len(uploaded_files_list)} Medical Image(s) Attached]",
+        "attachments": uploaded_files_list,
         "sender": "USER",
         "created_at": datetime.now(timezone.utc)
     })
@@ -338,6 +395,7 @@ def chat_with_ai():
         "patient_id": str(patient_obj_id) if patient_obj_id else user_id,
         "message": message,
         "response": ai_response,
+        "attachments": uploaded_files_list,
         "is_emergency": False,
         "disclaimer": CLINICAL_DISCLAIMER
     }), 200
@@ -354,6 +412,19 @@ def get_ai_history(target_id):
     }
     messages = list(db.ai_conversations.find(query).sort("created_at", 1).limit(100))
     return jsonify(serialize_doc(messages)), 200
+
+@ai_assistant_bp.route("/history/all/<target_id>", methods=["DELETE"], strict_slashes=False)
+@token_required
+def clear_all_ai_history(target_id):
+    db = get_database()
+    query = {
+        "$or": [
+            {"user_id": target_id},
+            {"patient_id": ObjectId(target_id) if is_valid_object_id(target_id) else target_id}
+        ]
+    }
+    db.ai_conversations.delete_many(query)
+    return jsonify({"message": "Conversation history cleared successfully"}), 200
 
 @ai_assistant_bp.route("/history", methods=["POST"], strict_slashes=False)
 @token_required
@@ -389,3 +460,4 @@ def delete_ai_message(message_id):
     if is_valid_object_id(message_id):
         db.ai_conversations.delete_one({"_id": ObjectId(message_id)})
     return jsonify({"message": "Message deleted successfully"}), 200
+

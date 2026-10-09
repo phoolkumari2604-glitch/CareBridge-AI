@@ -223,6 +223,16 @@ const patientService = {
     return res.data;
   },
 
+  async deleteHealthRecord(recordId) {
+    const res = await api.delete(`/health-records/${recordId}`);
+    return res.data;
+  },
+
+  async deleteHealthRecordsBatch(recordIds) {
+    const res = await api.post("/health-records/batch-delete", { record_ids: recordIds });
+    return res.data;
+  },
+
   // ==========================================
   // VITALS & ALERTS
   // ==========================================
@@ -274,8 +284,22 @@ const patientService = {
   // ==========================================
   // AI ASSISTANT
   // ==========================================
-  async chatWithAI(patientId, message) {
+  async chatWithAI(patientId, message, images = []) {
     const pId = patientId || this.getCurrentPatientId();
+    
+    if (images && images.length > 0) {
+      const formData = new FormData();
+      formData.append("patient_id", pId);
+      formData.append("message", message || "");
+      images.forEach((imgFile) => {
+        formData.append("images", imgFile);
+      });
+      const res = await api.post("/ai-assistant/chat", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data;
+    }
+
     const res = await api.post("/ai-assistant/chat", {
       patient_id: pId,
       message,
@@ -286,6 +310,12 @@ const patientService = {
   async getAIHistory(patientId) {
     const pId = patientId || this.getCurrentPatientId();
     const res = await api.get(`/ai-assistant/history/${pId}`);
+    return res.data;
+  },
+
+  async clearAIHistory(patientId) {
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.delete(`/ai-assistant/history/all/${pId}`);
     return res.data;
   },
 
@@ -308,7 +338,29 @@ const patientService = {
     const res = await api.put(`/notifications/${notificationId}`, { is_read: true });
     return res.data;
   },
+
+  async markAllNotificationsRead(patientId) {
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.put(`/notifications/${pId}/mark-all-read`);
+    return res.data;
+  },
+
+  async clearAllNotifications(patientId) {
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.delete(`/notifications/${pId}/clear-all`);
+    return res.data;
+  },
+
+  async simulateAlert(patientId, alertData) {
+    const pId = patientId || this.getCurrentPatientId();
+    const res = await api.post("/notifications/simulate-alert", {
+      patient_id: pId,
+      ...alertData,
+    });
+    return res.data;
+  },
 };
 
 export { patientService };
 export default patientService;
+

@@ -1,0 +1,313 @@
+/* =========================================================
+   CAREBRIDGE AI - 3D ANATOMICAL HEART TELEMETRY
+   Dark Navy / Glowing Biomechanical Shaders
+========================================================= */
+
+.heart-3d-card {
+  background: #0f172a;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.heart-3d-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.heart-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.heart-pulse-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart-header-title h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.heart-header-title span {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.heart-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.pulsing-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: ledBlink 1.5s infinite;
+}
+
+@keyframes ledBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.8); }
+}
+
+/* =========================================================
+   VIEWPORT
+========================================================= */
+.heart-3d-viewport {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  background: radial-gradient(circle at center, #132238 0%, #080e1a 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.three-canvas-container {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.three-canvas-container:active {
+  cursor: grabbing;
+}
+
+/* 2D Fallback */
+.heart-2d-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #cbd5e1;
+}
+
+.fallback-heart-svg {
+  width: 120px;
+  height: 120px;
+}
+
+.fallback-heart-svg.beating {
+  animation: svgHeartBeat infinite ease-in-out;
+}
+
+@keyframes svgHeartBeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  30% { transform: scale(1.05); }
+  45% { transform: scale(1.2); }
+  60% { transform: scale(1); }
+}
+
+/* Floating Badges */
+.viewport-telemetry-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bpm-counter {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.bpm-counter strong {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.bpm-counter small {
+  font-size: 11px;
+  color: #38bdf8;
+  font-weight: 800;
+}
+
+.cycle-indicator {
+  display: flex;
+  flex-direction: column;
+  font-size: 10px;
+  color: #94a3b8;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 10px;
+}
+
+.cardiac-state {
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.viewport-controls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.ctrl-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ctrl-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+/* =========================================================
+   SIMULATION TRAY
+========================================================= */
+.heart-simulation-tray {
+  padding: 16px 20px;
+  background: #0f172a;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sim-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sim-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #cbd5e1;
+  min-width: 190px;
+}
+
+.sim-label strong {
+  color: #38bdf8;
+  margin-left: 4px;
+}
+
+.heart-slider {
+  flex: 1;
+  min-width: 200px;
+  accent-color: #38bdf8;
+  cursor: pointer;
+}
+
+.sim-quick-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.preset-chip {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-chip:hover {
+  background: #253349;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.preset-chip.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.accessibility-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.reduced-motion-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.reduced-motion-toggle input {
+  accent-color: #0284c7;
+}
+
+.heart-disclaimer {
+  font-size: 10px;
+  color: #64748b;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 640px) {
+  .heart-3d-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .heart-3d-viewport {
+    height: 280px;
+  }
+}
