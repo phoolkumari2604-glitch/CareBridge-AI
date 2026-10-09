@@ -93,6 +93,8 @@ function App() {
               PATIENT MODULE
           ================================================== */}
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
+          <Route path="/patient/profile" element={<Profile />} />
+          <Route path="/patient/settings" element={<Settings />} />
           <Route path="/patient/hospitals" element={<HospitalDashboard />} />
           <Route path="/patient/doctors" element={<Doctors />} />
           <Route path="/patient/appointments" element={<Appointments />} />
@@ -107,6 +109,8 @@ function App() {
               DOCTOR MODULE
           ================================================== */}
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+          <Route path="/doctor/profile" element={<Profile />} />
+          <Route path="/doctor/settings" element={<Settings />} />
           <Route path="/doctor/hospitals" element={<HospitalDashboard />} />
           <Route path="/doctor/patient-monitoring" element={<PatientMonitoring />} />
           <Route path="/doctor/patients" element={<PatientMonitoring />} />
@@ -125,6 +129,8 @@ function App() {
               STAFF / ADMIN MODULE
           ================================================== */}
           <Route path="/staff/dashboard" element={<StaffDashboard />} />
+          <Route path="/staff/profile" element={<Profile />} />
+          <Route path="/staff/settings" element={<Settings />} />
           <Route path="/staff/patients" element={<StaffPatients />} />
           <Route path="/staff/appointments" element={<StaffAppointments />} />
           <Route path="/staff/queue" element={<StaffQueue />} />

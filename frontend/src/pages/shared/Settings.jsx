@@ -23,11 +23,13 @@ import {
   Info,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import authAPI from "../../services/auth";
 import "./Settings.css";
 
 function Settings() {
   const { user, setUser } = useAuth();
+  const { theme, setTheme, compactMode, setCompactMode } = useTheme();
   const role = (user?.role || "PATIENT").toUpperCase();
   const isDoctor = role === "DOCTOR";
   const isPatient = role === "PATIENT";
@@ -48,8 +50,6 @@ function Settings() {
     }
     return {
       // Appearance
-      theme: localStorage.getItem("theme") || "light",
-      compactMode: false,
       highContrast: false,
 
       // Notifications
@@ -87,21 +87,9 @@ function Settings() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // Apply theme and sync to DOM & localStorage
+  // Save settings state to localStorage
   useEffect(() => {
     localStorage.setItem("carebridge_settings", JSON.stringify(settings));
-    localStorage.setItem("theme", settings.theme);
-
-    const root = document.documentElement;
-    if (settings.theme === "dark") {
-      root.setAttribute("data-theme", "dark");
-      document.body.classList.add("dark-theme");
-      document.body.classList.remove("light-theme");
-    } else {
-      root.setAttribute("data-theme", "light");
-      document.body.classList.add("light-theme");
-      document.body.classList.remove("dark-theme");
-    }
   }, [settings]);
 
   const showToast = (msg = "Settings preferences updated successfully.") => {
@@ -126,10 +114,7 @@ function Settings() {
   };
 
   const handleThemeChange = (newTheme) => {
-    setSettings((prev) => ({
-      ...prev,
-      theme: newTheme,
-    }));
+    setTheme(newTheme);
     showToast(`Interface appearance switched to ${newTheme === "dark" ? "Dark" : "Light"} mode.`);
   };
 
@@ -586,7 +571,7 @@ function Settings() {
               {/* THEME SELECTOR CARDS */}
               <div className="theme-cards-grid">
                 <div
-                  className={`theme-card light ${settings.theme === "light" ? "selected" : ""}`}
+                  className={`theme-card light ${theme === "light" ? "selected" : ""}`}
                   onClick={() => handleThemeChange("light")}
                 >
                   <div className="theme-preview-box light-box">
@@ -603,7 +588,7 @@ function Settings() {
                 </div>
 
                 <div
-                  className={`theme-card dark ${settings.theme === "dark" ? "selected" : ""}`}
+                  className={`theme-card dark ${theme === "dark" ? "selected" : ""}`}
                   onClick={() => handleThemeChange("dark")}
                 >
                   <div className="theme-preview-box dark-box">
@@ -629,8 +614,8 @@ function Settings() {
                   <label className="switch">
                     <input
                       type="checkbox"
-                      checked={settings.compactMode}
-                      onChange={() => handleToggle("compactMode")}
+                      checked={compactMode}
+                      onChange={() => setCompactMode(!compactMode)}
                     />
                     <span className="slider round"></span>
                   </label>

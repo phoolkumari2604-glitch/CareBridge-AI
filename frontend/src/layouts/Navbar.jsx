@@ -13,9 +13,12 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import doctorService from "../services/doctorService";
 import patientService from "../services/patientService";
 import api from "../services/api";
@@ -68,6 +71,7 @@ function getPageName(pathname) {
 
 function Navbar({ onMenuClick }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -369,7 +373,21 @@ function Navbar({ onMenuClick }) {
           )}
         </div>
 
-        {/* 3. STAFF ADMIN / DOCTOR PROFILE DROPDOWN */}
+        {/* 3. THEME TOGGLE BUTTON */}
+        <button
+          className="navbar-theme-toggle-btn"
+          onClick={toggleTheme}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? (
+            <Sun size={18} className="theme-toggle-icon sun" />
+          ) : (
+            <Moon size={18} className="theme-toggle-icon moon" />
+          )}
+        </button>
+
+        {/* 4. STAFF ADMIN / DOCTOR PROFILE DROPDOWN */}
         <div className="navbar-profile-container" ref={profileRef}>
           <button
             className={`navbar-profile-btn ${profileDropdownOpen ? "is-active" : ""}`}
