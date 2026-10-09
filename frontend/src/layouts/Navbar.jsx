@@ -50,8 +50,32 @@ function Navbar({ onMenuClick }) {
     if (pathname.includes("/doctor/notifications")) {
       return { title: "Clinical Notifications", subtitle: "Alerts, Telemetry & System Updates" };
     }
+    if (pathname.includes("/staff/dashboard")) {
+      return { title: "Staff Command Center", subtitle: "Operational Oversight & Facility Metrics" };
+    }
+    if (pathname.includes("/staff/patients")) {
+      return { title: "Patient Registry", subtitle: "Demographics, Clinical Records & Intake" };
+    }
+    if (pathname.includes("/staff/appointments")) {
+      return { title: "Appointment Operations", subtitle: "Consultation Queue & Scheduling" };
+    }
+    if (pathname.includes("/staff/queue")) {
+      return { title: "OPD Queue Management", subtitle: "Live Token Tracking & Department Flow" };
+    }
+    if (pathname.includes("/staff/approvals")) {
+      return { title: "Clearance & Approvals Hub", subtitle: "Clinical Requests & Verifications" };
+    }
+    if (pathname.includes("/staff/doctors")) {
+      return { title: "Doctor Directory", subtitle: "Specialist Rosters & Availability" };
+    }
+    if (pathname.includes("/staff/notifications")) {
+      return { title: "Staff Notifications", subtitle: "Alerts & Department Bulletins" };
+    }
+    if (pathname.includes("/staff/audit")) {
+      return { title: "Security & Audit Logs", subtitle: "Access Logs & System Compliance" };
+    }
     if (pathname.includes("/profile")) {
-      return { title: "Doctor Profile", subtitle: "Professional Credentials & Info" };
+      return { title: "User Profile", subtitle: "Professional Credentials & Info" };
     }
     if (pathname.includes("/settings")) {
       return { title: "System Settings", subtitle: "Account, Preferences & Security" };

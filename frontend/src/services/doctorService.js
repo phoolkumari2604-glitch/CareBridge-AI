@@ -8,10 +8,16 @@ export const doctorService = {
   // ------------------------------------------------------------
   // PATIENTS
   // ------------------------------------------------------------
-  async getPatients() {
+  async getPatients(params = {}) {
     try {
-      const response = await api.get("/patients/");
-      return Array.isArray(response.data) ? response.data : [];
+      const response = await api.get("/patients/", { params });
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      if (response.data && Array.isArray(response.data.patients)) {
+        return response.data.patients;
+      }
+      return [];
     } catch (error) {
       console.warn("Failed to fetch patients list from /patients/:", error?.message);
       return [];

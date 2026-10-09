@@ -17,6 +17,11 @@ const patientService = {
   // ==========================================
   // PATIENT PROFILE & MANAGEMENT
   // ==========================================
+  async getPatients(params = {}) {
+    const res = await api.get("/patients/", { params });
+    return res.data;
+  },
+
   async getPatientProfile(patientId) {
     const res = await api.get(`/patients/${patientId}`);
     return res.data;
@@ -29,6 +34,11 @@ const patientService = {
 
   async updatePatientProfile(patientId, data) {
     const res = await api.put(`/patients/${patientId}`, data);
+    return res.data;
+  },
+
+  async deletePatientProfile(patientId) {
+    const res = await api.delete(`/patients/${patientId}`);
     return res.data;
   },
 
