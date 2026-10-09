@@ -136,6 +136,56 @@ def update_opd_pass(opd_pass_id):
     )
     return jsonify({"message": "OPD pass updated successfully", "opd_pass_id": opd_pass_id, "status": status}), 200
 
+@opd_pass_bp.route("/verify/<pass_number>", methods=["GET"], strict_slashes=False)
+@opd_pass_bp.route("/validate", methods=["POST"], strict_slashes=False)
+@token_required
+def verify_opd_pass(pass_number=None):
+    db = get_database()
+    if not pass_number:
+        data = request.get_json() or {}
+        pass_number = data.get("pass_number") or data.get("token") or request.args.get("pass_number")
+    
+    if not pass_number:
+        return jsonify({"error": "Validation Error", "detail": "Pass number is required"}), 400
+        
+    pass_doc = db.opd_passes.find_one({"pass_number": pass_number.strip().upper()})
+    if not pass_doc:
+        if is_valid_object_id(pass_number):
+            pass_doc = db.opd_passes.find_one({"_id": ObjectId(pass_number)})
+            
+    if not pass_doc:
+        return jsonify({
+            "valid": False,
+            "message": f"OPD Pass '{pass_number}' not found in registry",
+            "pass_number": pass_number
+        }), 404
+        
+    doc_name = pass_doc.get("doctor_name")
+    if not doc_name and pass_doc.get("doctor_id"):
+        doc = db.doctors.find_one({"_id": pass_doc["doctor_id"]})
+        if doc: 
+            doc_name = doc.get("name")
+        
+    hosp_name = pass_doc.get("hospital_name")
+    if not hosp_name and pass_doc.get("hospital_id"):
+        hosp = db.hospitals.find_one({"_id": pass_doc["hospital_id"]})
+        if hosp: 
+            hosp_name = hosp.get("name")
+
+    return jsonify({
+        "valid": pass_doc.get("status") == "ACTIVE",
+        "status": pass_doc.get("status", "ACTIVE"),
+        "pass_number": pass_doc.get("pass_number"),
+        "patient_name": pass_doc.get("patient_name"),
+        "doctor_name": doc_name,
+        "hospital_name": hosp_name,
+        "appointment_date": pass_doc.get("appointment_date"),
+        "appointment_time": pass_doc.get("appointment_time"),
+        "reason": pass_doc.get("reason"),
+        "issued_at": pass_doc.get("created_at"),
+        "message": "Valid for outpatient hospital intake" if pass_doc.get("status") == "ACTIVE" else f"Pass status is {pass_doc.get('status')}"
+    }), 200
+
 @opd_pass_bp.route("/<opd_pass_id>", methods=["DELETE"], strict_slashes=False)
 @staff_or_admin_required
 def delete_opd_pass(opd_pass_id):
@@ -146,3 +196,4 @@ def delete_opd_pass(opd_pass_id):
     if result.deleted_count == 0:
         return jsonify({"error": "Not Found", "detail": "OPD pass not found"}), 404
     return jsonify({"message": "OPD pass deleted successfully"}), 200
+

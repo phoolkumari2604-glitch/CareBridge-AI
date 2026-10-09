@@ -1,0 +1,34 @@
+
+Patient  dashboard 
+1.doctors=> bookappointment,viewprofile, active bottom start [bookapp]
+2. appointement-view, three dots, find  a doctor
+digital opd pass-[download],copy button,update scanner inreal time data, visit summary active,
+3.live queue- should show live ,token list should be showed
+4.health application should be active when patient logined
+5.health records- should style off in uploading file mode 
+6. ai assistant - upgrade the further future [ai can answer anything patient question related to health issues]
+7.profile- account + security - security settings
+8.hospitals -recheck all hospital near them[it should show all the hospital in india]
+9. dashboard - dashboard should work 
+person information - [change button it is not working setting all should change and it should work out
+
+
+--------------------------------
+
+doctor dashboard
+1.dashboard- bottom -open
+2.patient monitoring -- search bar , records vitals bottom
+3.appointement-should show active  status and search bar
+calendar active
+4. approvals -bottoms of [approve][reject][view details]
+5. health records- there should be separate rolls to each dr, document should get upgrade
+6. ai assistant- upgrade camera,mic 
+7. notification - emergency
+8. profit-edit option, save and share 
+9. setting- all same 
+10.Vital Signs → Heart rate, BP, SpO₂, temperature, respiratory rate
+Health Trends → Heart rate / BP / glucose / cholesterol graphs
+Medical History → Previous diagnoses, surgeries, conditions
+Medications → Current medicines, dosage, frequency
+Lab Reports → Blood tests, cholesterol, glucose, etc.
+Doctor Notes → Clinical observations and treatment plan

@@ -31,13 +31,20 @@ function DigitalOPDPass() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("active"); // "active" or "archive"
+  const [activeTab, setActiveTab] = useState("active"); // "active", "archive", or "verify"
 
   const [activePasses, setActivePasses] = useState([]);
   const [selectedPass, setSelectedPass] = useState(null);
   const [doctors, setDoctors] = useState([]);
   const [hospitals, setHospitals] = useState([]);
   const [copied, setCopied] = useState(false);
+
+  // Scanner Validation State
+  const [verifyToken, setVerifyToken] = useState("");
+  const [validating, setValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState(null);
+  const [validationError, setValidationError] = useState(null);
+
 
   const loadOPDPassData = useCallback(async () => {
     if (!user?.patient_id) {
@@ -130,6 +137,25 @@ function DigitalOPDPass() {
     return hospitals.find((h) => h._id === hospitalId || h.id === hospitalId) || {};
   };
 
+  const handleValidatePass = async (e) => {
+    if (e) e.preventDefault();
+    if (!verifyToken.trim()) return;
+    try {
+      setValidating(true);
+      setValidationError(null);
+      setValidationResult(null);
+      const res = await patientService.validateOPDPass(verifyToken.trim());
+      setValidationResult(res);
+    } catch (err) {
+      console.error("Pass validation failed:", err);
+      setValidationError(
+        err.response?.data?.message || err.response?.data?.detail || "Invalid OPD Pass or Token not found in hospital registry."
+      );
+    } finally {
+      setValidating(false);
+    }
+  };
+
   const handleCopy = async () => {
     if (!selectedPass?.pass_number) return;
     try {
@@ -164,12 +190,12 @@ function DigitalOPDPass() {
         </div>
 
         <div className="opd-header-actions">
-          <button className="opd-outline-btn" onClick={handlePrint} disabled={!selectedPass}>
+          <button className="opd-outline-btn" onClick={handlePrint} disabled={!selectedPass || activeTab === "verify"}>
             <Printer size={16} />
             <span>Print Pass</span>
           </button>
 
-          <button className="opd-download-btn" onClick={handlePrint} disabled={!selectedPass}>
+          <button className="opd-download-btn" onClick={handlePrint} disabled={!selectedPass || activeTab === "verify"}>
             <Download size={16} />
             <span>Download PDF</span>
           </button>
@@ -190,7 +216,19 @@ function DigitalOPDPass() {
         >
           <Archive size={15} /> Pass Archive ({archiveList.length})
         </button>
+        <button
+          className={`opd-tab-btn ${activeTab === "verify" ? "active" : ""}`}
+          onClick={() => {
+            setActiveTab("verify");
+            if (selectedPass?.pass_number && !verifyToken) {
+              setVerifyToken(selectedPass.pass_number);
+            }
+          }}
+        >
+          <QrCode size={15} /> Scanner Validation
+        </button>
       </div>
+
 
       {/* LOADING STATE */}
       {loading && (
@@ -209,8 +247,105 @@ function DigitalOPDPass() {
         </div>
       )}
 
+      {/* SCANNER VALIDATION TAB */}
+      {activeTab === "verify" && (
+        <section className="opd-validator-section">
+          <div className="validator-card">
+            <div className="validator-header">
+              <div className="validator-icon">
+                <QrCode size={24} />
+              </div>
+              <div>
+                <h2>OPD Pass Validator & Token Scanner</h2>
+                <p>Verify cryptographic legitimacy, check reception intake readiness, and validate appointment details.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleValidatePass} className="validator-form">
+              <div className="validator-input-wrap">
+                <input
+                  type="text"
+                  placeholder="Enter or paste OPD Pass Number (e.g. OPD-20261009-ABC123)..."
+                  value={verifyToken}
+                  onChange={(e) => setVerifyToken(e.target.value)}
+                  className="validator-input"
+                  required
+                />
+                <button type="submit" disabled={validating || !verifyToken.trim()} className="validator-submit-btn">
+                  {validating ? <Loader2 size={16} className="spinner-icon" /> : <ShieldCheck size={16} />}
+                  <span>{validating ? "Validating..." : "Verify Token"}</span>
+                </button>
+              </div>
+              {selectedPass?.pass_number && (
+                <div className="quick-token-buttons">
+                  <span>Current Pass:</span>
+                  <button
+                    type="button"
+                    className="quick-token-chip"
+                    onClick={() => {
+                      setVerifyToken(selectedPass.pass_number);
+                    }}
+                  >
+                    Use {selectedPass.pass_number}
+                  </button>
+                </div>
+              )}
+            </form>
+
+            {validationError && (
+              <div className="validation-alert invalid">
+                <AlertCircle size={20} />
+                <div>
+                  <strong>Validation Failed</strong>
+                  <p>{validationError}</p>
+                </div>
+              </div>
+            )}
+
+            {validationResult && (
+              <div className={`validation-alert ${validationResult.valid ? "valid" : "warning"}`}>
+                <CheckCircle2 size={24} />
+                <div className="validation-result-details">
+                  <div className="validation-result-header">
+                    <strong>{validationResult.valid ? "Pass Cryptographically Verified & Active" : "Verification Notice"}</strong>
+                    <span className={`status-badge-mini ${validationResult.status?.toLowerCase()}`}>{validationResult.status}</span>
+                  </div>
+                  <p>{validationResult.message}</p>
+                  <div className="validation-grid">
+                    <div>
+                      <span>Pass Number:</span>
+                      <strong>{validationResult.pass_number}</strong>
+                    </div>
+                    <div>
+                      <span>Patient:</span>
+                      <strong>{validationResult.patient_name || user?.name || "Verified Patient"}</strong>
+                    </div>
+                    <div>
+                      <span>Doctor:</span>
+                      <strong>{validationResult.doctor_name || "Assigned Specialist"}</strong>
+                    </div>
+                    <div>
+                      <span>Hospital:</span>
+                      <strong>{validationResult.hospital_name || "CareBridge Hospital"}</strong>
+                    </div>
+                    <div>
+                      <span>Date & Time:</span>
+                      <strong>{validationResult.appointment_date || "Today"} at {validationResult.appointment_time || "Scheduled Slot"}</strong>
+                    </div>
+                    <div>
+                      <span>Reason:</span>
+                      <strong>{validationResult.reason || "General Consultation"}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* EMPTY STATE */}
-      {!loading && !error && (activeTab === "active" ? activeList.length === 0 : archiveList.length === 0) && (
+      {activeTab !== "verify" && !loading && !error && (activeTab === "active" ? activeList.length === 0 : archiveList.length === 0) && (
         <div className="opd-empty-state">
           <Ticket size={48} />
           <h3>{activeTab === "active" ? "No Active OPD Passes" : "No Archived Passes"}</h3>
@@ -228,8 +363,9 @@ function DigitalOPDPass() {
       )}
 
       {/* MAIN OPD LAYOUT */}
-      {!loading && !error && selectedPass && (
+      {activeTab !== "verify" && !loading && !error && selectedPass && (
         <div className="opd-layout">
+
           {/* PASS CARDS SELECTOR (IF MULTIPLE) */}
           {activePasses.length > 1 && (
             <div className="opd-selector-row">

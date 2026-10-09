@@ -17,13 +17,13 @@ import {
   Camera,
   Image as ImageIcon,
   X,
-  Copy,
-  Check,
-  Download,
   Trash2,
+  BookmarkPlus,
+  CheckCircle2,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import doctorService from "../../services/doctorService";
+import api from "../../services/api";
 import "./DoctorAIAssistant.css";
 
 function DoctorAIAssistant() {
@@ -34,6 +34,17 @@ function DoctorAIAssistant() {
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState(initialPatientId);
   const [copiedId, setCopiedId] = useState(null);
+
+  // Save Note Approval Modal State
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [noteToSave, setNoteToSave] = useState({
+    patient_id: "",
+    title: "AI Clinical Decision Note",
+    diagnosis: "Clinical Assessment",
+    description: "",
+  });
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState("");
 
   const [messages, setMessages] = useState([
     {
@@ -254,6 +265,48 @@ How may I assist your clinical rounds today?`,
     setTimeout(() => setCopiedId(null), 2500);
   };
 
+  const handleOpenSaveModal = (text) => {
+    setNoteToSave({
+      patient_id: selectedPatientId || (patients[0]?._id || patients[0]?.id || ""),
+      title: "AI-Generated Clinical Consultation Note",
+      diagnosis: "Differential Diagnosis Review",
+      description: text,
+    });
+    setSaveModalOpen(true);
+    setSaveSuccessMessage("");
+  };
+
+  const handleSaveClinicalNote = async (e) => {
+    e.preventDefault();
+    if (!noteToSave.patient_id) {
+      alert("Please select a valid patient to link this clinical note.");
+      return;
+    }
+    try {
+      setSaveLoading(true);
+      await api.post("/health-records/", {
+        patient_id: noteToSave.patient_id,
+        record_type: "CLINICAL_NOTE",
+        title: noteToSave.title,
+        diagnosis: noteToSave.diagnosis,
+        description: noteToSave.description,
+        doctor_name: user?.name || "Consulting Doctor",
+        hospital_name: "CareBridge Medical Center",
+        record_date: new Date().toISOString().split("T")[0],
+      });
+      setSaveSuccessMessage("Clinical note approved and saved directly to the patient's medical records.");
+      setTimeout(() => {
+        setSaveModalOpen(false);
+        setSaveSuccessMessage("");
+      }, 2000);
+    } catch (err) {
+      console.error("Save note error:", err);
+      alert("Failed to save clinical note to patient chart.");
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   const handleClearChat = () => {
     if (window.confirm("Clear current clinical conversation?")) {
       setMessages([
@@ -428,6 +481,17 @@ How may I assist your clinical rounds today?`,
                         </>
                       )}
                     </button>
+
+                    {msg.sender === "assistant" && (
+                      <button
+                        className="save-chart-btn"
+                        onClick={() => handleOpenSaveModal(msg.text)}
+                        title="Approve & save as clinical note to patient chart"
+                      >
+                        <BookmarkPlus size={13} />
+                        <span>Save to Chart</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -521,6 +585,116 @@ How may I assist your clinical rounds today?`,
           </div>
         </div>
       </div>
+
+      {/* CLINICAL NOTE APPROVAL & SAVE MODAL */}
+      {saveModalOpen && (
+        <div className="cdss-modal-overlay">
+          <div className="cdss-modal-card">
+            <div className="cdss-modal-header">
+              <div className="cdss-modal-title">
+                <BookmarkPlus size={20} color="#7c3aed" />
+                <h3>Approve & Save AI Clinical Note</h3>
+              </div>
+              <button
+                type="button"
+                className="cdss-close-btn"
+                onClick={() => setSaveModalOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {saveSuccessMessage ? (
+              <div className="cdss-success-state">
+                <CheckCircle2 size={36} color="#16a34a" />
+                <p>{saveSuccessMessage}</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSaveClinicalNote} className="cdss-modal-body">
+                <p className="cdss-modal-desc">
+                  Please review and approve this clinical assessment before attaching it to the patient's permanent medical chart.
+                </p>
+
+                <div className="cdss-form-group">
+                  <label htmlFor="save-patient-select">Patient Chart</label>
+                  <select
+                    id="save-patient-select"
+                    value={noteToSave.patient_id}
+                    onChange={(e) =>
+                      setNoteToSave({ ...noteToSave, patient_id: e.target.value })
+                    }
+                    required
+                  >
+                    <option value="">-- Select Target Patient --</option>
+                    {patients.map((p) => (
+                      <option key={p._id || p.id} value={p._id || p.id}>
+                        {p.name} (ID: {(p._id || p.id).slice(-6)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="cdss-form-group">
+                  <label htmlFor="save-note-title">Record Title</label>
+                  <input
+                    id="save-note-title"
+                    type="text"
+                    value={noteToSave.title}
+                    onChange={(e) =>
+                      setNoteToSave({ ...noteToSave, title: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="cdss-form-group">
+                  <label htmlFor="save-note-diagnosis">Clinical Assessment / Impression</label>
+                  <input
+                    id="save-note-diagnosis"
+                    type="text"
+                    value={noteToSave.diagnosis}
+                    onChange={(e) =>
+                      setNoteToSave({ ...noteToSave, diagnosis: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="cdss-form-group">
+                  <label htmlFor="save-note-desc">Clinical Note (Editable Review)</label>
+                  <textarea
+                    id="save-note-desc"
+                    rows={6}
+                    value={noteToSave.description}
+                    onChange={(e) =>
+                      setNoteToSave({ ...noteToSave, description: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="cdss-modal-actions">
+                  <button
+                    type="button"
+                    className="cdss-cancel-btn"
+                    onClick={() => setSaveModalOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="cdss-confirm-btn"
+                    disabled={saveLoading || !noteToSave.patient_id}
+                  >
+                    {saveLoading ? <Loader2 size={16} className="spinning" /> : <Check size={16} />}
+                    <span>Approve & Save Note</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

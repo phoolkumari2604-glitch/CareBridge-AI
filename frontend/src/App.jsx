@@ -47,6 +47,7 @@ import HealthMonitoring from "./pages/doctor/HealthMonitoring";
 import DoctorVitals from "./pages/doctor/Vitals";
 import DoctorAIAssistant from "./pages/doctor/AIAssistant";
 import DoctorNotifications from "./pages/doctor/Notifications";
+import DoctorEarnings from "./pages/doctor/DoctorEarnings";
 
 // ==================================================
 // STAFF / ADMIN PAGES
@@ -117,6 +118,8 @@ function App() {
           <Route path="/doctor/vitals" element={<DoctorVitals />} />
           <Route path="/doctor/ai-assistant" element={<DoctorAIAssistant />} />
           <Route path="/doctor/notifications" element={<DoctorNotifications />} />
+          <Route path="/doctor/earnings" element={<DoctorEarnings />} />
+          <Route path="/doctor/financial-reports" element={<DoctorEarnings />} />
 
           {/* ==================================================
               STAFF / ADMIN MODULE

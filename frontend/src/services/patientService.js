@@ -69,6 +69,10 @@ const patientService = {
     return res.data;
   },
 
+  async getPatientAppointments(patientId) {
+    return this.getAppointments(patientId);
+  },
+
   async getAppointment(appointmentId) {
     const res = await api.get(`/appointments/${appointmentId}`);
     return res.data;
@@ -99,6 +103,10 @@ const patientService = {
     return res.data;
   },
 
+  async getPatientOPDPasses(patientId) {
+    return this.getOPDPasses(patientId);
+  },
+
   async getOPDPass(opdPassId) {
     const res = await api.get(`/opd-pass/${opdPassId}`);
     return res.data;
@@ -108,6 +116,12 @@ const patientService = {
     const res = await api.post(`/opd-pass/${appointmentId}`);
     return res.data;
   },
+
+  async validateOPDPass(passNumber) {
+    const res = await api.post("/opd-pass/validate", { pass_number: passNumber });
+    return res.data;
+  },
+
 
   // ==========================================
   // LIVE QUEUE
@@ -224,6 +238,10 @@ const patientService = {
     return res.data;
   },
 
+  async getLatestVital(patientId) {
+    return this.getLatestVitals(patientId);
+  },
+
   async getHealthProfile(patientId) {
     const pId = patientId || this.getCurrentPatientId();
     const res = await api.get(`/health-profiles/${pId}`);
@@ -239,6 +257,11 @@ const patientService = {
   async getHealthAlerts(patientId) {
     const pId = patientId || this.getCurrentPatientId();
     const res = await api.get(`/health-alerts/${pId}`);
+    return res.data;
+  },
+
+  async acknowledgeAlert(alertId) {
+    const res = await api.put(`/health-alerts/${alertId}`, { acknowledged: true });
     return res.data;
   },
 

@@ -17,6 +17,8 @@ import {
   FileText,
   LineChart,
   Users,
+  DollarSign,
+  Receipt,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -120,6 +122,11 @@ function Sidebar({ open, isOpen, onClose }) {
       label: "Hospitals",
       path: "/doctor/hospitals",
       icon: Hospital,
+    },
+    {
+      label: "Financial Reports",
+      path: "/doctor/earnings",
+      icon: DollarSign,
     },
     {
       label: "Notifications",

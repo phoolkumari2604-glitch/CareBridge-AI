@@ -1,0 +1,403 @@
+/* =========================================================
+   DOCTOR FINANCIAL & EARNINGS REPORTS CSS
+   CareBridge AI SaaS Styling
+   ========================================================= */
+
+.doctor-earnings-container {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 16px 24px 60px;
+  box-sizing: border-box;
+}
+
+.earnings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.earnings-kicker {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #0d9488;
+  background: rgba(13, 148, 136, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.earnings-header h1 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.earnings-header p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.header-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+  transition: all 0.2s ease;
+}
+
+.action-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
+}
+
+.action-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.earnings-alert-banner {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* KPI CARDS */
+.earnings-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.kpi-card.total-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  border-color: #bbf7d0;
+}
+
+.kpi-icon-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon-wrap.green {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.kpi-icon-wrap.blue {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.kpi-icon-wrap.cyan {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.kpi-icon-wrap.amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.kpi-body {
+  flex: 1;
+}
+
+.kpi-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.kpi-body h2 {
+  margin: 4px 0 6px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.kpi-subtext {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.kpi-subtext.positive {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.kpi-subtext.warning {
+  color: #b45309;
+  font-weight: 600;
+}
+
+/* TRANSACTIONS CARD */
+.transactions-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+}
+
+.transactions-card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.transactions-card-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.transactions-card-header p {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.transactions-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 8px 12px;
+  width: 220px;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  width: 100%;
+}
+
+.status-select {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  outline: none;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.earnings-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.earnings-table th {
+  background: #f8fafc;
+  padding: 12px 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.earnings-table td {
+  padding: 14px 20px;
+  font-size: 13.5px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.earnings-table tr:hover {
+  background: #fafbfc;
+}
+
+.txn-id-pill {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 12px;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.date-time-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-time-cell small {
+  color: #94a3b8;
+  font-size: 11.5px;
+}
+
+.amount-cell {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status-pill.paid {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-pill.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.payout-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.payout-pill.settled {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.payout-pill.processing {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.method-text {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: #64748b;
+}
+
+.empty-state h4 {
+  margin: 12px 0 4px;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+@media print {
+  .header-action-buttons,
+  .transactions-filters,
+  .app-sidebar,
+  .app-navbar {
+    display: none !important;
+  }
+  .doctor-earnings-container {
+    padding: 0;
+  }
+}

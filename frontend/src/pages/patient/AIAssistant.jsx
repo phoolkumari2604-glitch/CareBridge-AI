@@ -21,6 +21,10 @@ import {
   Check,
   Trash2,
   Stethoscope,
+  Camera,
+  Paperclip,
+  Image as ImageIcon,
+  X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
@@ -32,6 +36,9 @@ function AIAssistant() {
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [attachedFile, setAttachedFile] = useState(null);
+  const [attachedPreview, setAttachedPreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   const [messages, setMessages] = useState([
     {
@@ -133,9 +140,34 @@ function AIAssistant() {
     "How does the Digital OPD Pass work?",
   ];
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAttachedFile(file);
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = () => setAttachedPreview(reader.result);
+        reader.readAsDataURL(file);
+      } else {
+        setAttachedPreview(null);
+      }
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachedFile(null);
+    setAttachedPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSendMessage = async (textToSend) => {
-    const query = (textToSend || message).trim();
-    if (!query || loading) return;
+    const textQuery = (textToSend || message).trim();
+    if ((!textQuery && !attachedFile) || loading) return;
+
+    let fullPrompt = textQuery;
+    if (attachedFile) {
+      fullPrompt = `[Attached Medical Document/Scan: ${attachedFile.name}]\n${textQuery || "Please analyze this medical scan/document in context with my health profile."}`;
+    }
 
     if (!user?.patient_id) {
       setMessages((prev) => [
@@ -143,7 +175,7 @@ function AIAssistant() {
         {
           id: Date.now(),
           sender: "user",
-          text: query,
+          text: fullPrompt,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
         {
@@ -154,22 +186,26 @@ function AIAssistant() {
         },
       ]);
       setMessage("");
+      handleRemoveAttachment();
       return;
     }
 
     const userMsg = {
       id: Date.now(),
       sender: "user",
-      text: query,
+      text: fullPrompt,
+      attachmentName: attachedFile?.name,
+      attachmentPreview: attachedPreview,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setMessage("");
+    handleRemoveAttachment();
     setLoading(true);
 
     try {
-      const res = await patientService.chatWithAI(user.patient_id, query);
+      const res = await patientService.chatWithAI(user.patient_id, fullPrompt);
 
       const aiMsg = {
         id: Date.now() + 1,
@@ -382,6 +418,22 @@ function AIAssistant() {
 
           {/* INPUT AREA */}
           <div className="ai-input-area">
+            {attachedFile && (
+              <div className="ai-attachment-preview">
+                <div className="preview-chip">
+                  {attachedPreview ? (
+                    <img src={attachedPreview} alt="attachment" className="preview-thumb" />
+                  ) : (
+                    <Paperclip size={14} />
+                  )}
+                  <span className="file-name">{attachedFile.name}</span>
+                  <button type="button" onClick={handleRemoveAttachment} className="remove-att-btn">
+                    <X size={13} />
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -389,6 +441,23 @@ function AIAssistant() {
               }}
               className="ai-input-wrapper"
             >
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept="image/*,.pdf,.docx,.txt"
+                onChange={handleFileChange}
+              />
+
+              <button
+                type="button"
+                className="attach-btn"
+                onClick={() => fileInputRef.current?.click()}
+                title="Attach medical report or image"
+              >
+                <Paperclip size={18} />
+              </button>
+
               <button
                 type="button"
                 className={`mic-btn ${isListening ? "active-listening" : ""}`}
@@ -402,14 +471,14 @@ function AIAssistant() {
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder={isListening ? "Listening... Speak your health question..." : "Ask about your vitals, alerts, appointments, or hospitals..."}
+                placeholder={isListening ? "Listening... Speak your health question..." : "Ask about your vitals, alerts, appointments, or upload report..."}
                 disabled={loading}
               />
 
               <button
                 type="submit"
                 className="ai-send-button"
-                disabled={!message.trim() || loading}
+                disabled={(!message.trim() && !attachedFile) || loading}
                 aria-label="Send message"
               >
                 {loading ? <Loader2 size={16} className="spinner-icon" /> : <Send size={16} />}
