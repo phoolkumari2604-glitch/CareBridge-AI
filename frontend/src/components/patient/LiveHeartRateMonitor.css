@@ -1,0 +1,536 @@
+/* ============================================================
+   CAREBRIDGE AI — LIVE HEART RATE MONITORING CARD
+   Realistic Animated Heart • Glassmorphism Overlay • Live Canvas ECG
+   ============================================================ */
+
+.live-heart-monitor-card {
+  position: relative;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  margin-bottom: 24px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+/* ============================================================
+   CARD TOP BAR
+   ============================================================ */
+
+.monitor-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.monitor-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.telemetry-live-dot-wrap {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.telemetry-ping-circle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #38bdf8;
+  opacity: 0.75;
+  animation: telemetryPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.telemetry-solid-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0284c7;
+}
+
+@keyframes telemetryPing {
+  75%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.monitor-main-heading {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.2px;
+}
+
+.monitor-sub-heading {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  margin-top: 2px;
+}
+
+.telemetry-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--surface-soft, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.telemetry-radio-icon {
+  animation: pulseRadio 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseRadio {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.9); }
+}
+
+.telemetry-mode-text {
+  color: var(--text-secondary, #64748b);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+}
+
+.telemetry-rate-badge {
+  color: var(--text-primary, #0f172a);
+  font-weight: 800;
+}
+
+/* ============================================================
+   HEART VISUALIZER CONTAINER
+   ============================================================ */
+
+.heart-visualizer-container {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background: radial-gradient(circle at center, rgba(14, 165, 168, 0.08) 0%, rgba(15, 23, 42, 0.03) 70%, transparent 100%);
+  border-radius: 18px;
+  border: 1px solid var(--border-light, #f1f5f9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* HEART IMAGE VIEWPORT */
+.heart-image-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart-ambient-glow {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.18) 0%, rgba(56, 189, 248, 0.12) 50%, transparent 75%);
+  filter: blur(28px);
+  pointer-events: none;
+  animation: ambientGlowPulse ease-in-out infinite;
+}
+
+@keyframes ambientGlowPulse {
+  0%, 100% {
+    transform: scale(0.92);
+    opacity: 0.5;
+  }
+  14% {
+    transform: scale(1.12);
+    opacity: 0.9;
+  }
+  28% {
+    transform: scale(1.0);
+    opacity: 0.6;
+  }
+  42% {
+    transform: scale(1.08);
+    opacity: 0.8;
+  }
+  56% {
+    transform: scale(0.92);
+    opacity: 0.5;
+  }
+}
+
+/* REALISTIC ANATOMICAL HEART IMAGE */
+.realistic-heart-img {
+  max-width: 280px;
+  max-height: 280px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.22));
+  transform-origin: center center;
+  animation-name: lubDubHeartbeat;
+  animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+/* TWO CONTRACTIONS PER CARDIAC CYCLE (LUB-DUB) */
+@keyframes lubDubHeartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    /* Lub: quick, subtle scale-up */
+    transform: scale(1.065);
+  }
+  28% {
+    /* Release */
+    transform: scale(1.01);
+  }
+  42% {
+    /* Dub: smaller, faster contraction */
+    transform: scale(1.042);
+  }
+  56% {
+    /* Return to resting state */
+    transform: scale(1);
+  }
+  100% {
+    /* Diastole pause until next cycle */
+    transform: scale(1);
+  }
+}
+
+/* ============================================================
+   GLASSMORPHISM "HEART BEAT" OVERLAY CARD (BOTTOM-LEFT)
+   ============================================================ */
+
+.heartbeat-glass-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 240px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  z-index: 10;
+  pointer-events: auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.heartbeat-glass-overlay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.38);
+}
+
+.glass-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.glass-icon-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f87171;
+}
+
+.overlay-heart-pulse {
+  animation: pulseHeartIcon 1s ease-in-out infinite;
+}
+
+@keyframes pulseHeartIcon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+.glass-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: #ffffff;
+  flex-grow: 1;
+}
+
+.glass-sync-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.glass-bpm-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.glass-bpm-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+  font-family: var(--font-family, Inter, sans-serif);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+
+.glass-bpm-unit {
+  font-size: 13px;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+/* CANVAS ECG WRAPPER */
+.glass-ecg-wrap {
+  width: 100%;
+  height: 54px;
+  background: rgba(3, 7, 18, 0.45);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.glass-ecg-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ============================================================
+   HEART RATE STATUS INDICATOR (BENEATH HEART & OVERLAY)
+   ============================================================ */
+
+.heart-rate-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: var(--surface-soft, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  flex-wrap: wrap;
+}
+
+.status-indicator-lead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  flex-shrink: 0;
+}
+
+.status-label-text {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.status-bpm-tag {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #cbd5e1);
+  color: var(--text-primary, #0f172a);
+}
+
+.status-clinical-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary, #64748b);
+  font-weight: 500;
+}
+
+.status-shield-icon {
+  color: #0ea5a8;
+  flex-shrink: 0;
+}
+
+/* FOOTER CLINICAL NOTICE */
+.monitor-clinical-notice {
+  margin-top: 10px;
+  text-align: right;
+  color: var(--text-muted, #94a3b8);
+  font-size: 11px;
+}
+
+/* ============================================================
+   MOTION ACCESSIBILITY (prefers-reduced-motion)
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .realistic-heart-img,
+  .heart-ambient-glow,
+  .overlay-heart-pulse,
+  .telemetry-ping-circle,
+  .telemetry-radio-icon {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .realistic-heart-img.no-animation {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   DARK THEME SUPPORT
+   ============================================================ */
+
+[data-theme="dark"] .live-heart-monitor-card,
+.dark-theme .live-heart-monitor-card {
+  background: #111a2e;
+  border-color: #1f2a44;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .monitor-main-heading,
+.dark-theme .monitor-main-heading {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .heart-visualizer-container,
+.dark-theme .heart-visualizer-container {
+  background: radial-gradient(circle at center, rgba(14, 165, 168, 0.14) 0%, rgba(11, 18, 32, 0.4) 70%, transparent 100%);
+  border-color: #1f2a44;
+}
+
+[data-theme="dark"] .heartbeat-glass-overlay,
+.dark-theme .heartbeat-glass-overlay {
+  background: rgba(11, 18, 32, 0.82);
+  border-color: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .telemetry-status-pill,
+.dark-theme .telemetry-status-pill,
+[data-theme="dark"] .heart-rate-status-bar,
+.dark-theme .heart-rate-status-bar {
+  background: #0b1220;
+  border-color: #1f2a44;
+}
+
+[data-theme="dark"] .status-bpm-tag,
+.dark-theme .status-bpm-tag {
+  background: #111a2e;
+  border-color: #1f2a44;
+  color: #f1f5f9;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN (MOBILE & TABLET)
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .live-heart-monitor-card {
+    padding: 18px 16px;
+  }
+
+  .heart-visualizer-container {
+    height: 320px;
+  }
+
+  .realistic-heart-img {
+    max-width: 210px;
+    max-height: 210px;
+  }
+
+  .heartbeat-glass-overlay {
+    bottom: 12px;
+    left: 12px;
+    width: 200px;
+    padding: 10px 12px;
+  }
+
+  .glass-bpm-value {
+    font-size: 22px;
+  }
+
+  .glass-ecg-wrap {
+    height: 44px;
+  }
+
+  .heart-rate-status-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .monitor-clinical-notice {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .heart-visualizer-container {
+    height: 290px;
+  }
+
+  .realistic-heart-img {
+    max-width: 170px;
+    max-height: 170px;
+  }
+
+  .heartbeat-glass-overlay {
+    width: 180px;
+    padding: 8px 10px;
+  }
+
+  .glass-bpm-value {
+    font-size: 20px;
+  }
+
+  .glass-ecg-wrap {
+    height: 38px;
+  }
+}

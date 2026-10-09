@@ -30,6 +30,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import EmergencyFacilitiesMap from "../../components/patient/EmergencyFacilitiesMap";
+import LiveHeartRateMonitor from "../../components/patient/LiveHeartRateMonitor";
 
 const PatientDashboard = () => {
   const { user } = useAuth();
@@ -412,6 +413,9 @@ const PatientDashboard = () => {
                 Full Health App <ChevronRight size={16} />
               </Link>
             </div>
+
+            {/* LIVE REALISTIC HEART RATE MONITOR CARD */}
+            <LiveHeartRateMonitor />
 
             {vitals ? (
               <div className="vitals-grid">

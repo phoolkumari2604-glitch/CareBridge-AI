@@ -39,6 +39,7 @@ import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
 import AnatomicalHeart3D from "../../components/patient/AnatomicalHeart3D";
 import InteractiveBodyMap from "../../components/patient/InteractiveBodyMap";
+import LiveHeartRateMonitor from "../../components/patient/LiveHeartRateMonitor";
 import "./Health.css";
 
 const MAX_FILES = 10;
@@ -931,6 +932,9 @@ function Health() {
             : "Telemetry Active"}
         </div>
       </section>
+
+      {/* LIVE HEART RATE MONITORING CARD */}
+      <LiveHeartRateMonitor />
 
       {/* 3D ANATOMICAL HEART VISUALIZATION */}
       <AnatomicalHeart3D

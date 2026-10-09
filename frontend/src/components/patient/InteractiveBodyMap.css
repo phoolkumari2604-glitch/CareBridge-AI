@@ -1,58 +1,127 @@
 /* =========================================================
-   CAREBRIDGE AI - INTERACTIVE PHYSIOLOGICAL BODY MAP
-   Dark Navy / Glowing Anatomical Nodes
-========================================================= */
+   CAREBRIDGE AI — INTERACTIVE PHYSIOLOGICAL ORGAN MAP
+   Glowing Anatomical Body • Neural/Vascular Pulse • Live Hotspots
+   ========================================================= */
 
 .body-map-card {
   background: #0f172a;
   border: 1px solid rgba(56, 189, 248, 0.2);
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   margin-bottom: 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  color: #f8fafc;
 }
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .body-map-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background: #1e293b;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  padding: 18px 24px;
+  background: #111a2e;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
 }
 
 .body-header-title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .body-icon-wrap {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
   color: #38bdf8;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .body-header-title h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 800;
   color: #ffffff;
+  letter-spacing: -0.2px;
 }
 
 .body-header-title span {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: #94a3b8;
   margin-top: 2px;
 }
 
+.body-map-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+/* REDUCE MOTION TOGGLE */
+.reduce-motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.reduce-motion-toggle:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: #38bdf8;
+}
+
+.reduce-motion-toggle input {
+  display: none;
+}
+
+.toggle-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1.5px solid #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.reduce-motion-toggle input:checked + .toggle-box {
+  background: #0ea5a8;
+  border-color: #0ea5a8;
+}
+
+.reduce-motion-toggle input:checked + .toggle-box::after {
+  content: "✓";
+  font-size: 10px;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.toggle-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+/* LEGEND */
 .body-map-legend {
   display: flex;
   align-items: center;
@@ -64,7 +133,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 11.5px;
   color: #cbd5e1;
   font-weight: 600;
 }
@@ -73,184 +142,517 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
 }
 
 /* =========================================================
-   CONTENT & SVG ANATOMY
-========================================================= */
+   CONTENT & GLOWING BODY VISUALIZER
+   ========================================================= */
+
 .body-map-content {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 20px;
-  padding: 24px;
-  background: radial-gradient(circle at left, #132238 0%, #0b1322 100%);
+  grid-template-columns: 340px 1fr;
+  gap: 28px;
+  padding: 28px;
+  background: radial-gradient(circle at 30% 40%, #111e33 0%, #090e17 100%);
   align-items: center;
 }
 
-.body-svg-container {
+.glowing-body-container {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.glowing-body-frame {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 520px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.6) 0%, rgba(3, 7, 18, 0.9) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
-.body-anatomy-svg {
+.body-neural-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  filter: blur(30px);
+  transition: background 0.5s ease;
+  animation: neuralPulse 4s ease-in-out infinite;
+}
+
+@keyframes neuralPulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+.glowing-body-img {
   width: 100%;
-  max-width: 240px;
-  height: auto;
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.15));
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  filter: drop-shadow(0 0 18px rgba(249, 115, 22, 0.35)) contrast(1.08) brightness(1.02);
+  user-select: none;
+  pointer-events: none;
 }
 
-.organ-node {
-  cursor: pointer;
-  transition: all 0.2s ease;
+/* PULSING VASCULAR / NEURAL OVERLAY */
+.vascular-glow-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 32%, rgba(249, 115, 22, 0.15) 0%, rgba(56, 189, 248, 0.08) 45%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: vascularBreathe ease-in-out infinite;
 }
 
-.organ-node:hover {
-  transform-origin: center;
-  transform: scale(1.15);
-  filter: drop-shadow(0 0 8px #ffffff);
+@keyframes vascularBreathe {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.85; }
 }
 
-.organ-node.selected {
-  stroke-dasharray: 4;
-  animation: dashSpin 3s linear infinite;
+/* CARDIAC FOCAL PULSE HALO AT HEART LOCATION */
+.cardiac-focal-pulse {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #10b981;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: cardiacBeatPulse ease-in-out infinite;
 }
 
-@keyframes dashSpin {
-  to { stroke-dashoffset: 20; }
+@keyframes cardiacBeatPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0.4;
+  }
+  14% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0.95;
+  }
+  28% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.5;
+  }
+  42% {
+    transform: translate(-50%, -50%) scale(1.35);
+    opacity: 0.8;
+  }
+  56% {
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0.4;
+  }
 }
 
 /* =========================================================
-   DRAWER
-========================================================= */
+   INTERACTIVE ORGAN HOTSPOT PINS
+   ========================================================= */
+
+.organ-hotspot-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  outline: none;
+  transition: transform 0.2s ease;
+}
+
+.organ-hotspot-pin:hover {
+  transform: translate(-50%, -50%) scale(1.25);
+  z-index: 30;
+}
+
+.organ-hotspot-pin.selected {
+  transform: translate(-50%, -50%) scale(1.3);
+  z-index: 35;
+}
+
+/* RADIATING BEACON RINGS */
+.beacon-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid var(--organ-color, #10b981);
+  animation: beaconWave infinite cubic-bezier(0, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+@keyframes beaconWave {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.beacon-pulse-core {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  opacity: 0.85;
+  pointer-events: none;
+  animation: coreGlow 2s ease-in-out infinite;
+}
+
+@keyframes coreGlow {
+  0%, 100% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+.beacon-center-dot {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 1.5px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.beacon-icon {
+  color: #ffffff;
+}
+
+/* FLOATING TAG PILL */
+.hotspot-tag-pill {
+  position: absolute;
+  left: 100%;
+  margin-left: 6px;
+  white-space: nowrap;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  pointer-events: none;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+}
+
+.organ-hotspot-pin:hover .hotspot-tag-pill,
+.hotspot-tag-pill.active {
+  opacity: 1;
+  background: rgba(15, 23, 42, 0.95);
+  transform: translateX(2px);
+}
+
+.tag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* =========================================================
+   ORGAN TELEMETRY & CLINICAL STATUS DRAWER
+   ========================================================= */
+
 .organ-detail-drawer {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .organ-detail-card {
   background: #0f172a;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-left: 4px solid #10b981;
-  border-radius: 14px;
-  padding: 20px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-left: 5px solid #10b981;
+  border-radius: 18px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  transition: all 0.3s ease;
 }
 
 .organ-detail-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .organ-name-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+}
+
+.organ-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .organ-name-row h4 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 800;
   color: #ffffff;
 }
 
+.organ-system-sub {
+  font-size: 12px;
+  color: #94a3b8;
+  display: block;
+  margin-top: 2px;
+}
+
 .organ-status-badge {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.8px;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
+.badge-glow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* LIVE TELEMETRY DISPLAY BOX */
 .organ-reading-box {
-  background: #1e293b;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 10px;
-  padding: 10px 14px;
+  background: #111a2e;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
 }
 
-.organ-reading-box span {
-  display: block;
-  font-size: 10px;
+.reading-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.reading-title-row span {
+  font-size: 11px;
   font-weight: 700;
   color: #94a3b8;
   text-transform: uppercase;
-  margin-bottom: 2px;
+  letter-spacing: 0.5px;
 }
 
-.organ-reading-box strong {
-  display: block;
-  font-size: 14px;
+.live-stream-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
   color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.radio-live-icon {
+  animation: radioBlink 1.5s ease-in-out infinite;
+}
+
+@keyframes radioBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.organ-telemetry-highlight {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+
+.organ-sub-reading {
+  font-size: 12.5px;
+  color: #cbd5e1;
+}
+
+/* CLINICAL OBSERVATION */
+.organ-clinical-note-wrap {
+  padding: 4px 0;
+}
+
+.clinical-kicker {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.4px;
 }
 
 .organ-clinical-note {
   margin: 0;
-  font-size: 13px;
-  color: #cbd5e1;
-  line-height: 1.55;
+  font-size: 13.5px;
+  color: #e2e8f0;
+  line-height: 1.6;
+}
+
+/* QUICK TARGET CHIPS */
+.organ-chips-section {
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chips-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
 .organ-chips-row {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .organ-select-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: #1e293b;
+  padding: 7px 12px;
+  border-radius: 9px;
+  background: #111a2e;
   border: 1px solid rgba(148, 163, 184, 0.2);
   color: #cbd5e1;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .organ-select-chip:hover {
-  background: #253349;
+  background: #1e293b;
   color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .organ-select-chip.active {
   background: rgba(56, 189, 248, 0.15);
   border-color: #38bdf8;
-  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
 .chip-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
 }
 
 .organ-drawer-footer {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 11.5px;
   color: #64748b;
-  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* =========================================================
-   RESPONSIVE
-========================================================= */
-@media (max-width: 800px) {
+   REDUCE MOTION OVERRIDES
+   ========================================================= */
+
+.no-anim,
+.no-anim * {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .body-neural-ambient,
+  .vascular-glow-overlay,
+  .cardiac-focal-pulse,
+  .beacon-ring,
+  .beacon-pulse-core,
+  .radio-live-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE DESIGN (TABLET & MOBILE)
+   ========================================================= */
+
+@media (max-width: 900px) {
   .body-map-content {
     grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 20px 16px;
   }
-  .body-svg-container {
-    margin-bottom: 16px;
+
+  .glowing-body-frame {
+    max-width: 290px;
+    height: 480px;
+  }
+}
+
+@media (max-width: 480px) {
+  .body-map-header {
+    padding: 14px 16px;
+  }
+
+  .glowing-body-frame {
+    max-width: 260px;
+    height: 430px;
+  }
+
+  .organ-detail-card {
+    padding: 18px 16px;
+  }
+
+  .organ-telemetry-highlight {
+    font-size: 16px;
   }
 }
