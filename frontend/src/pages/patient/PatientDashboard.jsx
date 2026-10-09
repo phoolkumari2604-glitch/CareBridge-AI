@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
 import "./PatientDashboard.css";
@@ -26,11 +26,14 @@ import {
   ArrowRight,
   ShieldCheck,
   Radio,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import EmergencyFacilitiesMap from "../../components/patient/EmergencyFacilitiesMap";
 
 const PatientDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -52,6 +55,8 @@ const PatientDashboard = () => {
   const [upcomingAppointment, setUpcomingAppointment] = useState(null);
   const [doctor, setDoctor] = useState(null);
 
+  const eventSourceRef = useRef(null);
+
   const fetchDashboardData = useCallback(async (isManualRefresh = false) => {
     if (!user?.patient_id) {
       setLoading(false);
@@ -68,7 +73,7 @@ const PatientDashboard = () => {
       }
       setError(null);
 
-      // Fetch data concurrently from patientService
+      // Concurrent fetch across clinical services
       const [
         hospitalsRes,
         alertsSummaryRes,
@@ -87,14 +92,14 @@ const PatientDashboard = () => {
         patientService.getDoctors(),
       ]);
 
-      // Process Hospitals
+      // 1. Hospitals count
       let hospitalsCount = 0;
       if (hospitalsRes.status === "fulfilled") {
         const hData = hospitalsRes.value;
         hospitalsCount = Array.isArray(hData) ? hData.length : (hData?.hospitals?.length || hData?.total || 0);
       }
 
-      // Process Alerts Summary
+      // 2. Alerts Summary
       let alertsTotal = 0;
       if (alertsSummaryRes.status === "fulfilled") {
         const summaryData = alertsSummaryRes.value;
@@ -102,7 +107,7 @@ const PatientDashboard = () => {
         alertsTotal = summaryData?.total_alerts || 0;
       }
 
-      // Process Records
+      // 3. Health Records
       let recordsCount = 0;
       if (recordsRes.status === "fulfilled") {
         const records = recordsRes.value || [];
@@ -114,18 +119,18 @@ const PatientDashboard = () => {
         );
       }
 
-      // Process Notifications
+      // 4. Notifications
       let unreadNotifications = 0;
       if (notificationsCountRes.status === "fulfilled") {
         unreadNotifications = notificationsCountRes.value?.unread_count || 0;
       }
 
-      // Process Vitals
+      // 5. Vitals
       if (vitalsRes.status === "fulfilled") {
         setVitals(vitalsRes.value);
       }
 
-      // Process Appointments
+      // 6. Appointments & Consults
       let allDocs = [];
       if (doctorsRes.status === "fulfilled") {
         allDocs = doctorsRes.value || [];
@@ -176,13 +181,53 @@ const PatientDashboard = () => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Auto-polling interval every 30 seconds
+  // Background SSE Live Updates with Polling Fallback
   useEffect(() => {
+    if (!user?.patient_id) return;
+
+    const patientId = user.patient_id;
+    let sseUrl = `http://127.0.0.1:5000/api/notifications/${patientId}/stream`;
+
+    try {
+      const source = new EventSource(sseUrl);
+      eventSourceRef.current = source;
+
+      source.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data && data.stats) {
+            setStats((prev) => ({
+              ...prev,
+              unreadNotifications: data.stats.unread_count ?? prev.unreadNotifications,
+              alertsTotal: data.stats.health_alerts ?? prev.alertsTotal,
+              upcomingAppointmentsCount: data.stats.appointments ?? prev.upcomingAppointmentsCount,
+            }));
+            setLastUpdated(new Date());
+          }
+        } catch {
+          // ignore keepalive parse
+        }
+      };
+
+      source.onerror = () => {
+        source.close();
+      };
+    } catch (err) {
+      console.warn("SSE stream unavailable on dashboard, falling back to interval polling:", err);
+    }
+
+    // Polling fallback every 20 seconds
     const interval = setInterval(() => {
       fetchDashboardData(false);
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [fetchDashboardData]);
+    }, 20000);
+
+    return () => {
+      clearInterval(interval);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, [user?.patient_id, fetchDashboardData]);
 
   const formatLastUpdated = (date) => {
     try {
@@ -190,6 +235,10 @@ const PatientDashboard = () => {
     } catch {
       return "Just now";
     }
+  };
+
+  const handleBookDoctor = () => {
+    navigate("/patient/doctors");
   };
 
   if (loading) {
@@ -230,9 +279,9 @@ const PatientDashboard = () => {
         <div>
           <div className="dash-header-badge-row">
             <span className="patient-kicker">PATIENT CLINICAL COMMAND</span>
-            <div className="live-telemetry-badge" title="Live background polling active">
+            <div className="live-telemetry-badge" title="Live background SSE & polling active">
               <span className="live-pulsing-dot"></span>
-              <span>LIVE</span>
+              <span>LIVE TELEMETRY</span>
               <small className="last-sync-time">Last updated: {formatLastUpdated(lastUpdated)}</small>
             </div>
           </div>
@@ -253,10 +302,14 @@ const PatientDashboard = () => {
             <RefreshCw size={16} className={isRefreshing ? "spin-icon" : ""} />
             <span>{isRefreshing ? "Syncing..." : "Refresh"}</span>
           </button>
-          <Link to="/patient/doctors" className="dash-book-btn" aria-label="Book a Doctor Appointment">
+          <button
+            onClick={handleBookDoctor}
+            className="dash-book-btn"
+            aria-label="Book a Doctor Appointment"
+          >
             <Plus size={16} />
             <span>Book Doctor</span>
-          </Link>
+          </button>
         </div>
       </header>
 
@@ -268,7 +321,7 @@ const PatientDashboard = () => {
         </div>
       )}
 
-      {/* STATS CARDS */}
+      {/* STATS CARDS (ALL CLICKABLE WITH HIGH-CONTRAST LABELS) */}
       <section className="stats-grid" aria-label="Patient Health Key Metrics">
         <Link to="/patient/hospitals" className="stat-card" aria-label="Nearby Hospitals">
           <div className="stat-icon blue">

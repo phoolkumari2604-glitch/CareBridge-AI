@@ -188,6 +188,7 @@ def verify_opd_pass(pass_number=None):
     }), 200
 
 @opd_pass_bp.route("/request-otp", methods=["POST"], strict_slashes=False)
+@opd_pass_bp.route("/send-otp", methods=["POST"], strict_slashes=False)
 @token_required
 def request_pass_otp():
     db = get_database()

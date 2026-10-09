@@ -49,16 +49,42 @@ def fetch_hospitals_from_local_db(
     db = get_database()
     and_conditions: List[Dict[str, Any]] = []
 
+    # Filter out invalid test entries
+    and_conditions.append({
+        "name": {
+            "$nin": ["string", "N/A", "n/a", "", None],
+            "$not": {"$regex": "^string$", "$options": "i"}
+        }
+    })
+
     if name:
-        and_conditions.append({"name": {"$regex": name.strip(), "$options": "i"}})
+        query_term = name.strip()
+        and_conditions.append({
+            "$or": [
+                {"name": {"$regex": query_term, "$options": "i"}},
+                {"city": {"$regex": query_term, "$options": "i"}},
+                {"state": {"$regex": query_term, "$options": "i"}},
+                {"address": {"$regex": query_term, "$options": "i"}},
+                {"facility_type": {"$regex": query_term, "$options": "i"}},
+                {"type": {"$regex": query_term, "$options": "i"}},
+                {"specialties": {"$regex": query_term, "$options": "i"}},
+                {"services": {"$regex": query_term, "$options": "i"}},
+            ]
+        })
     if city:
         and_conditions.append({"city": {"$regex": city.strip(), "$options": "i"}})
     if state:
         and_conditions.append({"state": {"$regex": state.strip(), "$options": "i"}})
-    if country:
+    if country and country != "all":
         # Handle country variations like India / US / USA
         if country.lower() in ["india", "in"]:
-            and_conditions.append({"country": {"$regex": "^(India|IN)$", "$options": "i"}})
+            and_conditions.append({
+                "$or": [
+                    {"country": {"$regex": "^(India|IN)$", "$options": "i"}},
+                    {"country": None},
+                    {"country": {"$exists": False}},
+                ]
+            })
         elif country.lower() in ["usa", "us", "united states"]:
             and_conditions.append({"country": {"$regex": "^(USA|US|United States)$", "$options": "i"}})
         else:

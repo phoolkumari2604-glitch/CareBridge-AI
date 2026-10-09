@@ -25,9 +25,10 @@ import {
   SwitchCamera,
   X,
   KeyRound,
-  FileCheck2,
-  AlertTriangle,
-  Info,
+  Send,
+  Timer,
+  Check,
+  FileCheck,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
@@ -40,13 +41,13 @@ function DigitalOPDPass() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("active"); // "active", "archive", or "verify"
+  const [activeTab, setActiveTab] = useState("active"); // "active", "archive", "verify"
 
   const [activePasses, setActivePasses] = useState([]);
   const [selectedPass, setSelectedPass] = useState(null);
   const [doctors, setDoctors] = useState([]);
   const [hospitals, setHospitals] = useState([]);
-  const [copyToast, setCopyToast] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Scanner & Validation State
   const [verifyToken, setVerifyToken] = useState("");
@@ -54,38 +55,34 @@ function DigitalOPDPass() {
   const [validationResult, setValidationResult] = useState(null);
   const [validationError, setValidationError] = useState(null);
 
-  // OTP State
-  const [otpSent, setOtpSent] = useState(false);
+  // OTP Verification State
+  const [otpMode, setOtpMode] = useState(false);
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
-  const [otpContact, setOtpContact] = useState("");
-  const [otpCooldown, setOtpCooldown] = useState(0);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [otpInfo, setOtpInfo] = useState(null);
   const [otpError, setOtpError] = useState(null);
-  const [demoOtp, setDemoOtp] = useState(null);
+  const [resendTimer, setResendTimer] = useState(0);
+  const otpInputRefs = useRef([]);
 
-  // Camera Live Scanner State
-  const [scannerOpen, setScannerOpen] = useState(false);
-  const [cameraFacing, setCameraFacing] = useState("environment"); // "environment" or "user"
+  // Camera & Scanner Modal State
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState("environment"); // "environment" | "user"
   const [cameraError, setCameraError] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
-  const animFrameRef = useRef(null);
+  const scanAnimationRef = useRef(null);
   const fileInputRef = useRef(null);
-  const cameraFallbackInputRef = useRef(null);
-  const otpInputRefs = useRef([]);
+  const uploadQrInputRef = useRef(null);
 
-  // Timer effect for OTP Cooldown
-  useEffect(() => {
-    let timer;
-    if (otpCooldown > 0) {
-      timer = setInterval(() => {
-        setOtpCooldown((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [otpCooldown]);
+  // Drag and Drop QR upload state
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [decodingUpload, setDecodingUpload] = useState(false);
 
+  // -------------------------------------------------------------
+  // DATA LOADING
+  // -------------------------------------------------------------
   const loadOPDPassData = useCallback(async () => {
     if (!user?.patient_id) {
       setLoading(false);
@@ -134,7 +131,12 @@ function DigitalOPDPass() {
             hospital_id: apt.hospital_id,
             doctor_id: apt.doctor_id,
             pass_number: passNumber,
-            status: apt.status === "COMPLETED" ? "USED" : apt.approval_status === "APPROVED" ? "ACTIVE" : "PENDING",
+            status:
+              apt.status === "COMPLETED"
+                ? "USED"
+                : apt.approval_status === "APPROVED"
+                ? "ACTIVE"
+                : "PENDING",
             created_at: apt.created_at,
             appointment_date: apt.appointment_date,
             appointment_time: apt.appointment_time,
@@ -164,7 +166,18 @@ function DigitalOPDPass() {
     loadOPDPassData();
   }, [loadOPDPassData]);
 
-  // Doctor & Hospital Helpers
+  // Resend Timer Countdown
+  useEffect(() => {
+    let timer;
+    if (resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  // Lookup helpers
   const getDoctor = (doctorId) => {
     return doctors.find((d) => d._id === doctorId || d.id === doctorId) || {};
   };
@@ -173,68 +186,92 @@ function DigitalOPDPass() {
     return hospitals.find((h) => h._id === hospitalId || h.id === hospitalId) || {};
   };
 
-  // Direct Token Verification (Instant Lookup)
+  // -------------------------------------------------------------
+  // TOKEN & PASS VALIDATION
+  // -------------------------------------------------------------
   const handleValidatePass = async (tokenToVerify) => {
     const token = (tokenToVerify || verifyToken || "").trim();
     if (!token) return;
+
     try {
       setValidating(true);
       setValidationError(null);
       setValidationResult(null);
+      setOtpMode(false);
+      setOtpError(null);
+
       const res = await patientService.validateOPDPass(token);
       setValidationResult(res);
     } catch (err) {
       console.error("Pass validation failed:", err);
       setValidationError(
-        err.response?.data?.message || err.response?.data?.detail || "Invalid OPD Pass or Token not found in hospital registry."
+        err.response?.data?.message ||
+          err.response?.data?.detail ||
+          "Invalid OPD Pass or Token not found in hospital registry."
       );
     } finally {
       setValidating(false);
     }
   };
 
-  // OTP Flow
+  // -------------------------------------------------------------
+  // OTP WORKFLOW
+  // -------------------------------------------------------------
   const handleRequestOTP = async () => {
-    const token = verifyToken.trim() || selectedPass?.pass_number;
+    const token = (verifyToken || selectedPass?.pass_number || "").trim();
     if (!token) {
-      setValidationError("Please enter a valid pass number first.");
+      setValidationError("Please enter or select a valid Pass Number first.");
       return;
     }
+
     try {
       setOtpLoading(true);
       setOtpError(null);
       setValidationError(null);
+
       const res = await patientService.requestOPDPassOTP(token);
-      setOtpSent(true);
-      setOtpContact(res.masked_contact || "registered contact");
-      setOtpCooldown(res.cooldown_seconds || 30);
-      setDemoOtp(res.demo_otp || null);
+      setOtpInfo(res);
+      setOtpMode(true);
+      setResendTimer(res.cooldown_seconds || 30);
       setOtpDigits(["", "", "", "", "", ""]);
       setTimeout(() => {
-        otpInputRefs.current[0]?.focus();
+        if (otpInputRefs.current[0]) otpInputRefs.current[0].focus();
       }, 100);
     } catch (err) {
-      console.error("OTP request failed:", err);
-      setOtpError(err.response?.data?.detail || err.response?.data?.message || "Failed to send OTP code.");
+      console.error("Failed to request OTP:", err);
+      setOtpError(
+        err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Unable to dispatch verification OTP. Please try again."
+      );
     } finally {
       setOtpLoading(false);
     }
   };
 
-  const handleOtpDigitChange = (index, value) => {
-    const cleanVal = value.replace(/\D/g, "").slice(-1);
+  const handleOtpChange = (index, value) => {
+    const cleanVal = value.replace(/\D/g, "");
+    if (!cleanVal && value !== "") return;
+
     const newDigits = [...otpDigits];
-    newDigits[index] = cleanVal;
+    newDigits[index] = cleanVal ? cleanVal.slice(-1) : "";
     setOtpDigits(newDigits);
 
-    if (cleanVal && index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
+    // Auto-advance to next input
+    if (cleanVal && index < 5 && otpInputRefs.current[index + 1]) {
+      otpInputRefs.current[index + 1].focus();
+    }
+
+    // Auto-submit if all 6 digits are filled
+    const fullCode = newDigits.join("");
+    if (fullCode.length === 6 && !newDigits.includes("")) {
+      handleVerifyOTPCode(fullCode);
     }
   };
 
   const handleOtpKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
+      otpInputRefs.current[index - 1].focus();
     }
   };
 
@@ -242,106 +279,112 @@ function DigitalOPDPass() {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
     if (!pastedData) return;
+
     const newDigits = [...otpDigits];
     for (let i = 0; i < 6; i++) {
       newDigits[i] = pastedData[i] || "";
     }
     setOtpDigits(newDigits);
-    const targetIdx = Math.min(pastedData.length, 5);
-    otpInputRefs.current[targetIdx]?.focus();
+
+    const focusIndex = Math.min(pastedData.length, 5);
+    if (otpInputRefs.current[focusIndex]) {
+      otpInputRefs.current[focusIndex].focus();
+    }
+
+    if (pastedData.length === 6) {
+      handleVerifyOTPCode(pastedData);
+    }
   };
 
-  const handleVerifyOTP = async (e) => {
-    if (e) e.preventDefault();
-    const token = verifyToken.trim() || selectedPass?.pass_number;
-    const fullOtp = otpDigits.join("");
-    if (fullOtp.length < 6) {
-      setOtpError("Please enter the complete 6-digit OTP code.");
+  const handleVerifyOTPCode = async (codeToVerify) => {
+    const token = (verifyToken || selectedPass?.pass_number || "").trim();
+    const code = codeToVerify || otpDigits.join("");
+
+    if (code.length !== 6) {
+      setOtpError("Please enter all 6 digits of the verification OTP.");
       return;
     }
+
     try {
       setOtpLoading(true);
       setOtpError(null);
-      const res = await patientService.verifyOPDPassOTP(token, fullOtp);
+
+      const res = await patientService.verifyOPDPassOTP(token, code);
       setValidationResult(res);
-      setOtpSent(false);
+      setOtpMode(false);
     } catch (err) {
       console.error("OTP verification failed:", err);
-      setOtpError(err.response?.data?.detail || err.response?.data?.message || "Invalid OTP code entered.");
+      setOtpError(
+        err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Invalid or expired verification OTP."
+      );
     } finally {
       setOtpLoading(false);
     }
   };
 
-  // Camera Live QR Scanner
-  const startCamera = async (facing = cameraFacing) => {
+  // -------------------------------------------------------------
+  // CAMERA & QR SCANNER
+  // -------------------------------------------------------------
+  const startCameraScanner = async () => {
     setCameraError(null);
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setCameraError("Live camera access is not supported by your browser. Please use the file upload or mobile photo option.");
-      return;
-    }
+    setCameraModalOpen(true);
 
     try {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Camera API not supported on this device. Use file upload instead.");
       }
 
-      const constraints = {
-        video: {
-          facingMode: facing,
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      };
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: cameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
-
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.setAttribute("playsinline", "true");
         await videoRef.current.play();
-        scanQRCodeLoop();
+        scanAnimationFrame();
       }
     } catch (err) {
       console.error("Camera access error:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        setCameraError("Camera permission denied. Please allow camera access in your browser settings or upload an image.");
-      } else {
-        setCameraError("Unable to access camera feed. Please use QR file upload instead.");
-      }
+      setCameraError(err.message || "Camera access denied. Please grant permissions or upload a QR image.");
     }
   };
 
   const stopCamera = () => {
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = null;
+    if (scanAnimationRef.current) {
+      cancelAnimationFrame(scanAnimationRef.current);
     }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
-    setScannerOpen(false);
+    setCameraModalOpen(false);
   };
 
-  const toggleCameraFacing = () => {
+  const switchCameraFacing = async () => {
+    stopCamera();
     const nextFacing = cameraFacing === "environment" ? "user" : "environment";
     setCameraFacing(nextFacing);
-    startCamera(nextFacing);
+    setTimeout(() => {
+      startCameraScanner();
+    }, 200);
   };
 
-  const scanQRCodeLoop = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas || video.readyState !== video.HAVE_ENOUGH_DATA) {
-      animFrameRef.current = requestAnimationFrame(scanQRCodeLoop);
+  const scanAnimationFrame = () => {
+    if (!videoRef.current || videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
+      scanAnimationRef.current = requestAnimationFrame(scanAnimationFrame);
       return;
     }
 
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const video = videoRef.current;
+    const canvas = canvasRef.current || document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -350,86 +393,86 @@ function DigitalOPDPass() {
     });
 
     if (code && code.data) {
-      const scannedText = code.data.trim();
+      const decodedText = code.data.trim();
+      // Extract OPD pass token if inside a JSON or URL
+      let passToken = decodedText;
+      if (decodedText.includes("OPD-")) {
+        const match = decodedText.match(/OPD-[\w-]+/i);
+        if (match) passToken = match[0];
+      }
+
+      setVerifyToken(passToken);
       stopCamera();
-      setVerifyToken(scannedText);
-      handleValidatePass(scannedText);
+      handleValidatePass(passToken);
       return;
     }
 
-    animFrameRef.current = requestAnimationFrame(scanQRCodeLoop);
+    scanAnimationRef.current = requestAnimationFrame(scanAnimationFrame);
   };
 
-  // Open / Close Scanner Modal
-  const openScannerModal = () => {
-    setScannerOpen(true);
-    setTimeout(() => {
-      startCamera(cameraFacing);
-    }, 150);
-  };
-
-  // Decode Image File (Drag & Drop or File Picker)
-  const processImageFile = (file) => {
+  // -------------------------------------------------------------
+  // QR IMAGE UPLOAD & DECODE (Drag-and-Drop & Picker)
+  // -------------------------------------------------------------
+  const handleQrImageFile = (file) => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setValidationError("Selected file is not an image. Please upload a PNG or JPEG file.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setValidationError("File is too large (maximum 5MB allowed).");
+    setUploadError(null);
+
+    if (!["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.type)) {
+      setUploadError("Please upload a valid image file (PNG, JPG, or WEBP).");
       return;
     }
 
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("File exceeds the 5 MB size limit.");
+      return;
+    }
+
+    setDecodingUpload(true);
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const offCanvas = document.createElement("canvas");
-        offCanvas.width = img.width;
-        offCanvas.height = img.height;
-        const ctx = offCanvas.getContext("2d");
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, img.width, img.height);
-        const imgData = ctx.getImageData(0, 0, img.width, img.height);
-        const code = jsQR(imgData.data, imgData.width, imgData.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "attemptBoth",
+        });
+
+        setDecodingUpload(false);
         if (code && code.data) {
-          const rawData = code.data.trim();
-          setVerifyToken(rawData);
-          handleValidatePass(rawData);
+          let token = code.data.trim();
+          if (token.includes("OPD-")) {
+            const match = token.match(/OPD-[\w-]+/i);
+            if (match) token = match[0];
+          }
+          setVerifyToken(token);
+          handleValidatePass(token);
         } else {
-          setValidationError("No valid QR code detected in this image. Please upload a clearer photo.");
+          setUploadError("Could not detect a valid QR code in the uploaded image. Please try another photo.");
         }
       };
       img.onerror = () => {
-        setValidationError("Failed to read the image file.");
+        setDecodingUpload(false);
+        setUploadError("Failed to parse image file.");
       };
       img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   };
 
-  const handleFileScan = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      processImageFile(file);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.files?.[0]) {
-      processImageFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  // Clipboard Copy with Toast
   const handleCopy = async () => {
     if (!selectedPass?.pass_number) return;
     try {
       await navigator.clipboard.writeText(selectedPass.pass_number);
-      setCopyToast(true);
-      setTimeout(() => setCopyToast(false), 2500);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
     } catch {
-      alert("Pass ID: " + selectedPass.pass_number);
+      alert("Unable to copy Pass ID");
     }
   };
 
@@ -438,28 +481,22 @@ function DigitalOPDPass() {
   };
 
   const activeList = activePasses.filter((p) => p.status === "ACTIVE" || p.status === "PENDING");
-  const archiveList = activePasses.filter((p) => p.status === "USED" || p.status === "EXPIRED" || p.status === "CANCELLED");
+  const archiveList = activePasses.filter(
+    (p) => p.status === "USED" || p.status === "EXPIRED" || p.status === "CANCELLED"
+  );
 
   const currentPassDoctor = selectedPass ? getDoctor(selectedPass.doctor_id) : {};
   const currentPassHospital = selectedPass ? getHospital(selectedPass.hospital_id) : {};
 
   return (
     <div className="opd-page">
-      {/* COPY TOAST */}
-      {copyToast && (
-        <div className="opd-toast-alert" role="status" aria-live="polite">
-          <CheckCircle2 size={18} />
-          <span>Pass ID copied to clipboard!</span>
-        </div>
-      )}
-
       {/* HEADER */}
       <div className="opd-header">
         <div>
           <span className="opd-kicker">VERIFIED PATIENT ACCESS</span>
-          <h1 className="opd-page-title">Digital OPD Pass</h1>
-          <p className="opd-header-desc">
-            Instant QR verification for outpatient hospital admission, doctor triage, and reception check-in.
+          <h1 className="opd-main-title">Digital OPD Pass</h1>
+          <p className="opd-main-subtitle">
+            Cryptographically signed QR verification for outpatient hospital admission, doctor triage, and reception check-in.
           </p>
         </div>
 
@@ -468,7 +505,7 @@ function DigitalOPDPass() {
             className="opd-outline-btn"
             onClick={handlePrint}
             disabled={!selectedPass || activeTab === "verify"}
-            aria-label="Print Digital OPD Pass"
+            title="Print Official Outpatient Pass Slip"
           >
             <Printer size={16} />
             <span>Print Pass</span>
@@ -478,7 +515,7 @@ function DigitalOPDPass() {
             className="opd-download-btn"
             onClick={handlePrint}
             disabled={!selectedPass || activeTab === "verify"}
-            aria-label="Download Pass as PDF"
+            title="Export Digital Pass PDF Document"
           >
             <Download size={16} />
             <span>Download PDF</span>
@@ -515,7 +552,7 @@ function DigitalOPDPass() {
           role="tab"
           aria-selected={activeTab === "verify"}
         >
-          <QrCode size={15} /> Pass Validator & Scanner
+          <QrCode size={15} /> Scanner Validation & OTP
         </button>
       </div>
 
@@ -536,78 +573,93 @@ function DigitalOPDPass() {
         </div>
       )}
 
-      {/* SCANNER & VALIDATOR SECTION */}
+      {/* =========================================================
+          SCANNER VALIDATION & OTP TAB
+      ========================================================= */}
       {activeTab === "verify" && (
         <section className="opd-validator-section" aria-label="OPD Pass Validation">
           <div className="validator-card">
             <div className="validator-header">
               <div className="validator-icon">
-                <ShieldCheck size={26} />
+                <ShieldCheck size={28} />
               </div>
               <div>
-                <h2>Pass Validator & Reception Check-In</h2>
-                <p>Verify cryptographic legitimacy, check reception intake readiness, and validate appointment credentials.</p>
+                <h2>OPD Pass Validator & Token Scanner</h2>
+                <p>
+                  Verify cryptographic legitimacy, authenticate via 6-digit patient OTP, and validate hospital intake readiness.
+                </p>
               </div>
             </div>
 
-            {/* SCAN / UPLOAD ACTION BAR */}
-            <div className="validator-actions-toolbar">
+            {/* SCAN & UPLOAD ACTION BUTTONS */}
+            <div className="validator-quick-actions">
               <button
                 type="button"
-                className="scanner-action-btn primary"
-                onClick={openScannerModal}
-                title="Scan QR code using device camera"
+                className="v-action-btn primary"
+                onClick={startCameraScanner}
+                title="Scan QR Code with Camera"
               >
-                <Camera size={18} />
-                <span>Scan with Camera</span>
+                <Camera size={16} />
+                <span>Scan QR with Camera</span>
               </button>
 
               <button
                 type="button"
-                className="scanner-action-btn outline"
-                onClick={() => fileInputRef.current?.click()}
-                title="Upload QR Code image"
+                className="v-action-btn secondary"
+                onClick={() => uploadQrInputRef.current?.click()}
+                title="Upload QR Code Image File"
               >
-                <Upload size={18} />
+                <Upload size={16} />
                 <span>Upload QR Image</span>
               </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/png, image/jpeg, image/webp"
-                style={{ display: "none" }}
-                onChange={handleFileScan}
-              />
 
-              {selectedPass?.pass_number && (
-                <button
-                  type="button"
-                  className="scanner-action-btn chip"
-                  onClick={() => {
-                    setVerifyToken(selectedPass.pass_number);
-                    handleValidatePass(selectedPass.pass_number);
-                  }}
-                >
-                  <span>Auto-fill #{selectedPass.pass_number}</span>
-                </button>
+              <input
+                ref={uploadQrInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  if (e.target.files?.[0]) handleQrImageFile(e.target.files[0]);
+                }}
+              />
+            </div>
+
+            {/* DRAG AND DROP ZONE */}
+            <div
+              className={`qr-dropzone ${isDragging ? "dragging" : ""} ${decodingUpload ? "decoding" : ""}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                if (e.dataTransfer.files?.[0]) handleQrImageFile(e.dataTransfer.files[0]);
+              }}
+              onClick={() => uploadQrInputRef.current?.click()}
+            >
+              {decodingUpload ? (
+                <div className="dropzone-decoding">
+                  <Loader2 size={24} className="spinner-icon" />
+                  <span>Decoding QR matrix...</span>
+                </div>
+              ) : (
+                <div className="dropzone-inner">
+                  <QrCode size={28} />
+                  <span>Drag & drop QR image here, or <u>click to browse</u> (PNG, JPG up to 5MB)</span>
+                </div>
               )}
             </div>
 
-            {/* DROPZONE HELPER */}
-            <div
-              className="validator-dropzone"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <QrCode size={30} className="dropzone-icon" />
-              <div>
-                <strong>Drag & drop QR image here or click to browse</strong>
-                <span>Supports PNG, JPG, WebP up to 5MB</span>
+            {uploadError && (
+              <div className="validation-alert invalid mini" role="alert">
+                <AlertCircle size={16} />
+                <span>{uploadError}</span>
               </div>
-            </div>
+            )}
 
-            {/* TOKEN INPUT & INSTANT VERIFICATION */}
+            {/* TOKEN INPUT FORM */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -618,7 +670,7 @@ function DigitalOPDPass() {
               <div className="validator-input-wrap">
                 <input
                   type="text"
-                  placeholder="Enter Pass ID (e.g. OPD-20261009-ABC123)..."
+                  placeholder="Enter or paste OPD Pass Number (e.g. OPD-20261009-ABC123)..."
                   value={verifyToken}
                   onChange={(e) => setVerifyToken(e.target.value)}
                   className="validator-input"
@@ -630,156 +682,185 @@ function DigitalOPDPass() {
                   className="validator-submit-btn"
                 >
                   {validating ? <Loader2 size={16} className="spinner-icon" /> : <ShieldCheck size={16} />}
-                  <span>{validating ? "Checking..." : "Verify Token"}</span>
+                  <span>{validating ? "Validating..." : "Verify Token"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleRequestOTP}
+                  disabled={otpLoading || !verifyToken.trim()}
+                  className="validator-otp-trigger-btn"
+                  title="Authenticate via patient OTP"
+                >
+                  {otpLoading ? <Loader2 size={16} className="spinner-icon" /> : <KeyRound size={16} />}
+                  <span>Verify with OTP</span>
                 </button>
               </div>
+
+              {selectedPass?.pass_number && (
+                <div className="quick-token-buttons">
+                  <span>Current Pass:</span>
+                  <button
+                    type="button"
+                    className="quick-token-chip"
+                    onClick={() => {
+                      setVerifyToken(selectedPass.pass_number);
+                    }}
+                  >
+                    Use {selectedPass.pass_number}
+                  </button>
+                </div>
+              )}
             </form>
 
-            {/* OTP VERIFICATION CARD (OPTIONAL PATIENT AUTH STEP) */}
-            <div className="otp-verification-panel">
-              <div className="otp-panel-header">
-                <div className="otp-title-wrap">
-                  <KeyRound size={18} />
-                  <strong>Patient OTP Authorization</strong>
+            {/* OTP VERIFICATION MODAL / DRAWER */}
+            {otpMode && (
+              <div className="otp-verification-panel">
+                <div className="otp-panel-header">
+                  <div className="otp-title-wrap">
+                    <KeyRound size={20} className="otp-icon" />
+                    <div>
+                      <h4>6-Digit Security OTP Verification</h4>
+                      <p>
+                        A 6-digit authorization code has been dispatched to{" "}
+                        <strong>{otpInfo?.masked_contact || "patient's registered contact"}</strong>.
+                      </p>
+                    </div>
+                  </div>
+                  <button className="otp-close-btn" onClick={() => setOtpMode(false)} aria-label="Cancel OTP">
+                    <X size={16} />
+                  </button>
                 </div>
-                {!otpSent ? (
-                  <button
-                    type="button"
-                    className="request-otp-btn"
-                    onClick={handleRequestOTP}
-                    disabled={otpLoading || (!verifyToken.trim() && !selectedPass?.pass_number)}
-                  >
-                    {otpLoading ? <Loader2 size={14} className="spinner-icon" /> : <KeyRound size={14} />}
-                    <span>Request 6-Digit OTP</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="resend-otp-btn"
-                    onClick={handleRequestOTP}
-                    disabled={otpCooldown > 0 || otpLoading}
-                  >
-                    {otpCooldown > 0 ? `Resend in ${otpCooldown}s` : "Resend OTP"}
-                  </button>
+
+                {otpInfo?.demo_otp && (
+                  <div className="demo-otp-banner">
+                    <span>Demo Environment OTP Hint:</span>
+                    <strong>{otpInfo.demo_otp}</strong>
+                  </div>
                 )}
-              </div>
 
-              {otpSent && (
-                <div className="otp-box-section">
-                  <p className="otp-helper-text">
-                    Enter the 6-digit verification code sent to <strong>{otpContact}</strong> (valid for 5 mins):
-                  </p>
+                {/* 6 OTP INPUT BOXES */}
+                <div className="otp-boxes-container" onPaste={handleOtpPaste}>
+                  {otpDigits.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={(el) => (otpInputRefs.current[idx] = el)}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                      className={`otp-digit-box ${digit ? "filled" : ""}`}
+                      autoFocus={idx === 0}
+                      aria-label={`OTP Digit ${idx + 1}`}
+                    />
+                  ))}
+                </div>
 
-                  <form onSubmit={handleVerifyOTP} className="otp-inputs-form">
-                    <div className="otp-digits-row" onPaste={handleOtpPaste}>
-                      {otpDigits.map((digit, idx) => (
-                        <input
-                          key={idx}
-                          ref={(el) => (otpInputRefs.current[idx] = el)}
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                          className="otp-digit-input"
-                          aria-label={`OTP Digit ${idx + 1}`}
-                          autoComplete="off"
-                        />
-                      ))}
-                    </div>
+                {otpError && (
+                  <div className="otp-error-msg" role="alert">
+                    <AlertCircle size={15} />
+                    <span>{otpError}</span>
+                  </div>
+                )}
 
-                    <div className="otp-submit-row">
-                      <button
-                        type="submit"
-                        disabled={otpLoading || otpDigits.join("").length < 6}
-                        className="otp-verify-btn"
-                      >
-                        {otpLoading ? <Loader2 size={16} className="spinner-icon" /> : <CheckCircle2 size={16} />}
-                        <span>Verify & Authorize Intake</span>
-                      </button>
-                    </div>
-                  </form>
-
-                  {demoOtp && (
-                    <div className="demo-otp-hint">
-                      <Info size={14} />
+                <div className="otp-footer-actions">
+                  <div className="otp-timer">
+                    {resendTimer > 0 ? (
                       <span>
-                        Testing Code: <strong>{demoOtp}</strong>
+                        <Timer size={14} /> Resend available in <strong>{resendTimer}s</strong>
                       </span>
-                    </div>
-                  )}
-                </div>
-              )}
+                    ) : (
+                      <button type="button" className="otp-resend-btn" onClick={handleRequestOTP} disabled={otpLoading}>
+                        Resend New OTP
+                      </button>
+                    )}
+                  </div>
 
-              {otpError && (
-                <div className="otp-error-alert" role="alert">
-                  <AlertTriangle size={16} />
-                  <span>{otpError}</span>
+                  <button
+                    type="button"
+                    className="otp-verify-submit-btn"
+                    onClick={() => handleVerifyOTPCode()}
+                    disabled={otpLoading || otpDigits.join("").length !== 6}
+                  >
+                    {otpLoading ? <Loader2 size={16} className="spinner-icon" /> : <CheckCircle2 size={16} />}
+                    <span>Confirm & Authorize</span>
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* ERROR ALERT */}
+            {/* VALIDATION ERROR */}
             {validationError && (
               <div className="validation-alert invalid" role="alert">
-                <AlertCircle size={22} />
+                <AlertCircle size={20} />
                 <div>
-                  <strong>Validation Unsuccessful</strong>
+                  <strong>Validation Failed</strong>
                   <p>{validationError}</p>
                 </div>
               </div>
             )}
 
-            {/* SUCCESS OR WARNING RESULT */}
+            {/* VALIDATION SUCCESS RESULT */}
             {validationResult && (
               <div
                 className={`validation-alert ${
-                  validationResult.valid || validationResult.verified ? "valid" : "warning"
+                  validationResult.valid || validationResult.verified
+                    ? "valid"
+                    : validationResult.status === "USED"
+                    ? "used"
+                    : "warning"
                 }`}
-                role="status"
               >
-                <CheckCircle2 size={26} />
+                <div className="result-icon-box">
+                  {validationResult.valid || validationResult.verified ? (
+                    <CheckCircle2 size={28} />
+                  ) : (
+                    <AlertCircle size={28} />
+                  )}
+                </div>
                 <div className="validation-result-details">
                   <div className="validation-result-header">
                     <strong>
-                      {validationResult.valid || validationResult.verified
+                      {validationResult.verified
+                        ? "Pass Cryptographically Signed & OTP Authorized"
+                        : validationResult.valid
                         ? "Pass Cryptographically Verified & Active"
-                        : "Verification Notice"}
+                        : `Verification Notice: ${validationResult.status || "Status Check"}`}
                     </strong>
-                    <span className={`status-badge-mini ${validationResult.status?.toLowerCase() || "active"}`}>
-                      {validationResult.status || (validationResult.valid ? "ACTIVE" : "INVALID")}
+                    <span className={`status-badge-mini ${(validationResult.status || "active").toLowerCase()}`}>
+                      {validationResult.status || "VERIFIED"}
                     </span>
                   </div>
                   <p>{validationResult.message}</p>
                   <div className="validation-grid">
                     <div>
                       <span>Pass Number:</span>
-                      <strong>{validationResult.pass_number || verifyToken}</strong>
+                      <strong>{validationResult.pass_number}</strong>
                     </div>
                     <div>
                       <span>Patient Name:</span>
                       <strong>{validationResult.patient_name || user?.name || "Verified Patient"}</strong>
                     </div>
                     <div>
-                      <span>Assigned Doctor:</span>
-                      <strong>{validationResult.doctor_name || "Specialist On-Duty"}</strong>
+                      <span>Consulting Doctor:</span>
+                      <strong>{validationResult.doctor_name || "Assigned Medical Practitioner"}</strong>
                     </div>
                     <div>
                       <span>Hospital / Unit:</span>
                       <strong>{validationResult.hospital_name || "CareBridge Medical Center"}</strong>
                     </div>
                     <div>
-                      <span>Date & Time Slot:</span>
+                      <span>Scheduled Slot:</span>
                       <strong>
                         {validationResult.appointment_date || "Today"} at{" "}
-                        {validationResult.appointment_time || "Scheduled Slot"}
+                        {validationResult.appointment_time || "10:00 AM"}
                       </strong>
                     </div>
                     <div>
-                      <span>Consultation Reason:</span>
-                      <strong>{validationResult.reason || "General Medical Intake"}</strong>
+                      <span>Clinical Reason:</span>
+                      <strong>{validationResult.reason || "Outpatient Clinical Consultation"}</strong>
                     </div>
                   </div>
                 </div>
@@ -789,141 +870,63 @@ function DigitalOPDPass() {
         </section>
       )}
 
-      {/* CAMERA SCANNER MODAL */}
-      {scannerOpen && (
-        <div className="camera-modal-overlay" role="dialog" aria-modal="true" aria-label="QR Code Scanner">
-          <div className="camera-modal-box">
-            <div className="camera-modal-header">
-              <div className="modal-title-wrap">
-                <Camera size={20} />
-                <strong>Live QR Camera Scanner</strong>
-              </div>
-              <div className="modal-actions-wrap">
-                <button
-                  type="button"
-                  className="modal-icon-btn"
-                  onClick={toggleCameraFacing}
-                  title="Switch Front/Back Camera"
-                >
-                  <SwitchCamera size={18} />
-                </button>
-                <button
-                  type="button"
-                  className="modal-icon-btn"
-                  onClick={stopCamera}
-                  title="Close Camera"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            </div>
-
-            <div className="camera-viewport-container">
-              {cameraError ? (
-                <div className="camera-error-container">
-                  <AlertCircle size={36} />
-                  <p>{cameraError}</p>
-                  <button
-                    type="button"
-                    className="fallback-capture-btn"
-                    onClick={() => cameraFallbackInputRef.current?.click()}
-                  >
-                    <Camera size={16} /> Use Mobile Camera File Picker
-                  </button>
-                  <input
-                    type="file"
-                    ref={cameraFallbackInputRef}
-                    accept="image/*"
-                    capture="environment"
-                    style={{ display: "none" }}
-                    onChange={(e) => {
-                      stopCamera();
-                      handleFileScan(e);
-                    }}
-                  />
-                </div>
-              ) : (
-                <>
-                  <video ref={videoRef} className="camera-live-video" autoPlay playsInline muted />
-                  <canvas ref={canvasRef} style={{ display: "none" }} />
-                  <div className="scanner-overlay-frame">
-                    <div className="scanner-target-box">
-                      <div className="scanner-corner top-left" />
-                      <div className="scanner-corner top-right" />
-                      <div className="scanner-corner bottom-left" />
-                      <div className="scanner-corner bottom-right" />
-                      <div className="scanner-laser-line" />
-                    </div>
-                    <p className="scanner-instruction">Align OPD QR code inside frame</p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="camera-modal-footer">
-              <span>Point camera at any CareBridge AI Digital Pass QR</span>
-              <button type="button" className="camera-cancel-btn" onClick={stopCamera}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* EMPTY STATE */}
-      {activeTab !== "verify" && !loading && !error && (activeTab === "active" ? activeList.length === 0 : archiveList.length === 0) && (
-        <div className="opd-empty-state">
-          <Ticket size={48} />
-          <h3>{activeTab === "active" ? "No Active OPD Passes" : "No Archived Passes"}</h3>
-          <p>
-            {activeTab === "active"
-              ? "You do not have an active OPD Pass for today. Schedule an appointment to automatically receive a digital admission pass."
-              : "No historical or completed OPD passes found in your medical archive."}
-          </p>
-          {activeTab === "active" && (
-            <Link to="/patient/doctors" className="find-doc-btn">
-              <Stethoscope size={16} /> Book an Appointment
-            </Link>
-          )}
-        </div>
-      )}
+      {activeTab !== "verify" &&
+        !loading &&
+        !error &&
+        (activeTab === "active" ? activeList.length === 0 : archiveList.length === 0) && (
+          <div className="opd-empty-state">
+            <Ticket size={48} />
+            <h3>{activeTab === "active" ? "No Active OPD Passes" : "No Archived Passes"}</h3>
+            <p>
+              {activeTab === "active"
+                ? "You do not have an active OPD Pass for today. Schedule an appointment to automatically receive a digital admission pass."
+                : "No historical or completed OPD passes found in your medical archive."}
+            </p>
+            {activeTab === "active" && (
+              <Link to="/patient/doctors" className="find-doc-btn">
+                <Stethoscope size={16} /> Book an Appointment
+              </Link>
+            )}
+          </div>
+        )}
 
-      {/* MAIN OPD PASS VIEW */}
+      {/* =========================================================
+          MAIN OPD PASS DISPLAY
+      ========================================================= */}
       {activeTab !== "verify" && !loading && !error && selectedPass && (
         <div className="opd-layout">
-          {/* MULTI PASS SELECTOR */}
+          {/* PASS SELECTOR PILLS */}
           {activePasses.length > 1 && (
-            <div className="opd-selector-row" role="tablist" aria-label="Available OPD Passes">
+            <div className="opd-selector-row">
               {(activeTab === "active" ? activeList : archiveList).map((pass) => (
                 <button
                   key={pass._id}
                   className={`pass-select-pill ${selectedPass._id === pass._id ? "selected" : ""}`}
                   onClick={() => setSelectedPass(pass)}
-                  role="tab"
-                  aria-selected={selectedPass._id === pass._id}
                 >
                   <Ticket size={14} />
                   <span>{pass.pass_number}</span>
-                  <small className={`pill-badge ${pass.status?.toLowerCase()}`}>({pass.status})</small>
+                  <small>({pass.status})</small>
                 </button>
               ))}
             </div>
           )}
 
-          {/* DIGITAL PASS CARD */}
-          <section className="digital-pass-card" id="printable-opd-pass" aria-label="Digital Pass Card">
+          {/* DIGITAL PASS CARD (PRINTABLE) */}
+          <section className="digital-pass-card" id="printable-opd-pass">
             <div className="pass-top">
               <div className="pass-brand">
                 <div className="pass-logo">CB</div>
                 <div>
-                  <strong>CareBridge AI</strong>
-                  <span>Digital Outpatient Pass</span>
+                  <strong>CareBridge AI Health Network</strong>
+                  <span>Official Outpatient Admission Pass</span>
                 </div>
               </div>
 
               <div className="verified-badge">
                 <ShieldCheck size={15} />
-                <span>HL7 / HIPAA Verified</span>
+                <span>HIPAA & HL7 Cryptographically Verified</span>
               </div>
             </div>
 
@@ -931,13 +934,9 @@ function DigitalOPDPass() {
 
             <div className="pass-content">
               <div className="pass-status-row">
-                <span className={`pass-status-badge ${selectedPass.status?.toLowerCase() || "active"}`}>
-                  <CheckCircle2 size={15} />
-                  {selectedPass.status === "ACTIVE"
-                    ? "Valid for Consultation"
-                    : selectedPass.status === "USED"
-                    ? "Pass Completed"
-                    : selectedPass.status}
+                <span className={`pass-status-badge ${selectedPass.status?.toLowerCase()}`}>
+                  <CheckCircle2 size={16} />
+                  {selectedPass.status === "ACTIVE" ? "Valid for Intake & Triage" : selectedPass.status}
                 </span>
 
                 <span className="pass-dept-tag">
@@ -945,7 +944,7 @@ function DigitalOPDPass() {
                 </span>
               </div>
 
-              <h2 className="pass-reason-title">{selectedPass.reason || "General Medical Consultation"}</h2>
+              <h2>{selectedPass.reason || "General Medical Consultation"}</h2>
               <p className="pass-subtitle">
                 Patient: <strong>{user?.name || "Verified Patient"}</strong> &middot; ID: #
                 {String(user?.patient_id || "").slice(-6).toUpperCase()}
@@ -994,11 +993,11 @@ function DigitalOPDPass() {
                 </div>
               </div>
 
-              {/* PASS ID & WORKING COPY BUTTON */}
+              {/* PASS ID & COPY */}
               <div className="pass-id-box">
                 <div>
-                  <span className="pass-id-label">Digital Pass Identification Number</span>
-                  <strong className="pass-id-code">{selectedPass.pass_number}</strong>
+                  <span>Digital Pass Identification Number</span>
+                  <strong>{selectedPass.pass_number}</strong>
                 </div>
 
                 <button
@@ -1006,49 +1005,48 @@ function DigitalOPDPass() {
                   onClick={handleCopy}
                   className="copy-pass-btn"
                   title="Copy Pass ID to clipboard"
-                  aria-label="Copy Pass ID"
                 >
-                  <Copy size={16} />
-                  <span>Copy ID</span>
+                  {copied ? <Check size={16} className="text-green" /> : <Copy size={16} />}
+                  <span>{copied ? "Copied" : "Copy ID"}</span>
                 </button>
               </div>
             </div>
 
-            {/* QR CODE SCANNING DISPLAY */}
+            {/* QR CODE SCANNING SECTION */}
             <div className="qr-section">
               <div className="qr-box">
                 <div className="qr-pattern">
-                  <QrCode size={120} strokeWidth={1.5} />
+                  <QrCode size={118} strokeWidth={1.5} />
                 </div>
-                <span className="qr-code-label">OFFICIAL TOKEN</span>
+                <span className="qr-code-label">SECURE TOKEN</span>
               </div>
 
               <div className="qr-text">
                 <strong>Hospital Reception & Triage Scan</strong>
                 <p>
-                  Present this verified QR code at hospital check-in kiosks, triage nursing counters, or doctor intake desks.
+                  Present this QR code at hospital reception kiosks, nurse triage desks, or doctor chamber scanners for instant admissions check-in.
                 </p>
                 <div className="qr-meta">
-                  <span>Cryptographically signed by CareBridge AI Health Network</span>
+                  <span>Authorized by CareBridge Health Network &middot; Single Patient Use</span>
                 </div>
               </div>
             </div>
 
             <div className="pass-footer">
               <span>
-                <ShieldCheck size={14} /> HL7 FHIR Standard Compatible
+                <ShieldCheck size={14} /> Cryptographically Signed OPD Authorization
               </span>
               <span>Valid for Single Hospital Entry</span>
             </div>
           </section>
 
           {/* VISIT SUMMARY TIMELINE SIDEBAR */}
-          <aside className="visit-sidebar" aria-label="Visit Timeline">
+          <aside className="visit-sidebar">
             <div className="visit-card">
               <div className="visit-card-header">
                 <div>
                   <span className="small-label">CLINICAL VISIT WORKFLOW</span>
-                  <h3 className="visit-card-title">Consultation Timeline</h3>
+                  <h3>Consultation Timeline</h3>
                 </div>
                 <div className="visit-check">
                   <CheckCircle2 size={20} />
@@ -1117,13 +1115,85 @@ function DigitalOPDPass() {
                 <ShieldCheck size={20} />
               </div>
               <div>
-                <h3 className="opd-help-title">Keep Pass Ready</h3>
+                <h3>Keep Pass Ready</h3>
                 <p>
-                  Screenshots, digital passes, and printed copies are accepted across all partner hospital reception desks.
+                  Printed PDF passes, screenshots, and in-app tokens are accepted at all partner hospital reception counters.
                 </p>
               </div>
             </div>
           </aside>
+        </div>
+      )}
+
+      {/* =========================================================
+          CAMERA SCANNER MODAL (LIVE GETUSERMEDIA)
+      ========================================================= */}
+      {cameraModalOpen && (
+        <div className="scanner-modal-overlay" onClick={stopCamera}>
+          <div className="scanner-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="scanner-modal-header">
+              <div className="scanner-title">
+                <Camera size={20} />
+                <h3>Live QR Code Scanner</h3>
+              </div>
+              <div className="scanner-header-actions">
+                <button
+                  type="button"
+                  className="switch-cam-btn"
+                  onClick={switchCameraFacing}
+                  title="Switch Front/Rear Camera"
+                >
+                  <SwitchCamera size={16} />
+                  <span>Switch</span>
+                </button>
+                <button type="button" className="close-cam-btn" onClick={stopCamera} aria-label="Close Scanner">
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="scanner-viewport-wrap">
+              {cameraError ? (
+                <div className="scanner-error-state">
+                  <AlertCircle size={32} />
+                  <p>{cameraError}</p>
+                  <button
+                    type="button"
+                    className="file-fallback-btn"
+                    onClick={() => {
+                      stopCamera();
+                      uploadQrInputRef.current?.click();
+                    }}
+                  >
+                    Upload QR Image Instead
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <video ref={videoRef} className="scanner-video" playsInline autoPlay muted />
+                  <canvas ref={canvasRef} style={{ display: "none" }} />
+                  <div className="scan-target-box">
+                    <div className="scan-corner tl" />
+                    <div className="scan-corner tr" />
+                    <div className="scan-corner bl" />
+                    <div className="scan-corner br" />
+                    <div className="scan-laser-line" />
+                  </div>
+                  <span className="scan-instructions">Align OPD Pass QR Code within the frame</span>
+                </>
+              )}
+            </div>
+
+            <div className="scanner-modal-footer">
+              <button
+                type="button"
+                className="cam-cancel-btn"
+                onClick={stopCamera}
+              >
+                Cancel Scanner
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
