@@ -2,12 +2,12 @@ import axios from "axios";
 
 // Standardize API Base URL from environment or fallback to local Flask server
 const getBaseUrl = () => {
-  const envUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
   if (envUrl) {
     // Ensure /api suffix if not present
     return envUrl.endsWith("/api") ? envUrl : `${envUrl.replace(/\/$/, "")}/api`;
   }
-  return "http://127.0.0.1:5000/api";
+  return "http://localhost:5000/api";
 };
 
 const client = axios.create({
@@ -42,7 +42,7 @@ client.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response ? error.response.status : null;
 
-    if (status === 401 && !originalRequest._retry) {
+    if (status === 401 && !originalRequest?._retry) {
       // Clear credentials if token expired/invalid
       const currentPath = window.location.pathname;
       if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/") {

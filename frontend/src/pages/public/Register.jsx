@@ -1,105 +1,38 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  Heart,
+  Activity,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  ArrowRight,
+  Shield,
+  FileCheck2,
+} from "lucide-react";
 import authAPI from "../../services/auth";
 import "./Register.css";
-
-const Icon = ({ type }) => {
-  const common = {
-    width: 20,
-    height: 20,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8,
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-  };
-
-  switch (type) {
-    case "user":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="8" r="3.5" />
-          <path d="M5 20c.8-3.5 3.2-5.5 7-5.5s6.2 2 7 5.5" />
-        </svg>
-      );
-
-    case "mail":
-      return (
-        <svg {...common}>
-          <rect x="3" y="5" width="18" height="14" rx="2" />
-          <path d="m4 7 8 6 8-6" />
-        </svg>
-      );
-
-    case "phone":
-      return (
-        <svg {...common}>
-          <path d="M6.6 3.5 9 3l2 4.5-2.1 1.7a14.5 14.5 0 0 0 5.9 5.9l1.7-2.1L21 15l-.5 2.4c-.3 1.5-1.7 2.6-3.2 2.5C10 19.4 4.6 14 4.1 6.7 4 5.2 5.1 3.8 6.6 3.5Z" />
-        </svg>
-      );
-
-    case "lock":
-      return (
-        <svg {...common}>
-          <rect x="5" y="10" width="14" height="10" rx="2" />
-          <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-        </svg>
-      );
-
-    case "eye":
-      return (
-        <svg {...common}>
-          <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
-          <circle cx="12" cy="12" r="2.5" />
-        </svg>
-      );
-
-    case "eyeOff":
-      return (
-        <svg {...common}>
-          <path d="m3 3 18 18" />
-          <path d="M10.6 6.2A10.7 10.7 0 0 1 12 6c6 0 9.5 6 9.5 6a17 17 0 0 1-3 3.8" />
-          <path d="M6.7 6.7C3.8 8.7 2.5 12 2.5 12s3.5 6 9.5 6c1.3 0 2.5-.3 3.5-.7" />
-        </svg>
-      );
-
-    case "heart":
-      return (
-        <svg {...common}>
-          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-        </svg>
-      );
-
-    case "activity":
-      return (
-        <svg {...common}>
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-        </svg>
-      );
-
-    case "check":
-      return (
-        <svg {...common}>
-          <path d="m5 12 4 4L19 6" />
-        </svg>
-      );
-
-    default:
-      return null;
-  }
-};
 
 const Register = () => {
   const navigate = useNavigate();
 
+  // Core Account Form State
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
     confirmPassword: "",
-    // Optional Baseline Vitals & Health Profile
+    // Optional Baseline Vitals & Clinical Profile
     age: "",
     gender: "Other",
     blood_group: "O+",
@@ -114,69 +47,222 @@ const Register = () => {
     medical_history: "",
   });
 
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showOptionalVitals, setShowOptionalVitals] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [globalError, setGlobalError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [successToast, setSuccessToast] = useState("");
 
-  const updateField = (field, value) => {
-    setFormData((previous) => ({
-      ...previous,
-      [field]: value,
-    }));
-    setError("");
+  const fieldRefs = {
+    name: useRef(null),
+    email: useRef(null),
+    phone: useRef(null),
+    password: useRef(null),
+    confirmPassword: useRef(null),
+    agreeTerms: useRef(null),
+    age: useRef(null),
+    heart_rate: useRef(null),
+    systolic_bp: useRef(null),
+    diastolic_bp: useRef(null),
+    spo2: useRef(null),
+    temperature: useRef(null),
+    weight: useRef(null),
   };
 
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const updateField = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
 
-  const passwordStrength = useMemo(() => {
-    const password = formData.password;
-    if (!password) {
-      return { score: 0, label: "", color: "" };
+    // Clear field-specific error as user types
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
     }
+    setGlobalError("");
+  };
+
+  // Password strength calculation
+  const passwordStrength = useMemo(() => {
+    const pw = formData.password;
+    if (!pw) return { score: 0, label: "", colorClass: "" };
 
     let score = 0;
-    if (password.length >= 10) score++;
-    if (password.length >= 14) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[a-z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(pw)) score++;
 
-    if (score <= 2) return { score, label: "Weak (min 10 chars, mixed case, numbers & symbols)", color: "#ef4444" };
-    if (score <= 4) return { score, label: "Good (add symbols for max strength)", color: "#f59e0b" };
-    return { score, label: "Strong (meets clinical security standards)", color: "#10b981" };
+    if (score <= 2) return { score: 1, label: "Weak (add numbers & symbols)", colorClass: "strength-weak" };
+    if (score === 3) return { score: 2, label: "Fair (needs mixed case & symbols)", colorClass: "strength-fair" };
+    if (score === 4) return { score: 3, label: "Good (meets standard security)", colorClass: "strength-good" };
+    return { score: 4, label: "Strong (clinical grade protection)", colorClass: "strength-strong" };
   }, [formData.password]);
+
+  // Clean Indian phone number to 10 digits
+  const sanitizeIndianPhone = (raw) => {
+    if (!raw) return "";
+    let cleaned = raw.replace(/\D/g, "");
+    if (cleaned.startsWith("91") && cleaned.length > 10) {
+      cleaned = cleaned.slice(2);
+    } else if (cleaned.startsWith("0") && cleaned.length > 10) {
+      cleaned = cleaned.slice(1);
+    }
+    return cleaned;
+  };
+
+  // Comprehensive form validation
+  const validateForm = () => {
+    const errors = {};
+
+    // 1. Full name
+    const trimmedName = formData.name.trim();
+    if (!trimmedName) {
+      errors.name = "Full name is required.";
+    } else if (trimmedName.length < 2) {
+      errors.name = "Name must be at least 2 characters.";
+    }
+
+    // 2. Email
+    const trimmedEmail = formData.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail) {
+      errors.email = "Email address is required.";
+    } else if (!emailRegex.test(trimmedEmail)) {
+      errors.email = "Please enter a valid email address (e.g. name@example.com).";
+    }
+
+    // 3. Phone (10-digit Indian mobile number)
+    const cleanedPhone = sanitizeIndianPhone(formData.phone);
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!formData.phone.trim()) {
+      errors.phone = "Phone number is required.";
+    } else if (!phoneRegex.test(cleanedPhone)) {
+      errors.phone = "Please enter a valid 10-digit Indian phone number (starts with 6-9).";
+    }
+
+    // 4. Password (min 8 chars, uppercase, lowercase, number, symbol)
+    const pw = formData.password;
+    if (!pw) {
+      errors.password = "Password is required.";
+    } else if (pw.length < 8) {
+      errors.password = "Password must be at least 8 characters long.";
+    } else if (!/[A-Z]/.test(pw)) {
+      errors.password = "Include at least one uppercase letter (A-Z).";
+    } else if (!/[a-z]/.test(pw)) {
+      errors.password = "Include at least one lowercase letter (a-z).";
+    } else if (!/[0-9]/.test(pw)) {
+      errors.password = "Include at least one number (0-9).";
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(pw)) {
+      errors.password = "Include at least one special character (!@#$%^&*...).";
+    }
+
+    // 5. Confirm password
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = "Please confirm your password.";
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+    }
+
+    // 6. DPDP Consent
+    if (!agreeTerms) {
+      errors.agreeTerms = "You must consent to the DPDP Act 2023 terms to register.";
+    }
+
+    // 7. Optional Baseline Vitals validation (only validated if entered)
+    if (formData.age) {
+      const ageNum = Number(formData.age);
+      if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+        errors.age = "Age must be between 0 and 120 years.";
+      }
+    }
+
+    if (formData.heart_rate) {
+      const hrNum = Number(formData.heart_rate);
+      if (isNaN(hrNum) || hrNum < 30 || hrNum > 220) {
+        errors.heart_rate = "Heart rate must be between 30 and 220 BPM.";
+      }
+    }
+
+    if (formData.systolic_bp) {
+      const sysNum = Number(formData.systolic_bp);
+      if (isNaN(sysNum) || sysNum < 70 || sysNum > 200) {
+        errors.systolic_bp = "Systolic BP must be between 70 and 200 mmHg.";
+      }
+    }
+
+    if (formData.diastolic_bp) {
+      const diaNum = Number(formData.diastolic_bp);
+      if (isNaN(diaNum) || diaNum < 40 || diaNum > 130) {
+        errors.diastolic_bp = "Diastolic BP must be between 40 and 130 mmHg.";
+      }
+    }
+
+    if (formData.spo2) {
+      const spo2Num = Number(formData.spo2);
+      if (isNaN(spo2Num) || spo2Num < 70 || spo2Num > 100) {
+        errors.spo2 = "SpO2 oxygen saturation must be between 70% and 100%.";
+      }
+    }
+
+    if (formData.temperature) {
+      const tempNum = Number(formData.temperature);
+      if (isNaN(tempNum) || tempNum < 34 || tempNum > 42) {
+        errors.temperature = "Temperature must be between 34 °C and 42 °C.";
+      }
+    }
+
+    if (formData.weight) {
+      const weightNum = Number(formData.weight);
+      if (isNaN(weightNum) || weightNum < 2 || weightNum > 300) {
+        errors.weight = "Weight must be between 2 kg and 300 kg.";
+      }
+    }
+
+    return errors;
+  };
+
+  const scrollToFirstError = (errors) => {
+    const errorKeys = Object.keys(errors);
+    if (errorKeys.length === 0) return;
+
+    const firstKey = errorKeys[0];
+    // If error is in vitals section and vitals are collapsed, expand vitals first
+    if (["age", "heart_rate", "systolic_bp", "diastolic_bp", "spo2", "temperature", "weight"].includes(firstKey)) {
+      setShowOptionalVitals(true);
+    }
+
+    setTimeout(() => {
+      const targetRef = fieldRefs[firstKey];
+      if (targetRef && targetRef.current) {
+        targetRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (targetRef.current.focus) {
+          targetRef.current.focus();
+        }
+      }
+    }, 100);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
+    setGlobalError("");
+    setSuccessToast("");
 
-    const name = formData.name.trim();
-    const email = formData.email.trim().toLowerCase();
-    const phone = formData.phone.trim();
-
-    if (!name || !email || !phone || !formData.password) {
-      setError("Please complete all required fields.");
-      return;
-    }
-
-    if (formData.password.length < 10) {
-      setError("Password must contain at least 10 characters (with uppercase, lowercase, numbers & symbols).");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (!agreeTerms) {
-      setError("You must consent to the Terms of Service & DPDP Act 2023 Privacy Policy to register.");
+    // Run field validations
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setGlobalError("Please correct the highlighted errors before submitting.");
+      scrollToFirstError(errors);
       return;
     }
 
@@ -185,16 +271,18 @@ const Register = () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
+    const cleanedPhone = sanitizeIndianPhone(formData.phone);
+
     try {
       const payload = {
-        name,
-        email,
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
+        phone: cleanedPhone.length === 10 ? `+91 ${cleanedPhone}` : formData.phone.trim(),
         role: "PATIENT",
-        phone,
       };
 
-      // Include optional baseline health vitals if entered
+      // Add baseline vitals if provided
       if (formData.age) payload.age = parseInt(formData.age, 10);
       if (formData.gender) payload.gender = formData.gender;
       if (formData.blood_group) payload.blood_group = formData.blood_group;
@@ -205,35 +293,59 @@ const Register = () => {
       if (formData.temperature) payload.temperature = parseFloat(formData.temperature);
       if (formData.weight) payload.weight = parseFloat(formData.weight);
       if (formData.height) payload.height = parseFloat(formData.height);
-      if (formData.allergies) payload.allergies = formData.allergies;
-      if (formData.medical_history) payload.medical_history = formData.medical_history;
+      if (formData.allergies) {
+        payload.allergies = formData.allergies
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      if (formData.medical_history) {
+        payload.medical_history = formData.medical_history
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
 
       const res = await authAPI.register(payload, controller.signal);
       clearTimeout(timeoutId);
 
-      setSuccess("Account registered successfully! A verification link has been sent to your email. Redirecting to login...");
+      setSuccessToast(
+        res?.message || "Account created successfully! Verification email dispatched. Redirecting to login..."
+      );
+
       setTimeout(() => {
-        navigate("/login");
-      }, 2500);
+        navigate("/login", {
+          state: {
+            registeredEmail: formData.email.trim().toLowerCase(),
+            message: "Registration successful. Please log in with your credentials.",
+          },
+        });
+      }, 2000);
     } catch (err) {
       clearTimeout(timeoutId);
-      console.error("Registration error:", err);
+      console.error("CareBridge Registration error:", err);
 
-      if (err.name === "AbortError") {
-        setError("Registration request timed out. Please check your internet connection.");
+      if (err.name === "AbortError" || controller.signal.aborted) {
+        setGlobalError("Connection timed out (15s). Please check your internet connection and try again.");
+      } else if (err.response?.status === 409) {
+        setGlobalError("An account with this email address already exists. Please sign in or reset your password.");
+        setFieldErrors((prev) => ({
+          ...prev,
+          email: "This email is already registered. Please sign in.",
+        }));
+      } else if (err.response?.status === 400) {
+        const detail = err.response?.data?.detail || err.response?.data?.message || "Validation failed.";
+        setGlobalError(detail);
+      } else if (err.response?.status >= 500) {
+        setGlobalError("CareBridge clinical registration service encountered an error. Please try again shortly.");
       } else {
-        const errorDetail =
-          err.response?.data?.detail ||
-          err.response?.data?.message ||
-          (err.message === "Network Error"
-            ? "Unable to connect to CareBridge AI server. Please verify backend is running."
-            : err.message || "Registration failed. Please try again.");
-
-        if (Array.isArray(errorDetail)) {
-          setError(errorDetail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", "));
-        } else {
-          setError(typeof errorDetail === "string" ? errorDetail : "Registration failed. Please check your information.");
-        }
+        const isNetworkErr =
+          err.message === "Network Error" || !err.response || err.code === "ERR_NETWORK";
+        setGlobalError(
+          isNetworkErr
+            ? "Unable to connect to CareBridge AI server. Please verify backend is running on port 5000."
+            : err.response?.data?.detail || err.message || "Registration failed. Please try again."
+        );
       }
     } finally {
       setLoading(false);
@@ -241,263 +353,362 @@ const Register = () => {
   };
 
   return (
-    <main className="register-page">
-      {/* Background */}
-      <div className="register-background">
-        <div className="register-orb register-orb-one"></div>
-        <div className="register-orb register-orb-two"></div>
-        <div className="register-grid"></div>
-      </div>
+    <div className="cb-reg-page">
+      {/* Dynamic Success Toast */}
+      {successToast && (
+        <div className="cb-toast" role="status" aria-live="polite">
+          <CheckCircle2 size={20} className="cb-toast-icon" />
+          <span>{successToast}</span>
+        </div>
+      )}
 
-      <section className="register-shell">
-        {/* ================= LEFT PANEL ================= */}
-        <aside className="register-hero">
-          <div className="hero-top">
-            <Link to="/" className="brand">
-              <span className="brand-mark">C</span>
-              <span className="brand-name">
-                Care<span>Bridge</span>
-                <small>AI</small>
-              </span>
+      {/* Main 2-Panel Registration Shell */}
+      <div className="cb-reg-shell">
+        {/* =========================================================
+            LEFT PANEL: Hero, Value Props & Trust Badges
+            ========================================================= */}
+        <aside className="cb-reg-hero">
+          <div className="cb-hero-top">
+            <Link to="/" className="cb-logo-brand" aria-label="CareBridge AI Home">
+              <div className="cb-logo-mark">C</div>
+              <div className="cb-logo-text-wrap">
+                <span className="cb-logo-name">
+                  Care<span className="cb-logo-teal">Bridge</span>
+                </span>
+                <span className="cb-logo-badge">AI</span>
+              </div>
             </Link>
-            <div className="hero-status">
-              <span className="status-dot"></span>
-              Healthcare platform
+          </div>
+
+          <div className="cb-hero-body">
+            <div className="cb-hero-kicker">
+              <Sparkles size={14} />
+              <span>Intelligent Healthcare Ecosystem</span>
+            </div>
+
+            <h1 className="cb-hero-headline">
+              Universal Health Identity
+              <br />
+              for Connected Care
+            </h1>
+
+            <p className="cb-hero-desc">
+              Join thousands of patients accessing digital OPD passes, real-time hospital queues, specialist consultations, and continuous physiological telemetry.
+            </p>
+
+            {/* Vertical Stack of Clean Cards */}
+            <div className="cb-feature-stack">
+              <div className="cb-feature-item">
+                <div className="cb-feature-icon-box">
+                  <Activity size={20} />
+                </div>
+                <div className="cb-feature-content">
+                  <h3>Baseline Vitals Tracking</h3>
+                  <p>Capture initial physiological telemetry on registration for longitudinal AI insights.</p>
+                </div>
+              </div>
+
+              <div className="cb-feature-item">
+                <div className="cb-feature-icon-box">
+                  <Heart size={20} />
+                </div>
+                <div className="cb-feature-content">
+                  <h3>Live Queue & Digital OPD Pass</h3>
+                  <p>Instant QR tokens and real-time waiting list telemetry at 50+ network hospitals.</p>
+                </div>
+              </div>
+
+              <div className="cb-feature-item">
+                <div className="cb-feature-icon-box">
+                  <ShieldCheck size={20} />
+                </div>
+                <div className="cb-feature-content">
+                  <h3>Clinical Record Encryption</h3>
+                  <p>Protected by 256-bit AES encryption conforming to India's DPDP Act 2023.</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="hero-content">
-            <div className="hero-badge">
-              <span>✦</span>
-              Intelligent healthcare
+          {/* Pinned Bottom Trust Badges */}
+          <div className="cb-hero-footer">
+            <div className="cb-trust-badge">
+              <FileCheck2 size={15} />
+              <span>DPDP Act 2023 Compliant</span>
             </div>
-            <h1>
-              CareBridge AI
-              <br />
-              <span>Universal Health Identity</span>
-            </h1>
-            <p>
-              Create your account to access digital OPD passes, track vital signs, consult specialists, and receive clinical assistance from CareBridge AI.
-            </p>
-
-            <div className="hero-feature-cards">
-              <div className="feature-card">
-                <div className="feature-card-icon">
-                  <Icon type="heart" />
-                </div>
-                <div>
-                  <h4>Baseline Vitals Tracking</h4>
-                  <p>Capture initial physiological telemetry on registration</p>
-                </div>
-              </div>
-
-              <div className="feature-card">
-                <div className="feature-card-icon">
-                  <Icon type="activity" />
-                </div>
-                <div>
-                  <h4>Live Queue & OPD Pass</h4>
-                  <p>QR pass and real-time hospital token updates</p>
-                </div>
-              </div>
+            <div className="cb-trust-badge">
+              <Shield size={15} />
+              <span>256-Bit Encrypted</span>
+            </div>
+            <div className="cb-trust-badge">
+              <Activity size={15} />
+              <span>ABDM Ecosystem Ready</span>
             </div>
           </div>
         </aside>
 
-        {/* ================= RIGHT PANEL ================= */}
-        <section className="register-form-area">
-          <div className="form-card">
-            <div className="form-header">
-              <div className="form-header-badge">PATIENT REGISTRATION</div>
-              <h2>Create your Account</h2>
+        {/* =========================================================
+            RIGHT PANEL: Registration Form
+            ========================================================= */}
+        <main className="cb-reg-main">
+          {/* Mobile Top Brand (Visible on screens < 1024px) */}
+          <div className="cb-mobile-header">
+            <Link to="/" className="cb-logo-brand">
+              <div className="cb-logo-mark">C</div>
+              <div className="cb-logo-text-wrap">
+                <span className="cb-logo-name">
+                  Care<span className="cb-logo-teal">Bridge</span>
+                </span>
+                <span className="cb-logo-badge">AI</span>
+              </div>
+            </Link>
+          </div>
+
+          <div className="cb-form-container">
+            {/* Header */}
+            <div className="cb-form-header">
+              <span className="cb-form-tag">PATIENT REGISTRATION</span>
+              <h2>Create your account</h2>
               <p>Sign up to start managing your clinical consultations and telemetry</p>
             </div>
 
-            {error && <div className="register-error-banner">{error}</div>}
-            {success && <div className="register-success-banner">{success}</div>}
+            {/* Global Styled Alert Box */}
+            {globalError && (
+              <div className="cb-alert-error" role="alert" aria-live="polite">
+                <AlertCircle size={18} className="cb-alert-icon" />
+                <div className="cb-alert-msg">{globalError}</div>
+              </div>
+            )}
 
-            <form onSubmit={handleSubmit} className="register-form">
-              {/* Name */}
-              <div className="form-row">
-                <div className="field-group">
-                  <label htmlFor="name">
-                    Full name <span>*</span>
+            <form onSubmit={handleSubmit} noValidate className="cb-form">
+              {/* 2-Column Grid */}
+              <div className="cb-form-grid">
+                {/* Full Name (Spans full width) */}
+                <div className="cb-input-group cb-col-span-2">
+                  <label htmlFor="reg-name" className="cb-label">
+                    Full name <span className="cb-req">*</span>
                   </label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">
-                      <Icon type="user" />
-                    </span>
+                  <div className={`cb-input-wrap ${fieldErrors.name ? "has-error" : ""}`}>
+                    <User size={18} className="cb-field-icon" />
                     <input
-                      id="name"
+                      ref={fieldRefs.name}
+                      id="reg-name"
                       type="text"
                       placeholder="Enter your full name"
                       value={formData.name}
                       onChange={(e) => updateField("name", e.target.value)}
                       autoComplete="name"
-                      required
+                      disabled={loading}
+                      aria-invalid={Boolean(fieldErrors.name)}
+                      aria-describedby={fieldErrors.name ? "err-name" : undefined}
+                      className="cb-input"
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Email + Phone */}
-              <div className="form-row">
-                <div className="field-group">
-                  <label htmlFor="email">
-                    Email address <span>*</span>
-                  </label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">
-                      <Icon type="mail" />
+                  {fieldErrors.name && (
+                    <span id="err-name" className="cb-error-text" role="alert">
+                      {fieldErrors.name}
                     </span>
+                  )}
+                </div>
+
+                {/* Email Address */}
+                <div className="cb-input-group">
+                  <label htmlFor="reg-email" className="cb-label">
+                    Email address <span className="cb-req">*</span>
+                  </label>
+                  <div className={`cb-input-wrap ${fieldErrors.email ? "has-error" : ""}`}>
+                    <Mail size={18} className="cb-field-icon" />
                     <input
-                      id="email"
+                      ref={fieldRefs.email}
+                      id="reg-email"
                       type="email"
                       placeholder="you@example.com"
                       value={formData.email}
                       onChange={(e) => updateField("email", e.target.value)}
                       autoComplete="email"
-                      required
+                      disabled={loading}
+                      aria-invalid={Boolean(fieldErrors.email)}
+                      aria-describedby={fieldErrors.email ? "err-email" : undefined}
+                      className="cb-input"
                     />
                   </div>
+                  {fieldErrors.email && (
+                    <span id="err-email" className="cb-error-text" role="alert">
+                      {fieldErrors.email}
+                    </span>
+                  )}
                 </div>
 
-                <div className="field-group">
-                  <label htmlFor="phone">
-                    Phone number <span>*</span>
+                {/* Phone Number (Separate State & tel autocomplete) */}
+                <div className="cb-input-group">
+                  <label htmlFor="reg-phone" className="cb-label">
+                    Phone number <span className="cb-req">*</span>
                   </label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">
-                      <Icon type="phone" />
-                    </span>
+                  <div className={`cb-input-wrap ${fieldErrors.phone ? "has-error" : ""}`}>
+                    <Phone size={18} className="cb-field-icon" />
                     <input
-                      id="phone"
+                      ref={fieldRefs.phone}
+                      id="reg-phone"
                       type="tel"
-                      placeholder="e.g. +91 9876543210"
+                      placeholder="e.g. 9876543210"
                       value={formData.phone}
                       onChange={(e) => updateField("phone", e.target.value)}
                       autoComplete="tel"
-                      required
+                      disabled={loading}
+                      aria-invalid={Boolean(fieldErrors.phone)}
+                      aria-describedby={fieldErrors.phone ? "err-phone" : undefined}
+                      className="cb-input"
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Passwords */}
-              <div className="form-row">
-                <div className="field-group">
-                  <label htmlFor="password">
-                    Password <span>*</span>
-                  </label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">
-                      <Icon type="lock" />
+                  {fieldErrors.phone && (
+                    <span id="err-phone" className="cb-error-text" role="alert">
+                      {fieldErrors.phone}
                     </span>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div className="cb-input-group">
+                  <label htmlFor="reg-password" className="cb-label">
+                    Password <span className="cb-req">*</span>
+                  </label>
+                  <div className={`cb-input-wrap ${fieldErrors.password ? "has-error" : ""}`}>
+                    <Lock size={18} className="cb-field-icon" />
                     <input
-                      id="password"
+                      ref={fieldRefs.password}
+                      id="reg-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
                       value={formData.password}
                       onChange={(e) => updateField("password", e.target.value)}
                       autoComplete="new-password"
-                      required
+                      disabled={loading}
+                      aria-invalid={Boolean(fieldErrors.password)}
+                      aria-describedby={fieldErrors.password ? "err-password" : undefined}
+                      className="cb-input"
                     />
                     <button
                       type="button"
-                      className="password-toggle"
+                      className="cb-password-toggle"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      tabIndex={-1}
                     >
-                      <Icon type={showPassword ? "eyeOff" : "eye"} />
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {fieldErrors.password && (
+                    <span id="err-password" className="cb-error-text" role="alert">
+                      {fieldErrors.password}
+                    </span>
+                  )}
 
+                  {/* Password Strength Meter */}
                   {formData.password && (
-                    <div className="password-strength">
-                      <div className="strength-bars">
-                        {[1, 2, 3, 4, 5, 6].map((bar) => (
-                          <span
-                            key={bar}
-                            style={{
-                              backgroundColor:
-                                bar <= passwordStrength.score ? passwordStrength.color : "#e2e8f0",
-                            }}
-                            className={bar <= passwordStrength.score ? "active" : ""}
+                    <div className="cb-strength-box">
+                      <div className="cb-strength-bars">
+                        {[1, 2, 3, 4].map((step) => (
+                          <div
+                            key={step}
+                            className={`cb-strength-bar ${
+                              step <= passwordStrength.score ? passwordStrength.colorClass : ""
+                            }`}
                           />
                         ))}
                       </div>
-                      <small style={{ color: passwordStrength.color, fontWeight: 700 }}>
+                      <span className={`cb-strength-label ${passwordStrength.colorClass}`}>
                         {passwordStrength.label}
-                      </small>
+                      </span>
                     </div>
                   )}
                 </div>
 
-                <div className="field-group">
-                  <label htmlFor="confirmPassword">
-                    Confirm password <span>*</span>
+                {/* Confirm Password */}
+                <div className="cb-input-group">
+                  <label htmlFor="reg-confirm-password" className="cb-label">
+                    Confirm password <span className="cb-req">*</span>
                   </label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">
-                      <Icon type="lock" />
-                    </span>
+                  <div className={`cb-input-wrap ${fieldErrors.confirmPassword ? "has-error" : ""}`}>
+                    <Lock size={18} className="cb-field-icon" />
                     <input
-                      id="confirmPassword"
+                      ref={fieldRefs.confirmPassword}
+                      id="reg-confirm-password"
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm password"
+                      placeholder="Re-enter your password"
                       value={formData.confirmPassword}
                       onChange={(e) => updateField("confirmPassword", e.target.value)}
                       autoComplete="new-password"
-                      required
+                      disabled={loading}
+                      aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                      aria-describedby={fieldErrors.confirmPassword ? "err-confirm" : undefined}
+                      className="cb-input"
                     />
                     <button
                       type="button"
-                      className="password-toggle"
+                      className="cb-password-toggle"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      tabIndex={-1}
                     >
-                      <Icon type={showConfirmPassword ? "eyeOff" : "eye"} />
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {fieldErrors.confirmPassword && (
+                    <span id="err-confirm" className="cb-error-text" role="alert">
+                      {fieldErrors.confirmPassword}
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* OPTIONAL BASELINE VITALS & HEALTH PROFILE ACCORDION */}
-              <div className="optional-vitals-box">
+              {/* =====================================================
+                  OPTIONAL BASELINE VITALS CARD (Collapsed by default)
+                  ===================================================== */}
+              <div className="cb-vitals-card">
                 <button
                   type="button"
-                  className="vitals-accordion-btn"
+                  className="cb-vitals-header-btn"
                   onClick={() => setShowOptionalVitals(!showOptionalVitals)}
+                  aria-expanded={showOptionalVitals}
                 >
-                  <div className="btn-left">
-                    <span className="vitals-badge">OPTIONAL</span>
-                    <strong>Initial Baseline Vitals & Clinical Profile</strong>
+                  <div className="cb-vitals-btn-title">
+                    <span className="cb-vitals-pill">OPTIONAL</span>
+                    <span className="cb-vitals-title-text">Initial Baseline Vitals & Clinical Profile</span>
                   </div>
-                  <span className="accordion-arrow">{showOptionalVitals ? "▲ Hide" : "▼ Add Vitals"}</span>
+                  <span className="cb-vitals-chevron">
+                    {showOptionalVitals ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  </span>
                 </button>
 
                 {showOptionalVitals && (
-                  <div className="vitals-expanded-grid">
-                    <p className="vitals-help-text">
-                      Enter your initial physiological baseline for clinical health monitoring and telemetry analysis:
+                  <div className="cb-vitals-content">
+                    <p className="cb-vitals-subtitle">
+                      Enter your initial physiological baseline for personalized clinical monitoring and telemetry analysis:
                     </p>
 
-                    <div className="vitals-inputs-row">
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-age">Age (Years)</label>
+                    <div className="cb-vitals-grid">
+                      {/* Age */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-age">Age (Years)</label>
                         <input
-                          id="reg-age"
+                          ref={fieldRefs.age}
+                          id="reg-vitals-age"
                           type="number"
-                          min="1"
+                          min="0"
                           max="120"
                           placeholder="e.g. 28"
                           value={formData.age}
                           onChange={(e) => updateField("age", e.target.value)}
+                          className={fieldErrors.age ? "has-error" : ""}
                         />
+                        {fieldErrors.age && <span className="cb-error-text">{fieldErrors.age}</span>}
                       </div>
 
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-gender">Gender</label>
+                      {/* Gender */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-gender">Gender</label>
                         <select
-                          id="reg-gender"
+                          id="reg-vitals-gender"
                           value={formData.gender}
                           onChange={(e) => updateField("gender", e.target.value)}
                         >
@@ -507,10 +718,11 @@ const Register = () => {
                         </select>
                       </div>
 
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-blood">Blood Group</label>
+                      {/* Blood Group */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-blood">Blood Group</label>
                         <select
-                          id="reg-blood"
+                          id="reg-vitals-blood"
                           value={formData.blood_group}
                           onChange={(e) => updateField("blood_group", e.target.value)}
                         >
@@ -524,163 +736,215 @@ const Register = () => {
                           <option value="O-">O-</option>
                         </select>
                       </div>
-                    </div>
 
-                    <div className="vitals-inputs-row">
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-hr">Heart Rate (BPM)</label>
+                      {/* Heart Rate */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-hr">Heart Rate (BPM)</label>
                         <input
-                          id="reg-hr"
+                          ref={fieldRefs.heart_rate}
+                          id="reg-vitals-hr"
                           type="number"
+                          min="30"
+                          max="220"
                           placeholder="e.g. 72"
                           value={formData.heart_rate}
                           onChange={(e) => updateField("heart_rate", e.target.value)}
+                          className={fieldErrors.heart_rate ? "has-error" : ""}
                         />
+                        {fieldErrors.heart_rate && (
+                          <span className="cb-error-text">{fieldErrors.heart_rate}</span>
+                        )}
                       </div>
 
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-sys">BP Systolic (mmHg)</label>
+                      {/* Systolic BP */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-sys">BP Systolic (mmHg)</label>
                         <input
-                          id="reg-sys"
+                          ref={fieldRefs.systolic_bp}
+                          id="reg-vitals-sys"
                           type="number"
+                          min="70"
+                          max="200"
                           placeholder="e.g. 120"
                           value={formData.systolic_bp}
                           onChange={(e) => updateField("systolic_bp", e.target.value)}
+                          className={fieldErrors.systolic_bp ? "has-error" : ""}
                         />
+                        {fieldErrors.systolic_bp && (
+                          <span className="cb-error-text">{fieldErrors.systolic_bp}</span>
+                        )}
                       </div>
 
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-dia">BP Diastolic (mmHg)</label>
+                      {/* Diastolic BP */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-dia">BP Diastolic (mmHg)</label>
                         <input
-                          id="reg-dia"
+                          ref={fieldRefs.diastolic_bp}
+                          id="reg-vitals-dia"
                           type="number"
+                          min="40"
+                          max="130"
                           placeholder="e.g. 80"
                           value={formData.diastolic_bp}
                           onChange={(e) => updateField("diastolic_bp", e.target.value)}
+                          className={fieldErrors.diastolic_bp ? "has-error" : ""}
                         />
+                        {fieldErrors.diastolic_bp && (
+                          <span className="cb-error-text">{fieldErrors.diastolic_bp}</span>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="vitals-inputs-row">
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-spo2">SpO2 Oxygen (%)</label>
+                      {/* SpO2 */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-spo2">SpO2 Oxygen (%)</label>
                         <input
-                          id="reg-spo2"
+                          ref={fieldRefs.spo2}
+                          id="reg-vitals-spo2"
                           type="number"
+                          min="70"
+                          max="100"
                           step="0.1"
                           placeholder="e.g. 98"
                           value={formData.spo2}
                           onChange={(e) => updateField("spo2", e.target.value)}
+                          className={fieldErrors.spo2 ? "has-error" : ""}
                         />
+                        {fieldErrors.spo2 && <span className="cb-error-text">{fieldErrors.spo2}</span>}
                       </div>
 
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-temp">Temperature (°C)</label>
+                      {/* Temperature in Celsius */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-temp">Temperature (°C)</label>
                         <input
-                          id="reg-temp"
+                          ref={fieldRefs.temperature}
+                          id="reg-vitals-temp"
                           type="number"
+                          min="34"
+                          max="42"
                           step="0.1"
                           placeholder="e.g. 36.8"
                           value={formData.temperature}
                           onChange={(e) => updateField("temperature", e.target.value)}
+                          className={fieldErrors.temperature ? "has-error" : ""}
                         />
+                        {fieldErrors.temperature && (
+                          <span className="cb-error-text">{fieldErrors.temperature}</span>
+                        )}
                       </div>
 
-                      <div className="vitals-input-field">
-                        <label htmlFor="reg-weight">Weight (kg)</label>
+                      {/* Weight in kg */}
+                      <div className="cb-vitals-field">
+                        <label htmlFor="reg-vitals-weight">Weight (kg)</label>
                         <input
-                          id="reg-weight"
+                          ref={fieldRefs.weight}
+                          id="reg-vitals-weight"
                           type="number"
+                          min="2"
+                          max="300"
                           step="0.1"
                           placeholder="e.g. 68"
                           value={formData.weight}
                           onChange={(e) => updateField("weight", e.target.value)}
+                          className={fieldErrors.weight ? "has-error" : ""}
+                        />
+                        {fieldErrors.weight && (
+                          <span className="cb-error-text">{fieldErrors.weight}</span>
+                        )}
+                      </div>
+
+                      {/* Allergies (Full row) */}
+                      <div className="cb-vitals-field cb-col-full">
+                        <label htmlFor="reg-vitals-allergies">Known Allergies (Comma-separated)</label>
+                        <input
+                          id="reg-vitals-allergies"
+                          type="text"
+                          placeholder="e.g. Penicillin, Peanuts, Pollen"
+                          value={formData.allergies}
+                          onChange={(e) => updateField("allergies", e.target.value)}
                         />
                       </div>
-                    </div>
-
-                    <div className="vitals-input-field full">
-                      <label htmlFor="reg-allergies">Known Allergies (Optional, comma-separated)</label>
-                      <input
-                        id="reg-allergies"
-                        type="text"
-                        placeholder="e.g. Penicillin, Peanuts, Sulfa"
-                        value={formData.allergies}
-                        onChange={(e) => updateField("allergies", e.target.value)}
-                      />
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* DPDP Act 2023 Consent Checkbox */}
-              <div className="flex items-start gap-3 my-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+              {/* DPDP Act Consent Checkbox */}
+              <div className={`cb-consent-box ${fieldErrors.agreeTerms ? "has-error" : ""}`}>
                 <input
-                  id="agree-dpdp"
+                  ref={fieldRefs.agreeTerms}
+                  id="cb-agree-dpdp"
                   type="checkbox"
                   checked={agreeTerms}
-                  onChange={(e) => setAgreeTerms(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-800 text-cyan-500 focus:ring-cyan-400 cursor-pointer"
-                  required
+                  onChange={(e) => {
+                    setAgreeTerms(e.target.checked);
+                    if (fieldErrors.agreeTerms) {
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.agreeTerms;
+                        return next;
+                      });
+                    }
+                  }}
+                  className="cb-checkbox"
                 />
-                <label htmlFor="agree-dpdp" className="text-xs text-slate-300 leading-relaxed cursor-pointer">
-                  I consent to the collection and processing of my health profile under India's <strong>DPDP Act 2023</strong> and agree to the{" "}
-                  <Link to="/terms" target="_blank" className="text-cyan-400 hover:underline">
+                <label htmlFor="cb-agree-dpdp" className="cb-consent-label">
+                  I consent to the collection and processing of my health profile under India's{" "}
+                  <strong>Digital Personal Data Protection (DPDP) Act 2023</strong> and agree to the{" "}
+                  <Link to="/terms" target="_blank" className="cb-link-accent">
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link to="/privacy" target="_blank" className="text-cyan-400 hover:underline">
+                  <Link to="/privacy" target="_blank" className="cb-link-accent">
                     Privacy Policy
                   </Link>
                   .
                 </label>
               </div>
+              {fieldErrors.agreeTerms && (
+                <span className="cb-error-text cb-consent-error" role="alert">
+                  {fieldErrors.agreeTerms}
+                </span>
+              )}
 
-              {/* Security note */}
-              <div className="security-note">
-                <div className="security-icon">
-                  <Icon type="lock" />
-                </div>
-                <div>
-                  <strong>Your clinical records are encrypted</strong>
-                  <span>Your medical profile and vitals are securely stored in CareBridge AI.</span>
-                </div>
-              </div>
-
-              {/* Button */}
-              <button type="submit" className="register-button" disabled={loading || !agreeTerms}>
+              {/* Submit Button (type="submit", 52px, gradient) */}
+              <button
+                type="submit"
+                className="cb-submit-btn"
+                disabled={loading}
+              >
                 {loading ? (
                   <>
-                    <span className="button-spinner"></span>
-                    Creating account...
+                    <Loader2 size={19} className="cb-spinner" />
+                    <span>Creating account...</span>
                   </>
                 ) : (
                   <>
-                    Create account
-                    <span className="button-arrow">→</span>
+                    <span>Create account</span>
+                    <ArrowRight size={18} />
                   </>
                 )}
               </button>
             </form>
 
-            {/* Login */}
-            <div className="login-divider">
-              <span>Already have an account?</span>
-              <Link to="/login">Sign in</Link>
+            {/* Login Link */}
+            <div className="cb-form-footer">
+              <span>Already have an account?</span>{" "}
+              <Link to="/login" className="cb-link-signin">
+                Sign in
+              </Link>
             </div>
 
-            <div className="mt-4 text-center">
-              <span className="text-xs text-slate-500">
-                Need help? Email{" "}
-                <a href="mailto:phoolkumari2603@gmail.com" className="text-slate-400 hover:text-cyan-400">
-                  phoolkumari2603@gmail.com
-                </a>
-              </span>
+            {/* Contact Support */}
+            <div className="cb-support-note">
+              <span>Need help? Contact support: </span>
+              <a href="mailto:phoolkumari2603@gmail.com" className="cb-link-accent">
+                phoolkumari2603@gmail.com
+              </a>
             </div>
           </div>
-        </section>
-      </section>
-    </main>
+        </main>
+      </div>
+    </div>
   );
 };
 
