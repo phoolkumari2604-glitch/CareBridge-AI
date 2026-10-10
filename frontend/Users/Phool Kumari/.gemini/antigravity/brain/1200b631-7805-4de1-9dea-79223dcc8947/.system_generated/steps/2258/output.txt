@@ -1,7 +1,0 @@
-
-The command exited with code 0.
-Output:
-[MongoDB] Successfully connected to database 'carebridge_ai'
-Updated demo patient password and verified status
-SUCCESS: patient@carebridge.ai / CareBridge#Pt2026!Secure is ready
-

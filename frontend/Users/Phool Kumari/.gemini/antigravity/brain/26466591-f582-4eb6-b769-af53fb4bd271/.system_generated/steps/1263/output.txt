@@ -1,6 +1,0 @@
-
-The command exited with code 0.
-Output:
-Distinct names count: 53
-['AIIMS Guntur', 'Appointment Test Hospital 154bd1', 'Appointment Test Hospital 34611a', 'Appointment Test Hospital 36b20a', 'Appointment Test Hospital 3e1e4b', 'Appointment Test Hospital 5055f8', 'Appointment Test Hospital 76476f', 'Appointment Test Hospital b03392', 'Appointment Test Hospital c32a10', 'Approval Test Hospital 4bd7e2', 'Approval Test Hospital 64d45a', 'Approval Test Hospital 685387', 'Approval Test Hospital 75a440', 'Approval Test Hospital a5e9b9', 'Approval Test Hospital a706fc', 'Approval Test Hospital e17cf8', 'Approval Test Hospital e490d0', 'Approval Test Hospital ec5bc1', 'CareBridge Test Hospital', 'Doctor Test Hospital 1e3c37', 'Doctor Test Hospital 37dfd0', 'Doctor Test Hospital 613efd', 'Doctor Test Hospital 9a3f45', 'Doctor Test Hospital a942e3', 'Doctor Test Hospital b7de8e', 'Doctor Test Hospital d1268f', 'Doctor Test Hospital e2fce4', 'OPD Test Hospital 11e0a3', 'OPD Test Hospital 22cee5', 'OPD Test Hospital 58d7ed']
-

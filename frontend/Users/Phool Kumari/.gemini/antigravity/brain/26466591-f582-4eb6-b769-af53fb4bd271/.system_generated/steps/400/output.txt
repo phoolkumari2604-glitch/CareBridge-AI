@@ -1,8 +1,0 @@
-Task: 26466591-f582-4eb6-b769-af53fb4bd271/task-366
-Status: DONE
-Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\26466591-f582-4eb6-b769-af53fb4bd271\.system_generated\tasks\task-366.log
-Log output:
-<truncated 351 lines>
-0.2.4 pyogrio-0.13.0 pyparsing-3.3.3 pyproj-3.8.0 pystac-1.15.2 pystac-client-0.9.0 pystac-core-1.15.2 pystac-ext-classification-2.0.1 pystac-ext-datacube-2.2.1 pystac-ext-eo-1.1.1 pystac-ext-file-2.1.1 pystac-ext-grid-1.1.1 pystac-ext-item-assets-1.0.1 pystac-ext-label-1.0.2 pystac-ext-mgrs-1.0.1 pystac-ext-mlm-1.4.1 pystac-ext-pointcloud-1.0.1 pystac-ext-projection-2.0.1 pystac-ext-raster-1.1.1 pystac-ext-render-2.0.0 pystac-ext-sar-1.0.1 pystac-ext-sat-1.0.1 pystac-ext-scientific-1.0.1 pystac-ext-storage-2.0.1 pystac-ext-table-1.2.1 pystac-ext-timestamps-1.1.1 pystac-ext-version-1.2.1 pystac-ext-view-1.0.1 pystac-ext-xarray-assets-1.0.1 python-box-7.4.1 python-dateutil-2.9.0.post0 referencing-0.37.0 requests-2.34.2 rpds-py-2026.9.1 scooby-0.12.0 shapely-2.2.0 six-1.17.0 soupsieve-2.10 stack_data-0.6.3 tqdm-4.70.1 traitlets-5.16.1 traittypes-0.2.3 tzdata-2026.5 urllib3-2.8.0 wcwidth-0.9.2 werkzeug-3.1.9 whitebox-2.3.6 whiteboxgui-2.3.0 widgetsnbextension-4.0.16 xyzservices-2026.9.1
-
-Last progress: 7s ago

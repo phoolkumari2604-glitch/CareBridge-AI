@@ -1,8 +1,0 @@
-
-The command exited with code 1.
-Output:
-Traceback (most recent call last):
-  File "d:\CareBridge AI\backend\scripts\verify_auth.py", line 2, in <module>
-    from app import create_app
-ModuleNotFoundError: No module named 'app'
-

@@ -1,9 +1,0 @@
-
-The command exited with code 1.
-Output:
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-    import requests; r = requests.post('http://localhost:8000/auth/login', json={'email': 'patient@carebridge.ai', 'password': 'Patient@123'}); print('Status:', r.status_code); print('Response:', r.json())
-    ^^^^^^^^^^^^^^^
-ModuleNotFoundError: No module named 'requests'
-

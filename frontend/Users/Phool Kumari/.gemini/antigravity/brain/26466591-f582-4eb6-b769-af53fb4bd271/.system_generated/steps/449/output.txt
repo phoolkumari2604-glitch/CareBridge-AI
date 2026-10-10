@@ -1,9 +1,0 @@
-Task: 26466591-f582-4eb6-b769-af53fb4bd271/task-447
-Status: DONE
-Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\26466591-f582-4eb6-b769-af53fb4bd271\.system_generated\tasks\task-447.log
-Log output:
-MongoDB indexes created successfully.
-[Success] MongoDB connected successfully.
-Flask App Created Successfully: <Flask 'app'>
-
-Last progress: 3s ago

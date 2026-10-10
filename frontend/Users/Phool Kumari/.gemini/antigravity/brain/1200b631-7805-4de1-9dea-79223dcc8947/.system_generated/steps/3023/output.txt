@@ -1,6 +1,0 @@
-
-The command exited with code 0.
-Output:
-[MongoDB] Successfully connected to database 'carebridge_ai'
-Pats status: 404 Count: 0
-

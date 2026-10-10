@@ -1,8 +1,0 @@
-Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-1432
-Status: RUNNING
-Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-1432.log
-Log output:
-<truncated 2 lines>
-uccessfully', 'created_at': datetime.datetime(2026, 9, 27, 6, 15, 58, 961000)}, {'_id': ObjectId('6ab8b514605aab666835b472'), 'user_id': '6ab8b513605aab666835b471', 'user_role': 'PATIENT', 'action': 'LOGIN_SUCCESS', 'resource': 'AUTH', 'resource_id': '6ab8b513605aab666835b471', 'details': 'User logged in successfully', 'created_at': datetime.datetime(2026, 9, 27, 6, 17, 56, 75000)}, {'_id': ObjectId('6ab8b515605aab666835b475'), 'user_id': '6ab8b514605aab666835b474', 'user_role': 'PATIENT', 'action': 'LOGIN_SUCCESS', 'resource': 'AUTH', 'resource_id': '6ab8b514605aab666835b474', 'details': 'User logged in successfully', 'created_at': datetime.datetime(2026, 9, 27, 6, 17, 57, 36000)}, {'_id': ObjectId('6ab8b515605aab666835b478'), 'user_id': '6ab8b515605aab666835b477', 'user_role': 'PATIENT', 'action': 'LOGIN_SUCCESS', 'resource': 'AUTH', 'resource_id': '6ab8b515605aab666835b477', 'details': 'User logged in successfully', 'created_at': datetime.datetime(2026, 9, 27, 6, 17, 57, 976000)}]
-
-Last progress: 0s ago

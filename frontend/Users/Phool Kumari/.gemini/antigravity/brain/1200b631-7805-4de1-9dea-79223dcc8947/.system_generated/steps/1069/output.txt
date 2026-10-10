@@ -1,7 +1,0 @@
-
-The command exited with code 0.
-Output:
-patient@carebridge.ai 200
-doctor@carebridge.ai 200
-staff@carebridge.ai 200
-

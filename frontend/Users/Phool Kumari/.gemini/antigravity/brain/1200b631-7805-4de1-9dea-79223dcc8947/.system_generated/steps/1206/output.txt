@@ -1,8 +1,0 @@
-
-The command exited with code 1.
-Output:
-  File "<string>", line 21
-    print(f'[2] GET /api/patients: Total={get_data[" total\]},
-                                                   ^
-SyntaxError: unterminated string literal (detected at line 21)
-

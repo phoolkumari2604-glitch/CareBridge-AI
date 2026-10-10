@@ -1,5 +1,0 @@
-Using prompt: 3D medical render of a full human body silhouette with glowing orange and amber neural network, radiant vascular pathways, bio-luminescent nerve fibers on a dark sleek medical background, frontal anatomical full-body view, holographic sci-fi medical visualization, high detail.
-
-Generated image is saved at C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\glowing_body_nerves_1791567543196.jpg.
-
- Do not output the path of this image to show to the user since the user can already see it. However, you can embed this image in artifacts for the USER's review.

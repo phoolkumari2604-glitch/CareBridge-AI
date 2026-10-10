@@ -1,7 +1,0 @@
-
-The command exited with code 0.
-Output:
-__pycache__
-user.py
-__init__.py
-

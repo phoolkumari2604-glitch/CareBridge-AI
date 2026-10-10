@@ -1,9 +1,0 @@
-
-The command exited with code 1.
-Output:
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-    import os; from app import create_app; app = create_app(); client = app.test_client(); p_res = client.post('/api/auth/login', json={'email': 'patient@carebridge.ai', 'password': 'CareBridge#Pt2026!Secure'}); print('Patient Login:', p_res.status_code); d_res = client.post('/api/auth/login', json={'email': 'doctor@carebridge.ai', 'password': 'CareBridge#Doc2026!Secure'}); print('Doctor Login:', d_res.status_code); s_res = client.post('/api/auth/login', json={'email': 'staff@carebridge.ai', 'password': 'CareBridge#Staff2026!Admin'}); print('Staff Login:', s_res.status_code); assert p_res.status_code == 200 and d_res.status_code == 200 and s_res.status_code == 200; print('>>> ALL DEMO ACCOUNTS LOGGED IN SUCCESSFULLY <<<')
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^
-ModuleNotFoundError: No module named 'app'
-

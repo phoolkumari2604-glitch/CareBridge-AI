@@ -1,7 +1,0 @@
-
-The command exited with code 0.
-Output:
-frontend@0.0.0 D:\CareBridge AI\frontend
-`-- three@0.186.1
-
-

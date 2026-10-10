@@ -1,9 +1,0 @@
-
-The command exited with code 0.
-Output:
-[1] GET Patients: Total: 62 Returned: 10 Stats: {'active': 62, 'attention': 1, 'critical': 0, 'stable': 61, 'telemetry': 62, 'total': 62}
-[2] Search Phone 9876543101: 1 Found: Ramesh Kumar
-[3] Record Vitals Status 201: Vital signs recorded successfully Vital ID: 6ac9087db054b9c8a150d5f5
-[4] Updated Patient Telemetry: Kavita Verma Level: stable Vital HR: 78
---- ALL PATIENT MONITORING TESTS PASSED! ---
-

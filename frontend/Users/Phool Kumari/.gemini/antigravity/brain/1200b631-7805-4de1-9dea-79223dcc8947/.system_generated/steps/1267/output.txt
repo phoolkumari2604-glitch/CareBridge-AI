@@ -1,8 +1,0 @@
-
-The command exited with code 0.
-Output:
- M backend/app/routes/patient.py
- M backend/app/routes/vitals.py
- M frontend/src/pages/doctor/PatientMonitoring.css
- M frontend/src/pages/doctor/PatientMonitoring.jsx
-

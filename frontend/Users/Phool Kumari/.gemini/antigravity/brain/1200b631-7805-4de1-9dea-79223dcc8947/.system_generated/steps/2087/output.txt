@@ -1,6 +1,0 @@
-
-The command exited with code 0.
-Output:
-Haversine test: 15.8
-Format test: 4.5 km away
-

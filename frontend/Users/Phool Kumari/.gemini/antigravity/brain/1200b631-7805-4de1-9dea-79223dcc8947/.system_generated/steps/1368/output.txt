@@ -1,8 +1,0 @@
-Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-1365
-Status: DONE
-Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-1365.log
-Log output:
-<truncated 2 lines>
-, 9, 27, 12, 58, 51, 904000)}, {'_id': ObjectId('6ab914394716ddc0047f084e'), 'patient_id': ObjectId('6ab914394716ddc0047f084d'), 'hospital_id': ObjectId('6ab914394716ddc0047f0849'), 'doctor_id': ObjectId('6ab914394716ddc0047f084a'), 'appointment_date': '2026-10-05', 'appointment_time': '10:00 AM', 'reason': 'General consultation', 'status': 'PENDING', 'approval_status': 'PENDING', 'created_at': datetime.datetime(2026, 9, 27, 13, 3, 53, 998000), 'updated_at': datetime.datetime(2026, 9, 27, 13, 3, 53, 998000)}, {'_id': ObjectId('6ab91d63fea346f08e83f526'), 'patient_id': ObjectId('6ab91d62fea346f08e83f525'), 'hospital_id': ObjectId('6ab91d62fea346f08e83f521'), 'doctor_id': ObjectId('6ab91d62fea346f08e83f522'), 'appointment_date': '2026-10-01', 'appointment_time': '10:00 AM', 'reason': 'General consultation', 'status': 'PENDING', 'approval_status': 'PENDING', 'created_at': datetime.datetime(2026, 9, 27, 13, 42, 59, 91000), 'updated_at': datetime.datetime(2026, 9, 27, 13, 42, 59, 91000)}]
-
-Last progress: 1s ago

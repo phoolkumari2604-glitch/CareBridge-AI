@@ -1,8 +1,0 @@
-Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-1413
-Status: DONE
-Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-1413.log
-Log output:
-<truncated 2 lines>
-87f47ba71bc84'), 'name': 'SmartFlow Test Hospital 73e515', 'city': 'Guntur', 'phone': '9000000120'}, {'_id': ObjectId('6ab923b679a853dc9e624650'), 'name': 'SmartFlow Test Hospital 0723a0', 'city': 'Guntur', 'phone': '9000000120'}, {'_id': ObjectId('6ab92404a08c3a423ff3f3da'), 'name': 'SmartFlow Test Hospital bb98d7', 'city': 'Guntur', 'phone': '9000000120'}, {'_id': ObjectId('6ab92453ddb06915acd35abb'), 'name': 'Appointment Test Hospital 34611a', 'city': 'Guntur', 'phone': '9000000030'}, {'_id': ObjectId('6ab92455ddb06915acd35ac4'), 'name': 'Approval Test Hospital 75a440', 'city': 'Guntur', 'phone': '9000000030'}, {'_id': ObjectId('6ab9245addb06915acd35ad8'), 'name': 'Doctor Test Hospital b7de8e', 'city': 'Guntur', 'phone': '9000000010'}, {'_id': ObjectId('6ab9245eddb06915acd35ae4'), 'name': 'OPD Test Hospital ab9d19', 'city': 'Guntur', 'phone': '9000000030'}, {'_id': ObjectId('6ab92462ddb06915acd35af6'), 'name': 'Queue Test Hospital 8b2a0c', 'city': 'Guntur', 'phone': '9000000030'}]
-
-Last progress: 4s ago

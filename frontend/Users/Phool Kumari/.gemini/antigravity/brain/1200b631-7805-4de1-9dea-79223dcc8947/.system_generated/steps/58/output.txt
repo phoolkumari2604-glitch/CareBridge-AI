@@ -1,2 +1,0 @@
-Successfully killed 2 subagent(s) and their descendants.
-Killed roles: Backend API researcher, Frontend code researcher

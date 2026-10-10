@@ -1,7 +1,0 @@
-
-The command exited with code 0.
-Output:
-MongoDB indexes created successfully.
-[Success] MongoDB connected successfully.
-Flask App Created Successfully: <Flask 'app'>
-

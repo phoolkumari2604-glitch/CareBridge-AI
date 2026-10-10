@@ -1,6 +1,0 @@
-
-The command exited with code 0.
-Output:
-Backend Health: 200 {'database': 'connected', 'framework': 'Flask', 'status': 'healthy'}
-Frontend Status: 200
-
