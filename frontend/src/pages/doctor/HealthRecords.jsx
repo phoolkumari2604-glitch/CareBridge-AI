@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Search,
@@ -14,6 +14,13 @@ import {
   RefreshCw,
   X,
   CheckCircle2,
+  Trash2,
+  Printer,
+  Edit3,
+  Download,
+  User,
+  Copy,
+  Check,
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import { useAuth } from "../../context/AuthContext";
@@ -30,8 +37,9 @@ function HealthRecords() {
   const [toastMessage, setToastMessage] = useState("");
 
   const [patients, setPatients] = useState([]);
-  const [selectedPatientId, setSelectedPatientId] = useState(preselectedPatientId);
+  const [selectedPatientId, setSelectedPatientId] = useState(preselectedPatientId || "all");
   const [records, setRecords] = useState([]);
+  const [stats, setStats] = useState({ total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 });
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,7 +52,7 @@ function HealthRecords() {
 
   // New Record Form State
   const [formData, setFormData] = useState({
-    patient_id: preselectedPatientId || "",
+    patient_id: "",
     record_type: "Consultation",
     title: "",
     description: "",
@@ -59,21 +67,25 @@ function HealthRecords() {
     try {
       setError(null);
       const patientsList = await doctorService.getPatients();
-      const validPatients = Array.isArray(patientsList) ? patientsList : [];
+      const validPatients = (Array.isArray(patientsList) ? patientsList : []).filter(
+        (p) => (p.name || "").toLowerCase() !== "string"
+      );
       setPatients(validPatients);
 
-      // If a patient is selected, fetch their records. Otherwise fetch for first patient or all
-      let targetPatientId = selectedPatientId;
-      if (!targetPatientId && validPatients.length > 0) {
-        targetPatientId = validPatients[0]._id || validPatients[0].id;
-        setSelectedPatientId(targetPatientId);
-      }
+      const params = selectedPatientId && selectedPatientId !== "all" ? { patient_id: selectedPatientId } : {};
+      const summaryData = await doctorService.getHealthRecordsSummary(params);
+      
+      const recs = Array.isArray(summaryData?.records) ? summaryData.records : (Array.isArray(summaryData) ? summaryData : []);
+      setRecords(recs);
 
-      if (targetPatientId) {
-        const recordsData = await doctorService.getHealthRecords(targetPatientId);
-        setRecords(Array.isArray(recordsData) ? recordsData : []);
+      if (summaryData?.stats) {
+        setStats(summaryData.stats);
       } else {
-        setRecords([]);
+        const total = recs.length;
+        const consults = recs.filter((r) => (r.record_type || "").toUpperCase().includes("CONSULT")).length;
+        const prescripts = recs.filter((r) => r.medications && r.medications.length > 0).length;
+        const diags = recs.filter((r) => r.diagnosis && String(r.diagnosis).trim()).length;
+        setStats({ total, consultations: consults, prescriptions: prescripts, diagnoses: diags });
       }
     } catch (err) {
       console.error("Error loading health records:", err);
@@ -88,23 +100,25 @@ function HealthRecords() {
     loadPatientsAndRecords();
   }, [loadPatientsAndRecords]);
 
+  // Silent 30-second auto-refresh
+  useEffect(() => {
+    const timer = setInterval(() => {
+      loadPatientsAndRecords();
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [loadPatientsAndRecords]);
+
   const handlePatientSelectChange = async (patientId) => {
     setSelectedPatientId(patientId);
-    setLoading(true);
-    try {
-      const recordsData = await doctorService.getHealthRecords(patientId);
-      setRecords(Array.isArray(recordsData) ? recordsData : []);
-    } catch (err) {
-      console.warn("Failed to fetch records for selected patient:", err);
-      setRecords([]);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleRefresh = () => {
     setIsRefreshing(true);
     loadPatientsAndRecords();
+  };
+
+  const handlePrintRecord = (record) => {
+    window.print();
   };
 
   const handleCreateRecord = async (e) => {
@@ -273,28 +287,37 @@ function HealthRecords() {
             onChange={(e) => handlePatientSelectChange(e.target.value)}
             className="patient-dropdown"
           >
-            {patients.length === 0 ? (
-              <option value="">No patients available</option>
-            ) : (
-              patients.map((p) => (
+            <option value="all">-- All Patient Charts ({patients.length} active patients) --</option>
+            {patients.map((p) => {
+              const pCode = p.patient_code || String(p.patientId || "").replace("PT-", "") || String(p._id || p.id).slice(-6);
+              return (
                 <option key={p._id || p.id} value={p._id || p.id}>
-                  {p.name || "Patient"} (ID: {(p._id || p.id).slice(-6)})
+                  {p.name || "Patient"} (ID: {pCode})
                 </option>
-              ))
-            )}
+              );
+            })}
           </select>
         </div>
 
-        {activePatientObj && (
+        {activePatientObj ? (
           <div className="selected-patient-meta">
             <span>
-              <strong>Age/Gender:</strong> {activePatientObj.age || "N/A"} • {activePatientObj.gender || "N/A"}
+              <strong>Patient ID:</strong> {activePatientObj.patient_code || String(activePatientObj.patientId || "").replace("PT-", "") || String(activePatientObj._id || activePatientObj.id).slice(-6)}
+            </span>
+            <span>
+              <strong>Age/Gender:</strong> {activePatientObj.age ? `${activePatientObj.age} yrs` : "N/A"} • {activePatientObj.gender || "N/A"}
             </span>
             <span>
               <strong>Blood Group:</strong> {activePatientObj.blood_group || "N/A"}
             </span>
             <span>
               <strong>Contact:</strong> {activePatientObj.phone || activePatientObj.email || "N/A"}
+            </span>
+          </div>
+        ) : (
+          <div className="selected-patient-meta">
+            <span>
+              <strong>Registry View:</strong> Global Clinical Repository ({records.length} records across {patients.length} active patients)
             </span>
           </div>
         )}
@@ -308,7 +331,7 @@ function HealthRecords() {
           </div>
           <div>
             <span>Patient Records</span>
-            <strong>{records.length}</strong>
+            <strong>{stats.total || records.length}</strong>
             <small>Total charts logged</small>
           </div>
         </div>
@@ -319,9 +342,7 @@ function HealthRecords() {
           </div>
           <div>
             <span>Consultations</span>
-            <strong>
-              {records.filter((r) => (r.record_type || "").toLowerCase().includes("consult")).length}
-            </strong>
+            <strong>{stats.consultations}</strong>
             <small>Clinical sessions</small>
           </div>
         </div>
@@ -332,9 +353,7 @@ function HealthRecords() {
           </div>
           <div>
             <span>Prescriptions</span>
-            <strong>
-              {records.filter((r) => r.medications && r.medications.length > 0).length}
-            </strong>
+            <strong>{stats.prescriptions}</strong>
             <small>Active regimens</small>
           </div>
         </div>
@@ -345,9 +364,7 @@ function HealthRecords() {
           </div>
           <div>
             <span>Diagnoses</span>
-            <strong>
-              {records.filter((r) => r.diagnosis && r.diagnosis.trim()).length}
-            </strong>
+            <strong>{stats.diagnoses}</strong>
             <small>Documented findings</small>
           </div>
         </div>
@@ -359,7 +376,7 @@ function HealthRecords() {
           <Search size={18} />
           <input
             type="text"
-            placeholder="Search diagnosis, clinical title, doctor..."
+            placeholder="Search diagnosis, clinical title, patient name, 6-digit ID, doctor..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -412,7 +429,7 @@ function HealthRecords() {
             <p>
               {activePatientObj
                 ? `Showing medical records for ${activePatientObj.name}`
-                : "Select a patient to review medical chart"}
+                : "Showing all medical records across patient registry"}
             </p>
           </div>
           <span className="record-count">{filteredRecords.length} records</span>
@@ -428,7 +445,7 @@ function HealthRecords() {
             <table className="records-table">
               <thead>
                 <tr>
-                  <th>Title & Record Type</th>
+                  <th>Patient & Title</th>
                   <th>Date</th>
                   <th>Diagnosis</th>
                   <th>Medications / Rx</th>
@@ -442,7 +459,7 @@ function HealthRecords() {
                   <tr>
                     <td colSpan="6" className="empty-records-cell">
                       <FileText size={38} />
-                      <h3>No medical records found for this patient</h3>
+                      <h3>No medical records found</h3>
                       <p>
                         Click "Create Health Record" to document a consultation note, diagnosis, or prescription.
                       </p>
@@ -453,15 +470,24 @@ function HealthRecords() {
                     const recordDate =
                       record.record_date ||
                       (record.created_at ? record.created_at.split("T")[0] : "Recent");
+                    const patName = record.patient_name || (patients.find(p => (p._id || p.id) === (record.patient_id?._id || record.patient_id))?.name) || "Patient";
+                    const pCode = record.patient_code || (patients.find(p => (p._id || p.id) === (record.patient_id?._id || record.patient_id))?.patient_code) || "";
 
                     return (
                       <tr key={record._id || record.id || index}>
                         <td>
                           <div className="record-title-cell">
                             <strong>{record.title || record.diagnosis || "Medical Note"}</strong>
-                            <span className="record-type-badge">
-                              {record.record_type || "General"}
-                            </span>
+                            <div className="record-meta-pill-row">
+                              <span className="record-type-badge">
+                                {record.record_type || "General"}
+                              </span>
+                              {patName && (
+                                <span className="record-patient-pill">
+                                  {patName} {pCode && `(ID: ${pCode})`}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
 
@@ -538,6 +564,7 @@ function HealthRecords() {
                 <span className="record-meta-sub">
                   Type: {viewingRecord.record_type || "General"} • Date:{" "}
                   {viewingRecord.record_date || viewingRecord.created_at || "Recent"}
+                  {viewingRecord.patient_name && ` • Patient: ${viewingRecord.patient_name} (ID: ${viewingRecord.patient_code || ""})`}
                 </span>
               </div>
               <button className="modal-close" onClick={() => setViewingRecord(null)}>
@@ -555,7 +582,7 @@ function HealthRecords() {
 
               {viewingRecord.description && (
                 <div className="detail-section">
-                  <label>Clinical Notes & Observations</label>
+                  <label>Clinical Notes &amp; Observations</label>
                   <div className="detail-value text-body">
                     {viewingRecord.description}
                   </div>
@@ -601,6 +628,13 @@ function HealthRecords() {
             </div>
 
             <div className="modal-footer">
+              <button
+                className="btn-modal-action print-btn"
+                onClick={() => handlePrintRecord(viewingRecord)}
+              >
+                <Printer size={15} /> Print Chart
+              </button>
+
               <button
                 className="btn-modal-action delete-btn"
                 onClick={() => handleDeleteRecord(viewingRecord._id || viewingRecord.id)}

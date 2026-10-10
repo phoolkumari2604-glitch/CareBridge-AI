@@ -136,6 +136,15 @@ def validate_patient_payload(data: dict, is_create: bool = True):
 
     return errors
 
+def generate_unique_patient_code(db) -> str:
+    """Generate a unique 6-digit numeric patient code (100000 - 999999)."""
+    for _ in range(50):
+        code = str(secrets.randbelow(900000) + 100000)
+        if not db.patients.find_one({"patient_code": code}):
+            return code
+    import random
+    return str(random.randint(100000, 999999))
+
 def generate_secure_temp_password() -> str:
     """Generate a high-entropy 12-character temporary password."""
     alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
@@ -176,7 +185,7 @@ def create_patient():
         if existing_phone:
             return jsonify({
                 "error": "Duplicate Record",
-                "detail": f"A patient with phone number {phone} is already registered (ID #{str(existing_phone['_id'])[-6:].upper()})."
+                "detail": f"A patient with phone number {phone} is already registered (ID #{existing_phone.get('patient_code', str(existing_phone['_id'])[-6:])})."
             }), 409
 
     # Check duplicate email in patients
@@ -185,7 +194,7 @@ def create_patient():
         if existing_email:
             return jsonify({
                 "error": "Duplicate Record",
-                "detail": f"A patient with email {email} is already registered (ID #{str(existing_email['_id'])[-6:].upper()})."
+                "detail": f"A patient with email {email} is already registered (ID #{existing_email.get('patient_code', str(existing_email['_id'])[-6:])})."
             }), 409
 
     create_account = bool(data.get("create_account"))
@@ -225,9 +234,14 @@ def create_patient():
     elif current_user.get("role") == "PATIENT":
         created_user_id = str(current_user["_id"])
 
+    # Generate unique 6-digit numeric patient code
+    patient_code = generate_unique_patient_code(db)
+
     # Prepare patient document
     patient_doc = {
         "user_id": created_user_id,
+        "patient_code": patient_code,
+        "patient_id_code": patient_code,
         "name": data["name"],
         "email": email,
         "phone": phone,
@@ -238,25 +252,25 @@ def create_patient():
         "allergies": data.get("allergies", []),
         "medical_history": data.get("medical_history", []),
         "status": data.get("status", "Active"),
+        "is_test": False,
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc)
     }
 
     result = db.patients.insert_one(patient_doc)
     patient_id_str = str(result.inserted_id)
-    patient_code = f"PT-{patient_id_str[-6:].upper()}"
     patient_doc["_id"] = result.inserted_id
-    patient_doc["patient_id_code"] = patient_code
 
     # If account was created, update user with patient_id
     if created_user_id:
         db.users.update_one(
             {"_id": ObjectId(created_user_id)},
-            {"$set": {"patient_id": patient_id_str}}
+            {"$set": {"patient_id": patient_id_str, "patient_code": patient_code}}
         )
 
     serialized_patient = serialize_doc(patient_doc)
     serialized_patient["patientId"] = patient_code
+    serialized_patient["patient_code"] = patient_code
     serialized_patient["createdAt"] = patient_doc["created_at"].isoformat()
 
     return jsonify({
@@ -264,6 +278,7 @@ def create_patient():
         "patient": serialized_patient,
         "patient_id": patient_id_str,
         "patientId": patient_code,
+        "patient_code": patient_code,
         "account_created": create_account,
         "temp_password": temp_password
     }), 201
@@ -349,7 +364,9 @@ def get_patients():
         search_lower = search.lower()
         or_conditions = [
             {"name": {"$regex": re.escape(search), "$options": "i"}},
-            {"email": {"$regex": re.escape(search), "$options": "i"}}
+            {"email": {"$regex": re.escape(search), "$options": "i"}},
+            {"patient_code": {"$regex": re.escape(search), "$options": "i"}},
+            {"patient_id_code": {"$regex": re.escape(search), "$options": "i"}}
         ]
         
         # Phone search: strip non-digits to match flexible input
@@ -363,13 +380,11 @@ def get_patients():
         # Patient ID search
         if search_lower.startswith("pt-"):
             clean_code = search[3:].strip()
-            or_conditions.append({"patient_id_code": {"$regex": re.escape(search), "$options": "i"}})
+            or_conditions.append({"patient_code": {"$regex": re.escape(clean_code), "$options": "i"}})
             if is_valid_object_id(clean_code):
                 or_conditions.append({"_id": ObjectId(clean_code)})
         elif is_valid_object_id(search):
             or_conditions.append({"_id": ObjectId(search)})
-        else:
-            or_conditions.append({"patient_id_code": {"$regex": re.escape(search), "$options": "i"}})
 
         base_filter["$or"] = or_conditions
 
@@ -447,8 +462,10 @@ def get_patients():
         else:
             stable_stat_count += 1
 
+        p_code = p.get("patient_code") or str(p.get("patient_id_code") or "").replace("PT-", "") or pid_str[-6:]
         doc = serialize_doc(p)
-        doc["patientId"] = doc.get("patient_id_code") or f"PT-{pid_str[-6:].upper()}"
+        doc["patient_code"] = p_code
+        doc["patientId"] = p_code
         doc["createdAt"] = doc.get("created_at") or doc.get("createdAt")
         doc["telemetry_level"] = level
         doc["telemetry_label"] = label
@@ -499,12 +516,16 @@ def get_patient(patient_id):
     db = get_database()
     current_user = g.current_user
 
-    if not is_valid_object_id(patient_id):
-        patient = db.patients.find_one({"user_id": patient_id})
-        if not patient:
-            return jsonify({"error": "Not Found", "detail": "Invalid patient ID or patient not found"}), 404
-    else:
+    if is_valid_object_id(patient_id):
         patient = db.patients.find_one({"_id": ObjectId(patient_id)})
+    else:
+        patient = db.patients.find_one({
+            "$or": [
+                {"patient_code": str(patient_id)},
+                {"patient_id_code": str(patient_id)},
+                {"user_id": str(patient_id)}
+            ]
+        })
 
     if not patient:
         return jsonify({"error": "Not Found", "detail": "Patient record not found"}), 404
@@ -518,8 +539,10 @@ def get_patient(patient_id):
         if not owns_record:
             return jsonify({"error": "Forbidden", "detail": "You can only access your own patient record"}), 403
 
+    p_code = patient.get("patient_code") or str(patient.get("patient_id_code") or "").replace("PT-", "") or str(patient["_id"])[-6:]
     doc = serialize_doc(patient)
-    doc["patientId"] = doc.get("patient_id_code") or f"PT-{str(doc['_id'])[-6:].upper()}"
+    doc["patient_code"] = p_code
+    doc["patientId"] = p_code
     return jsonify(doc), 200
 
 @patient_bp.route("/<patient_id>", methods=["PUT"], strict_slashes=False)
@@ -529,7 +552,11 @@ def update_patient(patient_id):
     current_user = g.current_user
     data = request.get_json() or {}
 
-    query = {"_id": ObjectId(patient_id)} if is_valid_object_id(patient_id) else {"user_id": patient_id}
+    if is_valid_object_id(patient_id):
+        query = {"_id": ObjectId(patient_id)}
+    else:
+        query = {"$or": [{"patient_code": str(patient_id)}, {"patient_id_code": str(patient_id)}, {"user_id": str(patient_id)}]}
+    
     existing = db.patients.find_one(query)
 
     if not existing:
@@ -550,12 +577,16 @@ def update_patient(patient_id):
 
     data.pop("_id", None)
     data.pop("user_id", None)
+    data.pop("patient_code", None) # preserve immutable 6-digit code
+    data.pop("patient_id_code", None)
     data["updated_at"] = datetime.now(timezone.utc)
 
-    db.patients.update_one(query, {"$set": data})
-    updated = db.patients.find_one(query)
+    db.patients.update_one({"_id": existing["_id"]}, {"$set": data})
+    updated = db.patients.find_one({"_id": existing["_id"]})
+    p_code = updated.get("patient_code") or str(updated.get("patient_id_code") or "").replace("PT-", "") or str(updated["_id"])[-6:]
     doc = serialize_doc(updated)
-    doc["patientId"] = doc.get("patient_id_code") or f"PT-{str(doc['_id'])[-6:].upper()}"
+    doc["patient_code"] = p_code
+    doc["patientId"] = p_code
 
     return jsonify({"message": "Patient updated successfully", "patient": doc}), 200
 
@@ -563,7 +594,11 @@ def update_patient(patient_id):
 @staff_or_admin_required
 def delete_patient(patient_id):
     db = get_database()
-    query = {"_id": ObjectId(patient_id)} if is_valid_object_id(patient_id) else {"user_id": patient_id}
+    if is_valid_object_id(patient_id):
+        query = {"_id": ObjectId(patient_id)}
+    else:
+        query = {"$or": [{"patient_code": str(patient_id)}, {"patient_id_code": str(patient_id)}, {"user_id": str(patient_id)}]}
+    
     result = db.patients.delete_one(query)
     if result.deleted_count == 0:
         return jsonify({"error": "Not Found", "detail": "Patient not found"}), 404

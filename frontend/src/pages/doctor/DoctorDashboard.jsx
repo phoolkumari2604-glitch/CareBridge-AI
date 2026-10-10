@@ -67,6 +67,20 @@ function DoctorDashboard() {
   const [consultingDoctors, setConsultingDoctors] = useState([]);
   const [acknowledgedAlertIds, setAcknowledgedAlertIds] = useState(new Set());
 
+  // Consultation Schedule state
+  const [scheduleTab, setScheduleTab] = useState("today"); // "today" | "upcoming"
+  const [startingConsultationId, setStartingConsultationId] = useState(null);
+
+  // Network Specialists state
+  const [specialistSearch, setSpecialistSearch] = useState("");
+  const [specialistFilter, setSpecialistFilter] = useState("all");
+  const [referralModalOpen, setReferralModalOpen] = useState(false);
+  const [referralTargetDoctor, setReferralTargetDoctor] = useState(null);
+  const [referralPatientId, setReferralPatientId] = useState("");
+  const [referralReason, setReferralReason] = useState("");
+  const [referralSubmitting, setReferralSubmitting] = useState(false);
+  const [referralSuccessMsg, setReferralSuccessMsg] = useState("");
+
   // Fetch all dashboard data concurrently
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -83,7 +97,7 @@ function DoctorDashboard() {
       setPatients(patientList);
       setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
       setApprovals(Array.isArray(approvalsData) ? approvalsData : []);
-      setConsultingDoctors(Array.isArray(doctorsData) ? doctorsData.slice(0, 6) : []);
+      setConsultingDoctors(Array.isArray(doctorsData) ? doctorsData : []);
 
       // Determine initially focused patient
       if (patientList.length > 0) {
@@ -143,6 +157,14 @@ function DoctorDashboard() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  // Silent 60-second auto-refresh polling
+  useEffect(() => {
+    const timer = setInterval(() => {
+      fetchDashboardData();
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [fetchDashboardData]);
+
   const handleManualRefresh = () => {
     setIsRefreshing(true);
     fetchDashboardData();
@@ -150,6 +172,173 @@ function DoctorDashboard() {
 
   const handleAcknowledgeAlert = (patientId) => {
     setAcknowledgedAlertIds((prev) => new Set([...prev, patientId]));
+  };
+
+  // Local date in YYYY-MM-DD format
+  const localTodayStr = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  const parseTimeToMinutes = (timeStr) => {
+    if (!timeStr) return 9999;
+    const match = String(timeStr).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (!match) return 9999;
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const period = match[3] ? match[3].toUpperCase() : null;
+    if (period === "PM" && hours < 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  const formatDateNice = (dateStr) => {
+    if (!dateStr) return "";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  const { todayAppointments, upcomingAppointments } = useMemo(() => {
+    const todayList = [];
+    const upcomingList = [];
+
+    appointments.forEach((apt) => {
+      const aptDate = apt.appointment_date;
+      if (aptDate === localTodayStr || !aptDate) {
+        todayList.push(apt);
+      } else if (aptDate > localTodayStr) {
+        upcomingList.push(apt);
+      }
+    });
+
+    todayList.sort((a, b) => parseTimeToMinutes(a.appointment_time) - parseTimeToMinutes(b.appointment_time));
+    upcomingList.sort((a, b) => {
+      if (a.appointment_date !== b.appointment_date) {
+        return (a.appointment_date || "").localeCompare(b.appointment_date || "");
+      }
+      return parseTimeToMinutes(a.appointment_time) - parseTimeToMinutes(b.appointment_time);
+    });
+
+    return { todayAppointments: todayList, upcomingAppointments: upcomingList };
+  }, [appointments, localTodayStr]);
+
+  const getPatientNameForAppointment = (apt) => {
+    if (apt.patient_name && apt.patient_name !== "string" && apt.patient_name !== "Registered Patient") {
+      return apt.patient_name;
+    }
+    const pid = apt.patient_id?._id || apt.patient_id || apt.patientId;
+    if (pid) {
+      const matched = patients.find((p) => (p._id || p.id) === pid || p.patient_code === pid);
+      if (matched) return matched.name;
+    }
+    return apt.patient_name || "Registered Patient";
+  };
+
+  const handleStartConsultation = async (e, apt) => {
+    e.stopPropagation();
+    const aptId = apt._id || apt.id;
+    if (!aptId) return;
+    try {
+      setStartingConsultationId(aptId);
+      await doctorService.updateAppointment(aptId, { status: "IN_CONSULTATION" });
+      setAppointments((prev) =>
+        prev.map((a) => ((a._id || a.id) === aptId ? { ...a, status: "IN_CONSULTATION" } : a))
+      );
+      const targetPid = apt.patient_id?._id || apt.patient_id || apt.patientId;
+      if (targetPid) {
+        setFocusedPatientId(targetPid);
+      }
+    } catch (err) {
+      console.error("Failed to start consultation:", err);
+    } finally {
+      setStartingConsultationId(null);
+    }
+  };
+
+  const renderStatusBadge = (rawStatus) => {
+    const s = (rawStatus || "PENDING").toUpperCase();
+    if (s === "IN_CONSULTATION") {
+      return (
+        <span className="clean-status-badge in-consultation">
+          <span className="pulse-blue-dot"></span>
+          In Consultation
+        </span>
+      );
+    }
+    if (s === "APPROVED" || s === "CONFIRMED") {
+      return <span className="clean-status-badge approved">Approved</span>;
+    }
+    if (s === "PENDING") {
+      return <span className="clean-status-badge pending">Pending</span>;
+    }
+    if (s === "COMPLETED") {
+      return <span className="clean-status-badge completed">Completed</span>;
+    }
+    if (s === "CANCELLED" || s === "REJECTED") {
+      return <span className="clean-status-badge cancelled">Cancelled</span>;
+    }
+    return <span className="clean-status-badge pending">{rawStatus}</span>;
+  };
+
+  const filteredSpecialists = useMemo(() => {
+    return consultingDoctors.filter((doc) => {
+      const name = (doc.name || "").toLowerCase();
+      const spec = (doc.specialty || "").toLowerCase();
+      const hosp = (doc.hospital_name || doc.hospital || "").toLowerCase();
+      const matchesSearch =
+        !specialistSearch ||
+        name.includes(specialistSearch.toLowerCase()) ||
+        spec.includes(specialistSearch.toLowerCase()) ||
+        hosp.includes(specialistSearch.toLowerCase());
+
+      if (!matchesSearch) return false;
+      if (specialistFilter === "available") {
+        return (doc.status || "AVAILABLE").toUpperCase() === "AVAILABLE";
+      }
+      if (specialistFilter === "cardiology") {
+        return spec.includes("cardio");
+      }
+      if (specialistFilter === "neurology") {
+        return spec.includes("neuro");
+      }
+      return true;
+    });
+  }, [consultingDoctors, specialistSearch, specialistFilter]);
+
+  const handleOpenReferralModal = (e, doc) => {
+    e.stopPropagation();
+    setReferralTargetDoctor(doc);
+    setReferralPatientId(focusedPatientId || (patients[0]?._id || patients[0]?.id || ""));
+    setReferralReason("");
+    setReferralSuccessMsg("");
+    setReferralModalOpen(true);
+  };
+
+  const handleSubmitReferral = async (e) => {
+    e.preventDefault();
+    if (!referralTargetDoctor || !referralPatientId) return;
+    setReferralSubmitting(true);
+    try {
+      // Simulate/create referral record
+      await new Promise((res) => setTimeout(res, 600));
+      setReferralSuccessMsg(`Consultation request successfully routed to ${referralTargetDoctor.name}.`);
+      setTimeout(() => {
+        setReferralModalOpen(false);
+        setReferralSuccessMsg("");
+      }, 1500);
+    } catch (err) {
+      console.error("Referral failed:", err);
+    } finally {
+      setReferralSubmitting(false);
+    }
   };
 
   // Determine clinical status for any patient
@@ -490,7 +679,7 @@ function DoctorDashboard() {
                       <div className="alert-badge-meta">
                         <span className="severity-pill critical">CRITICAL TELEMETRY</span>
                         <strong className="patient-target-name">{pat.name || "Patient"}</strong>
-                        <span className="meta-tag">ID: {pid.slice(-6)}</span>
+                        <span className="meta-tag">ID: {pat.patient_code || String(pat.patientId || "").replace("PT-", "") || pid.slice(-6)}</span>
                         {pat.phone && (
                           <span className="meta-tag">
                             <Phone size={11} /> {pat.phone}
@@ -1112,11 +1301,11 @@ function DoctorDashboard() {
             -------------------------------------------------------- */}
             <aside className="workbench-side-column">
               {/* TODAY'S CONSULTATION APPOINTMENTS QUEUE */}
-              <div className="side-widget-card">
+              <div className="side-widget-card schedule-widget-card">
                 <div className="widget-card-head">
                   <div>
                     <span className="widget-kicker">OUTPATIENT CLINIC</span>
-                    <h3>Today's Consultation Schedule</h3>
+                    <h3>Consultation Schedule</h3>
                   </div>
                   <button
                     className="icon-link-btn"
@@ -1127,36 +1316,136 @@ function DoctorDashboard() {
                   </button>
                 </div>
 
-                <div className="appointments-queue-list">
-                  {appointments.length === 0 ? (
-                    <div className="empty-widget-state">
-                      <CalendarDays size={28} />
-                      <p>No appointments booked for today.</p>
-                      <button
-                        className="btn-widget-action"
-                        onClick={() => navigate("/doctor/appointments")}
-                      >
-                        Open Appointments Schedule
-                      </button>
-                    </div>
-                  ) : (
-                    appointments.slice(0, 5).map((apt, idx) => {
-                      const status = (apt.status || "PENDING").toLowerCase();
-                      return (
-                        <div key={apt._id || apt.id || idx} className="queue-appointment-item">
-                          <div className="token-index-badge">#{idx + 1}</div>
-                          <div className="appointment-info-body">
-                            <strong>{apt.reason || "General Consultation"}</strong>
-                            <div className="appointment-meta-text">
-                              <span>{apt.appointment_time || "10:00 AM"}</span>
-                              <span>&middot;</span>
-                              <span>{apt.appointment_date || "Today"}</span>
+                {/* SCHEDULE TABS (TODAY VS UPCOMING) */}
+                <div className="schedule-tabs-row">
+                  <button
+                    type="button"
+                    className={`schedule-tab-btn ${scheduleTab === "today" ? "active" : ""}`}
+                    onClick={() => setScheduleTab("today")}
+                  >
+                    <span>Today</span>
+                    <span className="tab-badge-pill">{todayAppointments.length}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`schedule-tab-btn ${scheduleTab === "upcoming" ? "active" : ""}`}
+                    onClick={() => setScheduleTab("upcoming")}
+                  >
+                    <span>Upcoming</span>
+                    <span className="tab-badge-pill">{upcomingAppointments.length}</span>
+                  </button>
+                </div>
+
+                <div className="appointments-timeline-queue">
+                  {scheduleTab === "today" ? (
+                    todayAppointments.length === 0 ? (
+                      <div className="empty-widget-state">
+                        <CalendarDays size={28} />
+                        <p>No consultations booked for today.</p>
+                        <button
+                          className="btn-widget-action"
+                          onClick={() => navigate("/doctor/appointments")}
+                        >
+                          Book / View Schedule
+                        </button>
+                      </div>
+                    ) : (
+                      todayAppointments.map((apt, idx) => {
+                        const patName = getPatientNameForAppointment(apt);
+                        const isApproved = (apt.status || "").toUpperCase() === "APPROVED" || (apt.status || "").toUpperCase() === "CONFIRMED";
+                        const isStarting = startingConsultationId === (apt._id || apt.id);
+                        const targetPid = apt.patient_id?._id || apt.patient_id || apt.patientId;
+                        const isFocused = focusedPatientId && String(focusedPatientId) === String(targetPid);
+
+                        return (
+                          <div
+                            key={apt._id || apt.id || idx}
+                            className={`timeline-consult-card ${isFocused ? "focused-card" : ""}`}
+                            onClick={() => {
+                              if (targetPid) setFocusedPatientId(targetPid);
+                            }}
+                          >
+                            <div className="timeline-time-col">
+                              <span className="timeline-clock-text">{apt.appointment_time || "10:00 AM"}</span>
+                              <div className="timeline-track-dot"></div>
+                            </div>
+
+                            <div className="timeline-card-content">
+                              <div className="timeline-card-main">
+                                <div className="timeline-patient-header">
+                                  <strong className="patient-name-link">{patName}</strong>
+                                  {renderStatusBadge(apt.status)}
+                                </div>
+                                <div className="timeline-reason-subtitle">
+                                  <span className="consult-type-tag">{apt.consultation_type || apt.reason || "Clinical Consultation"}</span>
+                                  {apt.booking_id && <span className="booking-ref-tag">#{apt.booking_id}</span>}
+                                </div>
+                              </div>
+
+                              {isApproved && (
+                                <div className="timeline-action-row">
+                                  <button
+                                    type="button"
+                                    className="btn-start-consult"
+                                    disabled={isStarting}
+                                    onClick={(e) => handleStartConsultation(e, apt)}
+                                  >
+                                    {isStarting ? (
+                                      <>
+                                        <Loader2 size={13} className="spin-inline" />
+                                        <span>Starting...</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Zap size={13} />
+                                        <span>Start Consultation</span>
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
-                          <span className={`apt-status-badge ${status}`}>{apt.status || "Pending"}</span>
-                        </div>
-                      );
-                    })
+                        );
+                      })
+                    )
+                  ) : (
+                    upcomingAppointments.length === 0 ? (
+                      <div className="empty-widget-state">
+                        <CalendarDays size={28} />
+                        <p>No upcoming appointments in the next days.</p>
+                      </div>
+                    ) : (
+                      upcomingAppointments.map((apt, idx) => {
+                        const patName = getPatientNameForAppointment(apt);
+                        const targetPid = apt.patient_id?._id || apt.patient_id || apt.patientId;
+
+                        return (
+                          <div
+                            key={apt._id || apt.id || idx}
+                            className="timeline-consult-card upcoming-card"
+                            onClick={() => {
+                              if (targetPid) setFocusedPatientId(targetPid);
+                            }}
+                          >
+                            <div className="timeline-time-col">
+                              <span className="timeline-date-pill">{formatDateNice(apt.appointment_date)}</span>
+                              <span className="timeline-clock-text">{apt.appointment_time || "10:00 AM"}</span>
+                            </div>
+
+                            <div className="timeline-card-content">
+                              <div className="timeline-patient-header">
+                                <strong className="patient-name-link">{patName}</strong>
+                                {renderStatusBadge(apt.status)}
+                              </div>
+                              <div className="timeline-reason-subtitle">
+                                <span className="consult-type-tag">{apt.consultation_type || apt.reason || "Consultation"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )
                   )}
                 </div>
               </div>
@@ -1187,8 +1476,8 @@ function DoctorDashboard() {
                 </div>
               </div>
 
-              {/* ASSIGNED / CONSULTING SPECIALISTS (IMAGE 2 CONCEPT) */}
-              <div className="side-widget-card">
+              {/* NETWORK SPECIALISTS DIRECTORY & REFERRALS */}
+              <div className="side-widget-card specialists-widget-card">
                 <div className="widget-card-head">
                   <div>
                     <span className="widget-kicker">NETWORK SPECIALISTS</span>
@@ -1203,30 +1492,95 @@ function DoctorDashboard() {
                   </button>
                 </div>
 
-                <div className="consulting-doctors-list">
-                  {consultingDoctors.map((doc) => {
-                    const initials = doc.name
-                      ? doc.name
-                          .replace(/^(Dr\.|Sir|Prof\.)\s*/i, "")
-                          .trim()
-                          .split(" ")
-                          .map((w) => w[0])
-                          .join("")
-                          .slice(0, 2)
-                          .toUpperCase()
-                      : "MD";
+                {/* SPECIALIST SEARCH & FILTER CHIPS */}
+                <div className="specialist-search-box">
+                  <Search size={14} className="search-icon-inside" />
+                  <input
+                    type="text"
+                    placeholder="Search doctor, specialty, hospital..."
+                    value={specialistSearch}
+                    onChange={(e) => setSpecialistSearch(e.target.value)}
+                  />
+                  {specialistSearch && (
+                    <button className="clear-search-btn" onClick={() => setSpecialistSearch("")}>
+                      &times;
+                    </button>
+                  )}
+                </div>
 
-                    return (
-                      <div key={doc._id || doc.id || doc.name} className="consulting-doc-item">
-                        <div className="doc-avatar-mini">{initials}</div>
-                        <div className="doc-info-block">
-                          <strong>{doc.name}</strong>
-                          <span>{doc.specialty || "Specialist"}</span>
-                          <small>{doc.hospital_name || doc.hospital || "Medical Network"}</small>
+                <div className="specialist-chips-row">
+                  {[
+                    { id: "all", label: "All" },
+                    { id: "available", label: "Available" },
+                    { id: "cardiology", label: "Cardio" },
+                    { id: "neurology", label: "Neuro" },
+                  ].map((chip) => (
+                    <button
+                      key={chip.id}
+                      type="button"
+                      className={`specialist-chip-btn ${specialistFilter === chip.id ? "active" : ""}`}
+                      onClick={() => setSpecialistFilter(chip.id)}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="consulting-doctors-list">
+                  {filteredSpecialists.length === 0 ? (
+                    <div className="empty-specialists-box">
+                      <Stethoscope size={24} />
+                      <p>No specialists match the current filter.</p>
+                    </div>
+                  ) : (
+                    filteredSpecialists.slice(0, 6).map((doc) => {
+                      const initials = doc.name
+                        ? doc.name
+                            .replace(/^(Dr\.|Sir|Prof\.)\s*/i, "")
+                            .trim()
+                            .split(" ")
+                            .map((w) => w[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()
+                        : "MD";
+
+                      const docStatus = (doc.status || "AVAILABLE").toUpperCase();
+                      const isAvailable = docStatus === "AVAILABLE";
+                      const isInConsult = docStatus === "IN_CONSULTATION";
+
+                      return (
+                        <div key={doc._id || doc.id || doc.name} className="consulting-doc-item">
+                          <div className="doc-avatar-container">
+                            <div className="doc-avatar-mini">{initials}</div>
+                            <span
+                              className={`specialist-status-dot ${
+                                isAvailable ? "available" : isInConsult ? "in-consult" : "offline"
+                              }`}
+                              title={`Status: ${docStatus}`}
+                            ></span>
+                          </div>
+
+                          <div className="doc-info-block">
+                            <div className="doc-name-row">
+                              <strong>{doc.name}</strong>
+                            </div>
+                            <span className="doc-spec-text">{doc.specialty || "Specialist"}</span>
+                            <small className="doc-hosp-text">{doc.hospital_name || doc.hospital || "Medical Network"}</small>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="btn-refer-doctor"
+                            onClick={(e) => handleOpenReferralModal(e, doc)}
+                            title="Request consultation / referral"
+                          >
+                            <span>Refer</span>
+                          </button>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
@@ -1287,6 +1641,86 @@ function DoctorDashboard() {
               </div>
             </aside>
           </div>
+
+          {/* REFERRAL / CONSULTATION REQUEST MODAL */}
+          {referralModalOpen && referralTargetDoctor && (
+            <div className="clinical-modal-backdrop" onClick={() => setReferralModalOpen(false)}>
+              <div className="clinical-modal-dialog" onClick={(e) => e.stopPropagation()}>
+                <div className="clinical-modal-header">
+                  <div>
+                    <span className="modal-kicker">CLINICAL REFERRAL</span>
+                    <h3>Request Specialist Consultation</h3>
+                  </div>
+                  <button className="modal-close-btn" onClick={() => setReferralModalOpen(false)}>
+                    &times;
+                  </button>
+                </div>
+
+                {referralSuccessMsg ? (
+                  <div className="modal-success-state">
+                    <CheckCircle2 size={44} className="text-emerald" />
+                    <h4>Referral Dispatched</h4>
+                    <p>{referralSuccessMsg}</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmitReferral} className="referral-form-body">
+                    <div className="referral-target-card">
+                      <div className="target-doc-avatar">
+                        {referralTargetDoctor.name.replace(/^(Dr\.|Sir|Prof\.)\s*/i, "").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="target-doc-meta">
+                        <strong>{referralTargetDoctor.name}</strong>
+                        <span>{referralTargetDoctor.specialty} &middot; {referralTargetDoctor.hospital_name || referralTargetDoctor.hospital}</span>
+                      </div>
+                    </div>
+
+                    <div className="form-group-field">
+                      <label>Patient for Consultation</label>
+                      <select
+                        value={referralPatientId}
+                        onChange={(e) => setReferralPatientId(e.target.value)}
+                        required
+                      >
+                        {patients.map((p) => (
+                          <option key={p._id || p.id} value={p._id || p.id}>
+                            {p.name} (ID #{p.patient_code || p.patientId || String(p._id).slice(-6)})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group-field">
+                      <label>Clinical Summary &amp; Referral Reason</label>
+                      <textarea
+                        rows={4}
+                        placeholder="State clinical rationale, telemetry findings, and questions for the specialist..."
+                        value={referralReason}
+                        onChange={(e) => setReferralReason(e.target.value)}
+                        required
+                      ></textarea>
+                    </div>
+
+                    <div className="modal-actions-footer">
+                      <button
+                        type="button"
+                        className="btn-cancel-modal"
+                        onClick={() => setReferralModalOpen(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn-submit-referral"
+                        disabled={referralSubmitting}
+                      >
+                        {referralSubmitting ? "Dispatching..." : "Send Consultation Request"}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

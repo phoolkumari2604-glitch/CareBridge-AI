@@ -369,11 +369,14 @@ How may I assist your clinical rounds today?`,
               className="ai-patient-select"
             >
               <option value="">-- General Clinical Query --</option>
-              {patients.map((p) => (
-                <option key={p._id || p.id} value={p._id || p.id}>
-                  {p.name || "Patient"} (ID: {(p._id || p.id).slice(-6)})
-                </option>
-              ))}
+              {patients.map((p) => {
+                const pCode = p.patient_code || String(p.patientId || "").replace("PT-", "") || String(p._id || p.id).slice(-6);
+                return (
+                  <option key={p._id || p.id} value={p._id || p.id}>
+                    {p.name || "Patient"} (ID: {pCode})
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -628,11 +631,14 @@ How may I assist your clinical rounds today?`,
                     required
                   >
                     <option value="">-- Select Target Patient --</option>
-                    {patients.map((p) => (
-                      <option key={p._id || p.id} value={p._id || p.id}>
-                        {p.name} (ID: {(p._id || p.id).slice(-6)})
-                      </option>
-                    ))}
+                    {patients.map((p) => {
+                      const pCode = p.patient_code || String(p.patientId || "").replace("PT-", "") || String(p._id || p.id).slice(-6);
+                      return (
+                        <option key={p._id || p.id} value={p._id || p.id}>
+                          {p.name} (ID: {pCode})
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 

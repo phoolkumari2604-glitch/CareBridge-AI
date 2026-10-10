@@ -245,17 +245,28 @@
 }
 
 .sidebar-link.active {
-  color: #2563eb;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #0284c7 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+  font-weight: 700;
+  position: relative;
+}
 
-  background: linear-gradient(
-    90deg,
-    #eff6ff,
-    #f0f9ff
-  );
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15%;
+  height: 70%;
+  width: 4px;
+  background: #93c5fd;
+  border-radius: 0 4px 4px 0;
 }
 
 .sidebar-link.active svg {
-  stroke-width: 2.5;
+  color: #ffffff;
+  stroke: #ffffff;
+  stroke-width: 2.3;
 }
 
 .sidebar-bottom {

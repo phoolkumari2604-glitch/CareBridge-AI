@@ -233,11 +233,14 @@ function Vitals() {
             {patients.length === 0 ? (
               <option value="">No patients available</option>
             ) : (
-              patients.map((p) => (
-                <option key={p._id || p.id} value={p._id || p.id}>
-                  {p.name || "Patient"} (ID: {(p._id || p.id).slice(-6)})
-                </option>
-              ))
+              patients.map((p) => {
+                const pCode = p.patient_code || String(p.patientId || "").replace("PT-", "") || String(p._id || p.id).slice(-6);
+                return (
+                  <option key={p._id || p.id} value={p._id || p.id}>
+                    {p.name || "Patient"} (ID: {pCode})
+                  </option>
+                );
+              })
             )}
           </select>
         </div>
@@ -571,11 +574,14 @@ function Vitals() {
                   required
                 >
                   <option value="">-- Select Patient --</option>
-                  {patients.map((p) => (
-                    <option key={p._id || p.id} value={p._id || p.id}>
-                      {p.name || "Patient"} (ID: {(p._id || p.id).slice(-6)})
-                    </option>
-                  ))}
+                  {patients.map((p) => {
+                    const pCode = p.patient_code || String(p.patientId || "").replace("PT-", "") || String(p._id || p.id).slice(-6);
+                    return (
+                      <option key={p._id || p.id} value={p._id || p.id}>
+                        {p.name || "Patient"} (ID: {pCode})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

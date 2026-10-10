@@ -170,6 +170,14 @@ function PatientMonitoring() {
     loadPatientsData();
   }, [loadPatientsData]);
 
+  // Silent 30-second telemetry polling
+  useEffect(() => {
+    const timer = setInterval(() => {
+      loadPatientsData(false);
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [loadPatientsData]);
+
   // Refresh Handler
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -371,79 +379,91 @@ function PatientMonitoring() {
       </section>
 
       {/* 4-COLUMN STAT GRID (ALL, CRITICAL, NEEDS ATTENTION, STABLE) */}
-      <section className="monitoring-stat-grid">
-        {/* ALL PATIENTS */}
-        <button
-          className={`stat-kpi-card card-all ${statusFilter === "all" ? "is-active" : ""}`}
-          onClick={() => {
-            setStatusFilter("all");
-            setCurrentPage(1);
-          }}
-        >
-          <div className="stat-card-icon-wrap">
-            <Users size={20} />
-          </div>
-          <div className="stat-card-text">
-            <span className="stat-card-label">All Monitored</span>
-            <strong className="stat-card-count">{stats.total || totalPatients}</strong>
-            <span className="stat-card-sub">Total Active Records</span>
-          </div>
-        </button>
+      {(() => {
+        const totalCount = stats.total || totalPatients || 0;
+        const critCount = stats.critical || 0;
+        const attnCount = stats.attention || 0;
+        const stableCount = stats.stable || 0;
+        const critPct = totalCount > 0 ? Math.round((critCount / totalCount) * 100) : 0;
+        const attnPct = totalCount > 0 ? Math.round((attnCount / totalCount) * 100) : 0;
+        const stablePct = totalCount > 0 ? Math.round((stableCount / totalCount) * 100) : 0;
 
-        {/* CRITICAL ALERTS */}
-        <button
-          className={`stat-kpi-card card-critical ${statusFilter === "critical" ? "is-active" : ""}`}
-          onClick={() => {
-            setStatusFilter("critical");
-            setCurrentPage(1);
-          }}
-        >
-          <div className="stat-card-icon-wrap">
-            <ShieldAlert size={20} />
-          </div>
-          <div className="stat-card-text">
-            <span className="stat-card-label">Critical Alerts</span>
-            <strong className="stat-card-count text-critical">{stats.critical || 0}</strong>
-            <span className="stat-card-sub">Acute Breaches</span>
-          </div>
-        </button>
+        return (
+          <section className="monitoring-stat-grid">
+            {/* ALL PATIENTS */}
+            <button
+              className={`stat-kpi-card card-all ${statusFilter === "all" ? "is-active" : ""}`}
+              onClick={() => {
+                setStatusFilter("all");
+                setCurrentPage(1);
+              }}
+            >
+              <div className="stat-card-icon-wrap">
+                <Users size={20} />
+              </div>
+              <div className="stat-card-text">
+                <span className="stat-card-label">All Monitored</span>
+                <strong className="stat-card-count">{totalCount}</strong>
+                <span className="stat-card-sub">100% Active Roster</span>
+              </div>
+            </button>
 
-        {/* NEEDS ATTENTION */}
-        <button
-          className={`stat-kpi-card card-attention ${statusFilter === "attention" ? "is-active" : ""}`}
-          onClick={() => {
-            setStatusFilter("attention");
-            setCurrentPage(1);
-          }}
-        >
-          <div className="stat-card-icon-wrap">
-            <AlertTriangle size={20} />
-          </div>
-          <div className="stat-card-text">
-            <span className="stat-card-label">Needs Attention</span>
-            <strong className="stat-card-count text-attention">{stats.attention || 0}</strong>
-            <span className="stat-card-sub">Borderline Readings</span>
-          </div>
-        </button>
+            {/* CRITICAL ALERTS */}
+            <button
+              className={`stat-kpi-card card-critical ${statusFilter === "critical" ? "is-active" : ""}`}
+              onClick={() => {
+                setStatusFilter("critical");
+                setCurrentPage(1);
+              }}
+            >
+              <div className="stat-card-icon-wrap">
+                <ShieldAlert size={20} />
+              </div>
+              <div className="stat-card-text">
+                <span className="stat-card-label">Critical Alerts</span>
+                <strong className="stat-card-count text-critical">{critCount} ({critPct}%)</strong>
+                <span className="stat-card-sub">Acute Breaches</span>
+              </div>
+            </button>
 
-        {/* STABLE BASELINE */}
-        <button
-          className={`stat-kpi-card card-stable ${statusFilter === "stable" ? "is-active" : ""}`}
-          onClick={() => {
-            setStatusFilter("stable");
-            setCurrentPage(1);
-          }}
-        >
-          <div className="stat-card-icon-wrap">
-            <CheckCircle2 size={20} />
-          </div>
-          <div className="stat-card-text">
-            <span className="stat-card-label">Stable Baseline</span>
-            <strong className="stat-card-count text-stable">{stats.stable || 0}</strong>
-            <span className="stat-card-sub">Normal Parameters</span>
-          </div>
-        </button>
-      </section>
+            {/* NEEDS ATTENTION */}
+            <button
+              className={`stat-kpi-card card-attention ${statusFilter === "attention" ? "is-active" : ""}`}
+              onClick={() => {
+                setStatusFilter("attention");
+                setCurrentPage(1);
+              }}
+            >
+              <div className="stat-card-icon-wrap">
+                <AlertTriangle size={20} />
+              </div>
+              <div className="stat-card-text">
+                <span className="stat-card-label">Needs Attention</span>
+                <strong className="stat-card-count text-attention">{attnCount} ({attnPct}%)</strong>
+                <span className="stat-card-sub">Borderline Readings</span>
+              </div>
+            </button>
+
+            {/* STABLE BASELINE */}
+            <button
+              className={`stat-kpi-card card-stable ${statusFilter === "stable" ? "is-active" : ""}`}
+              onClick={() => {
+                setStatusFilter("stable");
+                setCurrentPage(1);
+              }}
+            >
+              <div className="stat-card-icon-wrap">
+                <CheckCircle2 size={20} />
+              </div>
+              <div className="stat-card-text">
+                <span className="stat-card-label">Stable Baseline</span>
+                <strong className="stat-card-count text-stable">{stableCount} ({stablePct}%)</strong>
+                <span className="stat-card-sub">Normal Parameters</span>
+              </div>
+            </button>
+          </section>
+        );
+      })()}
 
       {/* ERROR NOTICE */}
       {error && (
@@ -541,7 +561,7 @@ function PatientMonitoring() {
             <tbody>
               {patients.map((patient) => {
                 const pid = String(patient._id || patient.id || "");
-                const formattedId = patient.patientId || `PT-${pid.slice(-6).toUpperCase()}`;
+                const formattedId = patient.patient_code || String(patient.patientId || "").replace("PT-", "") || pid.slice(-6);
                 const level = patient.telemetry_level || "stable";
                 const label = patient.telemetry_label || "Stable";
                 const vital = patient.latest_vital;
@@ -568,7 +588,7 @@ function PatientMonitoring() {
                     {/* Patient ID */}
                     <td>
                       <div className="id-copy-group">
-                        <span className="id-code-badge">#{formattedId}</span>
+                        <span className="id-code-badge monospace-id">{formattedId}</span>
                         <button
                           className="btn-mini-copy"
                           onClick={() => copyPatientId(formattedId)}
@@ -668,7 +688,7 @@ function PatientMonitoring() {
         <div className="monitoring-cards-mobile">
           {patients.map((patient) => {
             const pid = String(patient._id || patient.id || "");
-            const formattedId = patient.patientId || `PT-${pid.slice(-6).toUpperCase()}`;
+            const formattedId = patient.patient_code || String(patient.patientId || "").replace("PT-", "") || pid.slice(-6);
             const level = patient.telemetry_level || "stable";
             const label = patient.telemetry_label || "Stable";
             const vital = patient.latest_vital;
@@ -683,7 +703,7 @@ function PatientMonitoring() {
                     </div>
                     <div>
                       <h3 className="m-patient-name">{patient.name || "Unnamed Patient"}</h3>
-                      <span className="m-patient-id">#{formattedId}</span>
+                      <span className="m-patient-id monospace-id">{formattedId}</span>
                     </div>
                   </div>
 
@@ -880,11 +900,14 @@ function PatientMonitoring() {
                     className={vitalsErrors.patient_id ? "vinput-error" : ""}
                     required
                   >
-                    {patients.map((p) => (
-                      <option key={p._id || p.id} value={p._id || p.id}>
-                        {p.name} ({p.patientId || `PT-${String(p._id || p.id).slice(-6).toUpperCase()}`})
-                      </option>
-                    ))}
+                    {patients.map((p) => {
+                      const pcode = p.patient_code || String(p.patientId || "").replace("PT-", "") || String(p._id || p.id).slice(-6);
+                      return (
+                        <option key={p._id || p.id} value={p._id || p.id}>
+                          {p.name} (ID: {pcode})
+                        </option>
+                      );
+                    })}
                   </select>
                   {vitalsErrors.patient_id && <span className="verror-text">{vitalsErrors.patient_id}</span>}
                 </div>
@@ -1060,8 +1083,8 @@ function PatientMonitoring() {
                 <div>
                   <h2>{selectedPatient.name}</h2>
                   <div className="dossier-id-chips">
-                    <span className="id-code-badge">
-                      #{selectedPatient.patientId || `PT-${String(selectedPatient._id || selectedPatient.id).slice(-6).toUpperCase()}`}
+                    <span className="id-code-badge monospace-id">
+                      ID: {selectedPatient.patient_code || String(selectedPatient.patientId || "").replace("PT-", "") || String(selectedPatient._id || selectedPatient.id).slice(-6)}
                     </span>
                     <span className={`status-badge-pill badge-${selectedPatient.telemetry_level || "stable"}`}>
                       <span className="pulse-indicator-dot" />

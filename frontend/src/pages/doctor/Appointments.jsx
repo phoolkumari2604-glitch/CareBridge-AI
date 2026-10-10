@@ -376,7 +376,7 @@ function DoctorAppointments() {
                     const patient = patientsMap[apt.patient_id];
                     const patientName = patient?.name || "Patient Record";
                     const pid = apt.patient_id || "";
-                    const statusUpper = (apt.status || "PENDING").toUpperCase();
+                    const pCode = apt.patient_code || patient?.patient_code || String(patient?.patientId || "").replace("PT-", "") || (pid ? pid.slice(-6) : "");
 
                     return (
                       <tr key={apt._id || apt.id || index}>
@@ -393,7 +393,7 @@ function DoctorAppointments() {
                             <div>
                               <strong>{patientName}</strong>
                               <span>
-                                {pid ? `ID: ${pid.slice(-6)}` : ""}
+                                {pCode ? `ID: ${pCode}` : ""}
                                 {patient?.phone ? ` • ${patient.phone}` : ""}
                               </span>
                             </div>

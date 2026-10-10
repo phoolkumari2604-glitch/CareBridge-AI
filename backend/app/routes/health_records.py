@@ -1,4 +1,5 @@
 import os
+import re
 import secrets
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
@@ -30,8 +31,8 @@ def purge_file_from_disk(file_url):
     except Exception as e:
         print(f"Warning: Failed to delete attached file {file_url} from storage: {e}")
 
-@health_records_bp.route("", methods=["POST"], strict_slashes=False)
-@health_records_bp.route("/", methods=["POST"], strict_slashes=False)
+@health_records_bp.route("", methods=["POST"], endpoint="create_health_record_root", strict_slashes=False)
+@health_records_bp.route("/", methods=["POST"], endpoint="create_health_record_slash", strict_slashes=False)
 @token_required
 def create_health_record():
     db = get_database()
@@ -89,36 +90,52 @@ def create_health_record():
             })
 
     patient_id = data.get("patient_id")
-    if not patient_id:
-        if user_role == "PATIENT":
-            p_doc = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
-            if p_doc:
-                patient_id = str(p_doc["_id"])
-                
-    if not patient_id or not is_valid_object_id(patient_id):
-        return jsonify({"error": "Validation Error", "detail": "Valid patient_id is required"}), 400
-        
-    patient = db.patients.find_one({"_id": ObjectId(patient_id)})
+    patient = None
+    if patient_id:
+        if is_valid_object_id(patient_id):
+            patient = db.patients.find_one({"_id": ObjectId(patient_id)})
+        else:
+            patient = db.patients.find_one({
+                "$or": [
+                    {"patient_code": str(patient_id)},
+                    {"patient_id_code": str(patient_id)},
+                    {"user_id": str(patient_id)}
+                ]
+            })
+    elif user_role == "PATIENT":
+        patient = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
+
     if not patient:
-        return jsonify({"error": "Not Found", "detail": "Patient not found"}), 404
+        return jsonify({"error": "Validation Error", "detail": "Valid registered patient is required"}), 400
+
+    patient_oid = patient["_id"]
+    p_code = patient.get("patient_code") or str(patient.get("patient_id_code") or "").replace("PT-", "") or str(patient_oid)[-6:]
 
     primary_file_url = attachments[0]["file_url"] if attachments else data.get("file_url")
     primary_file_name = attachments[0]["file_name"] if attachments else data.get("file_name")
 
+    # Medications normalization
+    meds = data.get("medications", [])
+    if isinstance(meds, str):
+        meds = [m.strip() for m in meds.split(",") if m.strip()]
+
     record_doc = {
-        "patient_id": ObjectId(patient_id),
+        "patient_id": patient_oid,
+        "patient_code": p_code,
+        "patient_name": patient.get("name", "Registered Patient"),
         "created_by_user_id": user_id,
         "record_type": data.get("record_type", "CONSULTATION").upper(),
-        "title": data.get("title", "Clinical Medical Record"),
+        "title": data.get("title") or f"{data.get('record_type', 'Consultation').capitalize()} - {patient.get('name')}",
         "description": data.get("description", ""),
         "diagnosis": data.get("diagnosis", ""),
-        "doctor_name": data.get("doctor_name", "Consulting Physician"),
+        "doctor_name": data.get("doctor_name", current_user.get("name", "Consulting Physician")),
         "hospital_name": data.get("hospital_name", "CareBridge Medical Center"),
-        "medications": data.get("medications", []),
+        "medications": meds,
         "attachments": attachments,
         "file_url": primary_file_url,
         "file_name": primary_file_name,
         "record_date": data.get("record_date") or datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "is_test": bool(patient.get("is_test", False)),
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc)
     }
@@ -131,6 +148,88 @@ def create_health_record():
         "record_id": str(result.inserted_id),
         "record": serialize_doc(record_doc)
     }), 201
+
+@health_records_bp.route("", methods=["GET"], endpoint="list_health_records_root", strict_slashes=False)
+@health_records_bp.route("/", methods=["GET"], endpoint="list_health_records_slash", strict_slashes=False)
+@token_required
+def list_health_records():
+    db = get_database()
+    current_user = g.current_user
+    user_role = current_user.get("role", "PATIENT").upper()
+    user_id = str(current_user["_id"])
+
+    patient_id_arg = request.args.get("patient_id")
+    record_type_arg = request.args.get("record_type")
+    search = (request.args.get("search") or "").strip()
+
+    query = {}
+    if user_role == "PATIENT":
+        pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
+        if pat:
+            query["patient_id"] = pat["_id"]
+        elif patient_id_arg and is_valid_object_id(patient_id_arg):
+            query["patient_id"] = ObjectId(patient_id_arg)
+    elif patient_id_arg:
+        if is_valid_object_id(patient_id_arg):
+            query["patient_id"] = ObjectId(patient_id_arg)
+        else:
+            pat = db.patients.find_one({"$or": [{"patient_code": str(patient_id_arg)}, {"patient_id_code": str(patient_id_arg)}]})
+            if pat:
+                query["patient_id"] = pat["_id"]
+
+    if record_type_arg and record_type_arg.upper() != "ALL":
+        query["record_type"] = record_type_arg.upper()
+
+    if search:
+        s_clean = re.escape(search)
+        query["$or"] = [
+            {"title": {"$regex": s_clean, "$options": "i"}},
+            {"diagnosis": {"$regex": s_clean, "$options": "i"}},
+            {"description": {"$regex": s_clean, "$options": "i"}},
+            {"doctor_name": {"$regex": s_clean, "$options": "i"}},
+            {"patient_name": {"$regex": s_clean, "$options": "i"}},
+            {"patient_code": {"$regex": s_clean, "$options": "i"}},
+        ]
+
+    # Exclude test records if not explicitly requested
+    if request.args.get("include_test") != "true":
+        query["is_test"] = {"$ne": True}
+
+    records = list(db.health_records.find(query).sort("created_at", -1))
+    
+    # Calculate stats across matched/active records
+    total_recs = len(records)
+    consultations_count = sum(1 for r in records if r.get("record_type") == "CONSULTATION")
+    prescriptions_count = sum(1 for r in records if r.get("record_type") == "PRESCRIPTION" or (r.get("medications") and len(r.get("medications")) > 0))
+    diagnoses_count = sum(1 for r in records if r.get("diagnosis") and str(r.get("diagnosis")).strip() != "")
+
+    # Enrich missing patient info
+    patient_cache = {}
+    for r in records:
+        pid = r.get("patient_id")
+        if pid and (not r.get("patient_name") or not r.get("patient_code")):
+            pid_str = str(pid)
+            if pid_str not in patient_cache:
+                p_doc = db.patients.find_one({"_id": pid})
+                patient_cache[pid_str] = p_doc
+            p = patient_cache.get(pid_str)
+            if p:
+                r["patient_name"] = p.get("name", "Registered Patient")
+                r["patient_code"] = p.get("patient_code") or str(p.get("patient_id_code") or "").replace("PT-", "") or pid_str[-6:]
+                r["patient_age"] = p.get("age")
+                r["patient_gender"] = p.get("gender")
+
+    serialized = serialize_doc(records)
+    return jsonify({
+        "records": serialized,
+        "total": total_recs,
+        "stats": {
+            "total": total_recs,
+            "consultations": consultations_count,
+            "prescriptions": prescriptions_count,
+            "diagnoses": diagnoses_count
+        }
+    }), 200
 
 @health_records_bp.route("/upload", methods=["POST"], strict_slashes=False)
 @token_required
@@ -174,20 +273,32 @@ def serve_file(filename):
 @token_required
 def get_health_records(patient_id):
     db = get_database()
-    if not is_valid_object_id(patient_id):
-        return jsonify({"error": "Validation Error", "detail": "Invalid patient ID"}), 400
+    if is_valid_object_id(patient_id):
+        query = {"patient_id": ObjectId(patient_id)}
+    else:
+        pat = db.patients.find_one({"$or": [{"patient_code": str(patient_id)}, {"patient_id_code": str(patient_id)}]})
+        if pat:
+            query = {"patient_id": pat["_id"]}
+        else:
+            return jsonify([]), 200
         
-    records = list(db.health_records.find({"patient_id": ObjectId(patient_id)}).sort("created_at", -1))
+    records = list(db.health_records.find(query).sort("created_at", -1))
     return jsonify(serialize_doc(records)), 200
 
 @health_records_bp.route("/<patient_id>/latest", methods=["GET"], strict_slashes=False)
 @token_required
 def get_latest_health_record(patient_id):
     db = get_database()
-    if not is_valid_object_id(patient_id):
-        return jsonify({"error": "Validation Error", "detail": "Invalid patient ID"}), 400
+    if is_valid_object_id(patient_id):
+        query = {"patient_id": ObjectId(patient_id)}
+    else:
+        pat = db.patients.find_one({"$or": [{"patient_code": str(patient_id)}, {"patient_id_code": str(patient_id)}]})
+        if pat:
+            query = {"patient_id": pat["_id"]}
+        else:
+            return jsonify({"error": "Not Found", "detail": "No health records found"}), 404
         
-    record = db.health_records.find_one({"patient_id": ObjectId(patient_id)}, sort=[("created_at", -1)])
+    record = db.health_records.find_one(query, sort=[("created_at", -1)])
     if not record:
         return jsonify({"error": "Not Found", "detail": "No health records found"}), 404
         

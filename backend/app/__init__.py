@@ -91,6 +91,7 @@ def create_app():
         (auth_bp, "/auth"),
         (admin_bp, "/admin"),
         (patient_bp, "/patients"),
+        (patient_bp, "/patient"),
         (doctor_bp, "/doctors"),
         (hospital_bp, "/hospitals"),
         (hospital_bp, "/facilities"),

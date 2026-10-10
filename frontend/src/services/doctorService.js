@@ -176,13 +176,28 @@ export const doctorService = {
   // ------------------------------------------------------------
   // HEALTH RECORDS
   // ------------------------------------------------------------
-  async getHealthRecords(patientId) {
-    if (!patientId) return [];
+  async getHealthRecords(patientIdOrParams) {
     try {
-      const response = await api.get(`/health-records/${patientId}`);
-      return Array.isArray(response.data) ? response.data : [];
+      if (typeof patientIdOrParams === "string" && patientIdOrParams) {
+        const response = await api.get(`/health-records/${patientIdOrParams}`);
+        return Array.isArray(response.data) ? response.data : [];
+      }
+      const params = typeof patientIdOrParams === "object" ? patientIdOrParams : {};
+      const response = await api.get("/health-records/", { params });
+      if (Array.isArray(response.data)) return response.data;
+      if (response.data && Array.isArray(response.data.records)) return response.data.records;
+      return [];
     } catch (error) {
       return [];
+    }
+  },
+
+  async getHealthRecordsSummary(params = {}) {
+    try {
+      const response = await api.get("/health-records/", { params });
+      return response.data || { records: [], stats: { total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 } };
+    } catch (error) {
+      return { records: [], stats: { total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 } };
     }
   },
 

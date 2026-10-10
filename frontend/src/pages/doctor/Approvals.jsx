@@ -73,6 +73,14 @@ function Approvals() {
     loadApprovalsData();
   }, [loadApprovalsData]);
 
+  // Silent 30-second auto-refresh
+  useEffect(() => {
+    const timer = setInterval(() => {
+      loadApprovalsData();
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [loadApprovalsData]);
+
   const handleRefresh = () => {
     setIsRefreshing(true);
     loadApprovalsData();
@@ -122,16 +130,24 @@ function Approvals() {
 
     const patient = patientsMap[app.patient_id];
     const appointment = appointmentsMap[app.appointment_id];
-    const patientName = patient?.name || "";
-    const reason = appointment?.reason || "";
-    const appId = app._id || app.id || "";
+    const patientName = app.patient_name || patient?.name || "";
+    const pCode = app.patient_code || patient?.patient_code || String(patient?.patientId || "").replace("PT-", "") || "";
+    const reason = app.reason || appointment?.reason || "";
+    const appId = String(app._id || app.id || "");
+    const bookingId = app.booking_id || appointment?.booking_id || "";
+    const phone = patient?.phone || app.patient_phone || "";
+    const email = patient?.email || app.patient_email || "";
 
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch =
       !query ||
       patientName.toLowerCase().includes(query) ||
+      pCode.toLowerCase().includes(query) ||
       reason.toLowerCase().includes(query) ||
-      appId.toLowerCase().includes(query);
+      appId.toLowerCase().includes(query) ||
+      bookingId.toLowerCase().includes(query) ||
+      phone.toLowerCase().includes(query) ||
+      email.toLowerCase().includes(query);
 
     return matchesFilter && matchesSearch;
   });
@@ -317,8 +333,8 @@ function Approvals() {
               filteredApprovals.map((request) => {
                 const patient = patientsMap[request.patient_id];
                 const appointment = appointmentsMap[request.appointment_id];
-                const patientName = patient?.name || "Patient Record";
-                const pid = request.patient_id || "";
+                const patientName = request.patient_name || patient?.name || "Patient Record";
+                const pCode = request.patient_code || patient?.patient_code || String(patient?.patientId || "").replace("PT-", "") || String(request.patient_id || "").slice(-6);
                 const statusUpper = (request.status || "PENDING").toUpperCase();
 
                 return (
@@ -331,8 +347,10 @@ function Approvals() {
 
                       <div>
                         <h3>{patientName}</h3>
-                        <span>{pid ? `ID: ${pid.slice(-6)}` : "Verified Patient"}</span>
-                        {patient?.phone && <small className="phone-line">{patient.phone}</small>}
+                        <span className="patient-code-tag">ID: {pCode}</span>
+                        {(request.patient_phone || patient?.phone) && (
+                          <small className="phone-line">{request.patient_phone || patient?.phone}</small>
+                        )}
                       </div>
                     </div>
 
