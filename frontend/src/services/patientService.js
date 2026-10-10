@@ -49,9 +49,15 @@ const patientService = {
     const params = new URLSearchParams();
     if (filters.specialty) params.append("specialty", filters.specialty);
     if (filters.hospital_id) params.append("hospital_id", filters.hospital_id);
+    if (filters.search) params.append("search", filters.search);
+    if (filters.all) params.append("all", "true");
+    if (filters.limit !== undefined) params.append("limit", filters.limit);
     const queryString = params.toString() ? `?${params.toString()}` : "";
     const res = await api.get(`/doctors/${queryString}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.doctors)) return res.data.doctors;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getDoctor(doctorId) {
@@ -76,7 +82,10 @@ const patientService = {
     const pId = patientId || this.getCurrentPatientId();
     const query = pId ? `?patient_id=${pId}` : "";
     const res = await api.get(`/appointments/${query}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.appointments)) return res.data.appointments;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getPatientAppointments(patientId) {
@@ -110,7 +119,11 @@ const patientService = {
     const pId = patientId || this.getCurrentPatientId();
     const query = pId ? `?patient_id=${pId}` : "";
     const res = await api.get(`/opd-pass/${query}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.passes)) return res.data.passes;
+    if (res.data && Array.isArray(res.data.opd_passes)) return res.data.opd_passes;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getPatientOPDPasses(patientId) {
@@ -148,12 +161,20 @@ const patientService = {
   // ==========================================
   async getLiveQueue(departmentIdOrQuery) {
     const res = await api.get("/queue/");
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.queue)) return res.data.queue;
+    if (res.data && Array.isArray(res.data.entries)) return res.data.entries;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getQueue() {
     const res = await api.get("/queue/");
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.queue)) return res.data.queue;
+    if (res.data && Array.isArray(res.data.entries)) return res.data.entries;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getQueueEntry(queueId) {
@@ -168,7 +189,10 @@ const patientService = {
     const pId = patientId || this.getCurrentPatientId();
     const query = pId ? `?patient_id=${pId}` : "";
     const res = await api.get(`/approvals/${query}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.approvals)) return res.data.approvals;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getApproval(approvalId) {
@@ -187,7 +211,11 @@ const patientService = {
   async getHospitals(city) {
     const query = city ? `?city=${encodeURIComponent(city)}` : "";
     const res = await api.get(`/hospitals/${query}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.hospitals)) return res.data.hospitals;
+    if (res.data && Array.isArray(res.data.facilities)) return res.data.facilities;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getHospital(hospitalId) {
@@ -197,12 +225,18 @@ const patientService = {
 
   async searchHospitalsByCity(city) {
     const res = await api.get(`/hospitals/search/by-city?city=${encodeURIComponent(city)}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.hospitals)) return res.data.hospitals;
+    if (res.data && Array.isArray(res.data.facilities)) return res.data.facilities;
+    return [];
   },
 
   async getRealtimeNearbyHospitals(lat, lng, radiusKm = 10) {
     const res = await api.get(`/hospitals/nearby/realtime?lat=${lat}&lng=${lng}&radius_km=${radiusKm}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.hospitals)) return res.data.hospitals;
+    if (res.data && Array.isArray(res.data.facilities)) return res.data.facilities;
+    return [];
   },
 
   async getNearbyFacilities(lat, lng, radiusKm = 10) {
@@ -224,7 +258,10 @@ const patientService = {
   async getHealthRecords(patientId) {
     const pId = patientId || this.getCurrentPatientId();
     const res = await api.get(`/health-records/${pId}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.records)) return res.data.records;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async createHealthRecord(data) {
@@ -259,7 +296,10 @@ const patientService = {
   async getVitals(patientId) {
     const pId = patientId || this.getCurrentPatientId();
     const res = await api.get(`/vitals/${pId}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.vitals)) return res.data.vitals;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getLatestVitals(patientId) {
@@ -287,7 +327,10 @@ const patientService = {
   async getHealthAlerts(patientId) {
     const pId = patientId || this.getCurrentPatientId();
     const res = await api.get(`/health-alerts/${pId}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.alerts)) return res.data.alerts;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async acknowledgeAlert(alertId) {
@@ -345,7 +388,10 @@ const patientService = {
   async getNotifications(patientId) {
     const pId = patientId || this.getCurrentPatientId();
     const res = await api.get(`/notifications/${pId}`);
-    return res.data;
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.notifications)) return res.data.notifications;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
   },
 
   async getUnreadCount(patientId) {

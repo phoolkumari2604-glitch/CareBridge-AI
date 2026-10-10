@@ -11,6 +11,7 @@ import {
   Loader2,
   Check,
   X,
+  Sparkles,
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import "./Appointments.css";

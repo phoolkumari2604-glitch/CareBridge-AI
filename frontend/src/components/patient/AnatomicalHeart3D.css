@@ -1,24 +1,29 @@
 /* =========================================================
-   CAREBRIDGE AI - 3D ANATOMICAL HEART TELEMETRY
-   Dark Navy / Glowing Biomechanical Shaders
+   CAREBRIDGE AI - 3D ANATOMICAL HEART TELEMETRY & LIVE MONITOR
+   Dark Navy / Neon Cyan / Realistic Biomechanical Pulse
 ========================================================= */
 
 .heart-3d-card {
-  background: #0f172a;
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  border-radius: 16px;
+  background: #0b1324;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 18px;
   overflow: hidden;
   margin-bottom: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
+/* =========================================================
+   1. CARD HEADER
+========================================================= */
 .heart-3d-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background: #1e293b;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  padding: 16px 22px;
+  background: #111d33;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -34,20 +39,24 @@
   height: 40px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.3s ease;
 }
 
 .heart-header-title h3 {
   margin: 0;
   font-size: 16px;
+  font-weight: 700;
   color: #ffffff;
+  letter-spacing: -0.01em;
 }
 
 .heart-header-title span {
   display: block;
-  font-size: 11px;
+  font-size: 11.5px;
   color: #94a3b8;
   margin-top: 2px;
 }
@@ -55,90 +64,265 @@
 .heart-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 6px 14px;
-  border-radius: 20px;
+  border-radius: 24px;
   border: 1px solid;
   font-size: 12px;
   font-weight: 700;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(11, 19, 36, 0.85);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
 }
 
 .pulsing-led {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  animation: ledBlink 1.5s infinite;
+  animation: ledBlink 1.4s infinite ease-in-out;
+  box-shadow: 0 0 8px currentColor;
 }
 
 @keyframes ledBlink {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 0.35; transform: scale(0.85); }
 }
 
 /* =========================================================
-   VIEWPORT
+   2. VIEWPORT & REALISTIC HEART IMAGE STAGE
 ========================================================= */
 .heart-3d-viewport {
   position: relative;
   width: 100%;
-  height: 340px;
-  background: radial-gradient(circle at center, #132238 0%, #080e1a 100%);
+  height: 380px;
+  background: radial-gradient(circle at center, #152442 0%, #080d19 100%);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.three-canvas-container {
+.heart-image-stage {
+  position: relative;
   width: 100%;
   height: 100%;
-  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.three-canvas-container:active {
-  cursor: grabbing;
+/* Ambient Radial Cardiac Glow Behind Realistic Heart */
+.heart-ambient-glow {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.22) 0%, rgba(56, 189, 248, 0.12) 45%, transparent 70%);
+  filter: blur(28px);
+  pointer-events: none;
+  animation: ambientGlowPulse infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 2D Fallback */
-.heart-2d-fallback {
+@keyframes ambientGlowPulse {
+  0% { transform: scale(0.9); opacity: 0.4; }
+  14% { transform: scale(1.15); opacity: 0.85; }
+  28% { transform: scale(1.02); opacity: 0.55; }
+  42% { transform: scale(1.1); opacity: 0.75; }
+  60%, 100% { transform: scale(0.9); opacity: 0.4; }
+}
+
+/* Realistic Anatomical Heart PNG with Lub-Dub Beat */
+.realistic-heart-img {
+  max-height: 290px;
+  max-width: 85%;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 24px rgba(239, 68, 68, 0.25));
+  user-select: none;
+  -webkit-user-drag: none;
+  transform-origin: center center;
+  animation: lubDubHeartbeat infinite cubic-bezier(0.21, 0.61, 0.35, 1);
+  will-change: transform;
+}
+
+/* Two-Phase Lub-Dub Cardiac Cycle Keyframe Animation */
+@keyframes lubDubHeartbeat {
+  0% {
+    transform: scale(1);
+  }
+  /* Primary Systole (Lub - Ventricular Contraction) */
+  14% {
+    transform: scale(1.085);
+  }
+  24% {
+    transform: scale(1.01);
+  }
+  /* Secondary Systole (Dub - Atrial/Aortic recoil) */
+  38% {
+    transform: scale(1.052);
+  }
+  50% {
+    transform: scale(1);
+  }
+  /* Diastolic resting phase until next cycle */
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* =========================================================
+   3. GLASSMORPHISM "HEART BEAT" OVERLAY CARD (BOTTOM-LEFT)
+========================================================= */
+.heartbeat-glass-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 18px;
+  width: 240px;
+  background: rgba(11, 20, 38, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 10;
   display: flex;
   flex-direction: column;
+  gap: 6px;
+}
+
+.glass-header-row {
+  display: flex;
   align-items: center;
-  gap: 16px;
-  color: #cbd5e1;
+  gap: 8px;
 }
 
-.fallback-heart-svg {
-  width: 120px;
-  height: 120px;
+.glass-icon-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(56, 189, 248, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #38bdf8;
 }
 
-.fallback-heart-svg.beating {
-  animation: svgHeartBeat infinite ease-in-out;
+.overlay-heart-pulse {
+  animation: pulseScale 1s infinite ease-in-out;
 }
 
-@keyframes svgHeartBeat {
+@keyframes pulseScale {
   0%, 100% { transform: scale(1); }
-  15% { transform: scale(1.15); }
-  30% { transform: scale(1.05); }
-  45% { transform: scale(1.2); }
-  60% { transform: scale(1); }
+  50% { transform: scale(1.2); }
 }
 
-/* Floating Badges */
+.glass-title-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.glass-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.1;
+}
+
+.glass-caption {
+  font-size: 9.5px;
+  color: #94a3b8;
+  line-height: 1.1;
+}
+
+.glass-live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.live-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  animation: ledBlink 1.2s infinite;
+}
+
+.live-pulse-dot.paused {
+  background: #94a3b8;
+  animation: none;
+}
+
+.glass-sync-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.glass-bpm-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 2px 0 0 0;
+}
+
+.glass-bpm-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.glass-bpm-unit {
+  font-size: 11px;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.glass-ecg-wrap {
+  width: 100%;
+  height: 48px;
+  background: rgba(3, 7, 18, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.glass-ecg-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* =========================================================
+   4. TOP-RIGHT FLOATING TELEMETRY BADGE
+========================================================= */
 .viewport-telemetry-badge {
   position: absolute;
   top: 16px;
-  left: 16px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  backdrop-filter: blur(8px);
+  right: 18px;
+  background: rgba(11, 20, 38, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  z-index: 10;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 .bpm-counter {
@@ -151,6 +335,7 @@
   font-size: 26px;
   font-weight: 800;
   color: #ffffff;
+  line-height: 1;
 }
 
 .bpm-counter small {
@@ -164,53 +349,66 @@
   flex-direction: column;
   font-size: 10px;
   color: #94a3b8;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
   padding-left: 10px;
+  gap: 2px;
 }
 
 .cardiac-state {
   font-weight: 700;
-  color: #e2e8f0;
+  font-size: 10.5px;
 }
 
+/* =========================================================
+   5. VIEWPORT CONTROLS (PAUSE & RESET)
+========================================================= */
 .viewport-controls {
   position: absolute;
   bottom: 16px;
-  right: 16px;
+  right: 18px;
   display: flex;
   gap: 8px;
+  z-index: 10;
 }
 
 .ctrl-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(11, 20, 38, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   color: #cbd5e1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 
 .ctrl-btn:hover {
   background: #0284c7;
   color: #ffffff;
   border-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.ctrl-btn.active {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ef4444;
 }
 
 /* =========================================================
-   SIMULATION TRAY
+   6. SIMULATION TRAY (SLIDER & PRESETS)
 ========================================================= */
 .heart-simulation-tray {
-  padding: 16px 20px;
-  background: #0f172a;
+  padding: 18px 22px;
+  background: #0b1324;
   border-top: 1px solid rgba(148, 163, 184, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .sim-slider-row {
@@ -224,9 +422,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 12.5px;
   color: #cbd5e1;
-  min-width: 190px;
+  min-width: 210px;
 }
 
 .sim-label strong {
@@ -239,36 +437,38 @@
   min-width: 200px;
   accent-color: #38bdf8;
   cursor: pointer;
+  height: 6px;
 }
 
 .sim-quick-presets {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .preset-chip {
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 8px;
-  background: #1e293b;
+  background: #152238;
   border: 1px solid rgba(148, 163, 184, 0.2);
   color: #cbd5e1;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .preset-chip:hover {
-  background: #253349;
+  background: #1e3252;
   border-color: #38bdf8;
   color: #ffffff;
 }
 
 .preset-chip.active {
-  background: rgba(56, 189, 248, 0.15);
+  background: rgba(56, 189, 248, 0.18);
   border-color: #38bdf8;
   color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
 .accessibility-row {
@@ -276,7 +476,7 @@
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding-top: 10px;
+  padding-top: 12px;
   flex-wrap: wrap;
   gap: 10px;
 }
@@ -285,29 +485,86 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 11.5px;
   color: #94a3b8;
   cursor: pointer;
+  user-select: none;
 }
 
 .reduced-motion-toggle input {
   accent-color: #0284c7;
+  cursor: pointer;
 }
 
 .heart-disclaimer {
-  font-size: 10px;
+  font-size: 10.5px;
   color: #64748b;
 }
 
 /* =========================================================
-   RESPONSIVE
+   7. REDUCED MOTION & ACCESSIBILITY
 ========================================================= */
-@media (max-width: 640px) {
+.no-animation {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .realistic-heart-img,
+  .heart-ambient-glow,
+  .overlay-heart-pulse,
+  .pulsing-led {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   8. RESPONSIVE BREAKPOINTS
+========================================================= */
+@media (max-width: 768px) {
+  .heart-3d-viewport {
+    height: 340px;
+  }
+  .realistic-heart-img {
+    max-height: 240px;
+  }
+  .heartbeat-glass-overlay {
+    width: 200px;
+    padding: 10px 12px;
+  }
+  .glass-bpm-value {
+    font-size: 22px;
+  }
+  .viewport-telemetry-badge {
+    padding: 8px 10px;
+  }
+  .bpm-counter strong {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 540px) {
   .heart-3d-header {
     flex-direction: column;
     align-items: flex-start;
   }
   .heart-3d-viewport {
-    height: 280px;
+    height: 380px;
+  }
+  .heartbeat-glass-overlay {
+    left: 12px;
+    bottom: 12px;
+    width: 170px;
+  }
+  .glass-caption {
+    display: none;
+  }
+  .viewport-telemetry-badge {
+    top: 12px;
+    right: 12px;
+  }
+  .viewport-controls {
+    bottom: 12px;
+    right: 12px;
   }
 }

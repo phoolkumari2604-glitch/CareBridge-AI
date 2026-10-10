@@ -164,7 +164,8 @@ def register():
         "medical_history": data.get("medical_history", []),
         "created_at": datetime.now(timezone.utc)
     }
-    db.patients.insert_one(patient_doc)
+    patient_res = db.patients.insert_one(patient_doc)
+    patient_id = str(patient_res.inserted_id)
     
     # Send email verification
     send_patient_verification_email(email, name, verification_token)
@@ -178,13 +179,42 @@ def register():
         resource_id=user_id,
         details=f"New patient account registered for {email}. Verification email dispatched."
     )
+
+    # Issue access token for instant automatic sign-in
+    token_data = {
+        "sub": user_id,
+        "email": email,
+        "role": role
+    }
+    access_token = create_access_token(data=token_data, expires_delta=timedelta(days=7))
+    now_time = datetime.now(timezone.utc)
         
     return jsonify({
-        "message": "Registration successful. Please check your email to verify your account.",
+        "message": "Account created successfully! Welcome to CareBridge AI.",
+        "access_token": access_token,
+        "token_type": "bearer",
         "user_id": user_id,
         "email": email,
         "role": "PATIENT",
-        "email_verified": False
+        "email_verified": False,
+        "user": {
+            "id": user_id,
+            "_id": user_id,
+            "name": name,
+            "fullName": name,
+            "email": email,
+            "role": "PATIENT",
+            "phone": phone,
+            "patient_id": patient_id,
+            "doctor_id": None,
+            "staffId": None,
+            "staff_id": None,
+            "faceVerified": False,
+            "fingerprintVerified": False,
+            "emailVerified": False,
+            "lastLogin": now_time.isoformat(),
+            "createdAt": now_time.isoformat()
+        }
     }), 201
 
 # ============================================================
@@ -716,45 +746,60 @@ def set_invited_password():
 @auth_bp.route("/profile", methods=["GET"])
 @token_required
 def get_me():
-    db = get_database()
-    user = g.current_user
-    user_id = str(user["_id"])
-    role = user.get("role", "PATIENT")
-    
-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else None
-    
-    patient_id = None
-    doctor_id = None
-    if role == "PATIENT":
-        pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
-        if pat:
-            patient_id = str(pat["_id"])
-    elif role == "DOCTOR":
-        doc = db.doctors.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
-        if doc:
-            doctor_id = str(doc["_id"])
-            
-    return jsonify({
-        "id": user_id,
-        "_id": user_id,
-        "name": user.get("name"),
-        "fullName": user.get("name") or user.get("fullName") or "Staff User",
-        "email": user.get("email"),
-        "role": role,
-        "phone": user.get("phone", ""),
-        "staffId": staff_id,
-        "staff_id": staff_id,
-        "faceVerified": bool(user.get("face_verified") or user.get("faceVerified")),
-        "faceVerifiedAt": user.get("face_verified_at") or user.get("faceVerifiedAt"),
-        "fingerprintVerified": bool(user.get("fingerprint_verified") or user.get("fingerprintVerified")),
-        "fingerprintVerifiedAt": user.get("fingerprint_verified_at") or user.get("fingerprintVerifiedAt"),
-        "emailVerified": bool(user.get("email_verified", False)),
-        "is_primary_admin": bool(user.get("is_primary_admin", False)),
-        "lastLogin": user.get("lastLogin") or user.get("last_login", datetime.now(timezone.utc)).isoformat() if hasattr(user.get("last_login"), "isoformat") else str(user.get("last_login", "")),
-        "createdAt": user.get("created_at", datetime.now(timezone.utc)).isoformat() if hasattr(user.get("created_at"), "isoformat") else str(user.get("created_at", "")),
-        "patient_id": patient_id,
-        "doctor_id": doctor_id
-    }), 200
+    try:
+        db = get_database()
+        user = g.current_user
+        user_id = str(user["_id"])
+        role = user.get("role", "PATIENT")
+        
+        staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else None
+        
+        patient_id = None
+        doctor_id = None
+        if role == "PATIENT":
+            pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
+            if pat:
+                patient_id = str(pat["_id"])
+        elif role == "DOCTOR":
+            doc = db.doctors.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
+            if doc:
+                doctor_id = str(doc["_id"])
+                
+        last_login = user.get("lastLogin") or user.get("last_login")
+        if hasattr(last_login, "isoformat"):
+            last_login_str = last_login.isoformat()
+        else:
+            last_login_str = str(last_login or "")
+
+        created_at = user.get("createdAt") or user.get("created_at")
+        if hasattr(created_at, "isoformat"):
+            created_at_str = created_at.isoformat()
+        else:
+            created_at_str = str(created_at or "")
+
+        return jsonify({
+            "id": user_id,
+            "_id": user_id,
+            "name": user.get("name"),
+            "fullName": user.get("name") or user.get("fullName") or "User",
+            "email": user.get("email"),
+            "role": role,
+            "phone": user.get("phone", ""),
+            "staffId": staff_id,
+            "staff_id": staff_id,
+            "faceVerified": bool(user.get("face_verified") or user.get("faceVerified")),
+            "faceVerifiedAt": user.get("face_verified_at") or user.get("faceVerifiedAt"),
+            "fingerprintVerified": bool(user.get("fingerprint_verified") or user.get("fingerprintVerified")),
+            "fingerprintVerifiedAt": user.get("fingerprint_verified_at") or user.get("fingerprintVerifiedAt"),
+            "emailVerified": bool(user.get("email_verified", False)),
+            "is_primary_admin": bool(user.get("is_primary_admin", False)),
+            "lastLogin": last_login_str,
+            "createdAt": created_at_str,
+            "patient_id": patient_id,
+            "doctor_id": doctor_id
+        }), 200
+    except Exception as err:
+        return jsonify({"error": "Failed to retrieve profile", "detail": str(err)}), 500
 
 @auth_bp.route("/profile", methods=["PUT"])
 @auth_bp.route("/me", methods=["PUT"])

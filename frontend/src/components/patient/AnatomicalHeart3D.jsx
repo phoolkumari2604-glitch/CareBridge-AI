@@ -1,273 +1,290 @@
-import React, { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   HeartPulse,
   RotateCcw,
-  ZoomIn,
-  ZoomOut,
   Sparkles,
-  AlertTriangle,
-  ShieldCheck,
   Activity,
   Sliders,
   Play,
   Pause,
+  ShieldCheck,
+  Radio,
 } from "lucide-react";
+import heartImg from "../../assets/heart-realistic.png";
 import "./AnatomicalHeart3D.css";
 
-function AnatomicalHeart3D({ heartRate = 72, isAbnormal = false, status = "NORMAL" }) {
-  const mountRef = useRef(null);
-  const [bpm, setBpm] = useState(heartRate || 72);
-  const [simulating, setSimulating] = useState(false);
+/**
+ * Calculates ECG wave amplitude y in [-1, 1] for a given normalized phase u in [0, 1)
+ * Standard P-Q-R-S-T clinical waveform morphology.
+ */
+function getECGAmplitude(u) {
+  // Baseline isoelectric
+  if (u < 0.12) return 0;
+
+  // P wave: atrial depolarization (smooth upward dome)
+  if (u >= 0.12 && u < 0.22) {
+    const pPhase = (u - 0.12) / 0.1;
+    return 0.18 * Math.sin(Math.PI * pPhase);
+  }
+
+  // PR segment (isoelectric)
+  if (u >= 0.22 && u < 0.3) return 0;
+
+  // Q wave: small downward deflection
+  if (u >= 0.3 && u < 0.33) {
+    const qPhase = (u - 0.3) / 0.03;
+    return -0.16 * Math.sin(Math.PI * qPhase);
+  }
+
+  // R wave: sharp upward QRS spike
+  if (u >= 0.33 && u < 0.38) {
+    const rPhase = (u - 0.33) / 0.05;
+    return 0.95 * Math.sin(Math.PI * rPhase);
+  }
+
+  // S wave: sharp downward dip
+  if (u >= 0.38 && u < 0.42) {
+    const sPhase = (u - 0.38) / 0.04;
+    return -0.32 * Math.sin(Math.PI * sPhase);
+  }
+
+  // ST segment (isoelectric)
+  if (u >= 0.42 && u < 0.52) return 0;
+
+  // T wave: ventricular repolarization (medium dome)
+  if (u >= 0.52 && u < 0.7) {
+    const tPhase = (u - 0.52) / 0.18;
+    return 0.28 * Math.sin(Math.PI * tPhase);
+  }
+
+  // TP segment (resting baseline until next beat)
+  return 0;
+}
+
+function AnatomicalHeart3D({ heartRate = 74, isAbnormal = false, status = "NORMAL" }) {
+  const [bpm, setBpm] = useState(heartRate || 74);
   const [isPaused, setIsPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [webGlSupported, setWebGlSupported] = useState(true);
 
-  // Sync prop changes
+  // Sync prop changes when not manually modified
   useEffect(() => {
-    if (!simulating && heartRate) {
+    if (heartRate) {
       setBpm(heartRate);
     }
-  }, [heartRate, simulating]);
+  }, [heartRate]);
 
-  // Determine heart color based on BPM
-  const getStatusColor = (rate) => {
-    if (rate < 50 || rate > 120) return { hex: "#ef4444", threeColor: 0xef4444, label: "Critical Threshold", badge: "critical" };
-    if (rate < 60 || rate > 100) return { hex: "#f59e0b", threeColor: 0xf59e0b, label: "Borderline Watch", badge: "warning" };
-    return { hex: "#10b981", threeColor: 0x10b981, label: "Optimal Rhythm", badge: "normal" };
+  // Check OS prefers-reduced-motion
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      if (mediaQuery.matches) {
+        setReducedMotion(true);
+      }
+      const handler = (e) => setReducedMotion(e.matches);
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener("change", handler);
+        return () => mediaQuery.removeEventListener("change", handler);
+      }
+    }
+  }, []);
+
+  // Determine dynamic badge & status info based on BPM
+  const getStatusInfo = (rate) => {
+    if (rate > 110) {
+      return {
+        hex: "#ef4444",
+        label: "High Heart Rate",
+        cardiacState: "Tachycardic",
+        badgeClass: "badge-critical",
+        dotClass: "dot-red",
+        description: "Significant tachycardia threshold: close observation recommended",
+      };
+    }
+    if (rate > 100) {
+      return {
+        hex: "#f59e0b",
+        label: "Elevated Rhythm",
+        cardiacState: "Elevated Rhythm",
+        badgeClass: "badge-warning",
+        dotClass: "dot-amber",
+        description: "Mild tachycardia threshold: monitored resting suggested",
+      };
+    }
+    if (rate < 60) {
+      return {
+        hex: "#38bdf8",
+        label: "Low Resting Rhythm",
+        cardiacState: "Bradycardic",
+        badgeClass: "badge-low",
+        dotClass: "dot-cyan",
+        description: "Bradycardia threshold: physiological resting rhythm",
+      };
+    }
+    return {
+      hex: "#10b981",
+      label: "Optimal Rhythm",
+      cardiacState: "Sinus Normal",
+      badgeClass: "badge-normal",
+      dotClass: "dot-green",
+      description: "Optimal sinus rhythm: physiological parameters in safe range",
+    };
   };
 
-  const currentStatus = getStatusColor(bpm);
+  const currentStatus = getStatusInfo(bpm);
+  const cycleDuration = (60 / bpm).toFixed(3);
+
+  // Canvas ECG waveform refs & animation loop
+  const canvasRef = useRef(null);
+  const ecgWrapRef = useRef(null);
+  const bpmRef = useRef(bpm);
+  const animationFrameRef = useRef(null);
+  const phaseAccumulatorRef = useRef(0);
+  const lastTimeRef = useRef(null);
 
   useEffect(() => {
-    const container = mountRef.current;
-    if (!container) return;
+    bpmRef.current = bpm;
+  }, [bpm]);
 
-    let scene, camera, renderer, heartGroup, animationFrameId;
-    let isDragging = false;
-    let previousMousePosition = { x: 0, y: 0 };
+  // ResizeObserver for sharp High-DPI canvas rendering
+  useEffect(() => {
+    const wrap = ecgWrapRef.current;
+    if (!wrap || typeof ResizeObserver === "undefined") return;
 
-    try {
-      // Scene setup
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-      camera.position.set(0, 0, 8.5);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(container.clientWidth, container.clientHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      container.appendChild(renderer.domElement);
-
-      // Lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-      scene.add(ambientLight);
-
-      const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
-      dirLight1.position.set(5, 10, 7);
-      scene.add(dirLight1);
-
-      const pointLight = new THREE.PointLight(currentStatus.threeColor, 2.5, 20);
-      pointLight.position.set(0, 0, 4);
-      scene.add(pointLight);
-
-      // Construct Anatomical 3D Heart Geometry Group
-      heartGroup = new THREE.Group();
-
-      // Main Ventricles (Left & Right cardiac body)
-      const ventricleGeo = new THREE.SphereGeometry(1.6, 32, 32);
-      ventricleGeo.scale(1.0, 1.35, 0.95);
-      const heartMat = new THREE.MeshStandardMaterial({
-        color: currentStatus.threeColor,
-        roughness: 0.25,
-        metalness: 0.35,
-        emissive: currentStatus.threeColor,
-        emissiveIntensity: 0.22,
-      });
-      const ventricleMesh = new THREE.Mesh(ventricleGeo, heartMat);
-      ventricleMesh.rotation.z = -0.15;
-      heartGroup.add(ventricleMesh);
-
-      // Left & Right Atria
-      const atriaGeo = new THREE.SphereGeometry(0.85, 24, 24);
-      const atriaMat = new THREE.MeshStandardMaterial({
-        color: currentStatus.threeColor,
-        roughness: 0.4,
-        metalness: 0.2,
-      });
-
-      const rightAtrium = new THREE.Mesh(atriaGeo, atriaMat);
-      rightAtrium.position.set(-0.85, 1.25, -0.1);
-      heartGroup.add(rightAtrium);
-
-      const leftAtrium = new THREE.Mesh(atriaGeo, atriaMat);
-      leftAtrium.position.set(0.8, 1.2, -0.2);
-      heartGroup.add(leftAtrium);
-
-      // Aorta Arch (Main pulmonary artery curve)
-      const aortaCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 1.2, 0),
-        new THREE.Vector3(0.2, 2.2, 0.1),
-        new THREE.Vector3(-0.6, 2.4, -0.1),
-        new THREE.Vector3(-1.1, 1.8, -0.3),
-      ]);
-      const aortaGeo = new THREE.TubeGeometry(aortaCurve, 20, 0.38, 16, false);
-      const aortaMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.3 });
-      const aortaMesh = new THREE.Mesh(aortaGeo, aortaMat);
-      heartGroup.add(aortaMesh);
-
-      // Pulmonary Artery trunk
-      const pulmonaryCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-0.3, 1.0, 0.4),
-        new THREE.Vector3(-0.5, 1.8, 0.2),
-        new THREE.Vector3(0.5, 2.0, -0.2),
-      ]);
-      const pulmonaryGeo = new THREE.TubeGeometry(pulmonaryCurve, 16, 0.32, 12, false);
-      const pulmonaryMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.35 });
-      const pulmonaryMesh = new THREE.Mesh(pulmonaryGeo, pulmonaryMat);
-      heartGroup.add(pulmonaryMesh);
-
-      // Superior Vena Cava
-      const venaCavaGeo = new THREE.CylinderGeometry(0.26, 0.26, 1.2, 16);
-      const venaCavaMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.35 });
-      const venaCavaMesh = new THREE.Mesh(venaCavaGeo, venaCavaMat);
-      venaCavaMesh.position.set(-1.1, 1.8, -0.1);
-      heartGroup.add(venaCavaMesh);
-
-      scene.add(heartGroup);
-
-      // Interactive Mouse / Touch Drag to Rotate
-      const handleMouseDown = (e) => {
-        isDragging = true;
-        previousMousePosition = { x: e.clientX, y: e.clientY };
-      };
-
-      const handleMouseMove = (e) => {
-        if (!isDragging || !heartGroup) return;
-        const deltaX = e.clientX - previousMousePosition.x;
-        const deltaY = e.clientY - previousMousePosition.y;
-
-        heartGroup.rotation.y += deltaX * 0.01;
-        heartGroup.rotation.x += deltaY * 0.01;
-
-        previousMousePosition = { x: e.clientX, y: e.clientY };
-      };
-
-      const handleMouseUp = () => {
-        isDragging = false;
-      };
-
-      container.addEventListener("mousedown", handleMouseDown);
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-
-      // Touch events
-      const handleTouchStart = (e) => {
-        if (e.touches.length === 1) {
-          isDragging = true;
-          previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        const canvas = canvasRef.current;
+        if (canvas && width > 0 && height > 0) {
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.floor(width * dpr);
+          canvas.height = Math.floor(height * dpr);
         }
-      };
+      }
+    });
 
-      const handleTouchMove = (e) => {
-        if (!isDragging || e.touches.length !== 1) return;
-        const deltaX = e.touches[0].clientX - previousMousePosition.x;
-        const deltaY = e.touches[0].clientY - previousMousePosition.y;
+    observer.observe(wrap);
+    return () => observer.disconnect();
+  }, []);
 
-        heartGroup.rotation.y += deltaX * 0.01;
-        heartGroup.rotation.x += deltaY * 0.01;
+  // ECG drawing callback
+  const drawECG = useCallback((timestamp) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      };
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-      const handleTouchEnd = () => {
-        isDragging = false;
-      };
-
-      container.addEventListener("touchstart", handleTouchStart, { passive: true });
-      container.addEventListener("touchmove", handleTouchMove, { passive: true });
-      container.addEventListener("touchend", handleTouchEnd);
-
-      // Animation Loop with Physiological Heartbeat Rhythm
-      let clock = new THREE.Clock();
-
-      const animate = () => {
-        animationFrameId = requestAnimationFrame(animate);
-        const elapsedTime = clock.getElapsedTime();
-
-        if (heartGroup) {
-          // Slow continuous rotation
-          if (!isDragging && !isPaused) {
-            heartGroup.rotation.y += 0.005;
-          }
-
-          // Heartbeat pulse frequency formula (BPM / 60 beats per second)
-          if (!reducedMotion && !isPaused) {
-            const beatFreq = (bpm / 60) * Math.PI * 2;
-            const systolicPeak = Math.sin(elapsedTime * beatFreq);
-            const secondaryPulse = Math.sin(elapsedTime * beatFreq * 2) * 0.35;
-            const totalScale = 1.0 + Math.max(0, systolicPeak + secondaryPulse) * 0.12;
-
-            heartGroup.scale.set(totalScale, totalScale, totalScale);
-          } else {
-            heartGroup.scale.set(1, 1, 1);
-          }
-
-          // Update material colors dynamically if BPM changes
-          heartMat.color.setHex(currentStatus.threeColor);
-          heartMat.emissive.setHex(currentStatus.threeColor);
-          atriaMat.color.setHex(currentStatus.threeColor);
-          pointLight.color.setHex(currentStatus.threeColor);
-        }
-
-        renderer.render(scene, camera);
-      };
-
-      animate();
-
-      // Resize listener
-      const handleResize = () => {
-        if (!container || !camera || !renderer) return;
-        camera.aspect = container.clientWidth / container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-      };
-
-      window.addEventListener("resize", handleResize);
-
-      return () => {
-        cancelAnimationFrame(animationFrameId);
-        window.removeEventListener("resize", handleResize);
-        container.removeEventListener("mousedown", handleMouseDown);
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-        container.removeEventListener("touchstart", handleTouchStart);
-        container.removeEventListener("touchmove", handleTouchMove);
-        container.removeEventListener("touchend", handleTouchEnd);
-
-        if (renderer?.domElement && container.contains(renderer.domElement)) {
-          container.removeChild(renderer.domElement);
-        }
-        renderer?.dispose();
-      };
-    } catch (err) {
-      console.warn("WebGL initialization failed, falling back to 2D canvas:", err);
-      setWebGlSupported(false);
+    if (!lastTimeRef.current) {
+      lastTimeRef.current = timestamp;
     }
-  }, [bpm, isPaused, reducedMotion, currentStatus.threeColor]);
 
-  const handleZoom = (direction) => {
-    // Zoom control helper
-    setBpm((prev) => prev);
-  };
+    const deltaSeconds = Math.min((timestamp - lastTimeRef.current) / 1000, 0.1);
+    lastTimeRef.current = timestamp;
+
+    const currentBpm = bpmRef.current;
+    const beatsPerSecond = currentBpm / 60;
+
+    // Advance phase if not paused and not reduced motion
+    if (!reducedMotion && !isPaused) {
+      phaseAccumulatorRef.current += deltaSeconds * beatsPerSecond;
+    }
+
+    const currentPhase = phaseAccumulatorRef.current;
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = canvas.clientWidth || 210;
+    const displayHeight = canvas.clientHeight || 50;
+
+    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+    }
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+    // Subtle medical grid
+    ctx.strokeStyle = "rgba(56, 189, 248, 0.08)";
+    ctx.lineWidth = 1;
+    const gridSize = 14;
+
+    ctx.beginPath();
+    for (let x = 0; x < displayWidth; x += gridSize) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, displayHeight);
+    }
+    for (let y = 0; y < displayHeight; y += gridSize) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(displayWidth, y);
+    }
+    ctx.stroke();
+
+    // Baseline & waveform amplitude
+    const baselineY = displayHeight * 0.58;
+    const waveAmplitude = displayHeight * 0.44;
+
+    // Draw glowing ECG trail in bright cyan/blue
+    ctx.beginPath();
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#38bdf8";
+    ctx.shadowColor = "rgba(56, 189, 248, 0.85)";
+    ctx.shadowBlur = 7;
+
+    const cyclesVisibleOnScreen = 1.8;
+    const pointsCount = Math.floor(displayWidth);
+
+    for (let px = 0; px <= pointsCount; px++) {
+      const fractionOfScreen = px / displayWidth;
+      const samplePhase = currentPhase - (1 - fractionOfScreen) * cyclesVisibleOnScreen;
+      const u = ((samplePhase % 1) + 1) % 1;
+      const amp = getECGAmplitude(u);
+      const y = baselineY - amp * waveAmplitude;
+
+      if (px === 0) {
+        ctx.moveTo(px, y);
+      } else {
+        ctx.lineTo(px, y);
+      }
+    }
+    ctx.stroke();
+
+    // Leading glowing pulse dot at the right edge
+    const leadU = ((currentPhase % 1) + 1) % 1;
+    const leadY = baselineY - getECGAmplitude(leadU) * waveAmplitude;
+
+    ctx.beginPath();
+    ctx.arc(displayWidth - 2, leadY, 3.2, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#38bdf8";
+    ctx.shadowBlur = 10;
+    ctx.fill();
+
+    ctx.restore();
+
+    animationFrameRef.current = requestAnimationFrame(drawECG);
+  }, [reducedMotion, isPaused]);
+
+  useEffect(() => {
+    lastTimeRef.current = null;
+    animationFrameRef.current = requestAnimationFrame(drawECG);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [drawECG]);
 
   const handleResetCamera = () => {
-    setBpm(heartRate || 72);
-    setSimulating(false);
+    setBpm(heartRate || 74);
     setIsPaused(false);
   };
 
   return (
-    <div className="heart-3d-card">
+    <div className="heart-3d-card" aria-label="3D Anatomical Heart Telemetry Monitor">
+      {/* 1. HEADER WITH DYNAMIC OPTIMAL/ELEVATED/HIGH BADGE */}
       <div className="heart-3d-header">
         <div className="heart-header-title">
           <div className="heart-pulse-icon" style={{ color: currentStatus.hex }}>
@@ -279,64 +296,113 @@ function AnatomicalHeart3D({ heartRate = 72, isAbnormal = false, status = "NORMA
           </div>
         </div>
 
-        <div className="heart-status-pill" style={{ borderColor: currentStatus.hex, color: currentStatus.hex }}>
+        <div
+          className="heart-status-pill"
+          style={{ borderColor: `${currentStatus.hex}60`, color: currentStatus.hex }}
+        >
           <span className="pulsing-led" style={{ background: currentStatus.hex }} />
           <span>{currentStatus.label}</span>
         </div>
       </div>
 
+      {/* 2. REALISTIC ANATOMICAL HEART VIEWPORT WITH LIVE LUB-DUB BEAT */}
       <div className="heart-3d-viewport">
-        {webGlSupported ? (
-          <div ref={mountRef} className="three-canvas-container" title="Click & drag to rotate 3D heart" />
-        ) : (
-          /* 2D Canvas / SVG Fallback */
-          <div className="heart-2d-fallback">
-            <svg
-              viewBox="0 0 100 100"
-              className={`fallback-heart-svg ${!reducedMotion ? "beating" : ""}`}
-              style={{
-                filter: `drop-shadow(0 0 16px ${currentStatus.hex})`,
-                animationDuration: `${60 / bpm}s`,
-              }}
-            >
-              <path
-                d="M50,88 C50,88 15,62 15,35 C15,18 28,10 40,18 C46,22 50,30 50,30 C50,30 54,22 60,18 C72,10 85,18 85,35 C85,62 50,88 50,88 Z"
-                fill={currentStatus.hex}
-              />
-            </svg>
-            <span>2D Anatomical Cardiac Mode</span>
-          </div>
-        )}
+        <div className="heart-image-stage">
+          {/* Ambient synced cardiac glow */}
+          <div
+            className="heart-ambient-glow"
+            style={{
+              animationDuration: `${cycleDuration}s`,
+              animationPlayState: isPaused ? "paused" : "running",
+            }}
+          />
 
-        {/* Floating Telemetry Stats on Canvas */}
+          {/* Realistic Anatomical Human Heart Image with lub-dub keyframe animation */}
+          <img
+            src={heartImg}
+            alt="Realistic Anatomical Human Heart"
+            className={`realistic-heart-img ${reducedMotion ? "no-animation" : ""}`}
+            style={{
+              animationDuration: reducedMotion ? "0s" : `${cycleDuration}s`,
+              animationPlayState: isPaused ? "paused" : "running",
+            }}
+          />
+        </div>
+
+        {/* 3. GLASSMORPHISM "HEART BEAT" CARD (BOTTOM-LEFT OVERLAY) */}
+        <div className="heartbeat-glass-overlay" role="region" aria-label="Heart Beat Live Overlay">
+          <div className="glass-header-row">
+            <div className="glass-icon-badge">
+              <Activity
+                size={14}
+                className={`overlay-heart-pulse ${reducedMotion || isPaused ? "no-animation" : ""}`}
+              />
+            </div>
+            <div className="glass-title-col">
+              <span className="glass-title">Heart Beat</span>
+              <span className="glass-caption">Live heart rate</span>
+            </div>
+            <div className="glass-live-indicator">
+              <span className={`live-pulse-dot ${isPaused ? "paused" : ""}`} />
+              <span className="glass-sync-badge">{isPaused ? "Paused" : "Live"}</span>
+            </div>
+          </div>
+
+          <div className="glass-bpm-row">
+            <span className="glass-bpm-value" aria-live="polite">
+              {bpm}
+            </span>
+            <span className="glass-bpm-unit">bpm</span>
+          </div>
+
+          {/* REAL CANVAS ECG WAVEFORM */}
+          <div ref={ecgWrapRef} className="glass-ecg-wrap">
+            <canvas
+              ref={canvasRef}
+              className="glass-ecg-canvas"
+              aria-label="Real-time scrolling ECG telemetry waveform"
+            />
+          </div>
+        </div>
+
+        {/* 4. TOP-RIGHT FLOATING TELEMETRY BADGE (BPM, INTERVAL, CARDIAC STATE) */}
         <div className="viewport-telemetry-badge">
           <div className="bpm-counter">
             <strong>{bpm}</strong>
             <small>BPM</small>
           </div>
           <div className="cycle-indicator">
-            <span>Interval: {(60 / bpm).toFixed(2)}s</span>
-            <span className="cardiac-state">{bpm > 100 ? "Tachycardic" : bpm < 60 ? "Bradycardic" : "Sinus Normal"}</span>
+            <span>Interval: {cycleDuration}s</span>
+            <span className="cardiac-state" style={{ color: currentStatus.hex }}>
+              {currentStatus.cardiacState}
+            </span>
           </div>
         </div>
 
-        {/* Viewport Control Bar */}
+        {/* 5. VIEWPORT CONTROL BUTTONS (PAUSE & RESET) */}
         <div className="viewport-controls">
           <button
             type="button"
             onClick={() => setIsPaused(!isPaused)}
-            className="ctrl-btn"
-            title={isPaused ? "Resume rotation" : "Pause rotation"}
+            className={`ctrl-btn ${isPaused ? "active" : ""}`}
+            title={isPaused ? "Resume cardiac animation" : "Pause cardiac animation"}
+            aria-label={isPaused ? "Resume animation" : "Pause animation"}
           >
             {isPaused ? <Play size={15} /> : <Pause size={15} />}
           </button>
-          <button type="button" onClick={handleResetCamera} className="ctrl-btn" title="Reset Camera & Vitals">
+          <button
+            type="button"
+            onClick={handleResetCamera}
+            className="ctrl-btn"
+            title="Reset to resting baseline rate"
+            aria-label="Reset heart rate"
+          >
             <RotateCcw size={15} />
           </button>
         </div>
       </div>
 
-      {/* Heart Rate Simulator & Accessibility Controls */}
+      {/* 6. INTERACTIVE SLIDER, 48 / 74 / 135 PRESETS & REDUCE MOTION */}
       <div className="heart-simulation-tray">
         <div className="sim-slider-row">
           <div className="sim-label">
@@ -349,11 +415,9 @@ function AnatomicalHeart3D({ heartRate = 72, isAbnormal = false, status = "NORMA
             min="40"
             max="160"
             value={bpm}
-            onChange={(e) => {
-              setSimulating(true);
-              setBpm(Number(e.target.value));
-            }}
+            onChange={(e) => setBpm(Number(e.target.value))}
             className="heart-slider"
+            aria-label="Adjust simulated heart rate slider"
           />
         </div>
 
@@ -361,30 +425,21 @@ function AnatomicalHeart3D({ heartRate = 72, isAbnormal = false, status = "NORMA
           <button
             type="button"
             className={`preset-chip ${bpm === 48 ? "active" : ""}`}
-            onClick={() => {
-              setSimulating(true);
-              setBpm(48);
-            }}
+            onClick={() => setBpm(48)}
           >
             48 BPM (Bradycardia)
           </button>
           <button
             type="button"
             className={`preset-chip ${bpm === 74 ? "active" : ""}`}
-            onClick={() => {
-              setSimulating(true);
-              setBpm(74);
-            }}
+            onClick={() => setBpm(74)}
           >
             74 BPM (Normal Resting)
           </button>
           <button
             type="button"
             className={`preset-chip ${bpm === 135 ? "active" : ""}`}
-            onClick={() => {
-              setSimulating(true);
-              setBpm(135);
-            }}
+            onClick={() => setBpm(135)}
           >
             135 BPM (Tachycardia / Stress)
           </button>
@@ -397,10 +452,10 @@ function AnatomicalHeart3D({ heartRate = 72, isAbnormal = false, status = "NORMA
               checked={reducedMotion}
               onChange={(e) => setReducedMotion(e.target.checked)}
             />
-            <span>Reduce Motion (Disable Pulse Animation)</span>
+            <span>Reduce Motion (Disable Pulse & Scrolling Animation)</span>
           </label>
           <span className="heart-disclaimer">
-            * Informational 3D model synced with physiological parameters.
+            * Physiological anatomical model synchronized with live telemetry parameters.
           </span>
         </div>
       </div>

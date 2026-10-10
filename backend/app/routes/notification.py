@@ -9,6 +9,35 @@ from app.utils.helpers import serialize_doc, is_valid_object_id
 
 notification_bp = Blueprint("notifications", __name__)
 
+@notification_bp.route("", methods=["GET"], strict_slashes=False)
+@notification_bp.route("/", methods=["GET"], strict_slashes=False)
+@token_required
+def get_all_notifications():
+    db = get_database()
+    patient_id = request.args.get("patient_id")
+    current_user = getattr(g, "current_user", None) or {}
+    user_id = str(current_user.get("_id") or current_user.get("id") or "")
+    role = (current_user.get("role") or "").upper()
+
+    query = {}
+    if patient_id:
+        p_obj = ObjectId(patient_id) if is_valid_object_id(patient_id) else None
+        query = {"$or": [q for q in [{"patient_id": p_obj}, {"patient_id": patient_id}] if q["patient_id"] is not None]}
+    elif role == "PATIENT" and user_id:
+        u_obj = ObjectId(user_id) if is_valid_object_id(user_id) else None
+        or_conds = [{"patient_id": user_id}, {"user_id": user_id}]
+        if u_obj:
+            or_conds.extend([{"patient_id": u_obj}, {"user_id": u_obj}])
+        query = {"$or": or_conds}
+
+    try:
+        limit = max(1, min(100, int(request.args.get("limit", 50))))
+    except (ValueError, TypeError):
+        limit = 50
+
+    notifications = list(db.notifications.find(query).sort("created_at", -1).limit(limit))
+    return jsonify(serialize_doc(notifications)), 200
+
 @notification_bp.route("", methods=["POST"], strict_slashes=False)
 @notification_bp.route("/", methods=["POST"], strict_slashes=False)
 @token_required

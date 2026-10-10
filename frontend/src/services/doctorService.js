@@ -41,7 +41,10 @@ export const doctorService = {
   async getDoctors() {
     try {
       const response = await api.get("/doctors/");
-      return Array.isArray(response.data) ? response.data : [];
+      if (Array.isArray(response.data)) return response.data;
+      if (response.data && Array.isArray(response.data.doctors)) return response.data.doctors;
+      if (response.data && Array.isArray(response.data.data)) return response.data.data;
+      return [];
     } catch (error) {
       console.warn("Failed to fetch doctors:", error?.message);
       return [];
@@ -78,7 +81,11 @@ export const doctorService = {
   async getHospitals() {
     try {
       const response = await api.get("/hospitals/");
-      return Array.isArray(response.data) ? response.data : [];
+      if (Array.isArray(response.data)) return response.data;
+      if (response.data && Array.isArray(response.data.hospitals)) return response.data.hospitals;
+      if (response.data && Array.isArray(response.data.facilities)) return response.data.facilities;
+      if (response.data && Array.isArray(response.data.data)) return response.data.data;
+      return [];
     } catch (error) {
       console.warn("Failed to fetch hospitals:", error?.message);
       return [];
@@ -91,7 +98,10 @@ export const doctorService = {
   async getAppointments() {
     try {
       const response = await api.get("/appointments/");
-      return Array.isArray(response.data) ? response.data : [];
+      if (Array.isArray(response.data)) return response.data;
+      if (response.data && Array.isArray(response.data.appointments)) return response.data.appointments;
+      if (response.data && Array.isArray(response.data.data)) return response.data.data;
+      return [];
     } catch (error) {
       console.warn("Failed to fetch appointments from /appointments/:", error?.message);
       return [];

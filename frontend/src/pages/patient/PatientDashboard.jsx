@@ -61,12 +61,7 @@ const PatientDashboard = () => {
   const eventSourceRef = useRef(null);
 
   const fetchDashboardData = useCallback(async (isManualRefresh = false) => {
-    if (!user?.patient_id) {
-      setLoading(false);
-      return;
-    }
-
-    const patientId = user.patient_id;
+    const patientId = user?.patient_id || user?._id || user?.id;
 
     try {
       if (isManualRefresh) {
@@ -113,7 +108,12 @@ const PatientDashboard = () => {
       // 3. Health Records
       let recordsCount = 0;
       if (recordsRes.status === "fulfilled") {
-        const records = recordsRes.value || [];
+        const rawRecords = recordsRes.value;
+        const records = Array.isArray(rawRecords)
+          ? rawRecords
+          : Array.isArray(rawRecords?.records)
+          ? rawRecords.records
+          : [];
         recordsCount = records.length;
         setRecentRecords(
           [...records]
@@ -136,14 +136,26 @@ const PatientDashboard = () => {
       // 6. Appointments & Consults
       let allDocs = [];
       if (doctorsRes.status === "fulfilled") {
-        allDocs = doctorsRes.value || [];
+        const rawDocs = doctorsRes.value;
+        allDocs = Array.isArray(rawDocs)
+          ? rawDocs
+          : Array.isArray(rawDocs?.doctors)
+          ? rawDocs.doctors
+          : [];
       }
 
       let upcomingAptsCount = 0;
       if (appointmentsRes.status === "fulfilled") {
-        const apts = appointmentsRes.value || [];
+        const rawApts = appointmentsRes.value;
+        const apts = Array.isArray(rawApts)
+          ? rawApts
+          : Array.isArray(rawApts?.appointments)
+          ? rawApts.appointments
+          : Array.isArray(rawApts?.data)
+          ? rawApts.data
+          : [];
         const upcoming = apts.filter(
-          (a) => (a.status || "").toUpperCase() !== "COMPLETED" && (a.status || "").toUpperCase() !== "CANCELLED"
+          (a) => (a?.status || "").toUpperCase() !== "COMPLETED" && (a?.status || "").toUpperCase() !== "CANCELLED"
         );
         upcomingAptsCount = upcoming.length;
         if (upcoming.length > 0) {

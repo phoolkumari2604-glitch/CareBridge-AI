@@ -52,8 +52,8 @@ function getECGAmplitude(u) {
 }
 
 export default function LiveHeartRateMonitor({ className = "" }) {
-  // 1. Live BPM state (single source of truth, initially 120 bpm)
-  const [bpm, setBpm] = useState(120);
+  // 1. Live BPM state (single source of truth, initialized to 78 bpm)
+  const [bpm, setBpm] = useState(78);
 
   // 2. Reduced motion detection
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
@@ -64,8 +64,9 @@ export default function LiveHeartRateMonitor({ className = "" }) {
   });
 
   // Refs for animation & canvas rendering without causing component re-render loops
-  const bpmRef = useRef(120);
+  const bpmRef = useRef(78);
   const canvasRef = useRef(null);
+  const ecgWrapRef = useRef(null);
   const containerRef = useRef(null);
   const animationFrameRef = useRef(null);
   const phaseAccumulatorRef = useRef(0);
@@ -92,12 +93,19 @@ export default function LiveHeartRateMonitor({ className = "" }) {
   }, []);
 
   // 3. Live BPM simulation:
-  // Every 2 seconds, generate and display a new integer BPM between 60 and 110
+  // Every 2 seconds, apply a gradual, plausible delta (e.g. -2 to +2 BPM) clamped within [60, 110]
   useEffect(() => {
     const interval = setInterval(() => {
-      // Generate random integer between 60 and 110 inclusive
-      const newBpm = Math.floor(Math.random() * (110 - 60 + 1)) + 60;
-      setBpm(newBpm);
+      setBpm((prevBpm) => {
+        // Natural physiological respiratory sinus arrhythmia drift: -2, -1, 0, +1, +2
+        const delta = Math.floor(Math.random() * 5) - 2;
+        let nextBpm = prevBpm + delta;
+        // Bias back toward resting average (~76-80) if near extremes
+        if (nextBpm > 105) nextBpm -= 2;
+        if (nextBpm < 65) nextBpm += 2;
+        // Clamp strictly between 60 and 110
+        return Math.min(110, Math.max(60, nextBpm));
+      });
     }, 2000);
 
     return () => clearInterval(interval);
@@ -108,9 +116,9 @@ export default function LiveHeartRateMonitor({ className = "" }) {
     if (currentBpm < 60) {
       return {
         text: "Low resting heart rate",
-        color: "#f59e0b",
+        color: "#38bdf8",
         badgeClass: "status-low",
-        dotClass: "dot-amber",
+        dotClass: "dot-cyan",
         description: "Bradycardia threshold: clinical resting evaluation suggested",
       };
     }
@@ -125,7 +133,7 @@ export default function LiveHeartRateMonitor({ className = "" }) {
     }
     if (currentBpm <= 110) {
       return {
-        text: "Elevated heart rate",
+        text: "Elevated resting heart rate",
         color: "#f59e0b",
         badgeClass: "status-elevated",
         dotClass: "dot-amber",
@@ -265,6 +273,27 @@ export default function LiveHeartRateMonitor({ className = "" }) {
     };
   }, [drawECG]);
 
+  // ResizeObserver for sharp responsive high-DPI canvas
+  useEffect(() => {
+    const wrap = ecgWrapRef.current;
+    if (!wrap || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        const canvas = canvasRef.current;
+        if (canvas && width > 0 && height > 0) {
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.floor(width * dpr);
+          canvas.height = Math.floor(height * dpr);
+        }
+      }
+    });
+
+    observer.observe(wrap);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
       ref={containerRef}
@@ -279,14 +308,14 @@ export default function LiveHeartRateMonitor({ className = "" }) {
             <span className="telemetry-solid-dot" />
           </div>
           <div>
-            <h3 className="monitor-main-heading">Cardiac Rhythm & Heart Rate Monitor</h3>
-            <span className="monitor-sub-heading">Real-time physiological telemetry visualizer</span>
+            <h3 className="monitor-main-heading">3D Anatomical Heart Telemetry</h3>
+            <span className="monitor-sub-heading">Rhythmic Biomechanical Model Synchronized with Physiological Heart Rate</span>
           </div>
         </div>
 
         <div className="telemetry-status-pill" style={{ borderColor: `${status.color}40` }}>
           <Radio size={13} className="telemetry-radio-icon" style={{ color: status.color }} />
-          <span className="telemetry-mode-text">LIVE STREAM</span>
+          <span className="telemetry-mode-text">LIVE TELEMETRY</span>
           <span className="telemetry-rate-badge font-mono">{bpm} BPM</span>
         </div>
       </div>
@@ -310,10 +339,16 @@ export default function LiveHeartRateMonitor({ className = "" }) {
         <div className="heartbeat-glass-overlay" role="region" aria-label="Heart Beat Overlay Widget">
           <div className="glass-header-row">
             <div className="glass-icon-badge">
-              <Heart size={15} className={`overlay-heart-pulse ${prefersReducedMotion ? "no-animation" : ""}`} />
+              <Activity size={15} className={`overlay-heart-pulse ${prefersReducedMotion ? "no-animation" : ""}`} />
             </div>
-            <span className="glass-title">Heart Beat</span>
-            <span className="glass-sync-badge">Synced</span>
+            <div className="glass-title-col">
+              <span className="glass-title">Heart Beat</span>
+              <span className="glass-caption">Live heart rate</span>
+            </div>
+            <div className="glass-live-indicator">
+              <span className="live-pulse-dot" />
+              <span className="glass-sync-badge">Live</span>
+            </div>
           </div>
 
           <div className="glass-bpm-row">
@@ -324,7 +359,7 @@ export default function LiveHeartRateMonitor({ className = "" }) {
           </div>
 
           {/* REAL CANVAS ECG WAVEFORM */}
-          <div className="glass-ecg-wrap">
+          <div ref={ecgWrapRef} className="glass-ecg-wrap">
             <canvas
               ref={canvasRef}
               className="glass-ecg-canvas"

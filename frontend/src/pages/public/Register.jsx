@@ -18,12 +18,15 @@ import {
   ArrowRight,
   Shield,
   FileCheck2,
+  Sparkles,
 } from "lucide-react";
 import authAPI from "../../services/auth";
+import { useAuth } from "../../context/AuthContext";
 import "./Register.css";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   // Core Account Form State
   const [formData, setFormData] = useState({
@@ -309,18 +312,30 @@ const Register = () => {
       const res = await authAPI.register(payload, controller.signal);
       clearTimeout(timeoutId);
 
-      setSuccessToast(
-        res?.message || "Account created successfully! Verification email dispatched. Redirecting to login..."
-      );
-
-      setTimeout(() => {
-        navigate("/login", {
-          state: {
-            registeredEmail: formData.email.trim().toLowerCase(),
-            message: "Registration successful. Please log in with your credentials.",
-          },
-        });
-      }, 2000);
+      // Instant auto-login if token and user are returned
+      if (res?.access_token && res?.user) {
+        localStorage.setItem("access_token", res.access_token);
+        localStorage.setItem("user", JSON.stringify(res.user));
+        if (setUser) {
+          setUser(res.user);
+        }
+        setSuccessToast("Account created successfully! Logging you in...");
+        setTimeout(() => {
+          navigate("/patient/dashboard");
+        }, 1200);
+      } else {
+        setSuccessToast(
+          res?.message || "Account created successfully! Redirecting to login..."
+        );
+        setTimeout(() => {
+          navigate("/login", {
+            state: {
+              registeredEmail: formData.email.trim().toLowerCase(),
+              message: "Registration successful. Please log in with your credentials.",
+            },
+          });
+        }, 1800);
+      }
     } catch (err) {
       clearTimeout(timeoutId);
       console.error("CareBridge Registration error:", err);

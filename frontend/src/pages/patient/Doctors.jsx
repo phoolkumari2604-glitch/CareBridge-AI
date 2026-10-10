@@ -63,10 +63,14 @@ function Doctors() {
       ]);
 
       if (doctorsData.status === "fulfilled") {
-        setDoctors(doctorsData.value || []);
+        const val = doctorsData.value;
+        const list = Array.isArray(val) ? val : (val?.doctors || val?.data || []);
+        setDoctors(Array.isArray(list) ? list : []);
       }
       if (hospitalsData.status === "fulfilled") {
-        setHospitals(hospitalsData.value || []);
+        const val = hospitalsData.value;
+        const list = Array.isArray(val) ? val : (val?.hospitals || val?.facilities || val?.data || []);
+        setHospitals(Array.isArray(list) ? list : []);
       }
     } catch (err) {
       console.error("Failed to fetch doctors:", err);
@@ -80,18 +84,23 @@ function Doctors() {
     fetchDoctorsAndHospitals();
   }, [fetchDoctorsAndHospitals]);
 
+  const docList = useMemo(() => (Array.isArray(doctors) ? doctors : []), [doctors]);
+  const hospList = useMemo(() => (Array.isArray(hospitals) ? hospitals : []), [hospitals]);
+
   // Map hospital name or fallback to doctor field
   const getDoctorHospital = (doc) => {
+    if (!doc) return "Not available";
     if (doc.hospital_name) return doc.hospital_name;
     if (doc.hospital) return doc.hospital;
     if (doc.hospital_id) {
-      const found = hospitals.find((h) => h._id === doc.hospital_id || h.id === doc.hospital_id);
+      const found = hospList.find((h) => h._id === doc.hospital_id || h.id === doc.hospital_id);
       if (found) return found.name;
     }
     return "Not available";
   };
 
   const getDoctorLocation = (doc) => {
+    if (!doc) return "Not available";
     const parts = [];
     if (doc.city) parts.push(doc.city);
     if (doc.country) parts.push(doc.country);
@@ -101,21 +110,22 @@ function Doctors() {
   // Distinct lists for filters
   const specialties = useMemo(() => {
     return Array.from(
-      new Set(doctors.map((d) => d.specialty || d.specialization).filter(Boolean))
+      new Set(docList.map((d) => d?.specialty || d?.specialization).filter(Boolean))
     ).sort();
-  }, [doctors]);
+  }, [docList]);
 
   const categories = useMemo(() => {
-    return Array.from(new Set(doctors.map((d) => d.category).filter(Boolean))).sort();
-  }, [doctors]);
+    return Array.from(new Set(docList.map((d) => d?.category).filter(Boolean))).sort();
+  }, [docList]);
 
   const countries = useMemo(() => {
-    return Array.from(new Set(doctors.map((d) => d.country).filter(Boolean))).sort();
-  }, [doctors]);
+    return Array.from(new Set(docList.map((d) => d?.country).filter(Boolean))).sort();
+  }, [docList]);
 
   // Filter & search logic
   const filteredDoctors = useMemo(() => {
-    return doctors.filter((doc) => {
+    return docList.filter((doc) => {
+      if (!doc) return false;
       const name = (doc.name || "").toLowerCase();
       const spec = (doc.specialty || doc.specialization || "").toLowerCase();
       const hosp = (doc.hospital_name || doc.hospital || "").toLowerCase();
@@ -146,7 +156,7 @@ function Doctors() {
       return matchesSearch && matchesSpec && matchesCat && matchesCountry && matchesVerification;
     });
   }, [
-    doctors,
+    docList,
     searchQuery,
     selectedSpecialty,
     selectedCategory,
@@ -273,9 +283,9 @@ function Doctors() {
       <section className="doctors-header">
         <div>
           <span className="doctors-kicker">MEDICAL DIRECTORY</span>
-          <h1>Specialist &amp; Expert Directory</h1>
+          <h1>Find Your Specialist</h1>
           <p>
-            Explore verified specialists, medical researchers, academic faculty, and international leaders. Filter by specialty, institution, country, or clinical availability.
+            Explore verified medical professionals and find the right care for your needs.
           </p>
         </div>
 
@@ -290,7 +300,7 @@ function Doctors() {
           <Search size={18} />
           <input
             type="text"
-            placeholder="Search by doctor name, specialty, hospital, city, country, or category..."
+            placeholder="Search by doctor, specialty, hospital, or location"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -357,13 +367,29 @@ function Doctors() {
       {/* TOOLBAR */}
       <div className="doctors-toolbar">
         <div>
-          <h2>Medical Professionals &amp; Pioneers</h2>
+          <h2>Medical Professionals &amp; Specialists</h2>
           <p>
-            Showing <strong>{sortedDoctors.length}</strong> of {doctors.length} directory records
+            Showing <strong>{sortedDoctors.length}</strong> verified, published profile{sortedDoctors.length === 1 ? "" : "s"} of {doctors.length} in directory
           </p>
         </div>
 
         <div className="toolbar-controls">
+          {(searchQuery || selectedSpecialty || selectedCategory || selectedCountry || selectedVerification) && (
+            <button
+              type="button"
+              className="reset-filters-btn"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedSpecialty("");
+                setSelectedCategory("");
+                setSelectedCountry("");
+                setSelectedVerification("");
+              }}
+            >
+              Reset Filters
+            </button>
+          )}
+
           <select
             className="sort-select"
             value={sortBy}

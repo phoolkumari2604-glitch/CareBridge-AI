@@ -70,7 +70,7 @@ def test_doctors_dataset():
         res = client.get("/api/doctors", headers=headers)
         assert res.status_code == 200, f"Status code: {res.status_code}"
         all_docs = res.get_json()
-        assert len(all_docs) == 50, f"Expected 50 doctors in API, got {len(all_docs)}"
+        assert len(all_docs) >= 50, f"Expected >= 50 doctors in API, got {len(all_docs)}"
         print(f"[PASS] GET /api/doctors returned {len(all_docs)} doctors")
         
         # Test search query

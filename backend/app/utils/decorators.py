@@ -27,13 +27,16 @@ def token_required(f):
         
         try:
             db = get_database()
-            user = db.users.find_one({"_id": ObjectId(user_id)})
+            if ObjectId.is_valid(user_id):
+                user = db.users.find_one({"_id": ObjectId(user_id)})
+            else:
+                user = db.users.find_one({"$or": [{"_id": user_id}, {"id": user_id}, {"email": user_id}]})
             if not user:
                 return jsonify({"error": "User not found", "detail": "User associated with token does not exist"}), 401
             
             g.current_user = user
         except Exception as e:
-            return jsonify({"error": "Database error during authentication", "detail": str(e)}), 500
+            return jsonify({"error": "Authentication error", "detail": str(e)}), 401
         
         return f(*args, **kwargs)
     return decorated

@@ -81,18 +81,22 @@ def get_doctors():
     db = get_database()
     hospital_id = request.args.get("hospital_id")
     specialty = request.args.get("specialty")
+    category = request.args.get("category")
+    country = request.args.get("country")
+    is_bookable_param = request.args.get("is_bookable")
     status_arg = request.args.get("status")
     search = request.args.get("search", "").strip()
     
+    has_pagination = "page" in request.args or "limit" in request.args
     try:
         page = max(1, int(request.args.get("page", 1)))
     except (ValueError, TypeError):
         page = 1
         
     try:
-        limit = int(request.args.get("limit", 10))
+        limit = int(request.args.get("limit", 10 if has_pagination else 0))
     except (ValueError, TypeError):
-        limit = 10
+        limit = 10 if has_pagination else 0
         
     query = {}
     if hospital_id and is_valid_object_id(hospital_id):
@@ -100,6 +104,15 @@ def get_doctors():
         
     if specialty and specialty != "All" and specialty != "ALL":
         query["specialty"] = {"$regex": re.escape(specialty), "$options": "i"}
+        
+    if category and category != "All" and category != "ALL":
+        query["category"] = {"$regex": f"^{re.escape(category)}$", "$options": "i"}
+        
+    if country and country != "All" and country != "ALL":
+        query["country"] = {"$regex": f"^{re.escape(country)}$", "$options": "i"}
+        
+    if is_bookable_param is not None:
+        query["is_bookable"] = str(is_bookable_param).lower() in ["true", "1", "yes"]
         
     if search:
         s_clean = re.escape(search)
@@ -139,8 +152,8 @@ def get_doctors():
     doctors = list(cursor)
     serialized = serialize_doc(doctors)
     
-    # If legacy client requested without pagination parameter limit=0
-    if request.args.get("all") == "true" or limit == 0:
+    # If unpaginated request or limit=0 or all=true
+    if not has_pagination or request.args.get("all") == "true" or limit == 0:
         return jsonify(serialized), 200
         
     return jsonify({
