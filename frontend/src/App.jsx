@@ -117,6 +117,7 @@ function App() {
           {/* ==================================================
               PATIENT MODULE
           ================================================== */}
+          <Route path="/dashboard" element={<PatientDashboard />} />
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
           <Route path="/patient/profile" element={<Profile />} />
           <Route path="/patient/settings" element={<Settings />} />

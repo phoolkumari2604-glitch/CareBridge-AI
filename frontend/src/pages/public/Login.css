@@ -99,6 +99,20 @@
   margin-bottom: 20px;
 }
 
+.login-success-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(13, 148, 136, 0.15);
+  border: 1px solid rgba(13, 148, 136, 0.4);
+  color: #2dd4bf;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;

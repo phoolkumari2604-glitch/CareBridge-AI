@@ -937,8 +937,8 @@ const Register = () => {
             {/* Contact Support */}
             <div className="cb-support-note">
               <span>Need help? Contact support: </span>
-              <a href="mailto:phoolkumari2603@gmail.com" className="cb-link-accent">
-                phoolkumari2603@gmail.com
+              <a href="mailto:support@carebridge.ai" className="cb-link-accent">
+                support@carebridge.ai
               </a>
             </div>
           </div>

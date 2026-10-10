@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Mail,
   Lock,
@@ -13,6 +13,7 @@ import {
   Stethoscope,
   Building,
   RotateCcw,
+  CheckCircle2,
 } from "lucide-react";
 import authAPI from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
@@ -21,6 +22,7 @@ import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -29,6 +31,7 @@ function Login() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   // 2FA Admin verification step
   const [require2FA, setRequire2FA] = useState(false);
@@ -37,6 +40,16 @@ function Login() {
   const [timerSeconds, setTimerSeconds] = useState(600); // 10 minutes
   const [resendingOtp, setResendingOtp] = useState(false);
   const otpInputRefs = useRef([]);
+
+  // Load message/email passed from registration
+  useEffect(() => {
+    if (location.state?.registeredEmail) {
+      setEmail(location.state.registeredEmail);
+    }
+    if (location.state?.message) {
+      setSuccessMsg(location.state.message);
+    }
+  }, [location.state]);
 
   // Countdown timer for 2FA OTP
   useEffect(() => {
@@ -68,6 +81,7 @@ function Login() {
     }
 
     setError("");
+    setSuccessMsg("");
     setLoading(true);
 
     const controller = new AbortController();
@@ -102,7 +116,9 @@ function Login() {
       console.error("CareBridge Login error:", err);
 
       if (err.name === "AbortError" || err.code === "ECONNABORTED" || controller.signal.aborted) {
-        setError("Unable to sign in. Check your connection and try again.");
+        setError("Connection timed out (15s). Please check your internet connection and try again.");
+      } else if (!err.response || err.message === "Network Error" || err.code === "ERR_NETWORK") {
+        setError("Unable to connect to CareBridge AI server. Please verify the backend is running on port 5000.");
       } else if (err.response?.status === 401) {
         setError(err.response?.data?.detail || "Invalid email or password. Please verify your credentials.");
       } else if (err.response?.status === 429) {
@@ -115,7 +131,7 @@ function Login() {
         const msg =
           err.response?.data?.detail ||
           err.response?.data?.message ||
-          "Unable to sign in. Check your connection and try again.";
+          "Unable to sign in. Please check your credentials.";
         setError(msg);
       }
     } finally {
@@ -131,6 +147,7 @@ function Login() {
     setEmail(creds.email);
     setPassword(creds.password);
     setError("");
+    setSuccessMsg("");
     handleLogin(null, creds);
   };
 
@@ -168,6 +185,8 @@ function Login() {
 
       if (err.name === "AbortError" || controller.signal.aborted) {
         setError("Verification timed out. Check your connection and try again.");
+      } else if (!err.response || err.code === "ERR_NETWORK") {
+        setError("Unable to connect to CareBridge AI server. Please verify the backend is running.");
       } else if (err.response?.status === 401) {
         setError("Invalid or expired OTP code.");
       } else {
@@ -263,13 +282,12 @@ function Login() {
     <div className="login-page dark" data-theme="dark">
       <div className="login-container">
         <div className="login-card dark" data-theme="dark">
-          <Link to="/" className="login-brand-link">
+          <Link to="/" className="login-brand-link" aria-label="CareBridge AI Home">
             <div className="login-logo">C</div>
             <div>
               <span className="login-brand-name text-white">
                 Care<span className="text-teal-400">Bridge</span> AI
               </span>
-              <span className="login-brand-tag text-slate-400">Clinical Portal</span>
             </div>
           </Link>
 
@@ -366,9 +384,18 @@ function Login() {
                 Access your personal health records, live queues, and appointments.
               </p>
 
+              {/* SUCCESS NOTIFICATION (E.G. FROM REGISTRATION) */}
+              {successMsg && (
+                <div className="login-success-banner" role="status" aria-live="polite">
+                  <CheckCircle2 size={18} className="flex-shrink-0" />
+                  <span>{successMsg}</span>
+                </div>
+              )}
+
+              {/* ERROR NOTIFICATION */}
               {error && (
-                <div className="login-error" role="alert">
-                  <AlertCircle size={18} />
+                <div className="login-error" role="alert" aria-live="polite">
+                  <AlertCircle size={18} className="flex-shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
@@ -497,8 +524,8 @@ function Login() {
           <div className="mt-6 pt-4 border-t border-slate-800 text-center">
             <span className="text-xs text-slate-400">
               Support & Inquiries:{" "}
-              <a href="mailto:phoolkumari2603@gmail.com" className="text-teal-400 hover:underline">
-                phoolkumari2603@gmail.com
+              <a href="mailto:support@carebridge.ai" className="text-teal-400 hover:underline">
+                support@carebridge.ai
               </a>
             </span>
           </div>

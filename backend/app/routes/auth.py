@@ -85,8 +85,8 @@ def get_or_create_staff_id(db, user):
 
 def validate_strong_password(password: str):
     """Validates that a password meets production security criteria."""
-    if not password or len(password) < 10:
-        return False, "Password must be at least 10 characters long"
+    if not password or len(password) < 8:
+        return False, "Password must be at least 8 characters long"
     if not re.search(r"[A-Z]", password):
         return False, "Password must contain at least one uppercase letter (A-Z)"
     if not re.search(r"[a-z]", password):
