@@ -1,0 +1,8 @@
+
+The command exited with code 0.
+Output:
+Found 45 existing doctor records in carebridge_ai.doctors collection.
+Deleted 45 old records.
+Successfully inserted 50 real doctor records.
+Verified new total doctors in MongoDB: 50
+

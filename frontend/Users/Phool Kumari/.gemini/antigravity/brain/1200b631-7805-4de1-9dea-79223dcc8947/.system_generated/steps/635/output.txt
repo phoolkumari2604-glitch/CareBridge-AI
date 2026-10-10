@@ -1,0 +1,123 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\pages\patient\DigitalOPDPass.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -247,8 +247,105 @@
+         </div>
+       )}
+ 
++      {/* SCANNER VALIDATION TAB */}
++      {activeTab === "verify" && (
++        <section className="opd-validator-section">
++          <div className="validator-card">
++            <div className="validator-header">
++              <div className="validator-icon">
++                <QrCode size={24} />
++              </div>
++              <div>
++                <h2>OPD Pass Validator & Token Scanner</h2>
++                <p>Verify cryptographic legitimacy, check reception intake readiness, and validate appointment details.</p>
++              </div>
++            </div>
++
++            <form onSubmit={handleValidatePass} className="validator-form">
++              <div className="validator-input-wrap">
++                <input
++                  type="text"
++                  placeholder="Enter or paste OPD Pass Number (e.g. OPD-20261009-ABC123)..."
++                  value={verifyToken}
++                  onChange={(e) => setVerifyToken(e.target.value)}
++                  className="validator-input"
++                  required
++                />
++                <button type="submit" disabled={validating || !verifyToken.trim()} className="validator-submit-btn">
++                  {validating ? <Loader2 size={16} className="spinner-icon" /> : <ShieldCheck size={16} />}
++                  <span>{validating ? "Validating..." : "Verify Token"}</span>
++                </button>
++              </div>
++              {selectedPass?.pass_number && (
++                <div className="quick-token-buttons">
++                  <span>Current Pass:</span>
++                  <button
++                    type="button"
++                    className="quick-token-chip"
++                    onClick={() => {
++                      setVerifyToken(selectedPass.pass_number);
++                    }}
++                  >
++                    Use {selectedPass.pass_number}
++                  </button>
++                </div>
++              )}
++            </form>
++
++            {validationError && (
++              <div className="validation-alert invalid">
++                <AlertCircle size={20} />
++                <div>
++                  <strong>Validation Failed</strong>
++                  <p>{validationError}</p>
++                </div>
++              </div>
++            )}
++
++            {validationResult && (
++              <div className={`validation-alert ${validationResult.valid ? "valid" : "warning"}`}>
++                <CheckCircle2 size={24} />
++                <div className="validation-result-details">
++                  <div className="validation-result-header">
++                    <strong>{validationResult.valid ? "Pass Cryptographically Verified & Active" : "Verification Notice"}</strong>
++                    <span className={`status-badge-mini ${validationResult.status?.toLowerCase()}`}>{validationResult.status}</span>
++                  </div>
++                  <p>{validationResult.message}</p>
++                  <div className="validation-grid">
++                    <div>
++                      <span>Pass Number:</span>
++                      <strong>{validationResult.pass_number}</strong>
++                    </div>
++                    <div>
++                      <span>Patient:</span>
++                      <strong>{validationResult.patient_name || user?.name || "Verified Patient"}</strong>
++                    </div>
++                    <div>
++                      <span>Doctor:</span>
++                      <strong>{validationResult.doctor_name || "Assigned Specialist"}</strong>
++                    </div>
++                    <div>
++                      <span>Hospital:</span>
++                      <strong>{validationResult.hospital_name || "CareBridge Hospital"}</strong>
++                    </div>
++                    <div>
++                      <span>Date & Time:</span>
++                      <strong>{validationResult.appointment_date || "Today"} at {validationResult.appointment_time || "Scheduled Slot"}</strong>
++                    </div>
++                    <div>
++                      <span>Reason:</span>
++                      <strong>{validationResult.reason || "General Consultation"}</strong>
++                    </div>
++                  </div>
++                </div>
++              </div>
++            )}
++          </div>
++        </section>
++      )}
++
+       {/* EMPTY STATE */}
+-      {!loading && !error && (activeTab === "active" ? activeList.length === 0 : archiveList.length === 0) && (
++      {activeTab !== "verify" && !loading && !error && (activeTab === "active" ? activeList.length === 0 : archiveList.length === 0) && (
+         <div className="opd-empty-state">
+           <Ticket size={48} />
+           <h3>{activeTab === "active" ? "No Active OPD Passes" : "No Archived Passes"}</h3>
+@@ -265,8 +265,9 @@
+       )}
+ 
+       {/* MAIN OPD LAYOUT */}
+-      {!loading && !error && selectedPass && (
++      {activeTab !== "verify" && !loading && !error && selectedPass && (
+         <div className="opd-layout">
++
+           {/* PASS CARDS SELECTOR (IF MULTIPLE) */}
+           {activePasses.length > 1 && (
+             <div className="opd-selector-row">
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

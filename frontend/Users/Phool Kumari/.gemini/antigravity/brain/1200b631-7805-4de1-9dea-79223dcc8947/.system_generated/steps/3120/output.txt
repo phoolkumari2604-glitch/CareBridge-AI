@@ -1,0 +1,14 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\layouts\Navbar.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -42,7 +42,7 @@
+   if (pathname.startsWith("/doctor/appointments")) return "Appointments";
+   if (pathname.startsWith("/doctor/approvals")) return "Approvals";
+   if (pathname.startsWith("/doctor/records") || pathname.startsWith("/doctor/health-records")) return "Health Records";
+-  if (pathname.startsWith("/doctor/health-monitoring")) return "Health Monitoring";
++  if (pathname.startsWith("/doctor/health-monitoring")) return "PulseView";
+   if (pathname.startsWith("/doctor/vitals")) return "Vitals";
+   if (pathname.startsWith("/doctor/ai-assistant")) return "AI Assistant";
+   if (pathname.startsWith("/doctor/hospitals")) return "Hospitals";
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

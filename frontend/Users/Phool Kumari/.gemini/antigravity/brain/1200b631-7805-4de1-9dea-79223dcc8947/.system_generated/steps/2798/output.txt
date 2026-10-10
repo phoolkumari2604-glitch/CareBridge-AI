@@ -1,0 +1,41 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\services\doctorService.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -176,13 +176,28 @@
+   // ------------------------------------------------------------
+   // HEALTH RECORDS
+   // ------------------------------------------------------------
+-  async getHealthRecords(patientId) {
+-    if (!patientId) return [];
+-    try {
+-      const response = await api.get(`/health-records/${patientId}`);
+-      return Array.isArray(response.data) ? response.data : [];
+-    } catch (error) {
+-      return [];
++  async getHealthRecords(patientIdOrParams) {
++    try {
++      if (typeof patientIdOrParams === "string" && patientIdOrParams) {
++        const response = await api.get(`/health-records/${patientIdOrParams}`);
++        return Array.isArray(response.data) ? response.data : [];
++      }
++      const params = typeof patientIdOrParams === "object" ? patientIdOrParams : {};
++      const response = await api.get("/health-records/", { params });
++      if (Array.isArray(response.data)) return response.data;
++      if (response.data && Array.isArray(response.data.records)) return response.data.records;
++      return [];
++    } catch (error) {
++      return [];
++    }
++  },
++
++  async getHealthRecordsSummary(params = {}) {
++    try {
++      const response = await api.get("/health-records/", { params });
++      return response.data || { records: [], stats: { total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 } };
++    } catch (error) {
++      return { records: [], stats: { total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 } };
+     }
+   },
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

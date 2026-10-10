@@ -1,0 +1,38 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\patient\Doctors.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -367,9 +367,9 @@
+       {/* TOOLBAR */}
+       <div className="doctors-toolbar">
+         <div>
+-          <h2>Medical Professionals &amp; Pioneers</h2>
+-          <p>
+-            Showing <strong>{sortedDoctors.length}</strong> of {doctors.length} directory records
++          <h2>Medical Professionals &amp; Specialists</h2>
++          <p>
++            Showing <strong>{sortedDoctors.length}</strong> verified, published profile{sortedDoctors.length === 1 ? "" : "s"} of {doctors.length} in directory
+           </p>
+         </div>
+ 
+@@ -376,3 +376,19 @@
++          {(searchQuery || selectedSpecialty || selectedCategory || selectedCountry || selectedVerification) && (
++            <button
++              type="button"
++              className="reset-filters-btn"
++              onClick={() => {
++                setSearchQuery("");
++                setSelectedSpecialty("");
++                setSelectedCategory("");
++                setSelectedCountry("");
++                setSelectedVerification("");
++              }}
++            >
++              Reset Filters
++            </button>
++          )}
++
+           <select
+             className="sort-select"
+             value={sortBy}
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

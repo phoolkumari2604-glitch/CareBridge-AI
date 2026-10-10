@@ -1,0 +1,15 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\patient\AIAssistant.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -36,6 +36,9 @@
+   const [loading, setLoading] = useState(false);
+   const [isListening, setIsListening] = useState(false);
+   const [copiedId, setCopiedId] = useState(null);
++  const [attachedFile, setAttachedFile] = useState(null);
++  const [attachedPreview, setAttachedPreview] = useState(null);
++  const fileInputRef = useRef(null);
+ 
+   const [messages, setMessages] = useState([
+     {
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

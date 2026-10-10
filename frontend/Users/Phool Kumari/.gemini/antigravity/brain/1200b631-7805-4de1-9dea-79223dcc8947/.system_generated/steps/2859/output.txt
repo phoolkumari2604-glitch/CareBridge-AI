@@ -1,0 +1,170 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\pages\doctor\PatientMonitoring.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -379,79 +379,91 @@
+       </section>
+ 
+       {/* 4-COLUMN STAT GRID (ALL, CRITICAL, NEEDS ATTENTION, STABLE) */}
+-      <section className="monitoring-stat-grid">
+-        {/* ALL PATIENTS */}
+-        <button
+-          className={`stat-kpi-card card-all ${statusFilter === "all" ? "is-active" : ""}`}
+-          onClick={() => {
+-            setStatusFilter("all");
+-            setCurrentPage(1);
+-          }}
+-        >
+-          <div className="stat-card-icon-wrap">
+-            <Users size={20} />
+-          </div>
+-          <div className="stat-card-text">
+-            <span className="stat-card-label">All Monitored</span>
+-            <strong className="stat-card-count">{stats.total || totalPatients}</strong>
+-            <span className="stat-card-sub">Total Active Records</span>
+-          </div>
+-        </button>
+-
+-        {/* CRITICAL ALERTS */}
+-        <button
+-          className={`stat-kpi-card card-critical ${statusFilter === "critical" ? "is-active" : ""}`}
+-          onClick={() => {
+-            setStatusFilter("critical");
+-            setCurrentPage(1);
+-          }}
+-        >
+-          <div className="stat-card-icon-wrap">
+-            <ShieldAlert size={20} />
+-          </div>
+-          <div className="stat-card-text">
+-            <span className="stat-card-label">Critical Alerts</span>
+-            <strong className="stat-card-count text-critical">{stats.critical || 0}</strong>
+-            <span className="stat-card-sub">Acute Breaches</span>
+-          </div>
+-        </button>
+-
+-        {/* NEEDS ATTENTION */}
+-        <button
+-          className={`stat-kpi-card card-attention ${statusFilter === "attention" ? "is-active" : ""}`}
+-          onClick={() => {
+-            setStatusFilter("attention");
+-            setCurrentPage(1);
+-          }}
+-        >
+-          <div className="stat-card-icon-wrap">
+-            <AlertTriangle size={20} />
+-          </div>
+-          <div className="stat-card-text">
+-            <span className="stat-card-label">Needs Attention</span>
+-            <strong className="stat-card-count text-attention">{stats.attention || 0}</strong>
+-            <span className="stat-card-sub">Borderline Readings</span>
+-          </div>
+-        </button>
+-
+-        {/* STABLE BASELINE */}
+-        <button
+-          className={`stat-kpi-card card-stable ${statusFilter === "stable" ? "is-active" : ""}`}
+-          onClick={() => {
+-            setStatusFilter("stable");
+-            setCurrentPage(1);
+-          }}
+-        >
+-          <div className="stat-card-icon-wrap">
+-            <CheckCircle2 size={20} />
+-          </div>
+-          <div className="stat-card-text">
+-            <span className="stat-card-label">Stable Baseline</span>
+-            <strong className="stat-card-count text-stable">{stats.stable || 0}</strong>
+-            <span className="stat-card-sub">Normal Parameters</span>
+-          </div>
+-        </button>
+-      </section>
++      {(() => {
++        const totalCount = stats.total || totalPatients || 0;
++        const critCount = stats.critical || 0;
++        const attnCount = stats.attention || 0;
++        const stableCount = stats.stable || 0;
++        const critPct = totalCount > 0 ? Math.round((critCount / totalCount) * 100) : 0;
++        const attnPct = totalCount > 0 ? Math.round((attnCount / totalCount) * 100) : 0;
++        const stablePct = totalCount > 0 ? Math.round((stableCount / totalCount) * 100) : 0;
++
++        return (
++          <section className="monitoring-stat-grid">
++            {/* ALL PATIENTS */}
++            <button
++              className={`stat-kpi-card card-all ${statusFilter === "all" ? "is-active" : ""}`}
++              onClick={() => {
++                setStatusFilter("all");
++                setCurrentPage(1);
++              }}
++            >
++              <div className="stat-card-icon-wrap">
++                <Users size={20} />
++              </div>
++              <div className="stat-card-text">
++                <span className="stat-card-label">All Monitored</span>
++                <strong className="stat-card-count">{totalCount}</strong>
++                <span className="stat-card-sub">100% Active Roster</span>
++              </div>
++            </button>
++
++            {/* CRITICAL ALERTS */}
++            <button
++              className={`stat-kpi-card card-critical ${statusFilter === "critical" ? "is-active" : ""}`}
++              onClick={() => {
++                setStatusFilter("critical");
++                setCurrentPage(1);
++              }}
++            >
++              <div className="stat-card-icon-wrap">
++                <ShieldAlert size={20} />
++              </div>
++              <div className="stat-card-text">
++                <span className="stat-card-label">Critical Alerts</span>
++                <strong className="stat-card-count text-critical">{critCount} ({critPct}%)</strong>
++                <span className="stat-card-sub">Acute Breaches</span>
++              </div>
++            </button>
++
++            {/* NEEDS ATTENTION */}
++            <button
++              className={`stat-kpi-card card-attention ${statusFilter === "attention" ? "is-active" : ""}`}
++              onClick={() => {
++                setStatusFilter("attention");
++                setCurrentPage(1);
++              }}
++            >
++              <div className="stat-card-icon-wrap">
++                <AlertTriangle size={20} />
++              </div>
++              <div className="stat-card-text">
++                <span className="stat-card-label">Needs Attention</span>
++                <strong className="stat-card-count text-attention">{attnCount} ({attnPct}%)</strong>
++                <span className="stat-card-sub">Borderline Readings</span>
++              </div>
++            </button>
++
++            {/* STABLE BASELINE */}
++            <button
++              className={`stat-kpi-card card-stable ${statusFilter === "stable" ? "is-active" : ""}`}
++              onClick={() => {
++                setStatusFilter("stable");
++                setCurrentPage(1);
++              }}
++            >
++              <div className="stat-card-icon-wrap">
++                <CheckCircle2 size={20} />
++              </div>
++              <div className="stat-card-text">
++                <span className="stat-card-label">Stable Baseline</span>
++                <strong className="stat-card-count text-stable">{stableCount} ({stablePct}%)</strong>
++                <span className="stat-card-sub">Normal Parameters</span>
++              </div>
++            </button>
++          </section>
++        );
++      })()}
+ 
+       {/* ERROR NOTICE */}
+       {error && (
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

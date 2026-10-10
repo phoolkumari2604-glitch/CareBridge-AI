@@ -1,0 +1,24 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\patient\Doctors.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -6,7 +6,6 @@
+   CalendarDays,
+   Clock3,
+   Stethoscope,
+-  Star,
+   ChevronRight,
+   Loader2,
+   AlertCircle,
+@@ -13,10 +13,6 @@
+   CheckCircle2,
+-  X,
+   Calendar,
+   ShieldCheck,
+-  Phone,
+-  DollarSign,
+-  User,
+ } from "lucide-react";
+ import { useAuth } from "../../context/AuthContext";
+ import patientService from "../../services/patientService";
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

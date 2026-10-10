@@ -1,0 +1,26 @@
+
+The command exited with code 1.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+
+--- 1. Testing Root & Health Endpoints ---
+Health and root endpoints OK
+
+--- 2. Testing Registration with Baseline Vitals & Login ---
+Logged in patient with baseline vitals: flask_test_patient_3d3fc21f@carebridge.test, patient_id: 6ac7d238c229e94c87f4319b
+Registration baseline vitals verified successfully in vital_signs
+
+--- 3. Testing Password Change Endpoint ---
+Password changed successfully via /api/auth/change-password
+
+--- 4. Testing Hospital & Leafmap Endpoints ---
+Traceback (most recent call last):
+  File "d:\CareBridge AI\backend\test_flask_e2e.py", line 237, in <module>
+    test_flask_e2e(c)
+    ~~~~~~~~~~~~~~^^^
+  File "d:\CareBridge AI\backend\test_flask_e2e.py", line 90, in test_flask_e2e
+    hospital_id = str(hospitals[0]["_id"])
+                      ~~~~~~~~~^^^
+KeyError: 0
+

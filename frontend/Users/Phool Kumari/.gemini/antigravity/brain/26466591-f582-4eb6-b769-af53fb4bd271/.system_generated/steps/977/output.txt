@@ -1,0 +1,16 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\test_flask_e2e.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -165,8 +165,8 @@
+         "record_type": "Diagnostic Lab Report",
+         "title": "Comprehensive Blood Profile",
+         "diagnosis": "Normal lipid profile",
+-        "doctor_name": "Dr. Sarah Jenkins",
+-        "hospital_name": "CareBridge Memorial Hospital"
++        "doctor_name": "Dr. Naresh Trehan",
++        "hospital_name": "Medanta, Gurugram"
+     }
+     rec_res = client.post("/api/health-records/", json=rec_payload, headers=headers)
+     assert rec_res.status_code == 201
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

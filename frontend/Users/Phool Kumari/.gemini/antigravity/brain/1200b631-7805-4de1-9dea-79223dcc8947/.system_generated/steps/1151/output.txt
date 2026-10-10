@@ -1,0 +1,34 @@
+
+The command exited with code 0.
+Output:
+
+  frontend\src\services\doctorService.js:12:    try {
+> frontend\src\services\doctorService.js:13:      const response = await api.get("/patients/");
+  frontend\src\services\doctorService.js:14:      return Array.isArray(response.data) ? response.data : [];
+  frontend\src\services\doctorService.js:15:    } catch (error) {
+> frontend\src\services\doctorService.js:16:      console.warn("Failed to fetch patients list from /patients/:", 
+error?.message);
+  frontend\src\services\doctorService.js:17:      return [];
+  frontend\src\services\doctorService.js:23:    try {
+> frontend\src\services\doctorService.js:24:      const response = await api.get(`/patients/${patientId}`);
+  frontend\src\services\doctorService.js:25:      return response.data;
+  frontend\src\services\patientService.js:20:  async getPatientProfile(patientId) {
+> frontend\src\services\patientService.js:21:    const res = await api.get(`/patients/${patientId}`);
+  frontend\src\services\patientService.js:22:    return res.data;
+  frontend\src\services\patientService.js:25:  async createPatientProfile(data) {
+> frontend\src\services\patientService.js:26:    const res = await api.post("/patients/", data);
+  frontend\src\services\patientService.js:27:    return res.data;
+  frontend\src\services\patientService.js:30:  async updatePatientProfile(patientId, data) {
+> frontend\src\services\patientService.js:31:    const res = await api.put(`/patients/${patientId}`, data);
+  frontend\src\services\patientService.js:32:    return res.data;
+  frontend\src\layouts\Navbar.jsx:28:    }
+> frontend\src\layouts\Navbar.jsx:29:    if (pathname.includes("/doctor/patient-monitoring") || 
+pathname.includes("/doctor/patients")) {
+  frontend\src\layouts\Navbar.jsx:30:      return { title: "Patient Monitoring", subtitle: "Real-time Telemetry & 
+Patient Registry" };
+  frontend\src\layouts\Sidebar.jsx:145:      label: "Patients",
+> frontend\src\layouts\Sidebar.jsx:146:      path: "/staff/patients",
+  frontend\src\layouts\Sidebar.jsx:147:      icon: UserCircle,
+
+
+

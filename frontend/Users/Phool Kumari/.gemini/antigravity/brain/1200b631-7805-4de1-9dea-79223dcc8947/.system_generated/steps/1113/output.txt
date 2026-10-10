@@ -1,0 +1,10 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+    from app.core.database import get_database
+  File "D:\CareBridge AI\backend\app\__init__.py", line 2, in <module>
+    from flask import Flask, jsonify
+ModuleNotFoundError: No module named 'flask'
+

@@ -1,0 +1,97 @@
+
+The command exited with code 0.
+Output:
+
+  frontend\src\pages\staff\Appointments.jsx:132:        <div>
+> frontend\src\pages\staff\Appointments.jsx:133:          <span className="appointments-eyebrow">CAREBRIDGE AI - 
+CLINICAL SCHEDULING</span>
+  frontend\src\pages\staff\Appointments.jsx:134:          <h1>Appointment Operations</h1>
+  frontend\src\pages\staff\Appointments.jsx:229:            <Loader2 size={32} className="spinner-icon" />
+> frontend\src\pages\staff\Appointments.jsx:230:            <p>Loading appointments from CareBridge AI backend...</p>
+  frontend\src\pages\staff\Appointments.jsx:231:          </div>
+  frontend\src\pages\staff\Approvals.jsx:59:          doctor: appr.doctor_name || (docMap[appr.doctor_id]?.name || 
+"Assigned Specialist"),
+> frontend\src\pages\staff\Approvals.jsx:60:          hospital: appr.hospital_name || 
+(docMap[appr.doctor_id]?.hospital_name || "CareBridge Hospital Hub"),
+  frontend\src\pages\staff\Approvals.jsx:61:          type: appr.request_type || appr.type || "Medical Clearance",
+  frontend\src\pages\staff\Approvals.jsx:65:          priority: "Normal",
+> frontend\src\pages\staff\Approvals.jsx:66:          reason: appr.reason || "Outpatient Clinical Request",
+  frontend\src\pages\staff\Approvals.jsx:67:        });
+  frontend\src\pages\staff\Approvals.jsx:82:            doctor: doc.name || apt.doctor_name || "Specialist Doctor",
+> frontend\src\pages\staff\Approvals.jsx:83:            hospital: doc.hospital_name || doc.hospital || "CareBridge 
+Medical Center",
+  frontend\src\pages\staff\Approvals.jsx:84:            type: "Appointment Booking",
+  frontend\src\pages\staff\Approvals.jsx:170:        <div>
+> frontend\src\pages\staff\Approvals.jsx:171:          <span className="approvals-eyebrow">CAREBRIDGE AI - CLINICAL 
+CLEARANCE</span>
+  frontend\src\pages\staff\Approvals.jsx:172:          <h1>Clearance & Approvals Hub</h1>
+  frontend\src\pages\staff\Approvals.jsx:265:            <Loader2 size={32} className="spinner-icon" />
+> frontend\src\pages\staff\Approvals.jsx:266:            <p>Loading clearance requests from CareBridge AI 
+backend...</p>
+  frontend\src\pages\staff\Approvals.jsx:267:          </div>
+  frontend\src\pages\staff\Approvals.jsx:424:              <div className="modal-reason-box">
+> frontend\src\pages\staff\Approvals.jsx:425:                <h4>Clinical Purpose / Symptoms</h4>
+  frontend\src\pages\staff\Approvals.jsx:426:                <p>{selectedRequest.reason}</p>
+  frontend\src\pages\staff\AuditSecurity.jsx:104:    link.setAttribute("href", encodedUri);
+> frontend\src\pages\staff\AuditSecurity.jsx:105:    link.setAttribute("download", `carebridge_audit_logs_${new 
+Date().toISOString().split("T")[0]}.csv`);
+  frontend\src\pages\staff\AuditSecurity.jsx:106:    document.body.appendChild(link);
+  frontend\src\pages\staff\AuditSecurity.jsx:115:        <div>
+> frontend\src\pages\staff\AuditSecurity.jsx:116:          <span className="audit-eyebrow">CAREBRIDGE AI - SECURITY & 
+COMPLIANCE</span>
+  frontend\src\pages\staff\AuditSecurity.jsx:117:          <h1>Security & System Audit Logs</h1>
+  frontend\src\pages\staff\AuditSecurity.jsx:172:          <h3>MongoDB Audit Store</h3>
+> frontend\src\pages\staff\AuditSecurity.jsx:173:          <p>Stored in carebridge_ai.audit_logs collection.</p>
+  frontend\src\pages\staff\AuditSecurity.jsx:174:        </div>
+  frontend\src\pages\staff\Doctors.jsx:289:                  <th>Category</th>
+> frontend\src\pages\staff\Doctors.jsx:290:                  <th>Clinical Status</th>
+  frontend\src\pages\staff\Doctors.jsx:291:                  <th>Verification</th>
+  frontend\src\pages\staff\Doctors.jsx:528:              <div>
+> frontend\src\pages\staff\Doctors.jsx:529:                <span>Clinical Appointments</span>
+  frontend\src\pages\staff\Doctors.jsx:530:                <strong>
+  frontend\src\pages\staff\Hospitals.jsx:6:    id: "HSP-001",
+> frontend\src\pages\staff\Hospitals.jsx:7:    name: "CareBridge Central Hospital",
+  frontend\src\pages\staff\Hospitals.jsx:8:    location: "Banjara Hills, Hyderabad",
+  frontend\src\pages\staff\Patients.jsx:150:        <div>
+> frontend\src\pages\staff\Patients.jsx:151:          <span className="page-eyebrow">CAREBRIDGE AI - PATIENT 
+REGISTRY</span>
+  frontend\src\pages\staff\Patients.jsx:152:          <h1>Patient Records & Profiles</h1>
+  frontend\src\pages\staff\Patients.jsx:153:          <p>
+> frontend\src\pages\staff\Patients.jsx:154:            Manage hospital registrations, clinical demographics, baseline 
+physiological data, and consultation histories.
+  frontend\src\pages\staff\Patients.jsx:155:          </p>
+  frontend\src\pages\staff\Patients.jsx:248:            <Loader2 size={30} className="spinner-icon" />
+> frontend\src\pages\staff\Patients.jsx:249:            <p>Loading patient directory from CareBridge AI database...</p>
+  frontend\src\pages\staff\Patients.jsx:250:          </div>
+  frontend\src\pages\staff\Patients.jsx:341:              <div>
+> frontend\src\pages\staff\Patients.jsx:342:                <h2>Patient Clinical Dossier</h2>
+  frontend\src\pages\staff\Patients.jsx:343:                <p>ID: #{String(selectedPatient._id || 
+selectedPatient.id).slice(-8).toUpperCase()}</p>
+  frontend\src\pages\staff\Patients.jsx:423:                <h2>Register New Patient</h2>
+> frontend\src\pages\staff\Patients.jsx:424:                <p>Add a new patient profile and clinical baseline to the 
+database</p>
+  frontend\src\pages\staff\Patients.jsx:425:              </div>
+  frontend\src\pages\staff\Queue.jsx:63:              doctor: doc.name || "Specialist Doctor",
+> frontend\src\pages\staff\Queue.jsx:64:              department: doc.specialty || doc.specialization || "Clinical 
+OPD",
+  frontend\src\pages\staff\Queue.jsx:65:              appointment: apt.appointment_time || "10:00 AM",
+  frontend\src\pages\staff\Queue.jsx:153:        <div>
+> frontend\src\pages\staff\Queue.jsx:154:          <span className="queue-eyebrow">CAREBRIDGE AI - LIVE OUTPATIENT 
+SURVEILLANCE</span>
+  frontend\src\pages\staff\Queue.jsx:155:          <h1>Live OPD Queue Management</h1>
+  frontend\src\pages\staff\StaffDashboard.jsx:149:        <div>
+> frontend\src\pages\staff\StaffDashboard.jsx:150:          <p className="staff-eyebrow">CAREBRIDGE AI - STAFF & ADMIN 
+COMMAND</p>
+  frontend\src\pages\staff\StaffDashboard.jsx:151:          <h1>
+  frontend\src\pages\staff\StaffDashboard.jsx:154:          <p className="staff-subtitle">
+> frontend\src\pages\staff\StaffDashboard.jsx:155:            Surveillance of hospital operations, clinical 
+consultations, specialist rosters, and patient flow.
+  frontend\src\pages\staff\StaffDashboard.jsx:156:          </p>
+  frontend\src\pages\staff\StaffDashboard.jsx:415:          <span className="online-dot"></span>
+> frontend\src\pages\staff\StaffDashboard.jsx:416:          All clinical and API services operational
+  frontend\src\pages\staff\StaffDashboard.jsx:417:        </div>
+> frontend\src\pages\staff\StaffDashboard.jsx:418:        <span>CareBridge AI  Staff Administration Hub</span>
+  frontend\src\pages\staff\StaffDashboard.jsx:419:      </div>
+
+
+

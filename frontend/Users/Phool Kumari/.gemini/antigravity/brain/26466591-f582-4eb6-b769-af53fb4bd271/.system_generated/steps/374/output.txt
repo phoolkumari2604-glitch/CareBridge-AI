@@ -1,0 +1,24 @@
+Task: 26466591-f582-4eb6-b769-af53fb4bd271/task-366
+Status: RUNNING
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\26466591-f582-4eb6-b769-af53fb4bd271\.system_generated\tasks\task-366.log
+Log output:
+<truncated 264 lines>
+--------------- 9.8/9.8 MB 7.0 MB/s  0:00:01
+Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading traittypes-0.2.3-py2.py3-none-any.whl (8.1 kB)
+Downloading folium-0.20.0-py2.py3-none-any.whl (113 kB)
+Downloading branca-0.8.2-py3-none-any.whl (26 kB)
+Downloading gdown-6.4.1-py3-none-any.whl (50 kB)
+Downloading beautifulsoup4-4.15.0-py3-none-any.whl (109 kB)
+Downloading soupsieve-2.10-py3-none-any.whl (38 kB)
+Downloading filelock-4.0.12-py3-none-any.whl (111 kB)
+Downloading geojson-3.3.0-py3-none-any.whl (15 kB)
+Downloading geopandas-1.2.0-py3-none-any.whl (368 kB)
+Downloading pyogrio-0.13.0-cp311-abi3-win_amd64.whl (23.8 MB)
+   ---------------------------------------- 23.8/23.8 MB 9.6 MB/s  0:00:02
+Downloading pyproj-3.8.0-cp314-cp314-win_amd64.whl (6.9 MB)
+   ---------------------------------------- 6.9/6.9 MB 8.6 MB/s  0:00:00
+Downloading shapely-2.2.0-cp314-cp314-win_amd64.whl (1.8 MB)
+
+Last progress: 0s ago

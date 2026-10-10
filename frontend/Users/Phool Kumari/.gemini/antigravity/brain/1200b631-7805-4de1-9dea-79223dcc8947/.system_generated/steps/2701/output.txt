@@ -1,0 +1,110 @@
+
+The command exited with code 0.
+Output:
+<truncated 1 lines>
+-a----         10/9/2026   2:20 PM          17736 health_records.cpython-314.pyc                                       
+-a----        10/10/2026  12:58 AM          37364 hospital.cpython-314.pyc                                             
+-a----        10/10/2026   1:08 PM          13701 notification.cpython-314.pyc                                         
+-a----         10/9/2026   7:45 PM          20792 opd_pass.cpython-314.pyc                                             
+-a----         10/9/2026   8:58 PM          27454 patient.cpython-314.pyc                                              
+-a----         10/9/2026   9:13 PM          16134 queue.cpython-314.pyc                                                
+-a----         10/8/2026   3:22 PM           5999 smartflow.cpython-314.pyc                                            
+-a----         10/9/2026   8:58 PM           8573 vitals.cpython-314.pyc                                               
+-a----         10/9/2026  11:31 PM           1217 __init__.cpython-314.pyc                                             
+
+
+    Directory: D:\CareBridge AI\backend\app\schemas
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/9/2026   9:08 AM           5841 ai_assistant.py                                                      
+
+
+    Directory: D:\CareBridge AI\backend\app\services
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----         10/8/2026  10:53 PM                providers                                                            
+d-----         10/9/2026  11:31 PM                __pycache__                                                          
+-a----         9/28/2026   3:21 PM            977 ai_safety.py                                                         
+-a----         10/9/2026   2:23 PM           7516 ai_vision.py                                                         
+-a----         9/28/2026   3:21 PM            577 audit_service.py                                                     
+-a----         10/9/2026  11:29 PM          11613 email_service.py                                                     
+-a----         10/8/2026  10:53 PM          11245 hospital_service.py                                                  
+-a----         10/8/2026   4:27 PM           6382 map_service.py                                                       
+-a----         10/8/2026   3:25 PM           3541 smartflow_service.py                                                 
+-a----         9/25/2026   5:27 AM              0 __init__.py                                                          
+
+
+    Directory: D:\CareBridge AI\backend\app\services\providers
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----         10/9/2026   7:45 PM                __pycache__                                                          
+-a----         10/8/2026  10:52 PM           7293 api_ninjas_provider.py                                               
+-a----         10/8/2026  10:52 PM          10875 cms_provider.py                                                      
+-a----         10/8/2026  10:52 PM           2854 hmis_provider.py                                                     
+-a----         10/9/2026   7:44 PM           7905 local_db_provider.py                                                 
+
+
+    Directory: D:\CareBridge AI\backend\app\services\providers\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/8/2026  10:53 PM           9062 api_ninjas_provider.cpython-314.pyc                                  
+-a----         10/8/2026  10:53 PM          10269 cms_provider.cpython-314.pyc                                         
+-a----         10/8/2026  10:53 PM           3523 hmis_provider.cpython-314.pyc                                        
+-a----         10/9/2026   7:45 PM           9708 local_db_provider.cpython-314.pyc                                    
+
+
+    Directory: D:\CareBridge AI\backend\app\services\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         9/28/2026   3:21 PM           2085 ai_safety.cpython-314.pyc                                            
+-a----         10/9/2026   2:23 PM          10073 ai_vision.cpython-314.pyc                                            
+-a----         9/28/2026   3:21 PM           1157 audit_service.cpython-314.pyc                                        
+-a----         10/9/2026  11:31 PM          14246 email_service.cpython-314.pyc                                        
+-a----         10/8/2026  10:53 PM          15526 hospital_service.cpython-314.pyc                                     
+-a----         10/8/2026   4:29 PM           9520 map_service.cpython-314.pyc                                          
+-a----         9/25/2026   2:31 PM           4122 smartflow_service.cpython-314.pyc                                    
+-a----         9/25/2026   2:31 PM            148 __init__.cpython-314.pyc                                             
+
+
+    Directory: D:\CareBridge AI\backend\app\utils
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        10/10/2026  11:10 AM                __pycache__                                                          
+-a----        10/10/2026  11:09 AM           2756 decorators.py                                                        
+-a----         10/8/2026   3:18 PM           1209 helpers.py                                                           
+-a----         10/8/2026   3:18 PM           1312 security.py                                                          
+
+
+    Directory: D:\CareBridge AI\backend\app\utils\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/10/2026  11:10 AM           4207 decorators.cpython-314.pyc                                           
+-a----         10/8/2026   3:22 PM           1960 helpers.cpython-314.pyc                                              
+-a----         10/8/2026   3:22 PM           2887 security.cpython-314.pyc                                             
+
+
+    Directory: D:\CareBridge AI\backend\app\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/9/2026  11:30 PM           2214 config.cpython-314.pyc                                               
+-a----         10/9/2026  10:11 AM           3359 main.cpython-314.pyc                                                 
+-a----        10/10/2026  12:13 AM           5908 __init__.cpython-314.pyc                                             
+
+
+

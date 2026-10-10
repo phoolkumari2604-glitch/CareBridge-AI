@@ -1,0 +1,35 @@
+
+The command exited with code 0.
+Output:
+
+FullName                                                                                 
+--------                                                                                 
+D:\CareBridge AI\frontend\vite.config.js                                                 
+D:\CareBridge AI\frontend\node_modules\axios\lib\core\mergeConfig.js                     
+D:\CareBridge AI\frontend\node_modules\axios\lib\helpers\resolveConfig.js                
+D:\CareBridge AI\frontend\node_modules\call-bind-apply-helpers\tsconfig.json             
+D:\CareBridge AI\frontend\node_modules\dunder-proto\tsconfig.json                        
+D:\CareBridge AI\frontend\node_modules\es-define-property\tsconfig.json                  
+D:\CareBridge AI\frontend\node_modules\es-errors\tsconfig.json                           
+D:\CareBridge AI\frontend\node_modules\es-object-atoms\tsconfig.json                     
+D:\CareBridge AI\frontend\node_modules\es-set-tostringtag\tsconfig.json                  
+D:\CareBridge AI\frontend\node_modules\get-proto\tsconfig.json                           
+D:\CareBridge AI\frontend\node_modules\gopd\tsconfig.json                                
+D:\CareBridge AI\frontend\node_modules\has-symbols\tsconfig.json                         
+D:\CareBridge AI\frontend\node_modules\has-tostringtag\tsconfig.json                     
+D:\CareBridge AI\frontend\node_modules\hasown\eslint.config.mjs                          
+D:\CareBridge AI\frontend\node_modules\hasown\tsconfig.json                              
+D:\CareBridge AI\frontend\node_modules\lucide-react\dist\esm\icons\table-config.mjs      
+D:\CareBridge AI\frontend\node_modules\lucide-react\dist\esm\icons\table-config.mjs.map  
+D:\CareBridge AI\frontend\node_modules\math-intrinsics\tsconfig.json                     
+D:\CareBridge AI\frontend\node_modules\oxlint\configuration_schema.json                  
+D:\CareBridge AI\frontend\node_modules\oxlint\dist\js_config.js                          
+D:\CareBridge AI\frontend\node_modules\rolldown\dist\config.d.mts                        
+D:\CareBridge AI\frontend\node_modules\rolldown\dist\config.mjs                          
+D:\CareBridge AI\frontend\node_modules\rolldown\dist\shared\define-config-Demdg3_4.mjs   
+D:\CareBridge AI\frontend\node_modules\rolldown\dist\shared\define-config-kIZKjX8Q.d.mts 
+D:\CareBridge AI\frontend\node_modules\rolldown\dist\shared\load-config-B55tUA4L.mjs     
+D:\CareBridge AI\frontend\node_modules\rolldown\dist\shared\resolve-tsconfig-DRWFAQ3v.mjs
+
+
+

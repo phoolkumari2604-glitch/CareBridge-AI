@@ -1,0 +1,11 @@
+
+The command exited with code 1.
+Output:
+Get-ChildItem : A positional parameter cannot be found that accepts argument '*Login*'.
+At line:1 char:1
++ dir /s /b *Login*
++ ~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Get-ChildItem], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+

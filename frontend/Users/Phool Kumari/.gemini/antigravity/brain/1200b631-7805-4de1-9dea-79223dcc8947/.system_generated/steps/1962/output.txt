@@ -1,0 +1,15 @@
+
+The command exited with code 0.
+Output:
+
+FullName                                                                                    
+--------                                                                                    
+D:\CareBridge AI\frontend\node_modules\react-router\dist\development\register-CmkRspdl.d.mts
+D:\CareBridge AI\frontend\node_modules\react-router\dist\development\register-roq_0qYo.d.ts 
+D:\CareBridge AI\frontend\node_modules\react-router\dist\production\register-CmkRspdl.d.mts 
+D:\CareBridge AI\frontend\node_modules\react-router\dist\production\register-roq_0qYo.d.ts  
+D:\CareBridge AI\frontend\src\pages\public\Register.css                                     
+D:\CareBridge AI\frontend\src\pages\public\Register.jsx                                     
+
+
+

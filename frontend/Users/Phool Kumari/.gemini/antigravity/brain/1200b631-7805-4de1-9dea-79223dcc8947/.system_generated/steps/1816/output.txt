@@ -1,0 +1,12 @@
+
+The command exited with code 1.
+Output:
+d:\CareBridge : The term 'd:\CareBridge' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ d:\CareBridge AI\backend\.venv\Scripts\python.exe -c "from app import ...
++ ~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (d:\CareBridge:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+

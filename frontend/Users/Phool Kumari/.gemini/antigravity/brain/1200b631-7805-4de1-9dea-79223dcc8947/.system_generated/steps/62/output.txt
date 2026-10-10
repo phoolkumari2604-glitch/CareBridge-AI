@@ -1,0 +1,37 @@
+Created the following subagents:
+{
+  "conversationId":  "ff0cd931-9c9a-458c-a2c0-5250c24f6f31",
+  "logAbsoluteUri":  "file:///C:/Users/Phool%20Kumari/.gemini/antigravity/brain/ff0cd931-9c9a-458c-a2c0-5250c24f6f31/.system_generated/logs/transcript.jsonl",
+  "workspaceUris":  [
+    "file:///d%3A/CareBridge%20AI"
+  ]
+}
+{
+  "conversationId":  "366e48ec-0dd3-428e-a359-6c2f8993349b",
+  "logAbsoluteUri":  "file:///C:/Users/Phool%20Kumari/.gemini/antigravity/brain/366e48ec-0dd3-428e-a359-6c2f8993349b/.system_generated/logs/transcript.jsonl",
+  "workspaceUris":  [
+    "file:///d%3A/CareBridge%20AI"
+  ]
+}
+{
+  "conversationId":  "87d59109-0d7e-4222-8fe5-4ce3d8ba4b6e",
+  "logAbsoluteUri":  "file:///C:/Users/Phool%20Kumari/.gemini/antigravity/brain/87d59109-0d7e-4222-8fe5-4ce3d8ba4b6e/.system_generated/logs/transcript.jsonl",
+  "workspaceUris":  [
+    "file:///d%3A/CareBridge%20AI"
+  ]
+}
+{
+  "conversationId":  "a4110f51-4eac-49ba-8569-1839dfec65a7",
+  "logAbsoluteUri":  "file:///C:/Users/Phool%20Kumari/.gemini/antigravity/brain/a4110f51-4eac-49ba-8569-1839dfec65a7/.system_generated/logs/transcript.jsonl",
+  "workspaceUris":  [
+    "file:///d%3A/CareBridge%20AI"
+  ]
+}
+{
+  "conversationId":  "716b1f1c-3c17-46fc-b575-cfdbad26e323",
+  "logAbsoluteUri":  "file:///C:/Users/Phool%20Kumari/.gemini/antigravity/brain/716b1f1c-3c17-46fc-b575-cfdbad26e323/.system_generated/logs/transcript.jsonl",
+  "workspaceUris":  [
+    "file:///d%3A/CareBridge%20AI"
+  ]
+}
+The subagents will send you a message when they have completed their task or require guidance. There is no need to poll for their responses.

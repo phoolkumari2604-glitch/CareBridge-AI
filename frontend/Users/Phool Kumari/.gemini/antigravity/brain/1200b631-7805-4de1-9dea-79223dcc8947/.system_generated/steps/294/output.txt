@@ -1,0 +1,14 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\seed_demo_accounts.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -152,7 +152,7 @@
+         phone="+91 9876543212",
+     ))
+ 
+-    print("\n✅ Successfully seeded demo accounts!")
++    print("\n[OK] Successfully seeded demo accounts!")
+     print(f"  Patient: {patient_email} / {patient_password} (Patient ID: {patient_id})")
+     print(f"  Doctor:  {doctor_email} / {doctor_password}")
+     print(f"  Staff:   {staff_email} / {staff_password}")
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

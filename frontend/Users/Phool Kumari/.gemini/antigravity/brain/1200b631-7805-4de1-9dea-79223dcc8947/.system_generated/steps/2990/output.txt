@@ -1,0 +1,11 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    from app.core.database import get_database; from app.utils.security import create_access_token; import requests; db = get_database(); doc = db.users.find_one({'role': 'DOCTOR'}); token = create_access_token({'sub': str(doc['_id']), 'role': 'DOCTOR', 'email': doc['email']}); headers = {'Authorization': f'Bearer {token}'}; r = requests.get('http://127.0.0.1:5000/api/health-records/', headers=headers); print('HR Status:', r.status_code, r.json() if r.status_code == 200 else r.text[:200])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CareBridge AI\backend\app\__init__.py", line 2, in <module>
+    from flask import Flask, jsonify
+ModuleNotFoundError: No module named 'flask'
+

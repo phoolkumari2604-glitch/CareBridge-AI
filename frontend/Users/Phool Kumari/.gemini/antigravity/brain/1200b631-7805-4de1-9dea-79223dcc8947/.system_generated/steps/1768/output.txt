@@ -1,0 +1,62 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\public\Register.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -613,6 +613,29 @@
+                 )}
+               </div>
+ 
++              {/* DPDP Act 2023 Consent Checkbox */}
++              <div className="flex items-start gap-3 my-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800">
++                <input
++                  id="agree-dpdp"
++                  type="checkbox"
++                  checked={agreeTerms}
++                  onChange={(e) => setAgreeTerms(e.target.checked)}
++                  className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-800 text-cyan-500 focus:ring-cyan-400 cursor-pointer"
++                  required
++                />
++                <label htmlFor="agree-dpdp" className="text-xs text-slate-300 leading-relaxed cursor-pointer">
++                  I consent to the collection and processing of my health profile under India's <strong>DPDP Act 2023</strong> and agree to the{" "}
++                  <Link to="/terms" target="_blank" className="text-cyan-400 hover:underline">
++                    Terms of Service
++                  </Link>{" "}
++                  and{" "}
++                  <Link to="/privacy" target="_blank" className="text-cyan-400 hover:underline">
++                    Privacy Policy
++                  </Link>
++                  .
++                </label>
++              </div>
++
+               {/* Security note */}
+               <div className="security-note">
+                 <div className="security-icon">
+@@ -624,7 +624,7 @@
+               </div>
+ 
+               {/* Button */}
+-              <button type="submit" className="register-button" disabled={loading}>
++              <button type="submit" className="register-button" disabled={loading || !agreeTerms}>
+                 {loading ? (
+                   <>
+                     <span className="button-spinner"></span>
+@@ -644,9 +644,14 @@
+               <Link to="/login">Sign in</Link>
+             </div>
+ 
+-            <p className="terms-text">
+-              By creating an account, you agree to use CareBridge AI responsibly and provide accurate clinical information.
+-            </p>
++            <div className="mt-4 text-center">
++              <span className="text-xs text-slate-500">
++                Need help? Email{" "}
++                <a href="mailto:phoolkumari2603@gmail.com" className="text-slate-400 hover:text-cyan-400">
++                  phoolkumari2603@gmail.com
++                </a>
++              </span>
++            </div>
+           </div>
+         </section>
+       </section>
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

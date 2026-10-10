@@ -1,0 +1,8 @@
+
+The command exited with code 0.
+Output:
+Connected to MongoDB.
+Deleted 51 test/placeholder hospitals.
+Created 2dsphere index on 'location'.
+Verified hospital database ready. Total active hospitals: 23
+

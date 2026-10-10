@@ -1,0 +1,61 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\components\patient\LiveHeartRateMonitor.css. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -275,6 +275,12 @@
+   50% { transform: scale(1.18); }
+ }
+ 
++.glass-title-col {
++  display: flex;
++  flex-direction: column;
++  flex-grow: 1;
++}
++
+ .glass-title {
+   font-size: 13.5px;
+   font-weight: 700;
+@@ -281,11 +281,38 @@
+   color: #ffffff;
+-  flex-grow: 1;
++  line-height: 1.2;
++}
++
++.glass-caption {
++  font-size: 10.5px;
++  color: #94a3b8;
++  font-weight: 500;
++  letter-spacing: 0.2px;
++}
++
++.glass-live-indicator {
++  display: inline-flex;
++  align-items: center;
++  gap: 5px;
++}
++
++.live-pulse-dot {
++  width: 6px;
++  height: 6px;
++  border-radius: 50%;
++  background: #22c55e;
++  box-shadow: 0 0 8px #22c55e;
++  animation: pulseDot 1.4s ease-in-out infinite;
++}
++
++@keyframes pulseDot {
++  0%, 100% { opacity: 1; transform: scale(1); }
++  50% { opacity: 0.4; transform: scale(0.8); }
+ }
+ 
+ .glass-sync-badge {
+-  font-size: 10px;
+-  font-weight: 700;
+-  padding: 2px 7px;
++  font-size: 9.5px;
++  font-weight: 700;
++  padding: 2px 6px;
+   border-radius: 999px;
+   background: rgba(34, 197, 94, 0.2);
+   border: 1px solid rgba(34, 197, 94, 0.4);
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

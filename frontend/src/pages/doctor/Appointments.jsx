@@ -377,6 +377,7 @@ function DoctorAppointments() {
                     const patientName = patient?.name || "Patient Record";
                     const pid = apt.patient_id || "";
                     const pCode = apt.patient_code || patient?.patient_code || String(patient?.patientId || "").replace("PT-", "") || (pid ? pid.slice(-6) : "");
+                    const statusUpper = (apt.status || "PENDING").toUpperCase();
 
                     return (
                       <tr key={apt._id || apt.id || index}>

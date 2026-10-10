@@ -296,6 +296,110 @@ export const doctorService = {
       console.warn("Failed to mark notification read:", error?.message);
     }
   },
+
+  // ------------------------------------------------------------
+  // BILLING & FINANCIAL TRANSACTIONS
+  // ------------------------------------------------------------
+  async getBillingSummary(period = "30D") {
+    try {
+      const response = await api.get("/billing/summary", { params: { period } });
+      return response.data;
+    } catch (error) {
+      console.warn("Failed to fetch billing summary:", error?.message);
+      return null;
+    }
+  },
+
+  async getInvoices(params = {}) {
+    try {
+      const response = await api.get("/billing/invoices", { params });
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.warn("Failed to fetch invoices:", error?.message);
+      return [];
+    }
+  },
+
+  async getInvoice(id) {
+    if (!id) return null;
+    try {
+      const response = await api.get(`/billing/invoices/${id}`);
+      return response.data;
+    } catch (error) {
+      return null;
+    }
+  },
+
+  async createInvoice(data) {
+    const response = await api.post("/billing/invoices", data);
+    return response.data;
+  },
+
+  async getInvoiceQr(id) {
+    const response = await api.post(`/billing/invoices/${id}/qr`);
+    return response.data;
+  },
+
+  async markInvoicePaid(id, data = {}) {
+    const response = await api.post(`/billing/invoices/${id}/pay`, data);
+    return response.data;
+  },
+
+  async refundInvoice(id) {
+    const response = await api.post(`/billing/invoices/${id}/refund`);
+    return response.data;
+  },
+
+  async settleInvoice(id) {
+    const response = await api.post(`/billing/invoices/${id}/settle`);
+    return response.data;
+  },
+
+  // ------------------------------------------------------------
+  // CLINICAL KNOWLEDGE BASE (KB)
+  // ------------------------------------------------------------
+  async getKbConditions(params = {}) {
+    try {
+      const response = await api.get("/ai-assistant/kb/conditions", { params });
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      return [];
+    }
+  },
+
+  async addKbCondition(data) {
+    const response = await api.post("/ai-assistant/kb/conditions", data);
+    return response.data;
+  },
+
+  async updateKbCondition(id, data) {
+    const response = await api.put(`/ai-assistant/kb/conditions/${id}`, data);
+    return response.data;
+  },
+
+  async getKbDrugs() {
+    try {
+      const response = await api.get("/ai-assistant/kb/drugs");
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      return [];
+    }
+  },
+
+  async getUnmatchedQueries() {
+    try {
+      const response = await api.get("/ai-assistant/kb/unmatched");
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      return [];
+    }
+  },
+
+  async importKbEntries(entries) {
+    const response = await api.post("/ai-assistant/kb/import", { entries });
+    return response.data;
+  },
 };
 
 export default doctorService;
+

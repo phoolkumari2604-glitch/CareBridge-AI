@@ -1,0 +1,41 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\patient
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/3/2026  11:44 AM          11269 Hospitals.css                                                        
+-a----         10/8/2026   4:24 PM          16792 Hospitals.jsx                                                        
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\shared
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/8/2026  10:55 PM          30108 HospitalDashboard.css                                                
+-a----         10/9/2026   2:45 PM          51841 HospitalDashboard.jsx                                                
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\staff
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/2/2026   7:19 PM          10827 Hospitals.css                                                        
+-a----         10/2/2026   7:18 PM           9666 Hospitals.jsx                                                        
+
+
+    Directory: D:\CareBridge AI\frontend\src\services
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/8/2026  10:54 PM           3408 hospitalService.js                                                   
+
+
+

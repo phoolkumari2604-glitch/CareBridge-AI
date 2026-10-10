@@ -1,0 +1,10 @@
+
+The command exited with code 0.
+Output:
+[MongoDB] Successfully connected to database 'carebridge_ai'
+Users indexes:
+SON([('v', 2), ('key', SON([('_id', 1)])), ('name', '_id_')])
+SON([('v', 2), ('key', SON([('email', 1)])), ('name', 'users_email_unique'), ('unique', True)])
+Total users: 198
+Duplicates found: set()
+

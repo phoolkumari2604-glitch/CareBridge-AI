@@ -1,0 +1,26 @@
+Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-2280
+Status: DONE
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-2280.log
+Log output:
+<truncated 307 lines>
+ontend\src\pages\staff\Patients.jsx
+D:\CareBridge AI\frontend\src\pages\staff\Queue.css
+D:\CareBridge AI\frontend\src\pages\staff\Queue.jsx
+D:\CareBridge AI\frontend\src\pages\staff\StaffDashboard.css
+D:\CareBridge AI\frontend\src\pages\staff\StaffDashboard.jsx
+D:\CareBridge AI\frontend\src\routes\AdminRoute.jsx
+D:\CareBridge AI\frontend\src\routes\ProtectedRoute.jsx
+D:\CareBridge AI\frontend\src\services\api.js
+D:\CareBridge AI\frontend\src\services\auth.js
+D:\CareBridge AI\frontend\src\services\doctorService.js
+D:\CareBridge AI\frontend\src\services\facilities.js
+D:\CareBridge AI\frontend\src\services\hospitalService.js
+D:\CareBridge AI\frontend\src\services\patientService.js
+D:\CareBridge AI\frontend\src\styles\components.css
+D:\CareBridge AI\frontend\src\styles\global.css
+D:\CareBridge AI\frontend\src\styles\layout.css
+D:\CareBridge AI\frontend\src\styles\responsive.css
+D:\CareBridge AI\frontend\src\styles\variables.css
+D:\CareBridge AI\frontend\src\utils\geo.js
+
+Last progress: 2s ago

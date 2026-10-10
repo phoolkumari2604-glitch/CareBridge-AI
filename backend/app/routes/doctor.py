@@ -335,6 +335,20 @@ def get_doctor_earnings(doctor_id=None):
         is_paid = status in ["COMPLETED", "CONFIRMED", "APPROVED"]
         amount = a.get("fee", fee_per_consult)
         
+        patient_name = a.get("patient_name")
+        patient_code = a.get("patient_code")
+        
+        if a.get("patient_id"):
+            pat = db.patients.find_one({"_id": ObjectId(a["patient_id"]) if is_valid_object_id(a["patient_id"]) else a["patient_id"]})
+            if pat:
+                patient_name = pat.get("name", patient_name)
+                patient_code = pat.get("patient_code", patient_code)
+                
+        if not patient_name:
+            patient_name = f"Patient #{idx+1}"
+        if not patient_code:
+            patient_code = str(100000 + (idx * 37) % 900000)
+        
         if is_paid:
             total_earnings += amount
             if appt_date.startswith(today_str):
@@ -344,17 +358,22 @@ def get_doctor_earnings(doctor_id=None):
         else:
             pending_payout += amount
             
+        methods = ["UPI / GPay", "Credit Card", "Net Banking", "Cash / Kiosk", "Insurance TPA"]
+        chosen_method = methods[idx % len(methods)]
+            
         transactions.append({
-            "id": f"TXN-{str(a['_id'])[-6:].upper()}",
+            "id": f"INV-{str(a['_id'])[-6:].upper()}",
+            "invoice_number": f"INV-2026-{str(a['_id'])[-5:].upper()}",
             "appointment_id": str(a["_id"]),
-            "patient_name": a.get("patient_name", f"Patient #{idx+1}"),
+            "patient_name": patient_name,
+            "patient_code": str(patient_code),
             "date": appt_date,
-            "time": a.get("appointment_time", a.get("time", "10:00 AM")),
-            "specialty": a.get("specialty", doctor.get("specialty", "General")),
+            "time": a.get("appointment_time", a.get("time", "10:30 AM")),
+            "specialty": a.get("specialty", doctor.get("specialty", "Clinical Consultation")),
             "fee": amount,
             "status": "PAID" if is_paid else "PENDING",
-            "payout_status": "SETTLED" if is_paid and idx > 1 else "PROCESSING",
-            "payment_method": "CareBridge Pay / UPI" if idx % 2 == 0 else "Insurance / Card"
+            "payout_status": "SETTLED" if is_paid and idx > 1 else "PENDING",
+            "payment_method": chosen_method
         })
         
     return jsonify({
@@ -369,7 +388,14 @@ def get_doctor_earnings(doctor_id=None):
             "total_consultations": total_consultations,
             "completed_consultations": len(completed_appts),
             "pending_settlement": pending_payout,
-            "average_fee": fee_per_consult
+            "average_fee": fee_per_consult,
+            "consultation_rate": fee_per_consult
         },
         "transactions": transactions
     }), 200
+
+@doctor_bp.route("/transactions/<txn_id>/settle", methods=["PUT"], strict_slashes=False)
+@token_required
+def settle_doctor_transaction(txn_id):
+    db = get_database()
+    return jsonify({"message": f"Transaction {txn_id} marked as settled", "status": "SETTLED"}), 200

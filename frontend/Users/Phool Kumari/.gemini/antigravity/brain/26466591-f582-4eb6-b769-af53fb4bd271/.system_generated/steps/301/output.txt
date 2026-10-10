@@ -1,0 +1,74 @@
+
+The command exited with code 0.
+Output:
+<truncated 3832 lines>
+D:\CareBridge AI\backend\app\schemas\__init__.py                                                                       
+D:\CareBridge AI\backend\app\schemas\__pycache__\ai_assistant.cpython-314.pyc                                          
+D:\CareBridge AI\backend\app\schemas\__pycache__\appointment.cpython-314.pyc                                           
+D:\CareBridge AI\backend\app\schemas\__pycache__\approval.cpython-314.pyc                                              
+D:\CareBridge AI\backend\app\schemas\__pycache__\audit.cpython-314.pyc                                                 
+D:\CareBridge AI\backend\app\schemas\__pycache__\auth.cpython-314.pyc                                                  
+D:\CareBridge AI\backend\app\schemas\__pycache__\conversation.cpython-314.pyc                                          
+D:\CareBridge AI\backend\app\schemas\__pycache__\doctor.cpython-314.pyc                                                
+D:\CareBridge AI\backend\app\schemas\__pycache__\health.cpython-314.pyc                                                
+D:\CareBridge AI\backend\app\schemas\__pycache__\health_alerts.cpython-314.pyc                                         
+D:\CareBridge AI\backend\app\schemas\__pycache__\health_records.cpython-314.pyc                                        
+D:\CareBridge AI\backend\app\schemas\__pycache__\hospital.cpython-314.pyc                                              
+D:\CareBridge AI\backend\app\schemas\__pycache__\notification.cpython-314.pyc                                          
+D:\CareBridge AI\backend\app\schemas\__pycache__\opd_pass.cpython-314.pyc                                              
+D:\CareBridge AI\backend\app\schemas\__pycache__\patient.cpython-314.pyc                                               
+D:\CareBridge AI\backend\app\schemas\__pycache__\queue.cpython-314.pyc                                                 
+D:\CareBridge AI\backend\app\schemas\__pycache__\vitals.cpython-314.pyc                                                
+D:\CareBridge AI\backend\app\schemas\__pycache__\__init__.cpython-314.pyc                                              
+D:\CareBridge AI\backend\app\services\ai_safety.py                                                                     
+D:\CareBridge AI\backend\app\services\audit_service.py                                                                 
+D:\CareBridge AI\backend\app\services\smartflow_service.py                                                             
+D:\CareBridge AI\backend\app\services\__init__.py                                                                      
+D:\CareBridge AI\backend\app\services\__pycache__\ai_safety.cpython-314.pyc                                            
+D:\CareBridge AI\backend\app\services\__pycache__\audit_service.cpython-314.pyc                                        
+D:\CareBridge AI\backend\app\services\__pycache__\smartflow_service.cpython-314.pyc                                    
+D:\CareBridge AI\backend\app\services\__pycache__\__init__.cpython-314.pyc                                             
+D:\CareBridge AI\backend\app\__pycache__\main.cpython-314.pyc                                                          
+D:\CareBridge AI\backend\app\__pycache__\__init__.cpython-314.pyc                                                      
+D:\CareBridge AI\backend\tests\test_ai_assistant.py                                                                    
+D:\CareBridge AI\backend\tests\test_appointment.py                                                                     
+D:\CareBridge AI\backend\tests\test_approval.py                                                                        
+D:\CareBridge AI\backend\tests\test_audit.py                                                                           
+D:\CareBridge AI\backend\tests\test_auth.py                                                                            
+D:\CareBridge AI\backend\tests\test_basic.py                                                                           
+D:\CareBridge AI\backend\tests\test_conversation.py                                                                    
+D:\CareBridge AI\backend\tests\test_doctor.py                                                                          
+D:\CareBridge AI\backend\tests\test_health.py                                                                          
+D:\CareBridge AI\backend\tests\test_health_alerts.py                                                                   
+D:\CareBridge AI\backend\tests\test_health_records.py                                                                  
+D:\CareBridge AI\backend\tests\test_hospital.py                                                                        
+D:\CareBridge AI\backend\tests\test_notification.py                                                                    
+D:\CareBridge AI\backend\tests\test_opd_pass.py                                                                        
+D:\CareBridge AI\backend\tests\test_patient.py                                                                         
+D:\CareBridge AI\backend\tests\test_queue.py                                                                           
+D:\CareBridge AI\backend\tests\test_rbac.py                                                                            
+D:\CareBridge AI\backend\tests\test_smartflow.py                                                                       
+D:\CareBridge AI\backend\tests\test_vitals.py                                                                          
+D:\CareBridge AI\backend\tests\__pycache__\test_ai_assistant.cpython-314-pytest-9.1.1.pyc                              
+D:\CareBridge AI\backend\tests\__pycache__\test_appointment.cpython-314-pytest-9.1.1.pyc                               
+D:\CareBridge AI\backend\tests\__pycache__\test_approval.cpython-314-pytest-9.1.1.pyc                                  
+D:\CareBridge AI\backend\tests\__pycache__\test_audit.cpython-314-pytest-9.1.1.pyc                                     
+D:\CareBridge AI\backend\tests\__pycache__\test_auth.cpython-314-pytest-9.1.1.pyc                                      
+D:\CareBridge AI\backend\tests\__pycache__\test_basic.cpython-314-pytest-9.1.1.pyc                                     
+D:\CareBridge AI\backend\tests\__pycache__\test_conversation.cpython-314-pytest-9.1.1.pyc                              
+D:\CareBridge AI\backend\tests\__pycache__\test_doctor.cpython-314-pytest-9.1.1.pyc                                    
+D:\CareBridge AI\backend\tests\__pycache__\test_health.cpython-314-pytest-9.1.1.pyc                                    
+D:\CareBridge AI\backend\tests\__pycache__\test_health_alerts.cpython-314-pytest-9.1.1.pyc                             
+D:\CareBridge AI\backend\tests\__pycache__\test_health_records.cpython-314-pytest-9.1.1.pyc                            
+D:\CareBridge AI\backend\tests\__pycache__\test_hospital.cpython-314-pytest-9.1.1.pyc                                  
+D:\CareBridge AI\backend\tests\__pycache__\test_notification.cpython-314-pytest-9.1.1.pyc                              
+D:\CareBridge AI\backend\tests\__pycache__\test_opd_pass.cpython-314-pytest-9.1.1.pyc                                  
+D:\CareBridge AI\backend\tests\__pycache__\test_patient.cpython-314-pytest-9.1.1.pyc                                   
+D:\CareBridge AI\backend\tests\__pycache__\test_queue.cpython-314-pytest-9.1.1.pyc                                     
+D:\CareBridge AI\backend\tests\__pycache__\test_rbac.cpython-314-pytest-9.1.1.pyc                                      
+D:\CareBridge AI\backend\tests\__pycache__\test_smartflow.cpython-314-pytest-9.1.1.pyc                                 
+D:\CareBridge AI\backend\tests\__pycache__\test_vitals.cpython-314-pytest-9.1.1.pyc                                    
+D:\CareBridge AI\backend\__pycache__\test_mongodb.cpython-314-pytest-9.1.1.pyc                                         
+
+
+

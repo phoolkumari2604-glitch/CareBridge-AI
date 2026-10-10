@@ -1,0 +1,31 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\styles\layout.css. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -22,20 +22,14 @@
+   top: 0;
+   right: 0;
+   left: 0;
+-
+-  height: 72px;
+-
++  height: 64px;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+-
+-  padding: 0 28px;
+-
+-  background: rgba(255, 255, 255, 0.94);
+-  backdrop-filter: blur(16px);
+-
+-  border-bottom: 1px solid #e6ebf2;
+-
++  padding: 0 24px;
++  background: #ffffff;
++  border-bottom: 1px solid #e2e8f0;
++  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+   z-index: 1000;
+ }
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

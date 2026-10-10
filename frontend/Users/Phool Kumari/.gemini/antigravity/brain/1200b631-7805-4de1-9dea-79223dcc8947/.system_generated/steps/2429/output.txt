@@ -1,0 +1,72 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\components\patient\LiveHeartRateMonitor.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -52,8 +52,8 @@
+ }
+ 
+ export default function LiveHeartRateMonitor({ className = "" }) {
+-  // 1. Live BPM state (single source of truth, initially 120 bpm)
+-  const [bpm, setBpm] = useState(120);
++  // 1. Live BPM state (single source of truth, initialized to 78 bpm)
++  const [bpm, setBpm] = useState(78);
+ 
+   // 2. Reduced motion detection
+   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+@@ -63,8 +63,9 @@
+   });
+ 
+   // Refs for animation & canvas rendering without causing component re-render loops
+-  const bpmRef = useRef(120);
++  const bpmRef = useRef(78);
+   const canvasRef = useRef(null);
++  const ecgWrapRef = useRef(null);
+   const containerRef = useRef(null);
+   const animationFrameRef = useRef(null);
+   const phaseAccumulatorRef = useRef(0);
+@@ -90,12 +90,19 @@
+   }, []);
+ 
+   // 3. Live BPM simulation:
+-  // Every 2 seconds, generate and display a new integer BPM between 60 and 110
++  // Every 2 seconds, apply a gradual, plausible delta (e.g. -2 to +2 BPM) clamped within [60, 110]
+   useEffect(() => {
+     const interval = setInterval(() => {
+-      // Generate random integer between 60 and 110 inclusive
+-      const newBpm = Math.floor(Math.random() * (110 - 60 + 1)) + 60;
+-      setBpm(newBpm);
++      setBpm((prevBpm) => {
++        // Natural physiological respiratory sinus arrhythmia drift: -2, -1, 0, +1, +2
++        const delta = Math.floor(Math.random() * 5) - 2;
++        let nextBpm = prevBpm + delta;
++        // Bias back toward resting average (~76-80) if near extremes
++        if (nextBpm > 105) nextBpm -= 2;
++        if (nextBpm < 65) nextBpm += 2;
++        // Clamp strictly between 60 and 110
++        return Math.min(110, Math.max(60, nextBpm));
++      });
+     }, 2000);
+ 
+     return () => clearInterval(interval);
+@@ -105,9 +105,9 @@
+     if (currentBpm < 60) {
+       return {
+         text: "Low resting heart rate",
+-        color: "#f59e0b",
++        color: "#38bdf8",
+         badgeClass: "status-low",
+-        dotClass: "dot-amber",
++        dotClass: "dot-cyan",
+         description: "Bradycardia threshold: clinical resting evaluation suggested",
+       };
+     }
+@@ -121,7 +121,7 @@
+     }
+     if (currentBpm <= 110) {
+       return {
+-        text: "Elevated heart rate",
++        text: "Elevated resting heart rate",
+         color: "#f59e0b",
+         badgeClass: "status-elevated",
+         dotClass: "dot-amber",
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

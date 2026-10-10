@@ -1,0 +1,37 @@
+
+The command exited with code 0.
+Output:
+
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : 
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swag...
+RawContent        : HTTP/1.1 200 OK
+                    vary: Origin
+                    Content-Length: 1012
+                    Content-Type: text/html; charset=utf-8
+                    Date: Sat, 03 Oct 2026 06:32:33 GMT
+                    Server: uvicorn
+                    
+                    
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                        <met...
+Forms             : 
+Headers           : {[vary, Origin], [Content-Length, 1012], [Content-Type, text/html; charset=utf-8], [Date, Sat, 03 
+                    Oct 2026 06:32:33 GMT]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : 
+RawContentLength  : 1012
+
+
+
+

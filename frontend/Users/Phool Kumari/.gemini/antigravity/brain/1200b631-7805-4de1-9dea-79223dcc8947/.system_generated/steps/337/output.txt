@@ -1,0 +1,26 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\doctor
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/2/2026  10:52 PM            483 AIAssistant.jsx                                                      
+-a----         10/2/2026   6:30 PM          12553 Appointments.css                                                     
+-a----         10/2/2026  10:59 PM            480 Appointments.jsx                                                     
+-a----         10/2/2026   6:07 PM          11671 Approvals.css                                                        
+-a----         10/2/2026   6:06 PM           7572 Approvals.jsx                                                        
+-a----         10/2/2026   6:08 PM              0 DoctorDashboard.css                                                  
+-a----         10/2/2026   6:01 PM          11637 DoctorDashboard.jsx                                                  
+-a----         10/2/2026   6:14 PM          10026 HealthRecords.css                                                    
+-a----         10/2/2026   6:13 PM           9678 HealthRecords.jsx                                                    
+-a----         10/2/2026   6:30 PM           7725 Notifications.css                                                    
+-a----         10/2/2026   6:21 PM           6657 Notifications.jsx                                                    
+-a----         10/2/2026   6:12 PM           8754 Vitals.css                                                           
+-a----         10/2/2026   6:11 PM           7249 Vitals.jsx                                                           
+
+
+

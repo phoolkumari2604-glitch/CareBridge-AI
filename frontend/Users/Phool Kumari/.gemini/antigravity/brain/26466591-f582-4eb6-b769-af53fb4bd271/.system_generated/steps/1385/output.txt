@@ -1,0 +1,12 @@
+
+The command exited with code 0.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+Validate pass status: 200 Valid: True
+Request OTP status: 200 Message: 6-digit verification code sent to us***@example.com
+Verify OTP status: 200 Verified: True Msg: OPD Pass successfully verified with secure OTP authorization.
+Hospitals India status: 200 Total: 10
+Hospitals USA status: 200 Total: 35
+Hospitals Emergency status: 200 Total: 45
+

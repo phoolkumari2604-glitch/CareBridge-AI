@@ -1,0 +1,22 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\core\indexes.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -18,10 +18,12 @@
+     )
+ 
+     # Hospitals
+-    db.hospitals.create_index(
+-        "city",
+-        name="hospitals_city",
+-    )
++    db.hospitals.create_index("city", name="hospitals_city")
++    db.hospitals.create_index("name", name="hospitals_name")
++    db.hospitals.create_index("state", name="hospitals_state")
++    db.hospitals.create_index("country", name="hospitals_country")
++    db.hospitals.create_index("facility_type", name="hospitals_facility_type")
++    db.hospitals.create_index("data_source", name="hospitals_data_source")
+ 
+     # Doctors
+     db.doctors.create_index(
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

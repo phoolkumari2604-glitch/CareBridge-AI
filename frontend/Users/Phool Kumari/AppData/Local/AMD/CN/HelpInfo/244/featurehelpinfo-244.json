@@ -1,0 +1,104 @@
+[
+  {
+    "featureID": "profileperformance",
+    "featureTitle": "HYPR-RX",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/performance_profile_background.png"
+  },
+  {
+    "featureID": "chill",
+    "featureTitle": "Radeon Chill",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/radeon_chill_background.png"
+  },
+  {
+    "featureID": "antilag",
+    "featureTitle": "Radeon Anti-Lag",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/radeon_antilag_background.png"
+  },
+  {
+    "featureID": "antilagnext",
+    "featureTitle": "Radeon Anti-Lag+",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/radeon_antilagnext_background.png"
+  },
+  {
+    "featureID": "imagesharpening",
+    "featureTitle": "Radeon Image Sharpening",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/radeon_imagesharpening_background.png"
+  },
+  {
+    "featureID": "boost",
+    "featureTitle": "Radeon Boost",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/radeon_boost_background.png"
+  },
+  {
+    "featureID": "superresolution",
+    "featureTitle": "Radeon Super Resolution",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/radeon_superresolution_background.png"
+  },
+  {
+    "featureID": "enhancedsync",
+    "featureTitle": "Radeon Enhanced Sync",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/radeon_enhancedsync_background.png"
+  },
+  {
+    "featureID": "fluidmotionframes",
+    "featureTitle": "Fluid Motion Frames",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/radeon_fluidmotionframes_background.png"
+  },
+  {
+    "featureID": "smartaccessmemory",
+    "featureTitle": "AMD SmartAccess Memory",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/smartaccessmemory_background.png"
+  },
+  {
+    "featureID": "privacyview",
+    "featureTitle": "AMD Privacy View",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/amd_privacyview_background.png"
+  },
+  {
+    "featureID": "noisesuppression",
+    "featureTitle": "AMD Noise Supression",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/amd_noisesuppression_background.png"
+  },
+  {
+    "featureID": "smartaccessvideo",
+    "featureTitle": "AMD SmartAccess Video",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/smartaccessvideo_background.png"
+  },
+  {
+    "featureID": "smartshifteco",
+    "featureTitle": "AMD SmartShift Eco",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/smartshifteco_background.png"
+  },
+  {
+    "featureID": "smartshiftmax",
+    "featureTitle": "AMD SmartShift Max",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/smartshiftmax_background.png"
+  },
+   {
+    "featureID": "smartshiftrsr",
+    "featureTitle": "AMD SmartShift RSR",
+    "featureURL": "",
+    "background_img": "https://download.amd.com/rs-featurehelpinfo/images/smartshiftrsr_background.png"
+  },
+  {
+    "featureID": "smartaccessgraphics",
+    "featureTitle": "AMD SmartAccess Graphics",
+    "featureURL": "",
+    "background_img": ""
+  }
+]

@@ -1,0 +1,70 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\routes\hospital.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -233,14 +233,18 @@
+     if city and city.lower() != "all":
+         query["city"] = {"$regex": f"^{city}$", "$options": "i"}
+ 
++    # Quick chips & Filter params
++    has_icu_param = request.args.get("has_icu") or request.args.get("icu")
++    open_now_param = request.args.get("open_now") or request.args.get("open")
++    insurance_param = request.args.get("accepts_insurance") or request.args.get("insurance")
++    ambulance_param = request.args.get("ambulance")
++    
+     if facility_type and facility_type.lower() != "all":
+-        query["$and"] = query.get("$and", [])
+-        query["$and"].append({
+-            "$or": [
+-                {"facility_type": {"$regex": facility_type, "$options": "i"}},
+-                {"type": {"$regex": facility_type, "$options": "i"}}
+-            ]
+-        })
++        query["$or"] = [
++            {"facility_type": {"$regex": facility_type, "$options": "i"}},
++            {"type": {"$regex": facility_type, "$options": "i"}},
++            {"specialties": {"$regex": facility_type, "$options": "i"}}
++        ]
+ 
+     if specialty and specialty.lower() != "all":
+         query["specialties"] = {"$regex": specialty, "$options": "i"}
+@@ -247,6 +247,37 @@
+-    if emergency_only:
++    if emergency_only or (request.args.get("emergency") and str(request.args.get("emergency")).lower() in ["true", "1"]):
+         query["emergency"] = True
+ 
++    if has_icu_param and str(has_icu_param).lower() in ["true", "1"]:
++        query["$and"] = query.get("$and", [])
++        query["$and"].append({
++            "$or": [
++                {"icu_beds_total": {"$gt": 0}},
++                {"icu_beds": {"$gt": 0}},
++                {"services": {"$regex": "ICU|Critical Care", "$options": "i"}},
++                {"specialties": {"$regex": "ICU|Critical Care", "$options": "i"}}
++            ]
++        })
++
++    if insurance_param and str(insurance_param).lower() in ["true", "1"]:
++        query["$and"] = query.get("$and", [])
++        query["$and"].append({
++            "$or": [
++                {"accepts_insurance": True},
++                {"services": {"$regex": "Insurance|TPA|Cashless", "$options": "i"}},
++                {"ownership": {"$regex": "Private|Trust|Corporate", "$options": "i"}}
++            ]
++        })
++
++    if ambulance_param and str(ambulance_param).lower() in ["true", "1"]:
++        query["$and"] = query.get("$and", [])
++        query["$and"].append({
++            "$or": [
++                {"has_ambulance": True},
++                {"services": {"$regex": "Ambulance", "$options": "i"}},
++                {"emergency": True}
++            ]
++        })
++
+     # Fetch matching facilities
+     raw_docs = list(db.hospitals.find(query))
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

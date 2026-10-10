@@ -1,0 +1,14 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\package.json. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -18,8 +18,6 @@
+     "react-router-dom": "^7.18.4"
+   },
+   "devDependencies": {
+-    "@types/react": "^19.2.18",
+-    "@types/react-dom": "^19.2.7",
+     "@vitejs/plugin-react": "^6.1.1",
+     "oxlint": "^1.81.0",
+     "vite": "^8.3.0"
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

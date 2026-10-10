@@ -1,0 +1,316 @@
+
+The command exited with code 0.
+Output:
+<truncated 87 lines>
+
+19. Dr. Vipul Nanda � Artemis Hospital, Gurugram � Aesthetic & Reconstructive Plastic Surgery
+
+20. Dr. Rahul Gupta � Fortis Hospital Noida, Noida � Neurovascular & Skull Base Surgery
+
+21. Dr. Hitesh Kubadia � Medical Tourism India Network, Mumbai � Navigated Knee Replacement Surgery
+
+22. Dr. P. Ranganadham � Aster Prime Hospital, Hyderabad � Complex Neurosurgery
+
+23. Dr. Mohit Bhandari � Mohak Bariatrics & Robotics, Indore � Bariatric & Metabolic Surgery
+
+24. Dr. Chytra Anand � Kosmoderma Clinics, Bengaluru � Cosmetic Dermatology
+
+25. Dr. Hrishikesh Pai � Bloom IVF Group, Mumbai � Obstetrics, Gynecology & Infertility
+
+---
+
+# INTERNATIONAL / FOREIGN MEDICAL EXPERTS
+
+26. Dr. Patrick Soon-Shiong � USA � Transplant Surgery & Oncology
+
+27. Dr. Eric Topol � USA � Cardiology & Digital Medicine
+
+28. Dr. Anthony Fauci � USA � Immunology & Infectious Diseases
+
+29. Dr. Sanjay Gupta � USA � Neurosurgery
+
+30. Dr. Atul Gawande � USA � General & Endocrine Surgery
+
+31. Dr. Siddhartha Mukherjee � USA � Hematology & Oncology
+
+32. Dr. Michael Levitt � USA/UK � Structural Biology
+
+33. Dr. David Sinclair � Australia/USA � Genetics & Aging Research
+
+34. Dr. Helen Rees � South Africa � Public Health & Vaccinology
+
+35. Dr. Pedro Alonso � Spain � Global Health & Epidemiology
+
+36. Dr. Didier Raoult � France � Microbiology & Infectious Diseases
+
+37. Dr. Hans Clevers � Netherlands � Molecular Genetics & Stem Cell Biology
+
+38. Dr. Shinya Yamanaka � Japan � Stem Cell Research
+
+39. Dr. Takanori Fukushima � Japan/USA � Neurosurgery
+
+40. Dr. Devi Shetty � India/Cayman Islands � Cardiothoracic Surgery
+
+41. Dr. Agnes Binagwaho � Rwanda � Pediatrics & Global Health
+
+42. Dr. Zero Asuka � Japan � Cardiovascular Medicine
+
+43. Sir Michael Marmot � UK � Epidemiology & Public Health
+
+44. Dr. Sarah Gilbert � UK � Vaccinology
+
+45. Dr. Ugur Sahin � Germany � Oncology & Immunology
+
+46. Dr. �zlem T�reci � Germany � Immunology & Translational Medicine
+
+47. Dr. Martin Blaser � USA � Microbiome Research & Infectious Diseases
+
+48. Dr. Thomas Starzl � USA � Transplant Surgery
+
+49. Dr. Paul Farmer � USA/Global � Infectious Diseases & Medical Anthropology
+
+50. Dr. Howard Chang � USA � Dermatology & Genomic Medicine
+
+---
+
+# 3. IMPORTANT: DO NOT INVENT ADDITIONAL INFORMATION
+
+The information above is the initial dataset.
+
+Do NOT invent:
+
+* Doctor phone numbers
+* Email addresses
+* Medical registration numbers
+* Consultation fees
+* Ratings
+* Patient counts
+* Appointment counts
+* Hospital addresses
+* Doctor qualifications
+* Years of experience
+* Languages
+* Availability
+* Appointment slots
+* Doctor photographs
+
+If the existing dashboard requires a field that is not provided above, use:
+
+`Not available`
+
+or `null`
+
+instead of generating fake information.
+
+---
+
+# 4. DOCTOR CATEGORY
+
+Add a category/type field if the existing system supports it.
+
+For the international list, correctly distinguish medical doctors who are currently practicing from researchers, academics, public-health experts, and historical figures.
+
+Use:
+
+* Practicing Clinician
+* Medical Researcher
+* Academic
+* Public Health Expert
+* Historical Medical Pioneer
+
+Do not automatically make every person bookable.
+
+In particular, deceased/historical figures must NOT have an active "Book Appointment" option.
+
+---
+
+# 5. EXISTING DOCTOR CARD
+
+Keep the current doctor card design.
+
+Only replace its data.
+
+The existing card should display the available information, for example:
+
+```text
+Doctor Name
+Specialty
+Hospital / Institution
+Location
+Doctor Type
+Verification Status
+```
+
+Do not redesign the card unless required for the new fields.
+
+---
+
+# 6. SEARCH AND FILTER
+
+Make sure the existing doctor search works with the new 50 doctors.
+
+Search should support:
+
+* Doctor name
+* Specialty
+* Hospital
+* City
+* Country
+* Doctor type
+
+Existing filters should continue working.
+
+Do not break existing search functionality.
+
+---
+
+# 7. DOCTOR PROFILE
+
+If the existing dashboard has a doctor details/profile page, populate it using the new dataset.
+
+Show only information that actually exists.
+
+For unavailable information display:
+
+`Not available`
+
+Do not show fabricated values.
+
+---
+
+# 8. REAL DATA VERIFICATION
+
+The provided names and affiliations should be treated as **candidate data**, not automatically verified current information.
+
+Where the dashboard has a verification field, use:
+
+* `Verified` only when supported by a reliable current source.
+* `Needs Verification` when the information has not been checked.
+* `Historical` for deceased medical pioneers.
+
+Store the source URL and verification date if the existing database supports these fields.
+
+Do not claim that information has been verified unless you actually verify it.
+
+---
+
+# 9. DATABASE / API
+
+If the existing dashboard uses a database:
+
+**Update the existing doctor records/table instead of creating a second doctor database.**
+
+If doctors are currently stored in:
+
+```text
+MongoDB
+PostgreSQL
+MySQL
+Firebase
+Supabase
+JSON
+```
+
+use the existing storage mechanism.
+
+If the doctor data is currently hardcoded in a frontend file, replace that dataset with the 50 records.
+
+Do not unnecessarily change the backend architecture.
+
+---
+
+# 10. NO MOCK DATA
+
+After implementation, search the Doctor Dashboard code for dummy doctor data.
+
+Remove old records such as:
+
+```text
+Dr. John Smith
+Dr. Emily Johnson
+Dr. Michael Brown
+Dr. Sarah Wilson
+```
+
+or any other fictional doctors currently being used.
+
+Do not leave the old dummy doctors mixed with the new list.
+
+The Doctor Dashboard should display the 50 supplied doctors instead.
+
+---
+
+# 11. PRESERVE EVERYTHING ELSE
+
+Do NOT change:
+
+* Patient Dashboard
+* Hospital Dashboard
+* Login
+* Authentication
+* Sidebar
+* Header
+* Theme
+* Colors
+* Existing appointments
+* Existing patient records
+* Existing notifications
+* Existing analytics
+* Existing routing
+* Existing database functionality
+* Existing API architecture
+
+unless a minimal change is absolutely required to connect the new doctor data.
+
+---
+
+# 12. FINAL CHECK
+
+After implementation verify:
+
+### Doctor data
+
+* [ ] 50 supplied doctors are present.
+* [ ] Old dummy doctors are removed.
+* [ ] No fictional doctor records remain.
+* [ ] Names are displayed correctly.
+* [ ] Specialties are displayed correctly.
+* [ ] Institutions are displayed correctly.
+* [ ] Countries/locations are displayed correctly.
+
+### Functionality
+
+* [ ] Doctor search works.
+* [ ] Doctor filters work.
+* [ ] Doctor profile works.
+* [ ] Existing navigation still works.
+* [ ] Existing dashboard features still work.
+* [ ] No unrelated UI has changed.
+* [ ] No fake fees/ratings/availability were added.
+
+### Data integrity
+
+* [ ] No invented medical information.
+* [ ] No invented contact details.
+* [ ] No invented appointment slots.
+* [ ] No invented doctor photos.
+* [ ] No invented ratings.
+* [ ] No invented credentials.
+
+Finally, tell me:
+
+1. Which file contained the old dummy doctor data.
+2. Which file(s) you changed.
+3. Whether the 50 doctors are stored in the database or frontend.
+4. How many old dummy records were removed.
+5. How many of the 50 records were successfully added.
+6. Any records that require verification.
+7. Whether all existing Doctor Dashboard functionality still works.
+
+**Do not make any other changes to my website.** 
+
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-10-08T23:35:59+05:30.
+</ADDITIONAL_METADATA>
+

@@ -1,0 +1,25 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\frontend\public
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         9/19/2026   1:23 AM           9522 favicon.svg                                                          
+-a----         9/19/2026   1:23 AM           5031 icons.svg                                                            
+
+
+    Directory: D:\CareBridge AI\frontend\src\assets
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         9/19/2026   1:23 AM          13057 hero.png                                                             
+-a----         9/19/2026   1:23 AM           4126 react.svg                                                            
+-a----         9/19/2026   1:23 AM           8709 vite.svg                                                             
+
+
+

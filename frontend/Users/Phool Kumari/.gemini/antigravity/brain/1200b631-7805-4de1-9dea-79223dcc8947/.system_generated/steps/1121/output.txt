@@ -1,0 +1,13 @@
+
+The command exited with code 0.
+Output:
+
+   Id Path                                                                     CommandLine
+   -- ----                                                                     -----------
+ 3392 D:\CareBridge AI\backend\.venv\Scripts\python.exe                                   
+10292 C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\python.exe            
+34140 D:\CareBridge AI\backend\.venv\Scripts\python.exe                                   
+37060 C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\python.exe            
+
+
+

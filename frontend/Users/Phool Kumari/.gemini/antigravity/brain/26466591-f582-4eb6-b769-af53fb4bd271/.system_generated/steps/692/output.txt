@@ -1,0 +1,14 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\test_flask_e2e.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -91,7 +91,7 @@
+     print(f"Fetched {len(hospitals)} registered hospitals")
+ 
+     # Leafmap map generation
+-    map_res = client.get("/api/leafmap/map?lat=12.9716&lon=77.5946&zoom=12", headers=headers)
++    map_res = client.get("/api/hospitals/map/html?lat=12.9716&lon=77.5946&zoom=12", headers=headers)
+     assert map_res.status_code == 200
+     assert "text/html" in map_res.content_type
+     print("Leafmap interactive HTML generated successfully")
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

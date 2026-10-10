@@ -1,0 +1,17 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\.env.example. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -17,6 +17,11 @@
+ # Environment Mode (development / production)
+ FLASK_ENV=development
+ 
++# Seeded Demo Account Passwords (min 12 chars, mixed case, numbers, symbols)
++DEMO_PATIENT_PASSWORD=CareBridge#Pt2026!Secure
++DEMO_DOCTOR_PASSWORD=CareBridge#Doc2026!Secure
++DEMO_STAFF_PASSWORD=CareBridge#Staff2026!Admin
++
+ # =========================================================
+ # EXTERNAL DATA PROVIDER INTEGRATIONS (OPTIONAL)
+ # =========================================================
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

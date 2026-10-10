@@ -1,0 +1,23 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\pages\doctor\PatientMonitoring.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -561,7 +561,7 @@
+             <tbody>
+               {patients.map((patient) => {
+                 const pid = String(patient._id || patient.id || "");
+-                const formattedId = patient.patientId || `PT-${pid.slice(-6).toUpperCase()}`;
++                const formattedId = patient.patient_code || String(patient.patientId || "").replace("PT-", "") || pid.slice(-6);
+                 const level = patient.telemetry_level || "stable";
+                 const label = patient.telemetry_label || "Stable";
+                 const vital = patient.latest_vital;
+@@ -587,7 +587,7 @@
+                     {/* Patient ID */}
+                     <td>
+                       <div className="id-copy-group">
+-                        <span className="id-code-badge">#{formattedId}</span>
++                        <span className="id-code-badge monospace-id">{formattedId}</span>
+                         <button
+                           className="btn-mini-copy"
+                           onClick={() => copyPatientId(formattedId)}
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

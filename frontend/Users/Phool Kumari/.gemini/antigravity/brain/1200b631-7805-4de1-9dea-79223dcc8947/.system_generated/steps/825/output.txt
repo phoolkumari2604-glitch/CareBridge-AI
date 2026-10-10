@@ -1,0 +1,53 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\test_new_features.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -90,14 +90,15 @@
+     Image.new("RGB", (50, 50), color="green").save(img2, format='JPEG')
+     img2.seek(0)
+ 
+-    rec_data = {
+-        'patient_id': patient_id,
+-        'title': 'Comprehensive Blood Panel',
+-        'record_type': 'Lab Report',
+-        'diagnosis': 'Normal lipid profile and HbA1c',
+-        'doctor_name': 'Dr. Sharma',
+-        'files': [(img1, 'report1.png'), (img2, 'report2.jpg')]
+-    }
++    rec_data = [
++        ('patient_id', patient_id),
++        ('title', 'Comprehensive Blood Panel'),
++        ('record_type', 'Lab Report'),
++        ('diagnosis', 'Normal lipid profile and HbA1c'),
++        ('doctor_name', 'Dr. Sharma'),
++        ('files', (img1, 'report1.png')),
++        ('files', (img2, 'report2.jpg'))
++    ]
+     rec_res = client.post('/api/health-records', data=rec_data, content_type='multipart/form-data', headers=headers)
+     assert rec_res.status_code == 201, f"Create record failed: {rec_res.data}"
+     rec_json = rec_res.get_json()
+@@ -104,4 +104,4 @@
+-    files = rec_json['record'].get('files', [])
++    files = rec_json['record'].get('attachments', [])
+     assert len(files) == 2, f"Expected 2 files attached, got {len(files)}"
+     print(f"[PASS] Multi-file health record created with ID {record_id} and {len(files)} files")
+ 
+@@ -108,5 +108,6 @@
+     for f in files:
+-        filepath = os.path.join(os.path.dirname(__file__), 'uploads', f['filename'])
++        filename = f['file_url'].split('/')[-1]
++        filepath = os.path.join(os.path.dirname(__file__), 'uploads', filename)
+         assert os.path.exists(filepath), f"File {filepath} should exist on disk"
+     print("[PASS] Files exist in uploads directory")
+ 
+@@ -119,7 +119,8 @@
+ 
+     # Verify physical files purged from disk
+     for f in files:
+-        filepath = os.path.join(os.path.dirname(__file__), 'uploads', f['filename'])
++        filename = f['file_url'].split('/')[-1]
++        filepath = os.path.join(os.path.dirname(__file__), 'uploads', filename)
+         assert not os.path.exists(filepath), f"File {filepath} should have been purged from disk"
+     print("[PASS] Files successfully purged from disk upon deletion")
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

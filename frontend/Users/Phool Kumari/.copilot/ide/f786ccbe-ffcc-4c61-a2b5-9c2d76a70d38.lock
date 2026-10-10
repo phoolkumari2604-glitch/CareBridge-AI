@@ -1,0 +1,14 @@
+{
+  "socketPath": "\\\\.\\pipe\\mcp-da9f7638-31e7-45cb-b907-81f27e4d55f0.sock",
+  "scheme": "pipe",
+  "headers": {
+    "Authorization": "Nonce 1212dfc6-2d83-4332-a566-95f8135856eb"
+  },
+  "pid": 39464,
+  "ideName": "Visual Studio Code",
+  "timestamp": 1791517139941,
+  "workspaceFolders": [
+    "d:\\CareBridge AI"
+  ],
+  "isTrusted": true
+}

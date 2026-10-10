@@ -1,0 +1,16 @@
+{
+  "id":  "d2db693f-58b4-41cb-8aca-420128a26dca",
+  "name":  "smartroad-ai",
+  "projectResources":  {
+    "resources":  [
+      {
+        "gitFolder":  {
+          "folderUri":  "file:///f%3A/IIT%20Bombay%20Project/smartroad-ai",
+          "defaultBranch":  "main"
+        }
+      }
+    ]
+  },
+  "settings":  {},
+  "isWorkspaceOnly":  false
+}

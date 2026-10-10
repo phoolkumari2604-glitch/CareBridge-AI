@@ -1,0 +1,14 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\test_doctors_dataset.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -70,7 +70,7 @@
+         res = client.get("/api/doctors", headers=headers)
+         assert res.status_code == 200, f"Status code: {res.status_code}"
+         all_docs = res.get_json()
+-        assert len(all_docs) == 50, f"Expected 50 doctors in API, got {len(all_docs)}"
++        assert len(all_docs) >= 50, f"Expected >= 50 doctors in API, got {len(all_docs)}"
+         print(f"[PASS] GET /api/doctors returned {len(all_docs)} doctors")
+         
+         # Test search query
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

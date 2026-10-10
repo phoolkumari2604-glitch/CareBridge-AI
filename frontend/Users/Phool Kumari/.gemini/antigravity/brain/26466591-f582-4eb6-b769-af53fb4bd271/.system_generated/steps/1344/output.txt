@@ -1,0 +1,20 @@
+Task: 26466591-f582-4eb6-b769-af53fb4bd271/task-1342
+Status: RUNNING
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\26466591-f582-4eb6-b769-af53fb4bd271\.system_generated\tasks\task-1342.log
+Log output:
+<truncated 78 lines>
+File "D:\CareBridge AI\backend\.venv\Lib\site-packages\pymongo\synchronous\command_runner.py", line 214, in _run_command
+    helpers_shared._check_command_response(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        response_doc,
+        ^^^^^^^^^^^^^
+    ...<3 lines>...
+        pool_opts=pool_opts,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\pymongo\helpers_shared.py", line 327, in _check_command_response
+    raise OperationFailure(errmsg, code, response, max_wire_version)
+pymongo.errors.OperationFailure: Index already exists with a different name: hospitals_name, full error: {'ok': 0.0, 'errmsg': 'Index already exists with a different name: hospitals_name', 'code': 85, 'codeName': 'IndexOptionsConflict', '$clusterTime': {'clusterTime': Timestamp(1791537251, 42), 'signature': {'hash': b'k\xa3\x9d\xe9*\xc613\xce\xbdo\nZ0\x1e\x8f\xc7\xc3\xa1y', 'keyId': 7631244062707679234}}, 'operationTime': Timestamp(1791537251, 42)}
+
+Last progress: 0s ago

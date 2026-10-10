@@ -1,0 +1,74 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\backend
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/9/2026   9:31 PM          15570 cleanup_and_seed_hospitals.py                                        
+-a----         10/9/2026   7:44 PM           1343 inspect_hospitals.py                                                 
+-a----         10/9/2026   2:44 PM          16141 seed_hospitals.py                                                    
+-a----         10/8/2026  10:53 PM           3278 test_hospital_dashboard_api.py                                       
+-a----         10/9/2026   7:47 PM           5998 test_opd_and_hospital_upgrades.py                                    
+
+
+    Directory: D:\CareBridge AI\backend\app\models
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/8/2026  10:52 PM           1682 hospital.py                                                          
+
+
+    Directory: D:\CareBridge AI\backend\app\routes
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/10/2026  12:17 AM          28861 hospital.py                                                          
+
+
+    Directory: D:\CareBridge AI\backend\app\routes\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/10/2026  12:58 AM          37364 hospital.cpython-314.pyc                                             
+
+
+    Directory: D:\CareBridge AI\backend\app\services
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/8/2026  10:53 PM          11245 hospital_service.py                                                  
+
+
+    Directory: D:\CareBridge AI\backend\app\services\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/8/2026  10:53 PM          15526 hospital_service.cpython-314.pyc                                     
+
+
+    Directory: D:\CareBridge AI\backend\tests
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         9/27/2026   5:00 PM           3872 test_hospital.py                                                     
+
+
+    Directory: D:\CareBridge AI\backend\tests\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         9/27/2026   5:01 PM          10827 test_hospital.cpython-314-pytest-9.1.1.pyc                           
+
+
+

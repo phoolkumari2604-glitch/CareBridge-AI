@@ -21,6 +21,7 @@ from app.routes import (
     ai_assistant_bp,
     notification_bp,
     audit_bp,
+    billing_bp,
 )
 
 def create_app():
@@ -105,8 +106,10 @@ def create_app():
         (health_records_bp, "/health-records"),
         (health_alerts_bp, "/health-alerts"),
         (ai_assistant_bp, "/ai-assistant"),
+        (ai_assistant_bp, "/ai"),
         (notification_bp, "/notifications"),
         (audit_bp, "/audit-logs"),
+        (billing_bp, "/billing"),
     ]
 
     for bp, prefix in blueprints:

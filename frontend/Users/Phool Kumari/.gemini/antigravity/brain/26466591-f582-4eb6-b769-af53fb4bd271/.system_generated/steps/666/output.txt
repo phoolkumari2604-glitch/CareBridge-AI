@@ -1,0 +1,29 @@
+
+The command exited with code 1.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+
+--- 1. Testing Root & Health Endpoints ---
+
+--- 2. Testing Registration & Login ---
+Logged in patient: flask_test_patient_5db3f10c@carebridge.test, patient_id: 6ac77f4c663499b215a80a95
+
+--- 3. Testing Hospital & Leafmap Endpoints ---
+Fetched 61 registered hospitals
+Leafmap interactive HTML generated successfully
+Fetched nearby realtime facilities: 0 hospitals, 0 police stations
+
+--- 4. Testing Doctor Endpoints ---
+Doctor availability verified for doctor_id: 6ab6132559e430aaacdfd8cc
+
+--- 5. Testing Appointments & Workflow ---
+Traceback (most recent call last):
+  File "d:\CareBridge AI\backend\test_flask_e2e.py", line 240, in <module>
+    test_flask_e2e(c)
+    ~~~~~~~~~~~~~~^^^
+  File "d:\CareBridge AI\backend\test_flask_e2e.py", line 127, in test_flask_e2e
+    assert len(appts) > 0, "Expected at least one appointment for patient"
+           ^^^^^^^^^^^^^^
+AssertionError: Expected at least one appointment for patient
+

@@ -1,0 +1,13 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\routes\opd_pass.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -1,5 +1,6 @@
+-from datetime import datetime, timezone
++from datetime import datetime, timezone, timedelta
+ import secrets
++import hashlib
+ from flask import Blueprint, request, jsonify, g
+ from bson import ObjectId
+ from app.core.database import get_database
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

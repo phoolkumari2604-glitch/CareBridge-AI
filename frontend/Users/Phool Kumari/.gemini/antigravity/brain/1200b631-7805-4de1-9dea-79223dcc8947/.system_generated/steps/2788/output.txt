@@ -1,0 +1,91 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\backend\app\routes\patient.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -136,6 +136,15 @@
+ 
+     return errors
+ 
++def generate_unique_patient_code(db) -> str:
++    """Generate a unique 6-digit numeric patient code (100000 - 999999)."""
++    for _ in range(50):
++        code = str(secrets.randbelow(900000) + 100000)
++        if not db.patients.find_one({"patient_code": code}):
++            return code
++    import random
++    return str(random.randint(100000, 999999))
++
+ def generate_secure_temp_password() -> str:
+     """Generate a high-entropy 12-character temporary password."""
+     alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+@@ -175,7 +175,7 @@
+         if existing_phone:
+             return jsonify({
+                 "error": "Duplicate Record",
+-                "detail": f"A patient with phone number {phone} is already registered (ID #{str(existing_phone['_id'])[-6:].upper()})."
++                "detail": f"A patient with phone number {phone} is already registered (ID #{existing_phone.get('patient_code', str(existing_phone['_id'])[-6:])})."
+             }), 409
+ 
+     # Check duplicate email in patients
+@@ -183,7 +183,7 @@
+         if existing_email:
+             return jsonify({
+                 "error": "Duplicate Record",
+-                "detail": f"A patient with email {email} is already registered (ID #{str(existing_email['_id'])[-6:].upper()})."
++                "detail": f"A patient with email {email} is already registered (ID #{existing_email.get('patient_code', str(existing_email['_id'])[-6:])})."
+             }), 409
+ 
+     create_account = bool(data.get("create_account"))
+@@ -222,9 +222,14 @@
+     elif current_user.get("role") == "PATIENT":
+         created_user_id = str(current_user["_id"])
+ 
++    # Generate unique 6-digit numeric patient code
++    patient_code = generate_unique_patient_code(db)
++
+     # Prepare patient document
+     patient_doc = {
+         "user_id": created_user_id,
++        "patient_code": patient_code,
++        "patient_id_code": patient_code,
+         "name": data["name"],
+         "email": email,
+         "phone": phone,
+@@ -234,6 +234,7 @@
+         "allergies": data.get("allergies", []),
+         "medical_history": data.get("medical_history", []),
+         "status": data.get("status", "Active"),
++        "is_test": False,
+         "created_at": datetime.now(timezone.utc),
+         "updated_at": datetime.now(timezone.utc)
+     }
+@@ -240,8 +240,6 @@
+     result = db.patients.insert_one(patient_doc)
+     patient_id_str = str(result.inserted_id)
+-    patient_code = f"PT-{patient_id_str[-6:].upper()}"
+     patient_doc["_id"] = result.inserted_id
+-    patient_doc["patient_id_code"] = patient_code
+ 
+     # If account was created, update user with patient_id
+     if created_user_id:
+@@ -248,5 +248,5 @@
+             {"_id": ObjectId(created_user_id)},
+-            {"$set": {"patient_id": patient_id_str}}
++            {"$set": {"patient_id": patient_id_str, "patient_code": patient_code}}
+         )
+ 
+     serialized_patient = serialize_doc(patient_doc)
+@@ -253,3 +253,4 @@
++    serialized_patient["patient_code"] = patient_code
+     serialized_patient["createdAt"] = patient_doc["created_at"].isoformat()
+ 
+     return jsonify({
+@@ -256,6 +256,7 @@
+         "patient": serialized_patient,
+         "patient_id": patient_id_str,
+         "patientId": patient_code,
++        "patient_code": patient_code,
+         "account_created": create_account,
+         "temp_password": temp_password
+     }), 201
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

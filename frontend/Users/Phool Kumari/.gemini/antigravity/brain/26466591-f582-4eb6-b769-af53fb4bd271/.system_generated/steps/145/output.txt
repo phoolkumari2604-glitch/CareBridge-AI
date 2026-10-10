@@ -1,0 +1,232 @@
+
+The command exited with code 0.
+Output:
+<truncated 914 lines>
+    :              `-- useEffect uses `fetchNotifications` here
+ 32 |   }, [user]);
+    :      ^^^^^^
+ 33 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Identifier 'Link' is imported but never used.
+   ,-[src/pages/patient/Hospitals.jsx:2:10]
+ 1 | import React, { useState, useEffect } from "react";
+ 2 | import { Link } from "react-router-dom";
+   :          ^^|^
+   :            `-- 'Link' is imported here
+ 3 | import {
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Clock3' is imported but never used.
+   ,-[src/pages/patient/Hospitals.jsx:7:3]
+ 6 |   Phone,
+ 7 |   Clock3,
+   :   ^^^|^^
+   :      `-- 'Clock3' is imported here
+ 8 |   Star,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Heart' is imported but never used.
+    ,-[src/pages/patient/Hospitals.jsx:10:3]
+  9 |   Navigation,
+ 10 |   Heart,
+    :   ^^|^^
+    :     `-- 'Heart' is imported here
+ 11 |   Building,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'XCircle' is imported but never used.
+    ,-[src/pages/patient/Hospitals.jsx:13:3]
+ 12 |   CheckCircle2,
+ 13 |   XCircle,
+    :   ^^^|^^^
+    :      `-- 'XCircle' is imported here
+ 14 |   AlertCircle,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Activity' is imported but never used.
+    ,-[src/pages/patient/Hospitals.jsx:15:3]
+ 14 |   AlertCircle,
+ 15 |   Activity,
+    :   ^^^^|^^^
+    :       `-- 'Activity' is imported here
+ 16 |   Bed,
+    `----
+  help: Consider removing this import.
+
+  ! react(immutability): Cannot access variable while it is being initialized
+    ,-[src/pages/patient/Hospitals.jsx:33:5]
+ 32 |   useEffect(() => {
+ 33 |     fetchHospitals();
+    :     ^^^^^^^|^^^^^^
+    :            `-- `fetchHospitals` is read during its own initialization
+ 34 |   }, []);
+    `----
+  help: `fetchHospitals` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! eslint(no-unused-vars): Identifier 'ChevronRight' is imported but never used.
+    ,-[src/pages/patient/Health.jsx:13:3]
+ 12 |   CalendarDays,
+ 13 |   ChevronRight,
+    :   ^^^^^^|^^^^^
+    :         `-- 'ChevronRight' is imported here
+ 14 |   ShieldCheck,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'User' is imported but never used.
+    ,-[src/pages/patient/Health.jsx:15:3]
+ 14 |   ShieldCheck,
+ 15 |   User,
+    :   ^^|^
+    :     `-- 'User' is imported here
+ 16 |   AlertCircle,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'AlertCircle' is imported but never used.
+    ,-[src/pages/patient/Health.jsx:16:3]
+ 15 |   User,
+ 16 |   AlertCircle,
+    :   ^^^^^|^^^^^
+    :        `-- 'AlertCircle' is imported here
+ 17 |   Plus,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Plus' is imported but never used.
+    ,-[src/pages/patient/Health.jsx:17:3]
+ 16 |   AlertCircle,
+ 17 |   Plus,
+    :   ^^|^
+    :     `-- 'Plus' is imported here
+ 18 |   Clock,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'loading' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/patient/Health.jsx:29:10]
+ 28 | 
+ 29 |   const [loading, setLoading] = useState(true);
+    :          ^^^|^^^
+    :             `-- 'loading' is declared here
+ 30 |   const [error, setError] = useState(null);
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'error' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/patient/Health.jsx:30:10]
+ 29 |   const [loading, setLoading] = useState(true);
+ 30 |   const [error, setError] = useState(null);
+    :          ^^|^^
+    :            `-- 'error' is declared here
+ 31 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! react(immutability): Cannot access variable while it is being initialized
+    ,-[src/pages/patient/Health.jsx:39:5]
+ 38 |   useEffect(() => {
+ 39 |     fetchHealthData();
+    :     ^^^^^^^|^^^^^^^
+    :            `-- `fetchHealthData` is read during its own initialization
+ 40 |   }, [user]);
+    `----
+  help: `fetchHealthData` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'fetchHealthData'
+    ,-[src/pages/patient/Health.jsx:40:6]
+ 38 |   useEffect(() => {
+ 39 |     fetchHealthData();
+    :     ^^^^^^^|^^^^^^^
+    :            `-- useEffect uses `fetchHealthData` here
+ 40 |   }, [user]);
+    :      ^^^^^^
+ 41 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Identifier 'Users' is imported but never used.
+   ,-[src/pages/doctor/Appointments.jsx:6:3]
+ 5 |   Clock3,
+ 6 |   Users,
+   :   ^^|^^
+   :     `-- 'Users' is imported here
+ 7 |   CheckCircle2,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Filter' is imported but never used.
+    ,-[src/pages/doctor/Appointments.jsx:11:3]
+ 10 |   Search,
+ 11 |   Filter,
+    :   ^^^|^^
+    :      `-- 'Filter' is imported here
+ 12 |   Stethoscope,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Stethoscope' is imported but never used.
+    ,-[src/pages/doctor/Appointments.jsx:12:3]
+ 11 |   Filter,
+ 12 |   Stethoscope,
+    :   ^^^^^|^^^^^
+    :        `-- 'Stethoscope' is imported here
+ 13 |   Sparkles,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ChevronRight' is imported but never used.
+    ,-[src/pages/doctor/Appointments.jsx:14:3]
+ 13 |   Sparkles,
+ 14 |   ChevronRight,
+    :   ^^^^^^|^^^^^
+    :         `-- 'ChevronRight' is imported here
+ 15 |   RefreshCw,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Phone' is imported but never used.
+    ,-[src/pages/doctor/Appointments.jsx:19:3]
+ 18 |   X,
+ 19 |   Phone,
+    :   ^^|^^
+    :     `-- 'Phone' is imported here
+ 20 |   Video,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Video' is imported but never used.
+    ,-[src/pages/doctor/Appointments.jsx:20:3]
+ 19 |   Phone,
+ 20 |   Video,
+    :   ^^|^^
+    :     `-- 'Video' is imported here
+ 21 | } from "lucide-react";
+    `----
+  help: Consider removing this import.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/doctor/Appointments.jsx:72:5]
+ 70 | 
+ 71 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 72 |     loadAppointmentsData();
+    :     ^^^^^^^^^^|^^^^^^^^^
+    :               `-- Avoid calling setState() directly within an effect
+ 73 |   }, [loadAppointmentsData]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+Found 108 warnings and 0 errors.
+Finished in 116ms on 53 files with 104 rules using 8 threads.
+

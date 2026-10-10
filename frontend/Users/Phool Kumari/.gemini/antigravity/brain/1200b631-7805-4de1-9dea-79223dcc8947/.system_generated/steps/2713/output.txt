@@ -1,0 +1,16 @@
+
+The command exited with code 0.
+Output:
+[MongoDB] Successfully connected to database 'carebridge_ai'
+TOTAL PATIENTS: 65
+6ab6050f461883a153f8a422 Test Patient patient@example.com None None 9876543210
+6ab8f2ec1589311caadf47db Test Patient testpatient@example.com None None 9876543210
+6ab8f2ed1589311caadf47df Ownership Test Patient ownership@example.com None None 9999999999
+6ab8f3fd9a2359475711c0ea Test Patient testpatient@example.com None None 9876543210
+6ab8f3fe9a2359475711c0ee Ownership Test Patient ownership@example.com None None 9999999999
+6ab8f55efda7bc524a1b4eb8 Test Patient testpatient@example.com None None 9876543210
+6ab8f55ffda7bc524a1b4ebc Ownership Test Patient ownership@example.com None None 9999999999
+6ab8fb70c8579e520dfdda68 Test Patient testpatient@example.com None None 9876543210
+6ab8fb71c8579e520dfdda6c Ownership Test Patient ownership@example.com None None 9999999999
+6ab922cec0e87f47ba71bc88 SmartFlow Test Patient smartflow_patient_794ff70f@example.com None None 9000000110
+

@@ -1,0 +1,92 @@
+
+The command exited with code 0.
+Output:
+<truncated 36 lines>
+-a----         10/8/2026   2:00 PM          25835 Vitals.jsx                                                           
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\patient
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/3/2026  11:51 AM           8522 AIAssistant.css                                                      
+-a----         10/8/2026   3:02 PM          13818 AIAssistant.jsx                                                      
+-a----         10/8/2026   3:00 PM          13247 Appointments.css                                                     
+-a----         10/8/2026   3:07 PM          20506 Appointments.jsx                                                     
+-a----         10/2/2026   5:37 PM           9598 Approval.css                                                         
+-a----         10/8/2026   3:03 PM          14599 Approval.jsx                                                         
+-a----         10/8/2026   3:00 PM          13679 DigitalOPDPass.css                                                   
+-a----         10/8/2026   3:00 PM          16358 DigitalOPDPass.jsx                                                   
+-a----         10/8/2026  11:42 PM          18907 Doctors.css                                                          
+-a----         10/8/2026  11:42 PM          29883 Doctors.jsx                                                          
+-a----         10/8/2026   3:02 PM          15061 Health.css                                                           
+-a----         10/8/2026   3:07 PM          26769 Health.jsx                                                           
+-a----         10/3/2026  11:44 AM          11269 Hospitals.css                                                        
+-a----         10/8/2026   4:24 PM          16792 Hospitals.jsx                                                        
+-a----         10/8/2026   3:01 PM          12660 LiveQueue.css                                                        
+-a----         10/8/2026   3:01 PM          14767 LiveQueue.jsx                                                        
+-a----         10/3/2026  11:51 AM           8477 Notifications.css                                                    
+-a----         10/3/2026  11:51 AM          11898 Notifications.jsx                                                    
+-a----         10/9/2026   1:24 AM          13063 PatientDashboard.css                                                 
+-a----         10/8/2026   3:02 PM          17144 PatientDashboard.jsx                                                 
+-a----         10/2/2026   3:52 PM           4384 PatientLayout.jsx                                                    
+-a----         10/2/2026   5:15 PM           8059 PatientPages.css                                                     
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\public
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/2/2026  10:53 AM           5780 Landing.jsx                                                          
+-a----         10/2/2026  10:27 AM           6793 Login.backup.jsx                                                     
+-a----         10/9/2026   1:23 AM           6449 Login.css                                                            
+-a----         10/9/2026   1:23 AM           6831 Login.jsx                                                            
+-a----         10/8/2026   5:02 PM          21596 Register.css                                                         
+-a----         10/8/2026   5:01 PM          23060 Register.jsx                                                         
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\shared
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/8/2026  10:55 PM          30108 HospitalDashboard.css                                                
+-a----         10/8/2026  10:54 PM          56569 HospitalDashboard.jsx                                                
+-a----         10/2/2026  10:59 PM            350 NotFound.jsx                                                         
+-a----         10/8/2026   5:00 PM           9375 Profile.css                                                          
+-a----         10/8/2026   4:59 PM          29196 Profile.jsx                                                          
+-a----         10/8/2026   5:01 PM          10296 Settings.css                                                         
+-a----         10/8/2026   5:00 PM          28738 Settings.jsx                                                         
+-a----         10/2/2026  10:48 AM           1121 Unauthorized.jsx                                                     
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\staff
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/2/2026   7:10 PM          12765 Appointments.css                                                     
+-a----         10/9/2026   1:36 AM          11637 Appointments.jsx                                                     
+-a----         10/2/2026   7:14 PM          14703 Approvals.css                                                        
+-a----         10/9/2026   1:36 AM          16425 Approvals.jsx                                                        
+-a----         10/2/2026   7:24 PM          13507 AuditSecurity.css                                                    
+-a----         10/9/2026   1:36 AM           9811 AuditSecurity.jsx                                                    
+-a----         10/2/2026   7:15 PM          12728 Doctors.css                                                          
+-a----         10/8/2026  11:43 PM          19173 Doctors.jsx                                                          
+-a----         10/2/2026   7:19 PM          10827 Hospitals.css                                                        
+-a----         10/2/2026   7:18 PM           9666 Hospitals.jsx                                                        
+-a----         10/8/2026   2:35 PM            696 in main name the CareBridge AI dono.txt                              
+-a----         10/2/2026   7:21 PM           8529 Notifications.css                                                    
+-a----         10/2/2026   7:21 PM           7777 Notifications.jsx                                                    
+-a----         10/9/2026   9:53 AM           1686 p and dr.txt                                                         
+-a----         10/2/2026   6:59 PM          12256 Patients.css                                                         
+-a----         10/9/2026   1:35 AM          19861 Patients.jsx                                                         
+-a----         10/2/2026   7:07 PM          11457 Queue.css                                                            
+-a----         10/9/2026   1:36 AM          12481 Queue.jsx                                                            
+-a----         10/2/2026   6:52 PM          15667 StaffDashboard.css                                                   
+-a----         10/9/2026   1:35 AM          14454 StaffDashboard.jsx                                                   
+
+
+

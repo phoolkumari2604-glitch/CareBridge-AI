@@ -567,11 +567,16 @@ export default function HospitalDashboard() {
           MAIN SEARCH & FILTER PANEL (COMPACT TEAL/NAVY CARD)
           ============================================================ */}
       <section className="search-filter-card" aria-label="Hospital search and filters">
+        <div className="search-panel-header">
+          <div className="search-eyebrow">FIND CARE NEAR YOU</div>
+          <h1 className="search-panel-title">Hospital Network</h1>
+          <p className="search-panel-subtitle">
+            {facilities.length} facilit{facilities.length === 1 ? "y" : "ies"} {distance !== "all" ? `within ${distance} km` : "available in network"} near <strong className="text-teal-300">{locationLabel}</strong>
+          </p>
+        </div>
+
         {/* 1. FULL-WIDTH SEARCH BAR (h-12) */}
         <div className="search-bar-wrap">
-          <label htmlFor="hospital-search-input" className="sr-only">
-            Search hospitals, specialties or areas
-          </label>
           <Search size={18} className="search-bar-icon" aria-hidden="true" />
           <input
             id="hospital-search-input"
@@ -592,6 +597,13 @@ export default function HospitalDashboard() {
               <X size={16} />
             </button>
           )}
+          <button
+            type="button"
+            className="search-bar-submit-btn"
+            onClick={() => fetchFacilities()}
+          >
+            Search
+          </button>
         </div>
 
         {/* MOBILE CONTROLS TOGGLE BUTTON */}

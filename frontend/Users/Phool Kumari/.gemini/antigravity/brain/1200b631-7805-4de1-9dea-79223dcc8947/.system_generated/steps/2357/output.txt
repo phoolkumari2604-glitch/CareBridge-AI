@@ -1,0 +1,12 @@
+Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-2355
+Status: DONE
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-2355.log
+Log output:
+[MongoDB] Successfully connected to database 'carebridge_ai'
+Users indexes:
+SON([('v', 2), ('key', SON([('_id', 1)])), ('name', '_id_')])
+SON([('v', 2), ('key', SON([('email', 1)])), ('name', 'users_email_unique'), ('unique', True)])
+Total users: 198
+Duplicates found: set()
+
+Last progress: 3s ago

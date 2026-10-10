@@ -1,0 +1,49 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\patient\PatientDashboard.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -108,7 +108,12 @@
+       // 3. Health Records
+       let recordsCount = 0;
+       if (recordsRes.status === "fulfilled") {
+-        const records = recordsRes.value || [];
++        const rawRecords = recordsRes.value;
++        const records = Array.isArray(rawRecords)
++          ? rawRecords
++          : Array.isArray(rawRecords?.records)
++          ? rawRecords.records
++          : [];
+         recordsCount = records.length;
+         setRecentRecords(
+           [...records]
+@@ -130,7 +130,12 @@
+       // 6. Appointments & Consults
+       let allDocs = [];
+       if (doctorsRes.status === "fulfilled") {
+-        allDocs = doctorsRes.value || [];
++        const rawDocs = doctorsRes.value;
++        allDocs = Array.isArray(rawDocs)
++          ? rawDocs
++          : Array.isArray(rawDocs?.doctors)
++          ? rawDocs.doctors
++          : [];
+       }
+ 
+       let upcomingAptsCount = 0;
+@@ -137,6 +137,13 @@
+-        const apts = appointmentsRes.value || [];
++        const rawApts = appointmentsRes.value;
++        const apts = Array.isArray(rawApts)
++          ? rawApts
++          : Array.isArray(rawApts?.appointments)
++          ? rawApts.appointments
++          : Array.isArray(rawApts?.data)
++          ? rawApts.data
++          : [];
+         const upcoming = apts.filter(
+-          (a) => (a.status || "").toUpperCase() !== "COMPLETED" && (a.status || "").toUpperCase() !== "CANCELLED"
++          (a) => (a?.status || "").toUpperCase() !== "COMPLETED" && (a?.status || "").toUpperCase() !== "CANCELLED"
+         );
+         upcomingAptsCount = upcoming.length;
+         if (upcoming.length > 0) {
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

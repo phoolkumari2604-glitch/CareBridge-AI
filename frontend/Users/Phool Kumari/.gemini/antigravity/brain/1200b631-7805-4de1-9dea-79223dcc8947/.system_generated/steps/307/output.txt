@@ -1,0 +1,6 @@
+
+The command exited with code 0.
+Output:
+Status: 200
+Body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWMwYTJhZWMwZjkzOTVjZDBmOWY2ODIiLCJlbWFpbCI6InBhdGllbnRAY2FyZWJyaWRnZS5haSIsInJvbGUiOiJQQVRJRU5UIiwiZXhwIjoxNzkxMDEzMDk5fQ.2iXKitmy1mMY8I8f9sbfeuAEXh1Lv3oN8noUTnnW3pI', 'token_type': 'bearer', 'user': {'id': '6ac0a2aec0f9395cd0f9f682', 'name': 'Demo Patient', 'email': 'patient@carebridge.ai', 'role': 'PATIENT', 'phone': '+91 9876543210', 'patient_id': '6ac0a2aec0f9395cd0f9f683'}}
+

@@ -1,0 +1,22 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\services\patientService.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -122,6 +122,16 @@
+     return res.data;
+   },
+ 
++  async requestOPDPassOTP(passNumber) {
++    const res = await api.post("/opd-pass/request-otp", { pass_number: passNumber });
++    return res.data;
++  },
++
++  async verifyOPDPassOTP(passNumber, otp) {
++    const res = await api.post("/opd-pass/verify-otp", { pass_number: passNumber, otp });
++    return res.data;
++  },
++
+ 
+   // ==========================================
+   // LIVE QUEUE
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

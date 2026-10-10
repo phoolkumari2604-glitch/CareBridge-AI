@@ -1,0 +1,21 @@
+
+The command exited with code 0.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+Starting Patient Data Cleanup...
+Found 109 junk patient records to clean up.
+Deleted 109 junk patient records.
+Deleted 104 junk user accounts.
+Deleted 81 additional test users.
+Inserted clinical sample patient: Ramesh Kumar
+Inserted clinical sample patient: Sunita Devi
+Inserted clinical sample patient: Rajesh Verma
+Inserted clinical sample patient: Priya Nair
+Inserted clinical sample patient: Amit Patel
+Inserted clinical sample patient: Vikram Malhotra
+Inserted clinical sample patient: Meera Joshi
+Inserted clinical sample patient: Anil Deshmukh
+
+Cleanup Complete! Total clean patients in MongoDB: 60
+

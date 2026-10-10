@@ -1,0 +1,23 @@
+Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-1158
+Status: DONE
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-1158.log
+Log output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+Starting Patient Data Cleanup...
+Found 109 junk patient records to clean up.
+Deleted 109 junk patient records.
+Deleted 104 junk user accounts.
+Deleted 81 additional test users.
+Inserted clinical sample patient: Ramesh Kumar
+Inserted clinical sample patient: Sunita Devi
+Inserted clinical sample patient: Rajesh Verma
+Inserted clinical sample patient: Priya Nair
+Inserted clinical sample patient: Amit Patel
+Inserted clinical sample patient: Vikram Malhotra
+Inserted clinical sample patient: Meera Joshi
+Inserted clinical sample patient: Anil Deshmukh
+
+Cleanup Complete! Total clean patients in MongoDB: 60
+
+Last progress: 3s ago

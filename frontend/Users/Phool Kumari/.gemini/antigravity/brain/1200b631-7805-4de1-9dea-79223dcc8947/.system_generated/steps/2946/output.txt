@@ -1,0 +1,14 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\doctor\DoctorDashboard.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -679,7 +679,7 @@
+                       <div className="alert-badge-meta">
+                         <span className="severity-pill critical">CRITICAL TELEMETRY</span>
+                         <strong className="patient-target-name">{pat.name || "Patient"}</strong>
+-                        <span className="meta-tag">ID: {pid.slice(-6)}</span>
++                        <span className="meta-tag">ID: {pat.patient_code || String(pat.patientId || "").replace("PT-", "") || pid.slice(-6)}</span>
+                         {pat.phone && (
+                           <span className="meta-tag">
+                             <Phone size={11} /> {pat.phone}
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

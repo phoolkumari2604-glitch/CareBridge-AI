@@ -1,0 +1,15 @@
+
+The command exited with code 0.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+Connecting to MongoDB...
+Seeding demo patient: patient@carebridge.ai
+Seeding demo doctor: doctor@carebridge.ai
+Seeding demo staff: staff@carebridge.ai
+
+[OK] Successfully seeded demo accounts with strong unique passwords!
+  Patient: patient@carebridge.ai / CareBridge#Pt2026!Secure (Patient ID: 6ac8f8dd1365004d2523e4cb)
+  Doctor:  doctor@carebridge.ai / CareBridge#Doc2026!Secure
+  Staff:   staff@carebridge.ai / CareBridge#Staff2026!Admin
+

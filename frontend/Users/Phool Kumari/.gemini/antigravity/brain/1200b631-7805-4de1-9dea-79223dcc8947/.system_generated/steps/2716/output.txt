@@ -1,0 +1,32 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\backend\app\routes
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        10/10/2026   1:08 PM                __pycache__                                                          
+-a----         10/9/2026  11:30 PM          18753 admin.py                                                             
+-a----         10/9/2026   2:14 PM          25328 ai_assistant.py                                                      
+-a----         10/9/2026   9:12 PM          15663 appointment.py                                                       
+-a----         10/9/2026   9:14 PM          11446 approval.py                                                          
+-a----         10/9/2026   9:33 PM          12057 audit.py                                                             
+-a----        10/10/2026  11:09 AM          41220 auth.py                                                              
+-a----        10/10/2026  12:57 PM          15102 doctor.py                                                            
+-a----         10/8/2026   3:20 PM           3848 health.py                                                            
+-a----         10/8/2026   3:20 PM           4514 health_alerts.py                                                     
+-a----         10/9/2026   2:17 PM          12252 health_records.py                                                    
+-a----        10/10/2026  12:17 AM          28861 hospital.py                                                          
+-a----        10/10/2026   1:03 PM           9277 notification.py                                                      
+-a----         10/9/2026   7:45 PM          15615 opd_pass.py                                                          
+-a----         10/9/2026   8:58 PM          21439 patient.py                                                           
+-a----         10/9/2026   9:13 PM          12697 queue.py                                                             
+-a----         10/8/2026   3:20 PM           5284 smartflow.py                                                         
+-a----         10/9/2026   8:57 PM           6647 vitals.py                                                            
+-a----         10/9/2026  11:31 PM           1096 __init__.py                                                          
+
+
+

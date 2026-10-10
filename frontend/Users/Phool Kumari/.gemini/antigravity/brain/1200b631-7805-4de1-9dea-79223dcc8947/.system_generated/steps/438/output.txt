@@ -1,0 +1,29 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\frontend\src
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----         10/8/2026   3:22 PM                api                                                                  
+d-----         10/2/2026   7:48 AM                assets                                                               
+d-----         10/2/2026   9:31 PM                components                                                           
+d-----         10/2/2026   8:25 AM                context                                                              
+d-----         10/2/2026   7:52 AM                hooks                                                                
+d-----         10/2/2026   4:02 PM                layouts                                                              
+d-----         10/2/2026   7:52 AM                pages                                                                
+d-----         10/2/2026   8:28 AM                routes                                                               
+d-----         10/8/2026  10:54 PM                services                                                             
+d-----         10/2/2026   4:04 PM                styles                                                               
+d-----         10/2/2026   7:52 AM                types                                                                
+d-----         10/2/2026   7:52 AM                utils                                                                
+-a----         10/2/2026   5:55 PM           4461 App.css                                                              
+-a----         10/8/2026  10:55 PM           7082 App.jsx                                                              
+-a----         10/3/2026  11:56 AM          40522 index.css                                                            
+-a----         10/2/2026   8:54 PM            422 main.jsx                                                             
+
+
+

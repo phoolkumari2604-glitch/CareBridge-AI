@@ -1,0 +1,55 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\backend\app\routes
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/9/2026   2:14 PM          25328 ai_assistant.py                                                      
+-a----         10/8/2026   3:19 PM           7498 appointment.py                                                       
+-a----         10/8/2026   3:19 PM           5954 approval.py                                                          
+-a----         10/8/2026   3:21 PM           2286 audit.py                                                             
+-a----         10/8/2026   4:58 PM          15154 auth.py                                                              
+-a----         10/9/2026  10:13 AM          12834 doctor.py                                                            
+-a----         10/8/2026   3:20 PM           3848 health.py                                                            
+-a----         10/8/2026   3:20 PM           4514 health_alerts.py                                                     
+-a----         10/9/2026   2:17 PM          12252 health_records.py                                                    
+-a----         10/8/2026  10:53 PM          10365 hospital.py                                                          
+-a----         10/9/2026   2:16 PM           8017 notification.py                                                      
+-a----         10/9/2026   7:45 PM          15615 opd_pass.py                                                          
+-a----         10/9/2026   8:58 PM          21439 patient.py                                                           
+-a----         10/8/2026   3:20 PM           6364 queue.py                                                             
+-a----         10/8/2026   3:20 PM           5284 smartflow.py                                                         
+-a----         10/9/2026   8:57 PM           6647 vitals.py                                                            
+-a----         10/8/2026   3:21 PM           1041 __init__.py                                                          
+
+
+    Directory: D:\CareBridge AI\frontend\src\pages\staff
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/9/2026   1:36 AM          11637 Appointments.jsx                                                     
+-a----         10/9/2026   1:36 AM          16425 Approvals.jsx                                                        
+-a----         10/9/2026   1:36 AM           9811 AuditSecurity.jsx                                                    
+-a----         10/8/2026  11:43 PM          19173 Doctors.jsx                                                          
+-a----         10/2/2026   7:18 PM           9666 Hospitals.jsx                                                        
+-a----         10/2/2026   7:21 PM           7777 Notifications.jsx                                                    
+-a----         10/9/2026   8:53 PM          53144 Patients.jsx                                                         
+-a----         10/9/2026   1:36 AM          12481 Queue.jsx                                                            
+-a----         10/9/2026   1:35 AM          14454 StaffDashboard.jsx                                                   
+-a----         10/2/2026   7:10 PM          12765 Appointments.css                                                     
+-a----         10/2/2026   7:14 PM          14703 Approvals.css                                                        
+-a----         10/2/2026   7:24 PM          13507 AuditSecurity.css                                                    
+-a----         10/2/2026   7:15 PM          12728 Doctors.css                                                          
+-a----         10/2/2026   7:19 PM          10827 Hospitals.css                                                        
+-a----         10/2/2026   7:21 PM           8529 Notifications.css                                                    
+-a----         10/9/2026   8:53 PM          31304 Patients.css                                                         
+-a----         10/2/2026   7:07 PM          11457 Queue.css                                                            
+-a----         10/2/2026   6:52 PM          15667 StaffDashboard.css                                                   
+
+
+

@@ -1,0 +1,26 @@
+
+The command exited with code 0.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+Logged in test patient: flask_feature_patient_c9cbfae8@carebridge.test, patient_id: 6ac8abe255a59fc9c4685edb
+
+--- 1. Testing AI Assistant Chat with Image & Friendly Fallback ---
+[PASS] AI Multimodal image chat response received: **Visual Clinical Assessment (1 image received: *test_scan.j...
+
+--- 2. Testing Notifications Simulation & Batch Management ---
+[PASS] Simulated alert created successfully
+[PASS] Mark all notifications read: {'message': 'All notifications marked as read'}
+[PASS] Clear all notifications: {'deleted_count': 1, 'message': 'All notifications cleared'}
+
+--- 3. Testing Medical Records Multi-File Upload & Batch Delete ---
+[PASS] Multi-file health record created with ID 6ac8abe455a59fc9c4685ee2 and 2 files
+[PASS] Files exist in uploads directory
+[PASS] Batch delete successful: {'deleted_count': 1, 'message': 'Successfully deleted 1 record(s)'}
+[PASS] Files successfully purged from disk upon deletion
+
+========================================================
+>>> ALL UPGRADE CAPABILITY TESTS PASSED WITH 100% <<<
+========================================================
+
+

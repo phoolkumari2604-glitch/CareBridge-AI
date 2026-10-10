@@ -1,0 +1,39 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\shared\HospitalDashboard.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -567,11 +567,16 @@
+           MAIN SEARCH & FILTER PANEL (COMPACT TEAL/NAVY CARD)
+           ============================================================ */}
+       <section className="search-filter-card" aria-label="Hospital search and filters">
++        <div className="search-panel-header">
++          <div className="search-eyebrow">FIND CARE NEAR YOU</div>
++          <h1 className="search-panel-title">Hospital Network</h1>
++          <p className="search-panel-subtitle">
++            {facilities.length} facilit{facilities.length === 1 ? "y" : "ies"} {distance !== "all" ? `within ${distance} km` : "available in network"} near <strong className="text-teal-300">{locationLabel}</strong>
++          </p>
++        </div>
++
+         {/* 1. FULL-WIDTH SEARCH BAR (h-12) */}
+         <div className="search-bar-wrap">
+-          <label htmlFor="hospital-search-input" className="sr-only">
+-            Search hospitals, specialties or areas
+-          </label>
+           <Search size={18} className="search-bar-icon" aria-hidden="true" />
+           <input
+             id="hospital-search-input"
+@@ -591,6 +591,13 @@
+               <X size={16} />
+             </button>
+           )}
++          <button
++            type="button"
++            className="search-bar-submit-btn"
++            onClick={() => fetchFacilities()}
++          >
++            Search
++          </button>
+         </div>
+ 
+         {/* MOBILE CONTROLS TOGGLE BUTTON */}
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

@@ -1,0 +1,48 @@
+
+The command exited with code 0.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+
+--- 1. Testing Root & Health Endpoints ---
+Health and root endpoints OK
+
+--- 2. Testing Registration with Baseline Vitals & Login ---
+Logged in patient with baseline vitals: flask_test_patient_6a7a7225@carebridge.test, patient_id: 6ac7d2704d03afbed837d8dc
+Registration baseline vitals verified successfully in vital_signs
+
+--- 3. Testing Password Change Endpoint ---
+Password changed successfully via /api/auth/change-password
+
+--- 4. Testing Hospital & Leafmap Endpoints ---
+Fetched 12 registered hospitals
+Leafmap interactive HTML generated successfully
+
+--- 5. Testing Doctor Endpoints & Doctor Profile Update ---
+Doctor availability verified for doctor_id: 6ab6132559e430aaacdfd8cc
+
+--- 6. Testing Appointments & Workflow ---
+Appointment booked and retrieved: 6ac7d2724d03afbed837d8e2
+
+--- 7. Testing Approvals, Digital OPD Pass, Live Queue & SmartFlow ---
+SmartFlow executed: OPD Pass OPD-20261008-789CE6, Queue Token #4
+Patient OPD Passes retrieved successfully
+Live queue retrieved successfully
+
+--- 8. Testing Health Records & File Upload ---
+Health record file uploaded successfully: /api/health-records/files/1791480435_blood_test.pdf
+
+--- 9. Testing AI Assistant (General Health + Emergency + Clinical Triage) ---
+AI General Health response verified: **Your Latest Recorded Vital Signs:**
+
+� **Heart Rate**: 74 BPM (Normal range: 6 ...
+AI Emergency safety detection verified
+AI conversation history stored and retrieved
+
+--- 10. Testing Notifications ---
+Notifications retrieved: 1 messages
+
+========================================================
+>>> ALL 10 TEST SUITES PASSED WITH 100% SUCCESS <<<
+========================================================
+

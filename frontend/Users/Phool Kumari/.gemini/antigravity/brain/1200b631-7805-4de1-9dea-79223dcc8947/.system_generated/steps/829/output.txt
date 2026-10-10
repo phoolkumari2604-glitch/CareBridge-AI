@@ -1,0 +1,23 @@
+Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-827
+Status: DONE
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-827.log
+Log output:
+<truncated 21 lines>
+gs, **kw)
+           ~~~~~~~~~^^^^^^^^^^^^^
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\flask\testing.py", line 228, in open
+    request = self._request_from_builder_args(args, kwargs)
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\flask\testing.py", line 197, in _request_from_builder_args
+    builder = EnvironBuilder(self.application, *args, **kwargs)
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\flask\testing.py", line 86, in __init__
+    super().__init__(path, base_url, *args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\werkzeug\test.py", line 391, in __init__
+    for key, value in _iter_data(data):
+                      ~~~~~~~~~~^^^^^^
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\werkzeug\test.py", line 171, in _iter_data
+    for key, value in data.items():
+                      ^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'items'
+
+Last progress: 2s ago

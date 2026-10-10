@@ -1,0 +1,25 @@
+
+The command exited with code 1.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+Logged in test patient: flask_feature_patient_98bf9a88@carebridge.test, patient_id: 6ac8ab8bd2c86cd3d6c63804
+
+--- 1. Testing AI Assistant Chat with Image & Friendly Fallback ---
+[PASS] AI Multimodal image chat response received: **Visual Clinical Assessment (1 image received: *test_scan.j...
+
+--- 2. Testing Notifications Simulation & Batch Management ---
+[PASS] Simulated alert created successfully
+[PASS] Mark all notifications read: {'message': 'All notifications marked as read'}
+[PASS] Clear all notifications: {'deleted_count': 1, 'message': 'All notifications cleared'}
+
+--- 3. Testing Medical Records Multi-File Upload & Batch Delete ---
+Traceback (most recent call last):
+  File "D:\CareBridge AI\backend\test_new_features.py", line 134, in <module>
+    test_new_features()
+    ~~~~~~~~~~~~~~~~~^^
+  File "D:\CareBridge AI\backend\test_new_features.py", line 106, in test_new_features
+    assert len(files) == 2, f"Expected 2 files attached, got {len(files)}"
+           ^^^^^^^^^^^^^^^
+AssertionError: Expected 2 files attached, got 0
+

@@ -1,0 +1,54 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\shared\Settings.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -380,6 +380,7 @@
+                       onChange={(e) =>
+                         setPasswordForm({ ...passwordForm, current_password: e.target.value })
+                       }
++                      autoComplete="current-password"
+                       required
+                     />
+                   </div>
+@@ -393,8 +393,30 @@
+                       onChange={(e) =>
+                         setPasswordForm({ ...passwordForm, new_password: e.target.value })
+                       }
+-                      required
+-                    />
++                      autoComplete="new-password"
++                      required
++                    />
++                    {passwordForm.new_password && (
++                      <div className="settings-password-strength">
++                        <div className="settings-strength-bars">
++                          {[1, 2, 3, 4, 5, 6].map((bar) => (
++                            <span
++                              key={bar}
++                              style={{
++                                backgroundColor:
++                                  bar <= newPasswordStrength.score
++                                    ? newPasswordStrength.color
++                                    : "#e2e8f0",
++                              }}
++                              className={bar <= newPasswordStrength.score ? "active" : ""}
++                            />
++                          ))}
++                        </div>
++                        <small style={{ color: newPasswordStrength.color, fontWeight: 700 }}>
++                          {newPasswordStrength.label}
++                        </small>
++                      </div>
++                    )}
+                   </div>
+ 
+                   <div className="form-group">
+@@ -406,6 +406,7 @@
+                       onChange={(e) =>
+                         setPasswordForm({ ...passwordForm, confirm_password: e.target.value })
+                       }
++                      autoComplete="new-password"
+                       required
+                     />
+                   </div>
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

@@ -1,0 +1,13 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "<string>", line 22, in <module>
+    print('First patient:', d1['patients'][0]['name'], d1['patients'][0]['patientId'], d1['patients'][0]['phone'])
+                            ~~^^^^^^^^^^^^
+KeyError: 'patients'
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+GET Status: 401
+GET Response keys: ['detail', 'error'] Total: None Stats: None
+

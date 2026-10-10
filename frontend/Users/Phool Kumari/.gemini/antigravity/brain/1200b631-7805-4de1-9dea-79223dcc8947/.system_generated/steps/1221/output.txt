@@ -1,0 +1,19 @@
+
+The command exited with code 0.
+Output:
+
+  frontend\src\layouts\Navbar.jsx:28:    }
+  frontend\src\layouts\Navbar.jsx:29:    if (pathname.includes("/doctor/patient-monitoring") || 
+pathname.includes("/doctor/patients")) {
+> frontend\src\layouts\Navbar.jsx:30:      return { title: "Patient Monitoring", subtitle: "Real-time Telemetry & 
+Patient Registry" };
+  frontend\src\layouts\Navbar.jsx:31:    }
+  frontend\src\layouts\Navbar.jsx:32:    if (pathname.includes("/doctor/appointments")) {
+  frontend\src\layouts\Sidebar.jsx:85:    },
+  frontend\src\layouts\Sidebar.jsx:86:    {
+> frontend\src\layouts\Sidebar.jsx:87:      label: "Patient Monitoring",
+  frontend\src\layouts\Sidebar.jsx:88:      path: "/doctor/patient-monitoring",
+  frontend\src\layouts\Sidebar.jsx:89:      icon: Users,
+
+
+

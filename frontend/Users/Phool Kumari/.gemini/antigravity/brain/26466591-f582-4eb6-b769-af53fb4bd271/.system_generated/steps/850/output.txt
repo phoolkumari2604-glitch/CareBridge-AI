@@ -1,0 +1,199 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\patient\Doctors.css. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -850,6 +850,184 @@
+ }
+ 
+ /* =========================================================
++   CATEGORY & VERIFICATION BADGES
++========================================================= */
++.badge-row-compact {
++  display: flex;
++  align-items: center;
++  flex-wrap: wrap;
++  gap: 6px;
++  margin-bottom: 6px;
++}
++
++.verification-badge {
++  display: inline-flex;
++  align-items: center;
++  gap: 4px;
++  font-size: 10px;
++  font-weight: 800;
++  padding: 3px 8px;
++  border-radius: 6px;
++  letter-spacing: 0.3px;
++  text-transform: uppercase;
++}
++
++.verification-badge.verified {
++  background: rgba(16, 185, 129, 0.15);
++  color: #10b981;
++  border: 1px solid rgba(16, 185, 129, 0.3);
++}
++
++.verification-badge.historical {
++  background: rgba(168, 85, 247, 0.15);
++  color: #c084fc;
++  border: 1px solid rgba(168, 85, 247, 0.3);
++}
++
++.verification-badge.unverified {
++  background: rgba(245, 158, 11, 0.15);
++  color: #fbbf24;
++  border: 1px solid rgba(245, 158, 11, 0.3);
++}
++
++.category-tag {
++  display: inline-block;
++  font-size: 10px;
++  font-weight: 700;
++  padding: 2px 7px;
++  border-radius: 5px;
++  background: #0f1d3a;
++  color: #94a3b8;
++  border: 1px solid rgba(148, 163, 184, 0.2);
++}
++
++.category-tag.cat-practicing-clinician {
++  color: #38bdf8;
++  border-color: rgba(56, 189, 248, 0.3);
++}
++
++.category-tag.cat-medical-researcher {
++  color: #818cf8;
++  border-color: rgba(129, 140, 248, 0.3);
++}
++
++.category-tag.cat-academic {
++  color: #34d399;
++  border-color: rgba(52, 211, 153, 0.3);
++}
++
++.category-tag.cat-public-health-expert {
++  color: #f472b6;
++  border-color: rgba(244, 114, 182, 0.3);
++}
++
++.category-tag.cat-historical-medical-pioneer {
++  color: #c084fc;
++  border-color: rgba(192, 132, 252, 0.3);
++}
++
++/* Multi-filter Layout */
++.doctor-search-card.multi-filter-card {
++  display: flex;
++  flex-direction: column;
++  gap: 12px;
++}
++
++.doctor-search-box.full-width-search {
++  width: 100%;
++}
++
++.filters-subgrid {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
++  gap: 10px;
++}
++
++.bookable-status {
++  background: rgba(16, 185, 129, 0.08);
++  border-color: rgba(16, 185, 129, 0.2);
++}
++
++.bookable-status svg {
++  color: #10b981;
++}
++
++.non-bookable-status {
++  background: rgba(148, 163, 184, 0.06);
++  border-color: rgba(148, 163, 184, 0.15);
++}
++
++.non-bookable-status svg {
++  color: #94a3b8;
++}
++
++.doctor-book-btn.disabled-btn {
++  background: #1e293b;
++  color: #64748b;
++  border: 1px solid rgba(148, 163, 184, 0.15);
++  box-shadow: none;
++  cursor: not-allowed;
++}
++
++.verification-source-box {
++  background: #0b1528;
++  padding: 12px 16px;
++  border-radius: 10px;
++  border: 1px solid rgba(148, 163, 184, 0.1);
++}
++
++.verification-info-content {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  flex-wrap: wrap;
++  gap: 10px;
++}
++
++.source-url-link {
++  display: inline-flex;
++  align-items: center;
++  gap: 6px;
++  color: #38bdf8;
++  font-size: 12px;
++  font-weight: 700;
++  text-decoration: none;
++  transition: color 0.15s ease;
++}
++
++.source-url-link:hover {
++  color: #7dd3fc;
++  text-decoration: underline;
++}
++
++.verif-date {
++  font-size: 11px;
++  color: #94a3b8;
++}
++
++.not-avail-text {
++  font-size: 12px;
++  color: #64748b;
++}
++
++.non-consult-notice {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  background: rgba(168, 85, 247, 0.08);
++  border: 1px solid rgba(168, 85, 247, 0.2);
++  padding: 10px 14px;
++  border-radius: 10px;
++  font-size: 12px;
++  color: #d8b4fe;
++}
++
++.non-consult-notice svg {
++  color: #c084fc;
++  flex-shrink: 0;
++}
++
++/* =========================================================
+    RESPONSIVE
+ ========================================================= */
+ @media (max-width: 900px) {
+@@ -856,8 +856,5 @@
+     padding: 20px 16px;
+   }
+-  .doctor-search-card {
+-    grid-template-columns: 1fr;
+-  }
+ }
+ 
+ @media (max-width: 640px) {
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

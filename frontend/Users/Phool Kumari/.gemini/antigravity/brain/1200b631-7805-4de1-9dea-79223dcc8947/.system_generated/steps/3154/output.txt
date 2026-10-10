@@ -1,0 +1,118 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\routes\ai_assistant.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -589,12 +589,105 @@
+     doc["id"] = str(res.inserted_id)
+     return jsonify(serialize_doc(doc)), 201
+ 
+-@ai_assistant_bp.route("/history/<message_id>", methods=["DELETE"], strict_slashes=False)
+-@token_required
+-def delete_ai_message(message_id):
+-    db = get_database()
+-    if is_valid_object_id(message_id):
+-        db.ai_conversations.delete_one({"_id": ObjectId(message_id)})
+-    return jsonify({"message": "Message deleted successfully"}), 200
++@ai_assistant_bp.route("/stream", methods=["POST"], strict_slashes=False)
++@ai_assistant_bp.route("/chat/stream", methods=["POST"], strict_slashes=False)
++@token_required
++def stream_ai_chat():
++    db = get_database()
++    current_user = g.current_user
++    user_id = str(current_user["_id"])
++    user_role = current_user.get("role", "PATIENT").upper()
++
++    data = request.get_json() or {}
++    message = data.get("message", "").strip()
++    patient_id = data.get("patient_id")
++    messages_history = data.get("messages", [])
++
++    if not message and messages_history:
++        last_msg = messages_history[-1]
++        if isinstance(last_msg, dict):
++            message = last_msg.get("content", "").strip()
++
++    if not message:
++        return jsonify({"error": "Validation Error", "detail": "Message is required"}), 400
++
++    # Build context
++    context = {
++        "user_name": current_user.get("name", "User"),
++        "doctor_name": current_user.get("name", "Doctor"),
++        "patient_name": "Patient",
++        "vitals": None,
++        "alerts": [],
++        "records": [],
++        "conditions": [],
++        "medications": [],
++        "allergies": []
++    }
++
++    patient_obj_id = None
++    if patient_id and is_valid_object_id(patient_id):
++        patient_obj_id = ObjectId(patient_id)
++    elif patient_id:
++        p_match = db.patients.find_one({"$or": [{"patient_code": str(patient_id)}, {"patient_id_code": str(patient_id)}]})
++        if p_match:
++            patient_obj_id = p_match["_id"]
++
++    if patient_obj_id:
++        p_doc = db.patients.find_one({"_id": patient_obj_id})
++        if p_doc:
++            context["patient_name"] = p_doc.get("name", "Patient")
++            context["patient_code"] = p_doc.get("patient_code", str(patient_obj_id)[-6:])
++            context["age"] = p_doc.get("age", 45)
++            context["gender"] = p_doc.get("gender", "Unspecified")
++            context["blood_group"] = p_doc.get("blood_group", "O+")
++
++        vital_doc = db.vital_signs.find_one({"patient_id": patient_obj_id}, sort=[("recorded_at", -1)])
++        if vital_doc:
++            context["vitals"] = vital_doc
++
++        rec_docs = list(db.health_records.find({"patient_id": patient_obj_id}).sort("created_at", -1).limit(5))
++        context["records"] = rec_docs
++        for r in rec_docs:
++            if r.get("diagnosis"): context["conditions"].append(r["diagnosis"])
++            if r.get("prescriptions"):
++                for rx in r["prescriptions"]:
++                    if isinstance(rx, dict) and rx.get("medicine_name"):
++                        context["medications"].append(rx["medicine_name"])
++
++    # Generate full clinical response
++    full_response = generate_clinical_ai_response(user_role, message, context)
++
++    # Persist to database
++    db.ai_conversations.insert_one({
++        "user_id": user_id,
++        "patient_id": patient_obj_id,
++        "role": user_role,
++        "message": message,
++        "sender": "USER",
++        "created_at": datetime.now(timezone.utc)
++    })
++    db.ai_conversations.insert_one({
++        "user_id": user_id,
++        "patient_id": patient_obj_id,
++        "role": user_role,
++        "message": full_response,
++        "sender": "AI",
++        "created_at": datetime.now(timezone.utc)
++    })
++
++    def generate_stream():
++        # Stream word tokens with natural cadence
++        words = re.findall(r'\S+|\n+', full_response)
++        buffer = ""
++        for w in words:
++            if '\n' in w:
++                yield f"data: {json.dumps({'t': w})}\n\n"
++            else:
++                yield f"data: {json.dumps({'t': w + ' '})}\n\n"
++            time.sleep(0.015)
++        yield "data: [DONE]\n\n"
++
++    return Response(stream_with_context(generate_stream()), mimetype="text/event-stream")
++
+ 
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

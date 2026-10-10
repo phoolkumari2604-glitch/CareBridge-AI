@@ -1,0 +1,10 @@
+
+The command exited with code 0.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+Total hospitals in DB: 66
+Found 0 bad records to clean up:
+Distinct countries: [None, 'India', 'USA']
+Distinct types: ['Quaternary Academic Medical Center', 'Multi-Super Specialty Institute', 'Academic Medical Center', 'Super-Specialty Hospital', 'Tertiary Care Facility', 'Teaching Hospital & Research Center', 'Government Tertiary Hospital', 'Government / Academic Medical Center', 'Cardiovascular Specialty Hospital', 'Multi-Specialty Hospital', 'Super-Specialty Quaternary Hospital', 'Multi-Specialty Academic Center', 'Charitable Teaching Hospital', 'Specialized Cancer Hospital']
+

@@ -1,0 +1,2 @@
+Created file file:///d:/CareBridge%20AI/frontend/src/components/patient/AnatomicalHeart3D.css with requested content.
+If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.

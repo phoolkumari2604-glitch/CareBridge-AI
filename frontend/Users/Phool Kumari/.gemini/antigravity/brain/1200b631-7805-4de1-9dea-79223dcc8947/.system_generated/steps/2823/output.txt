@@ -1,0 +1,194 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\pages\doctor\DoctorDashboard.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -157,6 +157,14 @@
+     fetchDashboardData();
+   }, [fetchDashboardData]);
+ 
++  // Silent 60-second auto-refresh polling
++  useEffect(() => {
++    const timer = setInterval(() => {
++      fetchDashboardData();
++    }, 60000);
++    return () => clearInterval(timer);
++  }, [fetchDashboardData]);
++
+   const handleManualRefresh = () => {
+     setIsRefreshing(true);
+     fetchDashboardData();
+@@ -165,6 +165,173 @@
+     setAcknowledgedAlertIds((prev) => new Set([...prev, patientId]));
+   };
+ 
++  // Local date in YYYY-MM-DD format
++  const localTodayStr = useMemo(() => {
++    const d = new Date();
++    const year = d.getFullYear();
++    const month = String(d.getMonth() + 1).padStart(2, "0");
++    const day = String(d.getDate()).padStart(2, "0");
++    return `${year}-${month}-${day}`;
++  }, []);
++
++  const parseTimeToMinutes = (timeStr) => {
++    if (!timeStr) return 9999;
++    const match = String(timeStr).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
++    if (!match) return 9999;
++    let hours = parseInt(match[1], 10);
++    const minutes = parseInt(match[2], 10);
++    const period = match[3] ? match[3].toUpperCase() : null;
++    if (period === "PM" && hours < 12) hours += 12;
++    if (period === "AM" && hours === 12) hours = 0;
++    return hours * 60 + minutes;
++  };
++
++  const formatDateNice = (dateStr) => {
++    if (!dateStr) return "";
++    try {
++      const d = new Date(dateStr);
++      if (isNaN(d.getTime())) return dateStr;
++      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
++    } catch (e) {
++      return dateStr;
++    }
++  };
++
++  const { todayAppointments, upcomingAppointments } = useMemo(() => {
++    const todayList = [];
++    const upcomingList = [];
++
++    appointments.forEach((apt) => {
++      const aptDate = apt.appointment_date;
++      if (aptDate === localTodayStr || !aptDate) {
++        todayList.push(apt);
++      } else if (aptDate > localTodayStr) {
++        upcomingList.push(apt);
++      }
++    });
++
++    todayList.sort((a, b) => parseTimeToMinutes(a.appointment_time) - parseTimeToMinutes(b.appointment_time));
++    upcomingList.sort((a, b) => {
++      if (a.appointment_date !== b.appointment_date) {
++        return (a.appointment_date || "").localeCompare(b.appointment_date || "");
++      }
++      return parseTimeToMinutes(a.appointment_time) - parseTimeToMinutes(b.appointment_time);
++    });
++
++    return { todayAppointments: todayList, upcomingAppointments: upcomingList };
++  }, [appointments, localTodayStr]);
++
++  const getPatientNameForAppointment = (apt) => {
++    if (apt.patient_name && apt.patient_name !== "string" && apt.patient_name !== "Registered Patient") {
++      return apt.patient_name;
++    }
++    const pid = apt.patient_id?._id || apt.patient_id || apt.patientId;
++    if (pid) {
++      const matched = patients.find((p) => (p._id || p.id) === pid || p.patient_code === pid);
++      if (matched) return matched.name;
++    }
++    return apt.patient_name || "Registered Patient";
++  };
++
++  const handleStartConsultation = async (e, apt) => {
++    e.stopPropagation();
++    const aptId = apt._id || apt.id;
++    if (!aptId) return;
++    try {
++      setStartingConsultationId(aptId);
++      await doctorService.updateAppointment(aptId, { status: "IN_CONSULTATION" });
++      setAppointments((prev) =>
++        prev.map((a) => ((a._id || a.id) === aptId ? { ...a, status: "IN_CONSULTATION" } : a))
++      );
++      const targetPid = apt.patient_id?._id || apt.patient_id || apt.patientId;
++      if (targetPid) {
++        setFocusedPatientId(targetPid);
++      }
++    } catch (err) {
++      console.error("Failed to start consultation:", err);
++    } finally {
++      setStartingConsultationId(null);
++    }
++  };
++
++  const renderStatusBadge = (rawStatus) => {
++    const s = (rawStatus || "PENDING").toUpperCase();
++    if (s === "IN_CONSULTATION") {
++      return (
++        <span className="clean-status-badge in-consultation">
++          <span className="pulse-blue-dot"></span>
++          In Consultation
++        </span>
++      );
++    }
++    if (s === "APPROVED" || s === "CONFIRMED") {
++      return <span className="clean-status-badge approved">Approved</span>;
++    }
++    if (s === "PENDING") {
++      return <span className="clean-status-badge pending">Pending</span>;
++    }
++    if (s === "COMPLETED") {
++      return <span className="clean-status-badge completed">Completed</span>;
++    }
++    if (s === "CANCELLED" || s === "REJECTED") {
++      return <span className="clean-status-badge cancelled">Cancelled</span>;
++    }
++    return <span className="clean-status-badge pending">{rawStatus}</span>;
++  };
++
++  const filteredSpecialists = useMemo(() => {
++    return consultingDoctors.filter((doc) => {
++      const name = (doc.name || "").toLowerCase();
++      const spec = (doc.specialty || "").toLowerCase();
++      const hosp = (doc.hospital_name || doc.hospital || "").toLowerCase();
++      const matchesSearch =
++        !specialistSearch ||
++        name.includes(specialistSearch.toLowerCase()) ||
++        spec.includes(specialistSearch.toLowerCase()) ||
++        hosp.includes(specialistSearch.toLowerCase());
++
++      if (!matchesSearch) return false;
++      if (specialistFilter === "available") {
++        return (doc.status || "AVAILABLE").toUpperCase() === "AVAILABLE";
++      }
++      if (specialistFilter === "cardiology") {
++        return spec.includes("cardio");
++      }
++      if (specialistFilter === "neurology") {
++        return spec.includes("neuro");
++      }
++      return true;
++    });
++  }, [consultingDoctors, specialistSearch, specialistFilter]);
++
++  const handleOpenReferralModal = (e, doc) => {
++    e.stopPropagation();
++    setReferralTargetDoctor(doc);
++    setReferralPatientId(focusedPatientId || (patients[0]?._id || patients[0]?.id || ""));
++    setReferralReason("");
++    setReferralSuccessMsg("");
++    setReferralModalOpen(true);
++  };
++
++  const handleSubmitReferral = async (e) => {
++    e.preventDefault();
++    if (!referralTargetDoctor || !referralPatientId) return;
++    setReferralSubmitting(true);
++    try {
++      // Simulate/create referral record
++      await new Promise((res) => setTimeout(res, 600));
++      setReferralSuccessMsg(`Consultation request successfully routed to ${referralTargetDoctor.name}.`);
++      setTimeout(() => {
++        setReferralModalOpen(false);
++        setReferralSuccessMsg("");
++      }, 1500);
++    } catch (err) {
++      console.error("Referral failed:", err);
++    } finally {
++      setReferralSubmitting(false);
++    }
++  };
++
+   // Determine clinical status for any patient
+   const getPatientClinicalStatus = (patientId) => {
+     const summary = patientAlertsMap[patientId];
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

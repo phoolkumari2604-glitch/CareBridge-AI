@@ -1,0 +1,24 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\doctor\Appointments.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -375,8 +375,7 @@
+                   filteredAppointments.map((apt, index) => {
+                     const patient = patientsMap[apt.patient_id];
+                     const patientName = patient?.name || "Patient Record";
+-                    const pid = apt.patient_id || "";
+-                    const statusUpper = (apt.status || "PENDING").toUpperCase();
++                    const pCode = apt.patient_code || patient?.patient_code || String(patient?.patientId || "").replace("PT-", "") || (pid ? pid.slice(-6) : "");
+ 
+                     return (
+                       <tr key={apt._id || apt.id || index}>
+@@ -392,7 +392,7 @@
+                             <div>
+                               <strong>{patientName}</strong>
+                               <span>
+-                                {pid ? `ID: ${pid.slice(-6)}` : ""}
++                                {pCode ? `ID: ${pCode}` : ""}
+                                 {patient?.phone ? ` • ${patient.phone}` : ""}
+                               </span>
+                             </div>
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

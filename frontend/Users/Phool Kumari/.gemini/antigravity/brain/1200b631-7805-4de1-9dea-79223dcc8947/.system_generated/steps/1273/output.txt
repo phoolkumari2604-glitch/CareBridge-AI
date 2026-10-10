@@ -1,0 +1,13 @@
+
+The command exited with code 0.
+Output:
+
+  frontend\src\styles\layout.css:19:
+> frontend\src\styles\layout.css:20:.app-navbar {
+  frontend\src\styles\layout.css:21:  position: fixed;
+  frontend\src\styles\layout.css:343:
+> frontend\src\styles\layout.css:344:  .app-navbar {
+  frontend\src\styles\layout.css:345:    height: 64px;
+
+
+

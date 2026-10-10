@@ -1,0 +1,11 @@
+You have 1 background task(s) currently running:
+{
+  "taskId": "1200b631-7805-4de1-9dea-79223dcc8947/task-3043",
+  "toolName": "run_command",
+  "toolSummary": "Start backend daemon",
+  "description": ".venv\\Scripts\\python.exe run.py",
+  "startTime": "2026-10-10T09:58:28.974833600Z",
+  "stepIndex": 3043,
+  "logUri": "file:///C:/Users/Phool%20Kumari/.gemini/antigravity/brain/1200b631-7805-4de1-9dea-79223dcc8947/.system_generated/tasks/task-3043.log",
+  "isDaemon": true
+}

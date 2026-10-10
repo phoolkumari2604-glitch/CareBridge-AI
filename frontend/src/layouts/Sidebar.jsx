@@ -104,7 +104,7 @@ function Sidebar({ open, isOpen, onClose }) {
       icon: FileText,
     },
     {
-      label: "Health Monitoring",
+      label: "PulseView",
       path: "/doctor/health-monitoring",
       icon: LineChart,
     },

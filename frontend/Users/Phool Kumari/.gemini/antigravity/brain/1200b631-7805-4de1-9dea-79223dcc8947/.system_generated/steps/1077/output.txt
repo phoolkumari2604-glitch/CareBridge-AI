@@ -1,0 +1,20 @@
+
+The command exited with code 0.
+Output:
+
+FullName                                                        
+--------                                                        
+D:\CareBridge AI\frontend\src\pages\staff\StaffDashboard.css    
+D:\CareBridge AI\frontend\src\pages\staff\StaffDashboard.jsx    
+D:\CareBridge AI\frontend\src\pages\doctor\PatientMonitoring.css
+D:\CareBridge AI\frontend\src\pages\doctor\PatientMonitoring.jsx
+D:\CareBridge AI\frontend\src\pages\patient\PatientDashboard.css
+D:\CareBridge AI\frontend\src\pages\patient\PatientDashboard.jsx
+D:\CareBridge AI\frontend\src\pages\patient\PatientLayout.jsx   
+D:\CareBridge AI\frontend\src\pages\patient\PatientPages.css    
+D:\CareBridge AI\frontend\src\pages\staff\Patients.css          
+D:\CareBridge AI\frontend\src\pages\staff\Patients.jsx          
+D:\CareBridge AI\frontend\src\services\patientService.js        
+
+
+

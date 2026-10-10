@@ -1,0 +1,25 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\doctor\HealthMonitoring.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -340,11 +340,14 @@
+             {patients.length === 0 ? (
+               <option value="">No patients available</option>
+             ) : (
+-              patients.map((p) => (
+-                <option key={p._id || p.id} value={p._id || p.id}>
+-                  {p.name || "Patient"} (ID: {(p._id || p.id).slice(-6)})
+-                </option>
+-              ))
++              patients.map((p) => {
++                const pCode = p.patient_code || String(p.patientId || "").replace("PT-", "") || String(p._id || p.id).slice(-6);
++                return (
++                  <option key={p._id || p.id} value={p._id || p.id}>
++                    {p.name || "Patient"} (ID: {pCode})
++                  </option>
++                );
++              })
+             )}
+           </select>
+         </div>
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

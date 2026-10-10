@@ -1,0 +1,28 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\backend
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/9/2026   9:31 PM          15570 cleanup_and_seed_hospitals.py                                        
+-a----         10/9/2026  11:32 PM           4207 cleanup_demo_data.py                                                 
+-a----         10/9/2026   8:50 PM           9682 cleanup_patients_data.py                                             
+-a----         10/9/2026   7:44 PM           1343 inspect_hospitals.py                                                 
+-a----         10/8/2026   3:21 PM            330 run.py                                                               
+-a----         10/9/2026   7:53 PM           6529 seed_demo_accounts.py                                                
+-a----         10/8/2026  11:41 PM          47917 seed_doctors_50.py                                                   
+-a----        10/10/2026  12:10 AM          13938 seed_facilities_and_telemetry.py                                     
+-a----         10/9/2026   2:44 PM          16141 seed_hospitals.py                                                    
+-a----         10/9/2026  12:55 AM           5479 test_doctors_dataset.py                                              
+-a----         10/9/2026  12:55 AM           9552 test_flask_e2e.py                                                    
+-a----         10/8/2026  10:53 PM           3278 test_hospital_dashboard_api.py                                       
+-a----         9/25/2026   6:33 AM            260 test_mongodb.py                                                      
+-a----         10/9/2026   2:24 PM           5447 test_new_features.py                                                 
+-a----         10/9/2026   7:47 PM           5998 test_opd_and_hospital_upgrades.py                                    
+
+
+

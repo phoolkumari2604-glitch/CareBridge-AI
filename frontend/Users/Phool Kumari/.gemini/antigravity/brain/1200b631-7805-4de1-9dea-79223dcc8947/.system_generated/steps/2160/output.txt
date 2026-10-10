@@ -1,0 +1,16 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\public\Register.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -937,8 +937,8 @@
+             {/* Contact Support */}
+             <div className="cb-support-note">
+               <span>Need help? Contact support: </span>
+-              <a href="mailto:phoolkumari2603@gmail.com" className="cb-link-accent">
+-                phoolkumari2603@gmail.com
++              <a href="mailto:support@carebridge.ai" className="cb-link-accent">
++                support@carebridge.ai
+               </a>
+             </div>
+           </div>
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

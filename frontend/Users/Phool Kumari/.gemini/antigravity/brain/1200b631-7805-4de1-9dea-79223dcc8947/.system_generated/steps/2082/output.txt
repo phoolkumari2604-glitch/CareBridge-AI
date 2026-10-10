@@ -1,0 +1,5 @@
+
+The command exited with code 1.
+Output:
+C:\Program Files\nodejs\node.exe: bad option: -ErrorAction
+

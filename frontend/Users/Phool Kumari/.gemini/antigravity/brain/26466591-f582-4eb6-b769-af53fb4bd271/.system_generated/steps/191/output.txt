@@ -1,0 +1,16 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\frontend\src\services
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/2/2026   9:16 PM           1165 api.js                                                               
+-a----         10/2/2026   9:16 PM            793 auth.js                                                              
+-a----         10/8/2026   1:50 PM           7770 doctorService.js                                                     
+
+
+

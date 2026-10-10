@@ -1,0 +1,29 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\pages\doctor\Approvals.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -333,8 +333,8 @@
+               filteredApprovals.map((request) => {
+                 const patient = patientsMap[request.patient_id];
+                 const appointment = appointmentsMap[request.appointment_id];
+-                const patientName = patient?.name || "Patient Record";
+-                const pid = request.patient_id || "";
++                const patientName = request.patient_name || patient?.name || "Patient Record";
++                const pCode = request.patient_code || patient?.patient_code || String(patient?.patientId || "").replace("PT-", "") || String(request.patient_id || "").slice(-6);
+                 const statusUpper = (request.status || "PENDING").toUpperCase();
+ 
+                 return (
+@@ -346,8 +346,10 @@
+ 
+                       <div>
+                         <h3>{patientName}</h3>
+-                        <span>{pid ? `ID: ${pid.slice(-6)}` : "Verified Patient"}</span>
+-                        {patient?.phone && <small className="phone-line">{patient.phone}</small>}
++                        <span className="patient-code-tag">ID: {pCode}</span>
++                        {(request.patient_phone || patient?.phone) && (
++                          <small className="phone-line">{request.patient_phone || patient?.phone}</small>
++                        )}
+                       </div>
+                     </div>
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

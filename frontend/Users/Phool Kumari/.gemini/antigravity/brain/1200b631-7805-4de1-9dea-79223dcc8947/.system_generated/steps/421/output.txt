@@ -1,0 +1,13 @@
+
+The command exited with code 1.
+Output:
+.\venv\Scripts\python.exe : The term '.\venv\Scripts\python.exe' is not recognized as the name of a cmdlet, function, 
+script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is 
+correct and try again.
+At line:1 char:1
++ .\venv\Scripts\python.exe -c "import app.routes.hospital as h; print( ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.\venv\Scripts\python.exe:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+

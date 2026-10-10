@@ -1,0 +1,13 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\__init__.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -93,6 +93,7 @@
+         (patient_bp, "/patients"),
+         (doctor_bp, "/doctors"),
+         (hospital_bp, "/hospitals"),
++        (hospital_bp, "/facilities"),
+         (appointment_bp, "/appointments"),
+         (approval_bp, "/approvals"),
+         (opd_pass_bp, "/opd-pass"),
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

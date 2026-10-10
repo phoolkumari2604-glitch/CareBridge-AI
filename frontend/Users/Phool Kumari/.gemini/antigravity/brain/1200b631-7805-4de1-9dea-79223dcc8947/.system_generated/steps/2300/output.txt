@@ -1,0 +1,30 @@
+Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-2298
+Status: DONE
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-2298.log
+Log output:
+<truncated 61 lines>
+ 
+
+
+        
+                            
+                        
+                        
+                        
+                            
+                                
+                                    This is an automated clinical security notification from CareBridge AI. If you did not make this request, please contact support immediately at phoolkumari2603@gmail.com.
+                                
+
+
+                                
+                                    &copy; 2026 CareBridge AI. All rights reserved. HIPAA & DPDP Act 2023 Compliant.
+--------------------------------------------------
+[PASS] Registration returned 201 with access_token and user object
+[PASS] Password securely hashed with bcrypt in MongoDB users collection
+[PASS] Login returned 200 with JWT access_token
+[PASS] Protected /api/auth/me authorized with bearer token
+[PASS] Invalid credentials returned 401 Unauthorized
+=== ALL 4 CORE AUTH CHECKS VERIFIED 100% SUCCESSFUL ===
+
+Last progress: 3s ago

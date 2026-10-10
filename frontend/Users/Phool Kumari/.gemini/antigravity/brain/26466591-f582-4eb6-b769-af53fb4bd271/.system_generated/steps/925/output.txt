@@ -1,0 +1,20 @@
+
+The command exited with code 0.
+Output:
+[PASS] Total doctors count verified: 50/50
+[PASS] Indian specialists count: 25
+[PASS] International experts count: 25
+[PASS] Zero dummy/fictional doctor records confirmed in MongoDB
+[PASS] Historical pioneers verified: non-bookable and 'Historical' status confirmed
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+[PASS] GET /api/doctors returned 50 doctors
+[PASS] Search query ?search=Trehan matched: Dr. Naresh Trehan
+[PASS] Category filter ?category=Public Health Expert returned 6 experts
+[PASS] Country filter ?country=Germany returned 2 doctors (['Dr. Ugur Sahin', 'Dr. �zlem T�reci'])
+[PASS] Bookable filter ?is_bookable=true returned 26 active practicing doctors
+
+=======================================================
+>>> ALL 50 DOCTORS INTEGRATION & API TESTS PASSED! <<<
+=======================================================
+

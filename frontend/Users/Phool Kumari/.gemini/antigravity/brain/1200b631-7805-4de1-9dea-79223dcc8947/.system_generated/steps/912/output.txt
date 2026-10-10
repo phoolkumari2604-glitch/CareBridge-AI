@@ -1,0 +1,48 @@
+
+The command exited with code 1.
+Output:
+At line:1 char:151
++ ... rom app.core.database import get_database; db = get_database(); print ...
++                                                                  ~
+An expression was expected after '('.
+At line:1 char:179
++ ...  get_database; db = get_database(); print('Total hospitals:', db.hosp ...
++                                                                  ~
+Missing expression after ','.
+At line:1 char:180
++ ... ase(); print('Total hospitals:', db.hospitals.count_documents({})); b ...
++                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unexpected token 'db.hospitals.count_documents' in expression or statement.
+At line:1 char:179
++ ...  get_database; db = get_database(); print('Total hospitals:', db.hosp ...
++                                                                  ~
+Missing closing ')' in expression.
+At line:1 char:212
++ ... ; print('Total hospitals:', db.hospitals.count_documents({})); bad =  ...
++                                                                 ~
+Unexpected token ')' in expression or statement.
+At line:1 char:251
++ ... s.count_documents({})); bad = list(db.hospitals.find({'name': {'`$in' ...
++                                                                 ~
+Unexpected token ':' in expression or statement.
+At line:1 char:260
++ ... ocuments({})); bad = list(db.hospitals.find({'name': {'`$in': ['strin ...
++                                                                 ~
+Unexpected token ':' in expression or statement.
+At line:1 char:325
++ ... string', 'N/A', '', None]}})); print('Bad hospital entries:', len(bad ...
++                                                                  ~
+Missing expression after ','.
+At line:1 char:326
++ ... ng', 'N/A', '', None]}})); print('Bad hospital entries:', len(bad));  ...
++                                                               ~~~
+Unexpected token 'len' in expression or statement.
+At line:1 char:325
++ ... string', 'N/A', '', None]}})); print('Bad hospital entries:', len(bad ...
++                                                                  ~
+Missing closing ')' in expression.
+Not all parse errors were reported.  Correct the reported errors and try again.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : ExpectedExpression
+ 
+

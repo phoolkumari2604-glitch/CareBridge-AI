@@ -1,0 +1,9 @@
+
+The command exited with code 0.
+Output:
+[MongoDB] Successfully connected to database 'carebridge_ai'
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+STATUS /api/notifications/?limit=5: 200
+NOTIFICATIONS COUNT: 0
+

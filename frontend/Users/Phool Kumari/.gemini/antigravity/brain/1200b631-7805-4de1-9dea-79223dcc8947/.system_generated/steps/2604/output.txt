@@ -1,0 +1,47 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\backend\.venv\Lib\site-packages\jedi\third_party\typeshed\stubs\braintree\braintree
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/8/2026   3:18 PM           5408 webhook_notification.pyi                                             
+-a----         10/8/2026   3:18 PM            368 webhook_notification_gateway.pyi                                     
+
+
+    Directory: D:\CareBridge AI\backend\app\routes
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/9/2026   2:16 PM           8017 notification.py                                                      
+
+
+    Directory: D:\CareBridge AI\backend\app\routes\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         10/9/2026   2:20 PM          11600 notification.cpython-314.pyc                                         
+
+
+    Directory: D:\CareBridge AI\backend\tests
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         9/29/2026   1:13 AM           9662 test_notification.py                                                 
+
+
+    Directory: D:\CareBridge AI\backend\tests\__pycache__
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         9/29/2026   1:14 AM          31100 test_notification.cpython-314-pytest-9.1.1.pyc                       
+
+
+

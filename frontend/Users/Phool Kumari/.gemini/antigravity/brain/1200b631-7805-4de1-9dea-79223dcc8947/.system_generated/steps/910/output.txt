@@ -1,0 +1,9 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    from app.core.database import get_database; db = get_database(); print('Total hospitals:', db.hospitals.count_documents({})); bad = list(db.hospitals.find({'name': {'': ['string', 'N/A', '', None]}})); print('Bad hospital entries:', len(bad))
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'app'
+

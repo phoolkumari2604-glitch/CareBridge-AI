@@ -1,0 +1,7 @@
+
+The command exited with code 0.
+Output:
+ M frontend/src/layouts/Navbar.jsx
+ M frontend/src/styles/layout.css
+?? frontend/src/layouts/Navbar.css
+

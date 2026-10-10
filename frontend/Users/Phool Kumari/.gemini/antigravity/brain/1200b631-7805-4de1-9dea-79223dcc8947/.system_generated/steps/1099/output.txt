@@ -1,0 +1,9 @@
+
+The command exited with code 0.
+Output:
+
+frontend\src\App.jsx:23:import AppLayout from "./layouts/DashboardLayout";
+frontend\src\App.jsx:83:        <Route element={<AppLayout />}>
+
+
+

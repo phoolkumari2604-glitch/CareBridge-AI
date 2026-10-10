@@ -15,6 +15,7 @@ from app.routes.health_alerts import health_alerts_bp
 from app.routes.ai_assistant import ai_assistant_bp
 from app.routes.notification import notification_bp
 from app.routes.audit import audit_bp
+from app.routes.billing import billing_bp
 
 __all__ = [
     "auth_bp",
@@ -34,5 +35,5 @@ __all__ = [
     "ai_assistant_bp",
     "notification_bp",
     "audit_bp",
+    "billing_bp",
 ]
-

@@ -1,0 +1,80 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\public\Register.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -169,38 +169,15 @@
+     setLoading(true);
+ 
+     try {
+-      const response = await fetch(`${API_URL}/auth/register`, {
+-        method: "POST",
+-        headers: {
+-          "Content-Type": "application/json",
+-        },
+-        body: JSON.stringify({
+-          name,
+-          email,
+-          password: formData.password,
+-          role: "PATIENT",
+-          phone,
+-        }),
++      const data = await authAPI.register({
++        name,
++        email,
++        password: formData.password,
++        role: "PATIENT",
++        phone,
+       });
+ 
+-      const data = await response.json();
+-
+-      if (!response.ok) {
+-        const message =
+-          data?.detail ||
+-          data?.message ||
+-          "Registration failed. Please try again.";
+-
+-        if (Array.isArray(message)) {
+-          throw new Error(
+-            message.map((item) => item.msg).join(", ")
+-          );
+-        }
+-
+-        throw new Error(message);
+-      }
+-
+-      setSuccess("Your account has been created successfully.");
++      setSuccess("Your account has been created successfully. Redirecting to login...");
+ 
+       setTimeout(() => {
+         navigate("/login");
+@@ -207,8 +207,24 @@
+     } catch (err) {
+-      setError(
+-        err?.message ||
+-          "Unable to connect to CareBridge AI. Please check your backend."
+-      );
++      console.error("Registration error:", err);
++
++      const errorDetail =
++        err.response?.data?.detail ||
++        err.response?.data?.message ||
++        (err.message === "Network Error"
++          ? "Unable to connect to CareBridge AI server. Please verify backend is running on port 8000."
++          : err.message || "Registration failed. Please try again.");
++
++      if (Array.isArray(errorDetail)) {
++        setError(
++          errorDetail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", ")
++        );
++      } else {
++        setError(
++          typeof errorDetail === "string"
++            ? errorDetail
++            : "Registration failed. Please check your information."
++        );
++      }
+     } finally {
+       setLoading(false);
+     }
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

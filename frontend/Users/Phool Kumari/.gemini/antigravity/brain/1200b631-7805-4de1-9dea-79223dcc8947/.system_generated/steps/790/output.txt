@@ -1,0 +1,8 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "D:\CareBridge AI\backend\test_new_features.py", line 5, in <module>
+    from app.config import config
+ImportError: cannot import name 'config' from 'app.config' (D:\CareBridge AI\backend\app\config.py)
+

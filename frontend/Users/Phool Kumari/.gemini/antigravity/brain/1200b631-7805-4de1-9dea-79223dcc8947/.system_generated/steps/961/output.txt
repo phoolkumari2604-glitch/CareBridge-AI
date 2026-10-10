@@ -1,0 +1,19 @@
+
+The command exited with code 1.
+Output:
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+
+--- 1. Testing Registration & Authentication ---
+[PASS] Registered & Logged in patient opd_test_patient_55ee49bc@carebridge.test (patient_id: 6ac8f787d9bb748634bcb731)
+
+--- 2. Testing OPD Pass Creation & Verification ---
+Traceback (most recent call last):
+  File "D:\CareBridge AI\backend\test_opd_and_hospital_upgrades.py", line 128, in <module>
+    test_upgrades()
+    ~~~~~~~~~~~~~^^
+  File "D:\CareBridge AI\backend\test_opd_and_hospital_upgrades.py", line 52, in test_upgrades
+    assert apt_res.status_code == 201
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+

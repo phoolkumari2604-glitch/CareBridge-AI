@@ -1,0 +1,229 @@
+
+The command exited with code 0.
+Output:
+<truncated 1 lines>
+   :       `-- 'ArrowLeft' is imported here
+ 3 |   Clock3,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'MoreHorizontal' is imported but never used.
+    ,-[src/pages/patient/Notifications.jsx:10:3]
+  9 |   Info,
+ 10 |   MoreHorizontal,
+    :   ^^^^^^^|^^^^^^
+    :          `-- 'MoreHorizontal' is imported here
+ 11 |   Trash2,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Trash2' is imported but never used.
+    ,-[src/pages/patient/Notifications.jsx:11:3]
+ 10 |   MoreHorizontal,
+ 11 |   Trash2,
+    :   ^^^|^^
+    :      `-- 'Trash2' is imported here
+ 12 |   Check,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Filter' is imported but never used.
+    ,-[src/pages/patient/Notifications.jsx:16:3]
+ 15 |   ShieldCheck,
+ 16 |   Filter
+    :   ^^^|^^
+    :      `-- 'Filter' is imported here
+ 17 | } from "lucide-react";
+    `----
+  help: Consider removing this import.
+
+  ! react(immutability): Cannot access variable while it is being initialized
+    ,-[src/pages/patient/Notifications.jsx:31:5]
+ 30 |   useEffect(() => {
+ 31 |     fetchNotifications();
+    :     ^^^^^^^^^|^^^^^^^^
+    :              `-- `fetchNotifications` is read during its own initialization
+ 32 |   }, [user]);
+    `----
+  help: `fetchNotifications` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'fetchNotifications'
+    ,-[src/pages/patient/Notifications.jsx:32:6]
+ 30 |   useEffect(() => {
+ 31 |     fetchNotifications();
+    :     ^^^^^^^^^|^^^^^^^^
+    :              `-- useEffect uses `fetchNotifications` here
+ 32 |   }, [user]);
+    :      ^^^^^^
+ 33 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Variable 'data' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/pages/public/Register.jsx:172:13]
+ 171 |     try {
+ 172 |       const data = await authAPI.register({
+     :             ^^|^
+     :               `-- 'data' is declared here
+ 173 |         name,
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Identifier 'Link' is imported but never used.
+   ,-[src/pages/patient/Hospitals.jsx:2:10]
+ 1 | import React, { useState, useEffect } from "react";
+ 2 | import { Link } from "react-router-dom";
+   :          ^^|^
+   :            `-- 'Link' is imported here
+ 3 | import {
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Clock3' is imported but never used.
+   ,-[src/pages/patient/Hospitals.jsx:7:3]
+ 6 |   Phone,
+ 7 |   Clock3,
+   :   ^^^|^^
+   :      `-- 'Clock3' is imported here
+ 8 |   Star,
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Heart' is imported but never used.
+    ,-[src/pages/patient/Hospitals.jsx:10:3]
+  9 |   Navigation,
+ 10 |   Heart,
+    :   ^^|^^
+    :     `-- 'Heart' is imported here
+ 11 |   Building,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'XCircle' is imported but never used.
+    ,-[src/pages/patient/Hospitals.jsx:13:3]
+ 12 |   CheckCircle2,
+ 13 |   XCircle,
+    :   ^^^|^^^
+    :      `-- 'XCircle' is imported here
+ 14 |   AlertCircle,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Activity' is imported but never used.
+    ,-[src/pages/patient/Hospitals.jsx:15:3]
+ 14 |   AlertCircle,
+ 15 |   Activity,
+    :   ^^^^|^^^
+    :       `-- 'Activity' is imported here
+ 16 |   Bed,
+    `----
+  help: Consider removing this import.
+
+  ! react(immutability): Cannot access variable while it is being initialized
+    ,-[src/pages/patient/Hospitals.jsx:33:5]
+ 32 |   useEffect(() => {
+ 33 |     fetchHospitals();
+    :     ^^^^^^^|^^^^^^
+    :            `-- `fetchHospitals` is read during its own initialization
+ 34 |   }, []);
+    `----
+  help: `fetchHospitals` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! eslint(no-unused-vars): Identifier 'ShieldCheck' is imported but never used.
+    ,-[src/pages/public/Login.jsx:9:3]
+  8 |   ArrowRight,
+  9 |   ShieldCheck,
+    :   ^^^^^|^^^^^
+    :        `-- 'ShieldCheck' is imported here
+ 10 |   AlertCircle,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'ChevronRight' is imported but never used.
+    ,-[src/pages/patient/Health.jsx:13:3]
+ 12 |   CalendarDays,
+ 13 |   ChevronRight,
+    :   ^^^^^^|^^^^^
+    :         `-- 'ChevronRight' is imported here
+ 14 |   ShieldCheck,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'User' is imported but never used.
+    ,-[src/pages/patient/Health.jsx:15:3]
+ 14 |   ShieldCheck,
+ 15 |   User,
+    :   ^^|^
+    :     `-- 'User' is imported here
+ 16 |   AlertCircle,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'AlertCircle' is imported but never used.
+    ,-[src/pages/patient/Health.jsx:16:3]
+ 15 |   User,
+ 16 |   AlertCircle,
+    :   ^^^^^|^^^^^
+    :        `-- 'AlertCircle' is imported here
+ 17 |   Plus,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Identifier 'Plus' is imported but never used.
+    ,-[src/pages/patient/Health.jsx:17:3]
+ 16 |   AlertCircle,
+ 17 |   Plus,
+    :   ^^|^
+    :     `-- 'Plus' is imported here
+ 18 |   Clock,
+    `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'loading' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/patient/Health.jsx:29:10]
+ 28 | 
+ 29 |   const [loading, setLoading] = useState(true);
+    :          ^^^|^^^
+    :             `-- 'loading' is declared here
+ 30 |   const [error, setError] = useState(null);
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'error' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/pages/patient/Health.jsx:30:10]
+ 29 |   const [loading, setLoading] = useState(true);
+ 30 |   const [error, setError] = useState(null);
+    :          ^^|^^
+    :            `-- 'error' is declared here
+ 31 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! react(immutability): Cannot access variable while it is being initialized
+    ,-[src/pages/patient/Health.jsx:39:5]
+ 38 |   useEffect(() => {
+ 39 |     fetchHealthData();
+    :     ^^^^^^^|^^^^^^^
+    :            `-- `fetchHealthData` is read during its own initialization
+ 40 |   }, [user]);
+    `----
+  help: `fetchHealthData` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'fetchHealthData'
+    ,-[src/pages/patient/Health.jsx:40:6]
+ 38 |   useEffect(() => {
+ 39 |     fetchHealthData();
+    :     ^^^^^^^|^^^^^^^
+    :            `-- useEffect uses `fetchHealthData` here
+ 40 |   }, [user]);
+    :      ^^^^^^
+ 41 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+Found 71 warnings and 0 errors.
+Finished in 109ms on 50 files with 104 rules using 8 threads.
+

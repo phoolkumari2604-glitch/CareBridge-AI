@@ -1,0 +1,31 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\shared\Settings.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -133,6 +133,25 @@
+     showToast(`Interface appearance switched to ${newTheme === "dark" ? "Dark" : "Light"} mode.`);
+   };
+ 
++  const newPasswordStrength = useMemo(() => {
++    const password = passwordForm.new_password;
++    if (!password) {
++      return { score: 0, label: "" };
++    }
++
++    let score = 0;
++    if (password.length >= 8) score++;
++    if (password.length >= 12) score++;
++    if (/[A-Z]/.test(password)) score++;
++    if (/[a-z]/.test(password)) score++;
++    if (/[0-9]/.test(password)) score++;
++    if (/[^A-Za-z0-9]/.test(password)) score++;
++
++    if (score <= 2) return { score, label: "Weak (add numbers & symbols)", color: "#ef4444" };
++    if (score <= 4) return { score, label: "Medium (good password)", color: "#f59e0b" };
++    return { score, label: "Strong (high security)", color: "#10b981" };
++  }, [passwordForm.new_password]);
++
+   const handlePasswordSubmit = async (e) => {
+     e.preventDefault();
+     setPasswordError("");
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

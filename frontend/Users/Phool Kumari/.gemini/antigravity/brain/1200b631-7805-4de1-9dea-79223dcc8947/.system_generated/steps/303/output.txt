@@ -1,0 +1,57 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\routes\auth.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -111,6 +111,17 @@
+         details="User logged in successfully",
+     )
+ 
++    patient_id = None
++    if existing_user.get("role") == "PATIENT":
++        patient_doc = db.patients.find_one({
++            "$or": [
++                {"user_id": str(existing_user["_id"])},
++                {"email": existing_user["email"].lower()}
++            ]
++        })
++        if patient_doc:
++            patient_id = str(patient_doc["_id"])
++
+     return {
+         "access_token": access_token,
+         "token_type": "bearer",
+@@ -119,6 +119,7 @@
+             "email": existing_user["email"],
+             "role": existing_user["role"],
+             "phone": existing_user.get("phone"),
++            "patient_id": patient_id,
+         },
+     }
+ 
+@@ -129,6 +129,18 @@
+ def get_me(
+     current_user: dict = Depends(get_current_user),
+ ):
++    db = get_database()
++    patient_id = None
++    if current_user.get("role") == "PATIENT":
++        patient_doc = db.patients.find_one({
++            "$or": [
++                {"user_id": str(current_user["_id"])},
++                {"email": current_user["email"].lower()}
++            ]
++        })
++        if patient_doc:
++            patient_id = str(patient_doc["_id"])
++
+     return {
+         "id": str(current_user["_id"]),
+         "name": current_user["name"],
+@@ -135,5 +135,6 @@
+         "role": current_user["role"],
+         "phone": current_user.get("phone"),
++        "patient_id": patient_id,
+     }
+ 
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

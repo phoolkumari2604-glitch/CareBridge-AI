@@ -1,0 +1,122 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\doctor\AIAssistant.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -585,6 +585,116 @@
+           </div>
+         </div>
+       </div>
++
++      {/* CLINICAL NOTE APPROVAL & SAVE MODAL */}
++      {saveModalOpen && (
++        <div className="cdss-modal-overlay">
++          <div className="cdss-modal-card">
++            <div className="cdss-modal-header">
++              <div className="cdss-modal-title">
++                <BookmarkPlus size={20} color="#7c3aed" />
++                <h3>Approve & Save AI Clinical Note</h3>
++              </div>
++              <button
++                type="button"
++                className="cdss-close-btn"
++                onClick={() => setSaveModalOpen(false)}
++              >
++                <X size={18} />
++              </button>
++            </div>
++
++            {saveSuccessMessage ? (
++              <div className="cdss-success-state">
++                <CheckCircle2 size={36} color="#16a34a" />
++                <p>{saveSuccessMessage}</p>
++              </div>
++            ) : (
++              <form onSubmit={handleSaveClinicalNote} className="cdss-modal-body">
++                <p className="cdss-modal-desc">
++                  Please review and approve this clinical assessment before attaching it to the patient's permanent medical chart.
++                </p>
++
++                <div className="cdss-form-group">
++                  <label htmlFor="save-patient-select">Patient Chart</label>
++                  <select
++                    id="save-patient-select"
++                    value={noteToSave.patient_id}
++                    onChange={(e) =>
++                      setNoteToSave({ ...noteToSave, patient_id: e.target.value })
++                    }
++                    required
++                  >
++                    <option value="">-- Select Target Patient --</option>
++                    {patients.map((p) => (
++                      <option key={p._id || p.id} value={p._id || p.id}>
++                        {p.name} (ID: {(p._id || p.id).slice(-6)})
++                      </option>
++                    ))}
++                  </select>
++                </div>
++
++                <div className="cdss-form-group">
++                  <label htmlFor="save-note-title">Record Title</label>
++                  <input
++                    id="save-note-title"
++                    type="text"
++                    value={noteToSave.title}
++                    onChange={(e) =>
++                      setNoteToSave({ ...noteToSave, title: e.target.value })
++                    }
++                    required
++                  />
++                </div>
++
++                <div className="cdss-form-group">
++                  <label htmlFor="save-note-diagnosis">Clinical Assessment / Impression</label>
++                  <input
++                    id="save-note-diagnosis"
++                    type="text"
++                    value={noteToSave.diagnosis}
++                    onChange={(e) =>
++                      setNoteToSave({ ...noteToSave, diagnosis: e.target.value })
++                    }
++                    required
++                  />
++                </div>
++
++                <div className="cdss-form-group">
++                  <label htmlFor="save-note-desc">Clinical Note (Editable Review)</label>
++                  <textarea
++                    id="save-note-desc"
++                    rows={6}
++                    value={noteToSave.description}
++                    onChange={(e) =>
++                      setNoteToSave({ ...noteToSave, description: e.target.value })
++                    }
++                    required
++                  />
++                </div>
++
++                <div className="cdss-modal-actions">
++                  <button
++                    type="button"
++                    className="cdss-cancel-btn"
++                    onClick={() => setSaveModalOpen(false)}
++                  >
++                    Cancel
++                  </button>
++                  <button
++                    type="submit"
++                    className="cdss-confirm-btn"
++                    disabled={saveLoading || !noteToSave.patient_id}
++                  >
++                    {saveLoading ? <Loader2 size={16} className="spinning" /> : <Check size={16} />}
++                    <span>Approve & Save Note</span>
++                  </button>
++                </div>
++              </form>
++            )}
++          </div>
++        </div>
++      )}
+     </div>
+   );
+ }
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

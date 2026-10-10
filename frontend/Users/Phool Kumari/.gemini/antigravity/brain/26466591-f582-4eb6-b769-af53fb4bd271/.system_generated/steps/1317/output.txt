@@ -1,0 +1,6 @@
+
+The command exited with code 1.
+Output:
+[ERROR] Failed to launch 'C:\Python313\python.exe' (0x80070003)
+This may be a corrupt install or a system configuration issue.
+

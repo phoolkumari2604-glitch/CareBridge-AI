@@ -1,0 +1,89 @@
+
+The command exited with code 0.
+Output:
+[MongoDB] Successfully connected to database 'carebridge_ai'
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+[Email Service] Sending 'Verify your email address � CareBridge AI' to test_patient_live_check@carebridge.ai...
+[Email Service Notice] SMTP not configured in .env. Email content preview for test_patient_live_check@carebridge.ai:
+--- SUBJECT: Verify your email address � CareBridge AI ---
+Verify Your Email Address
+    
+    
+        
+            
+                
+                    
+                        
+                        
+                            
+                                
+                                    
+                                        
+                                            
+                                                CareBridge AI
+                                            
+                                            
+                                                Clinical Healthcare Platform
+                                            
+                                        
+                                    
+                                
+                            
+                        
+                        
+                        
+                            
+                                
+                                    Verify Your Email Address
+                                
+                                
+                                    
+    Hello Live Test Patient,
+
+
+    Thank you for registering on the CareBridge AI Patient Portal. Please verify your email address to activate your health dossier and appointment booking capabilities.
+
+
+    
+                                
+                                
+        
+            
+                
+                    
+                        Verify Email Address &rarr;
+                    
+                
+            
+        
+        
+            Or copy and paste this secure link into your browser:
+
+            http://localhost:5173/verify-email?token=vQm17Lrs1yEiii_kdmKPhaSWYa75zwIbi29dEQQiJvQ
+        
+
+
+        
+                            
+                        
+                        
+                        
+                            
+                                
+                                    This is an automated clinical security notification from CareBridge AI. If you did not make this request, please contact support immediately at phoolkumari2603@gmail.com.
+                                
+
+
+                                
+                                    &copy; 2026 CareBridge AI. All rights reserved. HIPAA & DPDP Act 2023 Compliant.
+--------------------------------------------------
+Register status: 201
+Register message: Account created successfully! Welcome to CareBridge AI.
+Duplicate register status: 409
+Login status: 200
+Login success! User role: PATIENT
+Auth /me status: 200
+Bad credentials status: 401
+ALL AUTH BACKEND TESTS PASSED SUCCESSFULLY!
+

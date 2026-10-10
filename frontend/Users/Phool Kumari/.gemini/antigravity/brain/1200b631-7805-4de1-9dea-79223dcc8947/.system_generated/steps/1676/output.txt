@@ -1,0 +1,22 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\backend\app\services
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----         10/8/2026  10:53 PM                providers                                                            
+d-----         10/9/2026   2:23 PM                __pycache__                                                          
+-a----         9/28/2026   3:21 PM            977 ai_safety.py                                                         
+-a----         10/9/2026   2:23 PM           7516 ai_vision.py                                                         
+-a----         9/28/2026   3:21 PM            577 audit_service.py                                                     
+-a----         10/8/2026  10:53 PM          11245 hospital_service.py                                                  
+-a----         10/8/2026   4:27 PM           6382 map_service.py                                                       
+-a----         10/8/2026   3:25 PM           3541 smartflow_service.py                                                 
+-a----         9/25/2026   5:27 AM              0 __init__.py                                                          
+
+
+

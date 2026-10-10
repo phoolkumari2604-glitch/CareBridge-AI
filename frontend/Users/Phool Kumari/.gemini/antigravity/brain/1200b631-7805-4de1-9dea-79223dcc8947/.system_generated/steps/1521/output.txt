@@ -1,0 +1,28 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\layouts\Navbar.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -373,7 +373,21 @@
+           )}
+         </div>
+ 
+-        {/* 3. STAFF ADMIN / DOCTOR PROFILE DROPDOWN */}
++        {/* 3. THEME TOGGLE BUTTON */}
++        <button
++          className="navbar-theme-toggle-btn"
++          onClick={toggleTheme}
++          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
++          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
++        >
++          {theme === "dark" ? (
++            <Sun size={18} className="theme-toggle-icon sun" />
++          ) : (
++            <Moon size={18} className="theme-toggle-icon moon" />
++          )}
++        </button>
++
++        {/* 4. STAFF ADMIN / DOCTOR PROFILE DROPDOWN */}
+         <div className="navbar-profile-container" ref={profileRef}>
+           <button
+             className={`navbar-profile-btn ${profileDropdownOpen ? "is-active" : ""}`}
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

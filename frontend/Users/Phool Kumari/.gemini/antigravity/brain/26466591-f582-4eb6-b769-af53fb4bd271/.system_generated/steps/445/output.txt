@@ -1,0 +1,11 @@
+
+The command exited with code 1.
+Output:
+& : The module 'backend' could not be loaded. For more information, run 'Import-Module backend'.
+At line:1 char:3
++ & "backend\.venv\Scripts\python.exe" -c "from app import create_app;  ...
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (backend\.venv\Scripts\python.exe:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CouldNotAutoLoadModule
+ 
+

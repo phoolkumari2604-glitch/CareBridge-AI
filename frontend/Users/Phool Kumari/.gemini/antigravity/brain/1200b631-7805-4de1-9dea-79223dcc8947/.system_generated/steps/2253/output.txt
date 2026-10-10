@@ -1,0 +1,21 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "<string>", line 34, in <module>
+    db.users.update_one(
+    ~~~~~~~~~~~~~~~~~~~^
+        {'email': demo_patient['email']},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        {'': {'password_hash': demo_patient['password_hash'], 'status': 'active', 'email_verified': True}}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\pymongo\synchronous\collection.py", line 1309, in update_one
+    common.validate_ok_for_update(update)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\pymongo\common.py", line 642, in validate_ok_for_update
+    raise ValueError("update only works with $ operators")
+ValueError: update only works with $ operators
+[MongoDB] Successfully connected to database 'carebridge_ai'
+

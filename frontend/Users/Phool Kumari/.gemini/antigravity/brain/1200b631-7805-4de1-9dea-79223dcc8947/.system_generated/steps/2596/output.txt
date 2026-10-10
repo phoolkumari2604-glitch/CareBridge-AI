@@ -1,0 +1,27 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\routes\doctor.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -82,6 +82,8 @@
+     hospital_id = request.args.get("hospital_id")
+     specialty = request.args.get("specialty")
+     category = request.args.get("category")
++    country = request.args.get("country")
++    is_bookable_param = request.args.get("is_bookable")
+     status_arg = request.args.get("status")
+     search = request.args.get("search", "").strip()
+     
+@@ -105,6 +105,12 @@
+     if category and category != "All" and category != "ALL":
+         query["category"] = {"$regex": f"^{re.escape(category)}$", "$options": "i"}
+         
++    if country and country != "All" and country != "ALL":
++        query["country"] = {"$regex": f"^{re.escape(country)}$", "$options": "i"}
++        
++    if is_bookable_param is not None:
++        query["is_bookable"] = str(is_bookable_param).lower() in ["true", "1", "yes"]
++        
+     if search:
+         s_clean = re.escape(search)
+         query["$or"] = [
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

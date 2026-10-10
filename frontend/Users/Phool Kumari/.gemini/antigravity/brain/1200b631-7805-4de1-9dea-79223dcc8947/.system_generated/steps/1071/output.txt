@@ -1,0 +1,10 @@
+
+The command exited with code 0.
+Output:
+ M backend/.env.example
+ M backend/seed_demo_accounts.py
+ M frontend/src/pages/public/Login.jsx
+ M frontend/src/pages/public/Register.jsx
+ M frontend/src/pages/shared/Settings.css
+ M frontend/src/pages/shared/Settings.jsx
+

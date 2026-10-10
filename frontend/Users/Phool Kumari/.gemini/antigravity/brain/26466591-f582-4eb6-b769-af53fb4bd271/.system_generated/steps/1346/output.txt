@@ -1,0 +1,22 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\seed_hospitals.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -389,11 +389,11 @@
+         )
+         
+     # Ensure indexes on hospitals collection
+-    db.hospitals.create_index([("name", 1)])
+-    db.hospitals.create_index([("city", 1)])
+-    db.hospitals.create_index([("state", 1)])
+-    db.hospitals.create_index([("country", 1)])
+-    db.hospitals.create_index([("emergency", 1)])
++    for idx in [("name", 1), ("city", 1), ("state", 1), ("country", 1), ("emergency", 1)]:
++        try:
++            db.hospitals.create_index([idx])
++        except Exception:
++            pass
+     
+     print(f"Hospital database seeded successfully. Current total verified records: {db.hospitals.count_documents({})}")
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

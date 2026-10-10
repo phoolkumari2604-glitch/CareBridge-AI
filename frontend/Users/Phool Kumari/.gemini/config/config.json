@@ -1,0 +1,59 @@
+{
+  "plugins": {
+    "android-cli-plugin": {
+      "installedFrom": {
+        "id": "antigravity-plugins-official/plugin/android-cli-plugin",
+        "marketplace": "antigravity-plugins-official",
+        "version": "1.0.15985488"
+      }
+    },
+    "chrome-devtools-plugin": {
+      "installedFrom": {
+        "id": "antigravity-plugins-official/plugin/chrome-devtools-plugin",
+        "marketplace": "antigravity-plugins-official",
+        "version": "0.21.0"
+      }
+    },
+    "firebase": {
+      "installedFrom": {
+        "id": "antigravity-plugins-official/plugin/firebase",
+        "marketplace": "antigravity-plugins-official",
+        "version": "1.0.3"
+      }
+    },
+    "flutter": {
+      "installedFrom": {
+        "id": "antigravity-plugins-official/plugin/flutter",
+        "marketplace": "antigravity-plugins-official",
+        "version": "1.0.5"
+      }
+    },
+    "google-antigravity-sdk": {
+      "installedFrom": {
+        "id": "antigravity-plugins-official/plugin/google-antigravity-sdk",
+        "marketplace": "antigravity-plugins-official",
+        "version": "0.0.9"
+      }
+    },
+    "modern-web-guidance-plugin": {
+      "installedFrom": {
+        "id": "antigravity-plugins-official/plugin/modern-web-guidance-plugin",
+        "marketplace": "antigravity-plugins-official",
+        "version": "1.0.6"
+      }
+    },
+    "science": {
+      "installedFrom": {
+        "id": "antigravity-plugins-official/plugin/science",
+        "marketplace": "antigravity-plugins-official",
+        "version": "1.2.4"
+      }
+    }
+  },
+  "userSettings": {
+    "gcpRegion": "us",
+    "remoteControlHostname": "kumari-ultima-axis",
+    "themeMode": "THEME_MODE_DARK",
+    "useAiCredits": true
+  }
+}

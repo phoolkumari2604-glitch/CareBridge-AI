@@ -1,0 +1,24 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\utils\decorators.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -27,7 +27,10 @@
+         
+         try:
+             db = get_database()
+-            user = db.users.find_one({"_id": ObjectId(user_id)})
++            if ObjectId.is_valid(user_id):
++                user = db.users.find_one({"_id": ObjectId(user_id)})
++            else:
++                user = db.users.find_one({"$or": [{"_id": user_id}, {"id": user_id}, {"email": user_id}]})
+             if not user:
+                 return jsonify({"error": "User not found", "detail": "User associated with token does not exist"}), 401
+             
+@@ -34,5 +34,5 @@
+         except Exception as e:
+-            return jsonify({"error": "Database error during authentication", "detail": str(e)}), 500
++            return jsonify({"error": "Authentication error", "detail": str(e)}), 401
+         
+         return f(*args, **kwargs)
+     return decorated
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

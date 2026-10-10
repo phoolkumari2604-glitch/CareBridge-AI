@@ -1,0 +1,8 @@
+Task: 26466591-f582-4eb6-b769-af53fb4bd271/task-366
+Status: RUNNING
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\26466591-f582-4eb6-b769-af53fb4bd271\.system_generated\tasks\task-366.log
+Log output:
+<truncated 349 lines>
+, eval-type-backport, duckdb, cycler, comm, charset_normalizer, blinker, attrs, asttokens, werkzeug, traittypes, stack_data, shapely, requests, referencing, python-dateutil, pyogrio, prompt_toolkit, plotly, matplotlib-inline, jinja2, jedi, contourpy, beautifulsoup4, pystac-core, pandas, matplotlib, jsonschema-specifications, ipython, Flask, branca, pystac-ext-xarray-assets, pystac-ext-view, pystac-ext-version, pystac-ext-timestamps, pystac-ext-table, pystac-ext-storage, pystac-ext-scientific, pystac-ext-sat, pystac-ext-sar, pystac-ext-render, pystac-ext-raster, pystac-ext-projection, pystac-ext-pointcloud, pystac-ext-mgrs, pystac-ext-label, pystac-ext-item-assets, pystac-ext-grid, pystac-ext-file, pystac-ext-datacube, maplibre, jsonschema, ipywidgets, geopandas, gdown, folium, Flask-Cors, pystac-ext-eo, pystac-ext-classification, ipyvue, ipytree, ipyleaflet, ipyfilechooser, ipyevents, bqscales, anywidget, whiteboxgui, pystac-ext-mlm, ipyvuetify, bqplot, pystac, pystac-client, leafmap
+
+Last progress: 35s ago

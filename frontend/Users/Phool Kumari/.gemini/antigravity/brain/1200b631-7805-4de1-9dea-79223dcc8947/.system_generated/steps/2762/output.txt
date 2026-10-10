@@ -1,0 +1,12 @@
+
+The command exited with code 0.
+Output:
+frontend/src\components\common\Navbar.jsx
+frontend/src\components\common\Sidebar.jsx
+frontend/src\layouts\DashboardLayout.jsx
+frontend/src\layouts\Navbar.css
+frontend/src\layouts\Navbar.jsx
+frontend/src\layouts\Sidebar.jsx
+frontend/src\pages\patient\PatientLayout.jsx
+frontend/src\styles\layout.css
+

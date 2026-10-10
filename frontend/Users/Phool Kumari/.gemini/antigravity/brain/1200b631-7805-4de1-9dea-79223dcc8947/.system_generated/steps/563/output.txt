@@ -1,0 +1,40 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\doctor\AIAssistant.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -17,13 +17,13 @@
+   Camera,
+   Image as ImageIcon,
+   X,
+-  Copy,
+-  Check,
+-  Download,
+   Trash2,
++  BookmarkPlus,
++  CheckCircle2,
+ } from "lucide-react";
+ import { useAuth } from "../../context/AuthContext";
+ import doctorService from "../../services/doctorService";
++import api from "../../services/api";
+ import "./DoctorAIAssistant.css";
+ 
+ function DoctorAIAssistant() {
+@@ -34,6 +34,17 @@
+   const [selectedPatientId, setSelectedPatientId] = useState(initialPatientId);
+   const [copiedId, setCopiedId] = useState(null);
+ 
++  // Save Note Approval Modal State
++  const [saveModalOpen, setSaveModalOpen] = useState(false);
++  const [noteToSave, setNoteToSave] = useState({
++    patient_id: "",
++    title: "AI Clinical Decision Note",
++    diagnosis: "Clinical Assessment",
++    description: "",
++  });
++  const [saveLoading, setSaveLoading] = useState(false);
++  const [saveSuccessMessage, setSaveSuccessMessage] = useState("");
++
+   const [messages, setMessages] = useState([
+     {
+       id: 1,
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

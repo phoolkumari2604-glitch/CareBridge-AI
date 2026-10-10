@@ -1,0 +1,19 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\patient\PatientDashboard.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -61,12 +61,7 @@
+   const eventSourceRef = useRef(null);
+ 
+   const fetchDashboardData = useCallback(async (isManualRefresh = false) => {
+-    if (!user?.patient_id) {
+-      setLoading(false);
+-      return;
+-    }
+-
+-    const patientId = user.patient_id;
++    const patientId = user?.patient_id || user?._id || user?.id;
+ 
+     try {
+       if (isManualRefresh) {
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

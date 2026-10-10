@@ -1,0 +1,10 @@
+
+The command exited with code 0.
+Output:
+
+FullName                                      
+--------                                      
+D:\CareBridge AI\backend\seed_demo_accounts.py
+
+
+

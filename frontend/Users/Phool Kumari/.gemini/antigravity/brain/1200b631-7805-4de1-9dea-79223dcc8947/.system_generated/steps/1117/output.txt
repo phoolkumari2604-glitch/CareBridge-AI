@@ -1,0 +1,6 @@
+
+The command exited with code 0.
+Output:
+C:\Users\Phool Kumari\AppData\Local\Microsoft\WindowsApps\python.exe
+C:\Users\Phool Kumari\AppData\Local\Python\bin\python.exe
+

@@ -1,0 +1,121 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\pages\doctor\HealthRecords.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -1,4 +1,4 @@
+-import React, { useState, useEffect, useCallback } from "react";
++import React, { useState, useEffect, useCallback, useMemo } from "react";
+ import { useSearchParams } from "react-router-dom";
+ import {
+   Search,
+@@ -13,6 +13,13 @@
+   RefreshCw,
+   X,
+   CheckCircle2,
++  Trash2,
++  Printer,
++  Edit3,
++  Download,
++  User,
++  Copy,
++  Check,
+ } from "lucide-react";
+ import doctorService from "../../services/doctorService";
+ import { useAuth } from "../../context/AuthContext";
+@@ -28,8 +28,9 @@
+   const [toastMessage, setToastMessage] = useState("");
+ 
+   const [patients, setPatients] = useState([]);
+-  const [selectedPatientId, setSelectedPatientId] = useState(preselectedPatientId);
++  const [selectedPatientId, setSelectedPatientId] = useState(preselectedPatientId || "all");
+   const [records, setRecords] = useState([]);
++  const [stats, setStats] = useState({ total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 });
+ 
+   // Search & Filters
+   const [searchQuery, setSearchQuery] = useState("");
+@@ -41,7 +41,7 @@
+ 
+   // New Record Form State
+   const [formData, setFormData] = useState({
+-    patient_id: preselectedPatientId || "",
++    patient_id: "",
+     record_type: "Consultation",
+     title: "",
+     description: "",
+@@ -55,21 +55,25 @@
+     try {
+       setError(null);
+       const patientsList = await doctorService.getPatients();
+-      const validPatients = Array.isArray(patientsList) ? patientsList : [];
++      const validPatients = (Array.isArray(patientsList) ? patientsList : []).filter(
++        (p) => (p.name || "").toLowerCase() !== "string"
++      );
+       setPatients(validPatients);
+ 
+-      // If a patient is selected, fetch their records. Otherwise fetch for first patient or all
+-      let targetPatientId = selectedPatientId;
+-      if (!targetPatientId && validPatients.length > 0) {
+-        targetPatientId = validPatients[0]._id || validPatients[0].id;
+-        setSelectedPatientId(targetPatientId);
+-      }
+-
+-      if (targetPatientId) {
+-        const recordsData = await doctorService.getHealthRecords(targetPatientId);
+-        setRecords(Array.isArray(recordsData) ? recordsData : []);
++      const params = selectedPatientId && selectedPatientId !== "all" ? { patient_id: selectedPatientId } : {};
++      const summaryData = await doctorService.getHealthRecordsSummary(params);
++      
++      const recs = Array.isArray(summaryData?.records) ? summaryData.records : (Array.isArray(summaryData) ? summaryData : []);
++      setRecords(recs);
++
++      if (summaryData?.stats) {
++        setStats(summaryData.stats);
+       } else {
+-        setRecords([]);
++        const total = recs.length;
++        const consults = recs.filter((r) => (r.record_type || "").toUpperCase().includes("CONSULT")).length;
++        const prescripts = recs.filter((r) => r.medications && r.medications.length > 0).length;
++        const diags = recs.filter((r) => r.diagnosis && String(r.diagnosis).trim()).length;
++        setStats({ total, consultations: consults, prescriptions: prescripts, diagnoses: diags });
+       }
+     } catch (err) {
+       console.error("Error loading health records:", err);
+@@ -83,18 +83,16 @@
+     loadPatientsAndRecords();
+   }, [loadPatientsAndRecords]);
+ 
++  // Silent 30-second auto-refresh
++  useEffect(() => {
++    const timer = setInterval(() => {
++      loadPatientsAndRecords();
++    }, 30000);
++    return () => clearInterval(timer);
++  }, [loadPatientsAndRecords]);
++
+   const handlePatientSelectChange = async (patientId) => {
+     setSelectedPatientId(patientId);
+-    setLoading(true);
+-    try {
+-      const recordsData = await doctorService.getHealthRecords(patientId);
+-      setRecords(Array.isArray(recordsData) ? recordsData : []);
+-    } catch (err) {
+-      console.warn("Failed to fetch records for selected patient:", err);
+-      setRecords([]);
+-    } finally {
+-      setLoading(false);
+-    }
+   };
+ 
+   const handleRefresh = () => {
+@@ -101,6 +101,10 @@
+     loadPatientsAndRecords();
+   };
+ 
++  const handlePrintRecord = (record) => {
++    window.print();
++  };
++
+   const handleCreateRecord = async (e) => {
+     e.preventDefault();
+     if (!formData.patient_id || !formData.title.trim()) {
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

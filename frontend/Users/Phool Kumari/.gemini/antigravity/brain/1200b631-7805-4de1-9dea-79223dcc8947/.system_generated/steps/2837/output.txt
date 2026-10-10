@@ -1,0 +1,601 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\pages\doctor\DoctorDashboard.css. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -1659,4 +1659,595 @@
+     justify-content: center;
+   }
+ }
++
++/* ============================================================
++   CONSULTATION SCHEDULE TABS & TIMELINE STYLING
++============================================================ */
++.schedule-tabs-row {
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  background: #f1f5f9;
++  padding: 4px;
++  border-radius: 10px;
++  margin-bottom: 12px;
++}
++
++.schedule-tab-btn {
++  flex: 1;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: 8px;
++  padding: 6px 12px;
++  border-radius: 8px;
++  border: 0;
++  background: transparent;
++  color: #64748b;
++  font-size: 13px;
++  font-weight: 600;
++  cursor: pointer;
++  transition: all 0.2s ease;
++}
++
++.schedule-tab-btn.active {
++  background: #ffffff;
++  color: #0284c7;
++  font-weight: 700;
++  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
++}
++
++.tab-badge-pill {
++  font-size: 11px;
++  font-weight: 700;
++  padding: 1px 7px;
++  border-radius: 999px;
++  background: #e2e8f0;
++  color: #475569;
++}
++
++.schedule-tab-btn.active .tab-badge-pill {
++  background: #e0f2fe;
++  color: #0284c7;
++}
++
++.appointments-timeline-queue {
++  display: flex;
++  flex-direction: column;
++  gap: 10px;
++}
++
++.timeline-consult-card {
++  display: flex;
++  gap: 12px;
++  padding: 12px 14px;
++  background: #f8fafc;
++  border: 1px solid #e2e8f0;
++  border-radius: 12px;
++  cursor: pointer;
++  transition: all 0.2s ease;
++  position: relative;
++}
++
++.timeline-consult-card:hover {
++  background: #ffffff;
++  border-color: #cbd5e1;
++  transform: translateY(-1px);
++  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
++}
++
++.timeline-consult-card.focused-card {
++  background: #f0f9ff;
++  border-color: #0284c7;
++  box-shadow: 0 0 0 1px #0284c7;
++}
++
++.timeline-time-col {
++  display: flex;
++  flex-direction: column;
++  align-items: flex-start;
++  min-width: 68px;
++}
++
++.timeline-clock-text {
++  font-size: 12px;
++  font-weight: 800;
++  color: #0f172a;
++}
++
++.timeline-date-pill {
++  font-size: 10px;
++  font-weight: 700;
++  color: #0284c7;
++  background: #e0f2fe;
++  padding: 2px 6px;
++  border-radius: 4px;
++  margin-bottom: 2px;
++}
++
++.timeline-track-dot {
++  width: 6px;
++  height: 6px;
++  border-radius: 50%;
++  background: #cbd5e1;
++  margin-top: 6px;
++}
++
++.timeline-card-content {
++  flex: 1;
++  display: flex;
++  flex-direction: column;
++  gap: 6px;
++}
++
++.timeline-patient-header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 8px;
++  flex-wrap: wrap;
++}
++
++.patient-name-link {
++  font-size: 13.5px;
++  font-weight: 700;
++  color: #0f172a;
++}
++
++.timeline-reason-subtitle {
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  flex-wrap: wrap;
++}
++
++.consult-type-tag {
++  font-size: 11.5px;
++  color: #64748b;
++  line-height: 1.3;
++}
++
++.booking-ref-tag {
++  font-size: 10px;
++  font-weight: 600;
++  color: #94a3b8;
++}
++
++/* CLEAN STATUS BADGES */
++.clean-status-badge {
++  display: inline-flex;
++  align-items: center;
++  gap: 5px;
++  font-size: 11px;
++  font-weight: 700;
++  padding: 3px 8px;
++  border-radius: 999px;
++  line-height: 1;
++}
++
++.clean-status-badge.in-consultation {
++  background: #e0f2fe;
++  color: #0369a1;
++  border: 1px solid #bae6fd;
++}
++
++.clean-status-badge.approved {
++  background: #d1fae5;
++  color: #065f46;
++  border: 1px solid #a7f3d0;
++}
++
++.clean-status-badge.pending {
++  background: #fef3c7;
++  color: #92400e;
++  border: 1px solid #fde68a;
++}
++
++.clean-status-badge.completed {
++  background: #f1f5f9;
++  color: #475569;
++  border: 1px solid #e2e8f0;
++}
++
++.clean-status-badge.cancelled {
++  background: #fee2e2;
++  color: #991b1b;
++  border: 1px solid #fecaca;
++}
++
++.pulse-blue-dot {
++  width: 6px;
++  height: 6px;
++  border-radius: 50%;
++  background: #0284c7;
++  animation: pulseBlue 1.5s infinite;
++}
++
++@keyframes pulseBlue {
++  0%, 100% {
++    opacity: 1;
++    transform: scale(1);
++  }
++  50% {
++    opacity: 0.4;
++    transform: scale(1.3);
++  }
++}
++
++.timeline-action-row {
++  margin-top: 4px;
++}
++
++.btn-start-consult {
++  display: inline-flex;
++  align-items: center;
++  gap: 6px;
++  padding: 5px 11px;
++  border-radius: 7px;
++  border: 0;
++  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
++  color: #ffffff;
++  font-size: 11.5px;
++  font-weight: 700;
++  cursor: pointer;
++  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
++  transition: all 0.2s ease;
++}
++
++.btn-start-consult:hover:not(:disabled) {
++  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
++  transform: translateY(-1px);
++}
++
++.spin-inline {
++  animation: spin 1s linear infinite;
++}
++
++/* ============================================================
++   NETWORK SPECIALISTS PANEL STYLES
++============================================================ */
++.specialist-search-box {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  padding: 6px 10px;
++  background: #f8fafc;
++  border: 1px solid #e2e8f0;
++  border-radius: 8px;
++  margin-bottom: 8px;
++}
++
++.specialist-search-box input {
++  flex: 1;
++  border: 0;
++  outline: 0;
++  background: transparent;
++  font-size: 12px;
++  color: #0f172a;
++}
++
++.specialist-search-box .clear-search-btn {
++  background: transparent;
++  border: 0;
++  color: #94a3b8;
++  cursor: pointer;
++  font-size: 14px;
++}
++
++.specialist-chips-row {
++  display: flex;
++  gap: 5px;
++  margin-bottom: 12px;
++  overflow-x: auto;
++  padding-bottom: 2px;
++}
++
++.specialist-chip-btn {
++  padding: 3px 9px;
++  border-radius: 6px;
++  border: 1px solid #e2e8f0;
++  background: #ffffff;
++  color: #64748b;
++  font-size: 11px;
++  font-weight: 600;
++  cursor: pointer;
++  white-space: nowrap;
++  transition: all 0.15s ease;
++}
++
++.specialist-chip-btn.active {
++  background: #0284c7;
++  border-color: #0284c7;
++  color: #ffffff;
++  font-weight: 700;
++}
++
++.doc-avatar-container {
++  position: relative;
++}
++
++.specialist-status-dot {
++  position: absolute;
++  bottom: 0;
++  right: 0;
++  width: 9px;
++  height: 9px;
++  border-radius: 50%;
++  border: 2px solid #ffffff;
++}
++
++.specialist-status-dot.available {
++  background: #10b981;
++}
++
++.specialist-status-dot.in-consult {
++  background: #0284c7;
++}
++
++.specialist-status-dot.offline {
++  background: #94a3b8;
++}
++
++.consulting-doc-item {
++  display: flex;
++  align-items: center;
++  gap: 10px;
++  padding: 9px 10px;
++  border-radius: 10px;
++  background: #f8fafc;
++  border: 1px solid #f1f5f9;
++  transition: all 0.2s ease;
++}
++
++.consulting-doc-item:hover {
++  background: #ffffff;
++  border-color: #e2e8f0;
++  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
++}
++
++.doc-name-row strong {
++  font-size: 13px;
++  color: #0f172a;
++}
++
++.doc-spec-text {
++  font-size: 11.5px;
++  color: #0284c7;
++  font-weight: 600;
++}
++
++.doc-hosp-text {
++  font-size: 10.5px;
++  color: #64748b;
++}
++
++.btn-refer-doctor {
++  margin-left: auto;
++  padding: 4px 10px;
++  border-radius: 6px;
++  border: 1px solid #cbd5e1;
++  background: #ffffff;
++  color: #334155;
++  font-size: 11.5px;
++  font-weight: 600;
++  cursor: pointer;
++  transition: all 0.15s ease;
++}
++
++.btn-refer-doctor:hover {
++  border-color: #0284c7;
++  color: #0284c7;
++  background: #f0f9ff;
++}
++
++.empty-specialists-box {
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  padding: 20px 10px;
++  text-align: center;
++  color: #94a3b8;
++  gap: 6px;
++  font-size: 12px;
++}
++
++/* ============================================================
++   CLINICAL REFERRAL MODAL STYLING
++============================================================ */
++.clinical-modal-backdrop {
++  position: fixed;
++  inset: 0;
++  background: rgba(15, 23, 42, 0.55);
++  backdrop-filter: blur(4px);
++  z-index: 2000;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  padding: 20px;
++  animation: fadeIn 0.2s ease;
++}
++
++.clinical-modal-dialog {
++  background: #ffffff;
++  border-radius: 16px;
++  width: 100%;
++  max-width: 520px;
++  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
++  border: 1px solid #e2e8f0;
++  overflow: hidden;
++  animation: slideUp 0.25s ease-out;
++}
++
++@keyframes slideUp {
++  from {
++    transform: translateY(12px);
++    opacity: 0;
++  }
++  to {
++    transform: translateY(0);
++    opacity: 1;
++  }
++}
++
++.clinical-modal-header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  padding: 16px 20px;
++  border-bottom: 1px solid #f1f5f9;
++  background: #f8fafc;
++}
++
++.modal-kicker {
++  font-size: 10px;
++  font-weight: 800;
++  letter-spacing: 0.08em;
++  color: #0284c7;
++}
++
++.clinical-modal-header h3 {
++  font-size: 16px;
++  font-weight: 700;
++  color: #0f172a;
++  margin: 2px 0 0;
++}
++
++.modal-close-btn {
++  background: transparent;
++  border: 0;
++  font-size: 20px;
++  color: #94a3b8;
++  cursor: pointer;
++  line-height: 1;
++}
++
++.referral-form-body {
++  padding: 20px;
++  display: flex;
++  flex-direction: column;
++  gap: 16px;
++}
++
++.referral-target-card {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  padding: 12px 14px;
++  background: #f0f9ff;
++  border: 1px solid #bae6fd;
++  border-radius: 10px;
++}
++
++.target-doc-avatar {
++  width: 40px;
++  height: 40px;
++  border-radius: 50%;
++  background: #0284c7;
++  color: #ffffff;
++  display: grid;
++  place-items: center;
++  font-weight: 800;
++  font-size: 13px;
++}
++
++.target-doc-meta {
++  display: flex;
++  flex-direction: column;
++  line-height: 1.3;
++}
++
++.target-doc-meta strong {
++  font-size: 13.5px;
++  color: #0f172a;
++}
++
++.target-doc-meta span {
++  font-size: 11.5px;
++  color: #64748b;
++}
++
++.form-group-field {
++  display: flex;
++  flex-direction: column;
++  gap: 6px;
++}
++
++.form-group-field label {
++  font-size: 12.5px;
++  font-weight: 700;
++  color: #334155;
++}
++
++.form-group-field select,
++.form-group-field textarea {
++  padding: 9px 12px;
++  border-radius: 8px;
++  border: 1px solid #cbd5e1;
++  font-size: 13px;
++  color: #0f172a;
++  outline: 0;
++  font-family: inherit;
++}
++
++.form-group-field select:focus,
++.form-group-field textarea:focus {
++  border-color: #0284c7;
++  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
++}
++
++.modal-actions-footer {
++  display: flex;
++  justify-content: flex-end;
++  gap: 10px;
++  margin-top: 8px;
++}
++
++.btn-cancel-modal {
++  padding: 8px 14px;
++  border-radius: 8px;
++  border: 1px solid #cbd5e1;
++  background: #ffffff;
++  color: #475569;
++  font-size: 13px;
++  font-weight: 600;
++  cursor: pointer;
++}
++
++.btn-submit-referral {
++  padding: 8px 16px;
++  border-radius: 8px;
++  border: 0;
++  background: #0284c7;
++  color: #ffffff;
++  font-size: 13px;
++  font-weight: 700;
++  cursor: pointer;
++  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
++}
++
++.modal-success-state {
++  padding: 36px 20px;
++  text-align: center;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  gap: 10px;
++}
++
++.modal-success-state h4 {
++  font-size: 16px;
++  font-weight: 700;
++  color: #0f172a;
++  margin: 0;
++}
++
++.modal-success-state p {
++  font-size: 13px;
++  color: #64748b;
++  margin: 0;
++}
++
++.text-emerald {
++  color: #10b981;
++}
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

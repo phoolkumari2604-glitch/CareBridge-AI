@@ -1,0 +1,14 @@
+{
+  "name": "carebridge-ai",
+  "version": "1.0.0",
+  "description": "CareBridge AI Healthcare SaaS Platform",
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"cd backend && .venv\\Scripts\\python.exe run.py\" \"cd frontend && npm run dev\"",
+    "start:backend": "cd backend && .venv\\Scripts\\python.exe run.py",
+    "start:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

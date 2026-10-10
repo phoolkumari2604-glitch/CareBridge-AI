@@ -1,0 +1,49 @@
+The following changes were made by the replace_file_content tool to: D:\CareBridge AI\frontend\src\pages\doctor\Approvals.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -73,6 +73,14 @@
+     loadApprovalsData();
+   }, [loadApprovalsData]);
+ 
++  // Silent 30-second auto-refresh
++  useEffect(() => {
++    const timer = setInterval(() => {
++      loadApprovalsData();
++    }, 30000);
++    return () => clearInterval(timer);
++  }, [loadApprovalsData]);
++
+   const handleRefresh = () => {
+     setIsRefreshing(true);
+     loadApprovalsData();
+@@ -121,9 +121,13 @@
+ 
+     const patient = patientsMap[app.patient_id];
+     const appointment = appointmentsMap[app.appointment_id];
+-    const patientName = patient?.name || "";
+-    const reason = appointment?.reason || "";
+-    const appId = app._id || app.id || "";
++    const patientName = app.patient_name || patient?.name || "";
++    const pCode = app.patient_code || patient?.patient_code || String(patient?.patientId || "").replace("PT-", "") || "";
++    const reason = app.reason || appointment?.reason || "";
++    const appId = String(app._id || app.id || "");
++    const bookingId = app.booking_id || appointment?.booking_id || "";
++    const phone = patient?.phone || app.patient_phone || "";
++    const email = patient?.email || app.patient_email || "";
+ 
+     const query = searchQuery.toLowerCase().trim();
+     const matchesSearch =
+@@ -130,6 +130,10 @@
+       patientName.toLowerCase().includes(query) ||
++      pCode.toLowerCase().includes(query) ||
+       reason.toLowerCase().includes(query) ||
+-      appId.toLowerCase().includes(query);
++      appId.toLowerCase().includes(query) ||
++      bookingId.toLowerCase().includes(query) ||
++      phone.toLowerCase().includes(query) ||
++      email.toLowerCase().includes(query);
+ 
+     return matchesFilter && matchesSearch;
+   });
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

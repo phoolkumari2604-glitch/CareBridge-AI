@@ -1,0 +1,12 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "D:\CareBridge AI\backend\test_doctors_dataset.py", line 110, in <module>
+    test_doctors_dataset()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\CareBridge AI\backend\test_doctors_dataset.py", line 21, in test_doctors_dataset
+    assert count == 50, f"Expected 50 doctors, found {count}"
+           ^^^^^^^^^^^
+AssertionError: Expected 50 doctors, found 51
+

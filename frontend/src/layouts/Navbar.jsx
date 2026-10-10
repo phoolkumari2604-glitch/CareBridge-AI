@@ -42,7 +42,7 @@ function getPageName(pathname) {
   if (pathname.startsWith("/doctor/appointments")) return "Appointments";
   if (pathname.startsWith("/doctor/approvals")) return "Approvals";
   if (pathname.startsWith("/doctor/records") || pathname.startsWith("/doctor/health-records")) return "Health Records";
-  if (pathname.startsWith("/doctor/health-monitoring")) return "Health Monitoring";
+  if (pathname.startsWith("/doctor/health-monitoring")) return "PulseView";
   if (pathname.startsWith("/doctor/vitals")) return "Vitals";
   if (pathname.startsWith("/doctor/ai-assistant")) return "AI Assistant";
   if (pathname.startsWith("/doctor/hospitals")) return "Hospitals";

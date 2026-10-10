@@ -1,0 +1,29 @@
+
+The command exited with code 0.
+Output:
+383: <div className="stat-card-icon-wrap">
+386: <div className="stat-card-text">
+387: <span className="stat-card-label">All Monitored</span>
+388: <strong className="stat-card-count">{stats.total || totalPatients}</strong>
+389: <span className="stat-card-sub">Total Active Records</span>
+401: <div className="stat-card-icon-wrap">
+404: <div className="stat-card-text">
+405: <span className="stat-card-label">Critical Alerts</span>
+406: <strong className="stat-card-count text-critical">{stats.critical || 0}</strong>
+407: <span className="stat-card-sub">Acute Breaches</span>
+419: <div className="stat-card-icon-wrap">
+422: <div className="stat-card-text">
+423: <span className="stat-card-label">Needs Attention</span>
+424: <strong className="stat-card-count text-attention">{stats.attention || 0}</strong>
+425: <span className="stat-card-sub">Borderline Readings</span>
+437: <div className="stat-card-icon-wrap">
+440: <div className="stat-card-text">
+441: <span className="stat-card-label">Stable Baseline</span>
+442: <strong className="stat-card-count text-stable">{stats.stable || 0}</strong>
+443: <span className="stat-card-sub">Normal Parameters</span>
+544: const formattedId = patient.patientId || `PT-${pid.slice(-6).toUpperCase()}`;
+671: const formattedId = patient.patientId || `PT-${pid.slice(-6).toUpperCase()}`;
+885: {p.name} ({p.patientId || `PT-${String(p._id || p.id).slice(-6).toUpperCase()}`})
+1064: #{selectedPatient.patientId || `PT-${String(selectedPatient._id || selectedPatient.id).slice(-6).toU
+1197: {vitalsHistory.slice(0, 5).map((v, i) => (
+

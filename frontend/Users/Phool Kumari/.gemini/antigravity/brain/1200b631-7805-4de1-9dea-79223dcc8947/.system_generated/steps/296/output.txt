@@ -1,0 +1,13 @@
+
+The command exited with code 0.
+Output:
+Connecting to MongoDB...
+Seeding demo patient: patient@carebridge.ai
+Seeding demo doctor: doctor@carebridge.ai
+Seeding demo staff: staff@carebridge.ai
+
+[OK] Successfully seeded demo accounts!
+  Patient: patient@carebridge.ai / Patient@123 (Patient ID: 6ac0a2aec0f9395cd0f9f683)
+  Doctor:  doctor@carebridge.ai / Doctor@123
+  Staff:   staff@carebridge.ai / Staff@123
+

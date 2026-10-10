@@ -1,0 +1,16 @@
+{
+  "id":  "73723a37-e6d3-40be-9959-466eb55a0e59",
+  "name":  "CareBridge AI",
+  "projectResources":  {
+    "resources":  [
+      {
+        "gitFolder":  {
+          "folderUri":  "file:///d%3A/CareBridge%20AI",
+          "defaultBranch":  "main"
+        }
+      }
+    ]
+  },
+  "settings":  {},
+  "isWorkspaceOnly":  false
+}

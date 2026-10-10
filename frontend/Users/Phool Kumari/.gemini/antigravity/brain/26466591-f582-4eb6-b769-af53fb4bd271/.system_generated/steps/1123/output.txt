@@ -1,0 +1,21 @@
+
+The command exited with code 0.
+Output:
+
+
+    Directory: D:\CareBridge AI\backend\app
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----         10/8/2026   3:33 PM                core                                                                 
+d-----         10/8/2026  10:52 PM                models                                                               
+d-----         10/8/2026   3:26 PM                routes                                                               
+d-----         10/8/2026  10:53 PM                services                                                             
+d-----         10/8/2026   3:22 PM                utils                                                                
+d-----         10/8/2026   5:03 PM                __pycache__                                                          
+-a----         10/8/2026   3:18 PM            582 config.py                                                            
+-a----         10/8/2026   5:03 PM           4688 __init__.py                                                          
+
+
+

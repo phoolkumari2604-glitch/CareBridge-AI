@@ -1,0 +1,19 @@
+Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-2360
+Status: DONE
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-2360.log
+Log output:
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+    res = db.users.update_many(
+        {'failed_login_attempts': {'': 0}},
+        {'': {'failed_login_attempts': 0, 'locked_until': None}}
+    )
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\pymongo\synchronous\collection.py", line 1409, in update_many
+    common.validate_ok_for_update(update)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "D:\CareBridge AI\backend\.venv\Lib\site-packages\pymongo\common.py", line 642, in validate_ok_for_update
+    raise ValueError("update only works with $ operators")
+ValueError: update only works with $ operators
+[MongoDB] Successfully connected to database 'carebridge_ai'
+
+Last progress: 4s ago

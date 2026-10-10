@@ -1,0 +1,19 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\components\patient\LiveHeartRateMonitor.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -266,6 +266,13 @@
+     lastTimeRef.current = null;
+     animationFrameRef.current = requestAnimationFrame(drawECG);
+ 
++    return () => {
++      if (animationFrameRef.current) {
++        cancelAnimationFrame(animationFrameRef.current);
++      }
++    };
++  }, [drawECG]);
++
+   // ResizeObserver for sharp responsive high-DPI canvas
+   useEffect(() => {
+     const wrap = ecgWrapRef.current;
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

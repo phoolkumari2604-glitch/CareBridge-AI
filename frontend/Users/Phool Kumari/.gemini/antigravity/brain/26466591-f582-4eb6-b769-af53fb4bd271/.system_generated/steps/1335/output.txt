@@ -1,0 +1,8 @@
+
+The command exited with code 0.
+Output:
+Total count: 61
+Distinct countries: [None]
+Distinct cities: ['Guntur', 'string']
+Sample: [{'_id': ObjectId('6ab609cb36d4d16460399777'), 'name': 'string', 'city': 'string'}, {'_id': ObjectId('6ab609e836d4d16460399778'), 'name': 'AIIMS Guntur', 'city': 'Guntur'}, {'_id': ObjectId('6ab609e836d4d16460399779'), 'name': 'AIIMS Guntur', 'city': 'Guntur'}, {'_id': ObjectId('6ab609ea36d4d1646039977a'), 'name': 'AIIMS Guntur', 'city': 'Guntur'}, {'_id': ObjectId('6ab609fe36d4d1646039977b'), 'name': 'AIIMS Guntur', 'city': 'Guntur'}]
+

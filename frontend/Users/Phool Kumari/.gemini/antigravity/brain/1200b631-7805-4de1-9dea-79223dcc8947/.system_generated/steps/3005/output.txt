@@ -1,0 +1,6 @@
+
+The command exited with code 0.
+Output:
+[MongoDB] Successfully connected to database 'carebridge_ai'
+HR Status: 200 Count: 33 Stats: {'consultations': 5, 'diagnoses': 33, 'prescriptions': 14, 'total': 33}
+

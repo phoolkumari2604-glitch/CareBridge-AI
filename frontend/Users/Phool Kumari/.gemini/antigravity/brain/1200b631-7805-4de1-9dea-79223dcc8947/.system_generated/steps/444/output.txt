@@ -1,0 +1,132 @@
+
+The command exited with code 1.
+Output:
+<truncated 1 lines>
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+___________________ ERROR collecting tests/test_hospital.py ___________________
+ImportError while importing test module 'D:\CareBridge AI\backend\tests\test_hospital.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_hospital.py:5: in <module>
+    from app.main import app
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+_________________ ERROR collecting tests/test_notification.py _________________
+ImportError while importing test module 'D:\CareBridge AI\backend\tests\test_notification.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_notification.py:5: in <module>
+    from app.main import app
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+___________________ ERROR collecting tests/test_opd_pass.py ___________________
+ImportError while importing test module 'D:\CareBridge AI\backend\tests\test_opd_pass.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_opd_pass.py:5: in <module>
+    from app.main import app
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+___________________ ERROR collecting tests/test_patient.py ____________________
+ImportError while importing test module 'D:\CareBridge AI\backend\tests\test_patient.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_patient.py:5: in <module>
+    from app.main import app
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+____________________ ERROR collecting tests/test_queue.py _____________________
+ImportError while importing test module 'D:\CareBridge AI\backend\tests\test_queue.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_queue.py:5: in <module>
+    from app.main import app
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+_____________________ ERROR collecting tests/test_rbac.py _____________________
+ImportError while importing test module 'D:\CareBridge AI\backend\tests\test_rbac.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_rbac.py:5: in <module>
+    from app.main import app
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+__________________ ERROR collecting tests/test_smartflow.py ___________________
+ImportError while importing test module 'D:\CareBridge AI\backend\tests\test_smartflow.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_smartflow.py:5: in <module>
+    from app.main import app
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+____________________ ERROR collecting tests/test_vitals.py ____________________
+ImportError while importing test module 'D:\CareBridge AI\backend\tests\test_vitals.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Phool Kumari\AppData\Local\Python\pythoncore-3.14-64\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\tests\test_vitals.py:5: in <module>
+    from app.main import app
+backend\app\main.py:6: in <module>
+    from app.routes.patient import router as patient_router
+E   ImportError: cannot import name 'router' from 'app.routes.patient' (D:\CareBridge AI\backend\app\routes\patient.py). Did you mean: 'routes'?
+============================== warnings summary ===============================
+backend\.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\CareBridge AI\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR backend\tests\test_ai_assistant.py
+ERROR backend\tests\test_appointment.py
+ERROR backend\tests\test_approval.py
+ERROR backend\tests\test_audit.py
+ERROR backend\tests\test_auth.py
+ERROR backend\tests\test_basic.py
+ERROR backend\tests\test_conversation.py
+ERROR backend\tests\test_doctor.py
+ERROR backend\tests\test_health.py
+ERROR backend\tests\test_health_alerts.py
+ERROR backend\tests\test_health_records.py
+ERROR backend\tests\test_hospital.py
+ERROR backend\tests\test_notification.py
+ERROR backend\tests\test_opd_pass.py
+ERROR backend\tests\test_patient.py
+ERROR backend\tests\test_queue.py
+ERROR backend\tests\test_rbac.py
+ERROR backend\tests\test_smartflow.py
+ERROR backend\tests\test_vitals.py
+!!!!!!!!!!!!!!!!!! Interrupted: 19 errors during collection !!!!!!!!!!!!!!!!!!!
+======================== 1 warning, 19 errors in 4.09s ========================
+

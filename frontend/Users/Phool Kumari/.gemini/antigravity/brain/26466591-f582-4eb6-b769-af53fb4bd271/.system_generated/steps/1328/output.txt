@@ -1,0 +1,9 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    from app.core.database import connect_db, get_database; connect_db(); db = get_database(); print('Hospital count:', db.hospitals.count_documents({})); print('Sample docs:', list(db.hospitals.find({}, {'name': 1, 'city': 1, 'country': 1, 'state': 1, 'facility_type': 1, 'emergency': 1}).limit(10)))
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'connect_db' from 'app.core.database' (D:\CareBridge AI\backend\app\core\database.py)
+

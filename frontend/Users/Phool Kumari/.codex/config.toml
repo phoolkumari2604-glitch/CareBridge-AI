@@ -1,0 +1,27 @@
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+
+[marketplaces.openai-bundled]
+last_updated = "2026-05-18T16:45:45Z"
+source_type = "local"
+source = '\\?\C:\Users\Phool Kumari\.codex\.tmp\bundled-marketplaces\openai-bundled'
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-05-16T09:58:58Z"
+source_type = "local"
+source = '\\?\C:\Users\Phool Kumari\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[windows]
+sandbox = "elevated"

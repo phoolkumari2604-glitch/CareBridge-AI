@@ -1,0 +1,62 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\routes\auth.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -164,7 +164,8 @@
+         "medical_history": data.get("medical_history", []),
+         "created_at": datetime.now(timezone.utc)
+     }
+-    db.patients.insert_one(patient_doc)
++    patient_res = db.patients.insert_one(patient_doc)
++    patient_id = str(patient_res.inserted_id)
+     
+     # Send email verification
+     send_patient_verification_email(email, name, verification_token)
+@@ -177,13 +177,42 @@
+         resource_id=user_id,
+         details=f"New patient account registered for {email}. Verification email dispatched."
+     )
+-        
+-    return jsonify({
+-        "message": "Registration successful. Please check your email to verify your account.",
++
++    # Issue access token for instant automatic sign-in
++    token_data = {
++        "sub": user_id,
++        "email": email,
++        "role": role
++    }
++    access_token = create_access_token(data=token_data, expires_delta=timedelta(days=7))
++    now_time = datetime.now(timezone.utc)
++        
++    return jsonify({
++        "message": "Account created successfully! Welcome to CareBridge AI.",
++        "access_token": access_token,
++        "token_type": "bearer",
+         "user_id": user_id,
+         "email": email,
+         "role": "PATIENT",
+-        "email_verified": False
++        "email_verified": False,
++        "user": {
++            "id": user_id,
++            "_id": user_id,
++            "name": name,
++            "fullName": name,
++            "email": email,
++            "role": "PATIENT",
++            "phone": phone,
++            "patient_id": patient_id,
++            "doctor_id": None,
++            "staffId": None,
++            "staff_id": None,
++            "faceVerified": False,
++            "fingerprintVerified": False,
++            "emailVerified": False,
++            "lastLogin": now_time.isoformat(),
++            "createdAt": now_time.isoformat()
++        }
+     }), 201
+ 
+ # ============================================================
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

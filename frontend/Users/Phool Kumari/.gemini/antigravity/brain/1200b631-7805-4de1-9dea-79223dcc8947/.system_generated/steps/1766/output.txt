@@ -1,0 +1,121 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\public\Register.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -130,6 +130,8 @@
+     setError("");
+   };
+ 
++  const [agreeTerms, setAgreeTerms] = useState(false);
++
+   const passwordStrength = useMemo(() => {
+     const password = formData.password;
+     if (!password) {
+@@ -136,16 +136,16 @@
+     }
+ 
+     let score = 0;
+-    if (password.length >= 8) score++;
+-    if (password.length >= 12) score++;
++    if (password.length >= 10) score++;
++    if (password.length >= 14) score++;
+     if (/[A-Z]/.test(password)) score++;
+     if (/[a-z]/.test(password)) score++;
+     if (/[0-9]/.test(password)) score++;
+-    if (/[^A-Za-z0-9]/.test(password)) score++;
+-
+-    if (score <= 2) return { score, label: "Weak (add mixed case, numbers & symbols)", color: "#ef4444" };
++    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
++
++    if (score <= 2) return { score, label: "Weak (min 10 chars, mixed case, numbers & symbols)", color: "#ef4444" };
+     if (score <= 4) return { score, label: "Good (add symbols for max strength)", color: "#f59e0b" };
+-    return { score, label: "Strong (high security password)", color: "#10b981" };
++    return { score, label: "Strong (meets clinical security standards)", color: "#10b981" };
+   }, [formData.password]);
+ 
+   const handleSubmit = async (event) => {
+@@ -153,7 +153,7 @@
+     setSuccess("");
+ 
+     const name = formData.name.trim();
+-    const email = formData.email.trim();
++    const email = formData.email.trim().toLowerCase();
+     const phone = formData.phone.trim();
+ 
+     if (!name || !email || !phone || !formData.password) {
+@@ -160,8 +160,8 @@
+       return;
+     }
+ 
+-    if (formData.password.length < 8) {
+-      setError("Password must contain at least 8 characters (mixed case, numbers & symbols recommended).");
++    if (formData.password.length < 10) {
++      setError("Password must contain at least 10 characters (with uppercase, lowercase, numbers & symbols).");
+       return;
+     }
+ 
+@@ -169,8 +169,16 @@
+       return;
+     }
+ 
++    if (!agreeTerms) {
++      setError("You must consent to the Terms of Service & DPDP Act 2023 Privacy Policy to register.");
++      return;
++    }
++
+     setLoading(true);
+ 
++    const controller = new AbortController();
++    const timeoutId = setTimeout(() => controller.abort(), 15000);
++
+     try {
+       const payload = {
+         name,
+@@ -193,25 +193,32 @@
+       if (formData.allergies) payload.allergies = formData.allergies;
+       if (formData.medical_history) payload.medical_history = formData.medical_history;
+ 
+-      await authAPI.register(payload);
+-
+-      setSuccess("Your account & baseline health record have been created successfully. Redirecting to login...");
++      const res = await authAPI.register(payload, controller.signal);
++      clearTimeout(timeoutId);
++
++      setSuccess("Account registered successfully! A verification link has been sent to your email. Redirecting to login...");
+       setTimeout(() => {
+         navigate("/login");
+-      }, 1200);
++      }, 2500);
+     } catch (err) {
++      clearTimeout(timeoutId);
+       console.error("Registration error:", err);
+-      const errorDetail =
+-        err.response?.data?.detail ||
+-        err.response?.data?.message ||
+-        (err.message === "Network Error"
+-          ? "Unable to connect to CareBridge AI server. Please verify backend is running."
+-          : err.message || "Registration failed. Please try again.");
+-
+-      if (Array.isArray(errorDetail)) {
+-        setError(errorDetail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", "));
++
++      if (err.name === "AbortError") {
++        setError("Registration request timed out. Please check your internet connection.");
+       } else {
+-        setError(typeof errorDetail === "string" ? errorDetail : "Registration failed. Please check your information.");
++        const errorDetail =
++          err.response?.data?.detail ||
++          err.response?.data?.message ||
++          (err.message === "Network Error"
++            ? "Unable to connect to CareBridge AI server. Please verify backend is running."
++            : err.message || "Registration failed. Please try again.");
++
++        if (Array.isArray(errorDetail)) {
++          setError(errorDetail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", "));
++        } else {
++          setError(typeof errorDetail === "string" ? errorDetail : "Registration failed. Please check your information.");
++        }
+       }
+     } finally {
+       setLoading(false);
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

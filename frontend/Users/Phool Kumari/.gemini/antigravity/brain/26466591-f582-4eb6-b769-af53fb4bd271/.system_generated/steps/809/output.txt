@@ -1,0 +1,10 @@
+
+The command exited with code 1.
+Output:
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+    db = get_database()
+  File "D:\CareBridge AI\backend\app\core\database.py", line 27, in get_database
+    raise RuntimeError("MongoDB is not connected")
+RuntimeError: MongoDB is not connected
+

@@ -1,0 +1,105 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\routes\auth.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -746,45 +746,60 @@
+ @auth_bp.route("/profile", methods=["GET"])
+ @token_required
+ def get_me():
+-    db = get_database()
+-    user = g.current_user
+-    user_id = str(user["_id"])
+-    role = user.get("role", "PATIENT")
+-    
+-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else None
+-    
+-    patient_id = None
+-    doctor_id = None
+-    if role == "PATIENT":
+-        pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
+-        if pat:
+-            patient_id = str(pat["_id"])
+-    elif role == "DOCTOR":
+-        doc = db.doctors.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
+-        if doc:
+-            doctor_id = str(doc["_id"])
+-            
+-    return jsonify({
+-        "id": user_id,
+-        "_id": user_id,
+-        "name": user.get("name"),
+-        "fullName": user.get("name") or user.get("fullName") or "Staff User",
+-        "email": user.get("email"),
+-        "role": role,
+-        "phone": user.get("phone", ""),
+-        "staffId": staff_id,
+-        "staff_id": staff_id,
+-        "faceVerified": bool(user.get("face_verified") or user.get("faceVerified")),
+-        "faceVerifiedAt": user.get("face_verified_at") or user.get("faceVerifiedAt"),
+-        "fingerprintVerified": bool(user.get("fingerprint_verified") or user.get("fingerprintVerified")),
+-        "fingerprintVerifiedAt": user.get("fingerprint_verified_at") or user.get("fingerprintVerifiedAt"),
+-        "emailVerified": bool(user.get("email_verified", False)),
+-        "is_primary_admin": bool(user.get("is_primary_admin", False)),
+-        "lastLogin": user.get("lastLogin") or user.get("last_login", datetime.now(timezone.utc)).isoformat() if hasattr(user.get("last_login"), "isoformat") else str(user.get("last_login", "")),
+-        "createdAt": user.get("created_at", datetime.now(timezone.utc)).isoformat() if hasattr(user.get("created_at"), "isoformat") else str(user.get("created_at", "")),
+-        "patient_id": patient_id,
+-        "doctor_id": doctor_id
+-    }), 200
++    try:
++        db = get_database()
++        user = g.current_user
++        user_id = str(user["_id"])
++        role = user.get("role", "PATIENT")
++        
++        staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else None
++        
++        patient_id = None
++        doctor_id = None
++        if role == "PATIENT":
++            pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
++            if pat:
++                patient_id = str(pat["_id"])
++        elif role == "DOCTOR":
++            doc = db.doctors.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
++            if doc:
++                doctor_id = str(doc["_id"])
++                
++        last_login = user.get("lastLogin") or user.get("last_login")
++        if hasattr(last_login, "isoformat"):
++            last_login_str = last_login.isoformat()
++        else:
++            last_login_str = str(last_login or "")
++
++        created_at = user.get("createdAt") or user.get("created_at")
++        if hasattr(created_at, "isoformat"):
++            created_at_str = created_at.isoformat()
++        else:
++            created_at_str = str(created_at or "")
++
++        return jsonify({
++            "id": user_id,
++            "_id": user_id,
++            "name": user.get("name"),
++            "fullName": user.get("name") or user.get("fullName") or "User",
++            "email": user.get("email"),
++            "role": role,
++            "phone": user.get("phone", ""),
++            "staffId": staff_id,
++            "staff_id": staff_id,
++            "faceVerified": bool(user.get("face_verified") or user.get("faceVerified")),
++            "faceVerifiedAt": user.get("face_verified_at") or user.get("faceVerifiedAt"),
++            "fingerprintVerified": bool(user.get("fingerprint_verified") or user.get("fingerprintVerified")),
++            "fingerprintVerifiedAt": user.get("fingerprint_verified_at") or user.get("fingerprintVerifiedAt"),
++            "emailVerified": bool(user.get("email_verified", False)),
++            "is_primary_admin": bool(user.get("is_primary_admin", False)),
++            "lastLogin": last_login_str,
++            "createdAt": created_at_str,
++            "patient_id": patient_id,
++            "doctor_id": doctor_id
++        }), 200
++    except Exception as err:
++        return jsonify({"error": "Failed to retrieve profile", "detail": str(err)}), 500
+ 
+ @auth_bp.route("/profile", methods=["PUT"])
+ @auth_bp.route("/me", methods=["PUT"])
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

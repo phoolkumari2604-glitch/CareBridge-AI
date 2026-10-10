@@ -1,0 +1,21 @@
+Task: 26466591-f582-4eb6-b769-af53fb4bd271/task-916
+Status: DONE
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\26466591-f582-4eb6-b769-af53fb4bd271\.system_generated\tasks\task-916.log
+Log output:
+[PASS] Total doctors count verified: 50/50
+[PASS] Indian specialists count: 25
+[PASS] International experts count: 25
+[PASS] Zero dummy/fictional doctor records confirmed in MongoDB
+[PASS] Historical pioneers verified: non-bookable and 'Historical' status confirmed
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+Traceback (most recent call last):
+  File "D:\CareBridge AI\backend\test_doctors_dataset.py", line 99, in <module>
+    test_doctors_dataset()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\CareBridge AI\backend\test_doctors_dataset.py", line 60, in test_doctors_dataset
+    assert res.status_code == 200, f"Status code: {res.status_code}"
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Status code: 500
+
+Last progress: 0s ago

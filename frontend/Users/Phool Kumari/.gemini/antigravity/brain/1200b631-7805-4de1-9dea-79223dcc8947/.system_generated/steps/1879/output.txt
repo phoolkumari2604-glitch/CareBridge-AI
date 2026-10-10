@@ -1,0 +1,19 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\backend\app\__init__.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -109,10 +109,11 @@
+     ]
+ 
+     for bp, prefix in blueprints:
++        p_clean = prefix.strip("/").replace("-", "_")
+         # Register under /api/<prefix>
+-        app.register_blueprint(bp, url_prefix=f"/api{prefix}", name=f"api_{bp.name}")
++        app.register_blueprint(bp, url_prefix=f"/api{prefix}", name=f"api_{p_clean}")
+         # Register under /<prefix> for direct backward compatibility
+-        app.register_blueprint(bp, url_prefix=prefix, name=f"root_{bp.name}")
++        app.register_blueprint(bp, url_prefix=prefix, name=f"root_{p_clean}")
+ 
+     # ----------------------------------------------------
+     # GLOBAL ERROR HANDLERS
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

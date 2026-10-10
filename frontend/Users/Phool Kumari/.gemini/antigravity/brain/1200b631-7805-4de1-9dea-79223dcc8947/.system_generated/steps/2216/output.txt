@@ -1,0 +1,48 @@
+The following changes were made by the replace_file_content tool to: d:\CareBridge AI\frontend\src\pages\public\Register.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -311,18 +311,30 @@
+       const res = await authAPI.register(payload, controller.signal);
+       clearTimeout(timeoutId);
+ 
+-      setSuccessToast(
+-        res?.message || "Account created successfully! Verification email dispatched. Redirecting to login..."
+-      );
+-
+-      setTimeout(() => {
+-        navigate("/login", {
+-          state: {
+-            registeredEmail: formData.email.trim().toLowerCase(),
+-            message: "Registration successful. Please log in with your credentials.",
+-          },
+-        });
+-      }, 2000);
++      // Instant auto-login if token and user are returned
++      if (res?.access_token && res?.user) {
++        localStorage.setItem("access_token", res.access_token);
++        localStorage.setItem("user", JSON.stringify(res.user));
++        if (setUser) {
++          setUser(res.user);
++        }
++        setSuccessToast("Account created successfully! Logging you in...");
++        setTimeout(() => {
++          navigate("/patient/dashboard");
++        }, 1200);
++      } else {
++        setSuccessToast(
++          res?.message || "Account created successfully! Redirecting to login..."
++        );
++        setTimeout(() => {
++          navigate("/login", {
++            state: {
++              registeredEmail: formData.email.trim().toLowerCase(),
++              message: "Registration successful. Please log in with your credentials.",
++            },
++          });
++        }, 1800);
++      }
+     } catch (err) {
+       clearTimeout(timeoutId);
+       console.error("CareBridge Registration error:", err);
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

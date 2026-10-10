@@ -1,0 +1,15 @@
+Task: 1200b631-7805-4de1-9dea-79223dcc8947/task-1173
+Status: DONE
+Log: C:\Users\Phool Kumari\.gemini\antigravity\brain\1200b631-7805-4de1-9dea-79223dcc8947\.system_generated\tasks\task-1173.log
+Log output:
+Traceback (most recent call last):
+  File "<string>", line 22, in <module>
+    print('First patient:', d1['patients'][0]['name'], d1['patients'][0]['patientId'], d1['patients'][0]['phone'])
+                            ~~^^^^^^^^^^^^
+KeyError: 'patients'
+MongoDB indexes created successfully.
+[Success] MongoDB connected successfully.
+GET Status: 401
+GET Response keys: ['detail', 'error'] Total: None Stats: None
+
+Last progress: 3s ago
