@@ -20,6 +20,8 @@ import {
   Trash2,
   BookmarkPlus,
   CheckCircle2,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import doctorService from "../../services/doctorService";
