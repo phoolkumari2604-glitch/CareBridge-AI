@@ -382,7 +382,7 @@ function DoctorDashboard() {
   // Filtered patients list
   const filteredPatients = useMemo(() => {
     return patients.filter((pat) => {
-      const pid = pat._id || pat.id;
+      const pid = String(pat._id || pat.id || "");
       const { status } = getPatientClinicalStatus(pid);
       const q = patientSearch.toLowerCase().trim();
 
@@ -395,14 +395,37 @@ function DoctorDashboard() {
           ? status === "attention"
           : status === "stable";
 
-      const matchesSearch =
-        !q ||
-        (pat.name || "").toLowerCase().includes(q) ||
-        (pat.email || "").toLowerCase().includes(q) ||
-        (pat.phone || "").toLowerCase().includes(q) ||
-        pid.toLowerCase().includes(q);
+      if (!q) {
+        return matchesKpi;
+      }
 
-      return matchesKpi && matchesSearch;
+      // Live search matches patient name, ID, and phone number (case-insensitive)
+      const name = String(pat.name || pat.patient_name || pat.user?.name || "").toLowerCase();
+      const email = String(pat.email || "").toLowerCase();
+      const patientCode = String(pat.patient_code || pat.patient_id_code || pat.patientId || pat.patient_id || "").toLowerCase();
+      const rawPhone = String(pat.phone || pat.phone_number || pat.mobile || pat.contact || "").toLowerCase();
+
+      // Digits-only phone matching for flexible formats (e.g. searching 987654 matches +91 9876543210)
+      const qDigits = q.replace(/\D/g, "");
+      const phoneDigits = rawPhone.replace(/\D/g, "");
+      const matchesPhone = rawPhone.includes(q) || (qDigits.length >= 2 && phoneDigits.includes(qDigits));
+
+      // ID matching: full ID, patient code, short suffix (e.g. #4829 or PT-104829)
+      const cleanQ = q.replace(/^#|^pt-?/i, "");
+      const shortPid = pid.slice(-4).toLowerCase();
+      const shortCode = patientCode.slice(-4);
+      const matchesId =
+        pid.toLowerCase().includes(q) ||
+        patientCode.includes(q) ||
+        (cleanQ && (pid.toLowerCase().includes(cleanQ) || patientCode.includes(cleanQ))) ||
+        (q.startsWith("#") && (shortPid.includes(cleanQ) || shortCode.includes(cleanQ))) ||
+        shortPid.includes(q) ||
+        shortCode.includes(q);
+
+      const matchesName = name.includes(q) || email.includes(q);
+      const matchesSearch = matchesName || matchesId || matchesPhone;
+
+      return matchesSearch;
     });
   }, [patients, patientSearch, kpiFilter, patientAlertsMap, patientVitalsMap]);
 
@@ -691,9 +714,16 @@ function DoctorDashboard() {
                       placeholder="Search patient name, ID, phone..."
                       value={patientSearch}
                       onChange={(e) => setPatientSearch(e.target.value)}
+                      aria-label="Search patient roster"
                     />
                     {patientSearch && (
-                      <button className="clear-btn" onClick={() => setPatientSearch("")}>
+                      <button
+                        type="button"
+                        className="clear-btn"
+                        onClick={() => setPatientSearch("")}
+                        aria-label="Clear patient search"
+                        title="Clear search"
+                      >
                         ✕
                       </button>
                     )}
@@ -703,22 +733,24 @@ function DoctorDashboard() {
                 {/* Horizontal Patient Switcher Pills */}
                 <div className="patient-pills-carousel">
                   {filteredPatients.length === 0 ? (
-                    <div className="no-patients-mini">No patients match your search.</div>
+                    <div className="no-patients-mini">No patients found</div>
                   ) : (
                     filteredPatients.map((pat) => {
                       const pid = pat._id || pat.id;
                       const { status } = getPatientClinicalStatus(pid);
                       const isSelected = focusedPid === pid;
+                      const displayId = String(pat.patient_code || pid).slice(-4);
 
                       return (
                         <button
                           key={pid}
+                          type="button"
                           className={`patient-tab-pill ${isSelected ? "selected" : ""} ${status}`}
                           onClick={() => setFocusedPatientId(pid)}
                         >
                           <span className={`status-dot ${status}`} />
                           <span className="pill-name">{pat.name || "Patient"}</span>
-                          <span className="pill-id">#{pid.slice(-4)}</span>
+                          <span className="pill-id">#{displayId}</span>
                         </button>
                       );
                     })
