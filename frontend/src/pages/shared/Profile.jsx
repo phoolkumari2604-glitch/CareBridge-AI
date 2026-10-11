@@ -35,6 +35,7 @@ import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
 import doctorService from "../../services/doctorService";
 import authAPI from "../../services/auth";
+import { COUNTRIES, getCountryByNameOrCode } from "../../utils/countries";
 import "./Profile.css";
 
 function Profile() {
@@ -95,6 +96,9 @@ function Profile() {
     experience_years: "10",
     consultation_fee: "800",
     room_number: "OPD-304",
+    country: "India",
+    country_code: "IN",
+    city: "New Delhi",
     bio: "Senior Consultant committed to evidence-based clinical diagnostics, cardiovascular therapeutics, and patient-centered clinical care.",
     available_days: "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday",
   });
@@ -849,6 +853,39 @@ function Profile() {
                       />
                     ) : (
                       <div className="profile-value">₹{formData.consultation_fee} per consultation</div>
+                    )}
+                  </div>
+
+                  <div className="profile-field">
+                    <label htmlFor="prof-country">Country (ISO 3166-1)</label>
+                    {editing ? (
+                      <select
+                        id="prof-country"
+                        name="country"
+                        value={formData.country || "India"}
+                        onChange={(e) => {
+                          const cName = e.target.value;
+                          const cObj = getCountryByNameOrCode(cName);
+                          let newPhone = formData.phone;
+                          if (cObj && cObj.dial && (!formData.phone || formData.phone.startsWith("+"))) {
+                            newPhone = `${cObj.dial} `;
+                          }
+                          setFormData({
+                            ...formData,
+                            country: cName,
+                            country_code: cObj ? cObj.code : "IN",
+                            phone: newPhone
+                          });
+                        }}
+                      >
+                        {COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.name}>
+                            {c.flag} {c.name} ({c.dial})
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="profile-value">{formData.country || "India"}</div>
                     )}
                   </div>
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
-import HospitalMap from "../../components/dashboard/HospitalMap";
+import GeoRadar from "../../components/patient/GeoRadar";
 import LiveHeartRateMonitor from "../../components/patient/LiveHeartRateMonitor";
 import "./PatientDashboard.css";
 import {
@@ -369,7 +369,7 @@ const PatientDashboard = () => {
 
       {/* TAB CONTENT: EITHER OVERVIEW OR FIND HOSPITALS */}
       {activeTab === "hospitals" ? (
-        <HospitalMap />
+        <GeoRadar />
       ) : (
         <>
           {/* ACTIVE APPOINTMENT & OPD PASS BANNER */}
@@ -610,7 +610,7 @@ const PatientDashboard = () => {
 
           {/* EMBEDDED HOSPITAL RADAR SECTION AT BOTTOM OF OVERVIEW */}
           <div className="dash-bottom-radar-wrap">
-            <HospitalMap />
+            <GeoRadar />
           </div>
         </>
       )}

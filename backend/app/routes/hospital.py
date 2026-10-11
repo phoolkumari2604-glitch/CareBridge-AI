@@ -665,3 +665,76 @@ def create_hospital():
         "facility_id": h_id,
         "beds_initialized": len(beds)
     }), 201
+
+# ============================================================
+# REAL BED DATA ENDPOINTS (db.hospital_beds)
+# ============================================================
+@hospital_bp.route("/beds", methods=["GET"], strict_slashes=False)
+def get_all_hospital_beds():
+    """
+    Returns live bed statistics across all facilities from db.hospital_beds.
+    """
+    db = get_database()
+    try:
+        records = list(db.hospital_beds.find({}))
+        results = {}
+        for r in records:
+            hid = str(r.get("hospital_id", ""))
+            results[hid] = {
+                "hospital_id": hid,
+                "hospital_name": r.get("hospital_name", ""),
+                "total_beds": int(r.get("total_beds", 0)),
+                "available_beds": int(r.get("available_beds", 0)),
+                "icu_total": int(r.get("icu_total", 0)),
+                "icu_available": int(r.get("icu_available", 0)),
+                "ventilators_total": int(r.get("ventilators_total", 0)),
+                "ventilators_available": int(r.get("ventilators_available", 0)),
+                "updated_at": r.get("updated_at")
+            }
+        return jsonify({"beds": results, "count": len(results)}), 200
+    except Exception as err:
+        return jsonify({"error": "Failed to fetch bed statistics", "detail": str(err)}), 500
+
+@hospital_bp.route("/<hospital_id>/beds", methods=["PUT"], strict_slashes=False)
+def update_hospital_beds(hospital_id):
+    """
+    Updates bed statistics for a facility in db.hospital_beds.
+    """
+    db = get_database()
+    data = request.get_json() or {}
+    now_time = datetime.now(timezone.utc).isoformat()
+    
+    update_fields = {"updated_at": now_time}
+    for field in ["total_beds", "available_beds", "icu_total", "icu_available", "ventilators_total", "ventilators_available"]:
+        if field in data and data[field] is not None:
+            try:
+                update_fields[field] = max(0, int(data[field]))
+            except ValueError:
+                pass
+
+    if len(update_fields) <= 1:
+        return jsonify({"error": "Validation Error", "detail": "No valid bed count fields provided"}), 400
+
+    res = db.hospital_beds.update_one(
+        {"hospital_id": str(hospital_id)},
+        {"$set": update_fields},
+        upsert=True
+    )
+
+    # Also sync top-level counts to db.hospitals if available
+    h_sync = {}
+    if "total_beds" in update_fields:
+        h_sync["total_beds"] = update_fields["total_beds"]
+    if "available_beds" in update_fields:
+        h_sync["available_beds"] = update_fields["available_beds"]
+    if "icu_available" in update_fields:
+        h_sync["icu_beds_available"] = update_fields["icu_available"]
+    if h_sync and is_valid_object_id(hospital_id):
+        db.hospitals.update_one({"_id": ObjectId(hospital_id)}, {"$set": h_sync})
+
+    return jsonify({
+        "message": "Bed statistics updated successfully",
+        "hospital_id": str(hospital_id),
+        "updated": update_fields
+    }), 200
+

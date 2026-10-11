@@ -1,0 +1,196 @@
+/* ==========================================================================
+   CANCEL APPOINTMENT MODAL STYLES
+   High-contrast, accessible, theme variable-driven design
+   ========================================================================== */
+
+.cam-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.cam-modal-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: camPop 0.18s ease-out;
+}
+
+@keyframes camPop {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cam-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cam-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cam-modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.cam-modal-close-btn:hover {
+  background: var(--bg-primary, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+}
+
+.cam-modal-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.cam-warning-box {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: #991b1b;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.cam-warning-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.cam-appt-details {
+  background: var(--bg-primary, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--text-primary, #0f172a);
+}
+
+.cam-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cam-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+}
+
+.cam-select,
+.cam-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary, #0f172a);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.cam-select:focus,
+.cam-textarea:focus {
+  border-color: var(--primary, #0284c7);
+}
+
+.cam-error-msg {
+  font-size: 0.85rem;
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.cam-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  background: var(--surface, #ffffff);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.cam-btn-keep {
+  padding: 0.65rem 1.25rem;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
+  color: var(--text-secondary, #475569);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cam-btn-keep:hover {
+  background: var(--bg-primary, #f1f5f9);
+}
+
+.cam-btn-cancel-confirm {
+  padding: 0.65rem 1.5rem;
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.15s;
+}
+
+.cam-btn-cancel-confirm:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.cam-btn-cancel-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

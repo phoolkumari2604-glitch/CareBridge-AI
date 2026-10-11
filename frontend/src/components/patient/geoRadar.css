@@ -1,0 +1,580 @@
+/* =========================================================
+   CAREBRIDGE AI — GEO-CLINICAL RADAR
+   Theme Adaptive, Accessible, Real-Time Interactive Radar
+========================================================= */
+
+.geo-radar-section {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+/* HEADER */
+.geo-radar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.radar-kicker {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #0284c7;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.geo-radar-header h2 {
+  font-size: clamp(20px, 2.5vw, 24px);
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+}
+
+.radar-subtitle {
+  color: var(--text-secondary, #64748b);
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.radar-actions-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-locate-me {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+}
+
+.btn-locate-me:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+.btn-locate-me:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.radar-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #cbd5e1);
+  background: var(--surface, #ffffff);
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radar-refresh-btn:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+/* NOTICE BANNER */
+.radar-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 12px;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.radar-notice-banner.error {
+  background: #fef2f2;
+  border-color: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-retry-radar {
+  margin-left: auto;
+  padding: 4px 12px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* CONTROLS BAR */
+.radar-controls-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 900px) {
+  .radar-controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.radar-search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-soft, #f8fafc);
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 12px;
+  padding: 0 14px;
+  height: 44px;
+}
+
+.radar-search-input-wrap:focus-within {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+}
+
+.radar-search-input-wrap input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary, #0f172a);
+  font-size: 14px;
+}
+
+.clear-search-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.radar-filters-subrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.radar-select-field {
+  flex: 1;
+  min-width: 120px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border, #cbd5e1);
+  background: var(--surface, #ffffff);
+  color: var(--text-primary, #0f172a);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.radar-emergency-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border, #cbd5e1);
+  background: var(--surface, #ffffff);
+  color: var(--text-primary, #1e293b);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radar-emergency-toggle.active {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* CATEGORY CHIPS */
+.radar-chips-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.radar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border, #cbd5e1);
+  background: var(--surface, #ffffff);
+  color: var(--text-secondary, #64748b);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.radar-chip:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+.radar-chip.active {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+.chip-count-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.radar-chip.active .chip-count-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* RESULTS COUNT ROW */
+.radar-results-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 14px;
+}
+
+.radar-results-info strong {
+  color: var(--text-primary, #0f172a);
+}
+
+/* RADAR MAIN SPLIT (MAP + FACILITY CARDS) */
+.radar-main-layout {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 992px) {
+  .radar-main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* MAP CONTAINER */
+.radar-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  border-radius: 16px;
+  border: 1px solid var(--border, #cbd5e1);
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.radar-leaflet-map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-travel-time-indicator {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  border: 1px solid #38bdf8;
+  font-size: 13px;
+  animation: slideInDown 0.25s ease-out;
+}
+
+.map-travel-time-indicator strong {
+  color: #38bdf8;
+}
+
+.btn-clear-route {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.btn-clear-route:hover {
+  color: #ffffff;
+}
+
+/* FACILITY LIST CONTAINER */
+.radar-facilities-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.radar-facility-card {
+  background: var(--surface, #ffffff);
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.radar-facility-card:hover {
+  border-color: #0284c7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.08);
+}
+
+.radar-facility-card.selected {
+  border-color: #0284c7;
+  background: rgba(2, 132, 199, 0.03);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+}
+
+.card-type-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.badge-place-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.badge-place-type.hospital {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.badge-place-type.police {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.badge-place-type.ambulance {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.card-distance-tag {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0284c7;
+}
+
+.radar-facility-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.radar-facility-address {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.radar-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-card-action.route {
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+}
+
+.btn-card-action.route:hover {
+  background: #0369a1;
+}
+
+.btn-card-action.call {
+  background: var(--surface-soft, #f8fafc);
+  color: var(--text-primary, #1e293b);
+  border: 1px solid var(--border, #cbd5e1);
+}
+
+.btn-card-action.call:hover {
+  border-color: #10b981;
+  color: #059669;
+}
+
+.btn-card-action.opd {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+/* POPUP CUSTOMIZATION */
+.custom-leaflet-popup .leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.custom-leaflet-popup .leaflet-popup-tip {
+  background: #0f172a;
+}
+
+.popup-inner {
+  font-family: inherit;
+}
+
+.popup-inner h4 {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  color: #ffffff;
+}
+
+.popup-inner p {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.popup-metrics-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.popup-metrics-row strong {
+  color: #38bdf8;
+}
+
+.popup-actions-row {
+  display: flex;
+  gap: 6px;
+}
+
+.popup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.popup-btn.primary {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.popup-btn.secondary {
+  background: #1e293b;
+  color: #ffffff;
+  border: 1px solid #334155;
+}
+
+/* SKELETONS */
+.radar-skeleton-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radar-skeleton-card {
+  height: 90px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

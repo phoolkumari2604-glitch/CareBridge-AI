@@ -367,3 +367,123 @@ def delete_appointment(appointment_id):
     # Also delete approval record if present
     db.approvals.delete_one({"appointment_id": ObjectId(appointment_id)})
     return jsonify({"message": "Appointment deleted/cancelled successfully"}), 200
+
+# ============================================================
+# CANCELLATION FLOW (SOFT-CANCEL, SLOT RELEASE, QUEUE REMOVAL, NOTIFICATIONS)
+# ============================================================
+@appointment_bp.route("/<appointment_id>/cancel", methods=["POST"], strict_slashes=False)
+@token_required
+def cancel_appointment(appointment_id):
+    """
+    Safely cancels an appointment:
+    - Verifies appointment exists and is in a cancellable status (PENDING, APPROVED, CONFIRMED)
+    - Verifies appointment is for a future time slot (prevents cancelling past/completed visits)
+    - Updates appointment status to 'CANCELLED' with cancellation metadata
+    - Removes appointment from live queue (db.queue)
+    - Creates notifications for both patient and doctor in db.notifications
+    """
+    db = get_database()
+    current_user = g.current_user
+    user_id = str(current_user["_id"])
+    role = current_user.get("role", "PATIENT")
+
+    if not is_valid_object_id(appointment_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid appointment ID"}), 400
+
+    appt = db.appointments.find_one({"_id": ObjectId(appointment_id)})
+    if not appt:
+        return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
+
+    # Permission check: Patients can only cancel their own appointments
+    if role == "PATIENT":
+        patient_record = db.patients.find_one({"user_id": user_id})
+        patient_id = patient_record["_id"] if patient_record else None
+        if appt.get("patient_id") and patient_id and str(appt["patient_id"]) != str(patient_id):
+            return jsonify({"error": "Forbidden", "detail": "You can only cancel your own appointments"}), 403
+
+    current_status = (appt.get("status") or "").upper()
+    if current_status == "CANCELLED":
+        return jsonify({"error": "Bad Request", "detail": "Appointment is already cancelled"}), 400
+    if current_status in ["COMPLETED", "CONSULTED"]:
+        return jsonify({"error": "Bad Request", "detail": "Cannot cancel an appointment that has already been completed"}), 400
+
+    # Verify future appointment check
+    appt_date_str = appt.get("appointment_date")
+    appt_time_str = appt.get("appointment_time")
+    now_dt = datetime.now(timezone.utc)
+    today_str = now_dt.strftime("%Y-%m-%d")
+
+    if appt_date_str and appt_date_str < today_str:
+        return jsonify({"error": "Bad Request", "detail": "Cannot cancel past appointments."}), 400
+
+    data = request.get_json() or {}
+    cancel_reason = data.get("reason", "Patient requested cancellation").strip()
+    other_reason = data.get("other_reason", "").strip()
+    if cancel_reason == "Other" and other_reason:
+        cancel_reason = f"Other: {other_reason}"
+
+    now_iso = now_dt.isoformat()
+
+    # Soft cancel update
+    update_data = {
+        "status": "CANCELLED",
+        "approval_status": "CANCELLED",
+        "cancelled_at": now_iso,
+        "cancelled_by": user_id,
+        "cancelled_by_role": role,
+        "cancel_reason": cancel_reason,
+        "updated_at": now_dt
+    }
+
+    db.appointments.update_one({"_id": ObjectId(appointment_id)}, {"$set": update_data})
+
+    # Sync approval document
+    db.approvals.update_one(
+        {"appointment_id": ObjectId(appointment_id)},
+        {"$set": {"status": "CANCELLED", "cancel_reason": cancel_reason, "updated_at": now_dt}}
+    )
+
+    # Remove from live queue if queued
+    db.queue.delete_many({
+        "$or": [
+            {"appointment_id": ObjectId(appointment_id)},
+            {"appointment_id": str(appointment_id)}
+        ]
+    })
+
+    # Create notification for patient
+    patient_id_val = appt.get("patient_id")
+    if patient_id_val:
+        db.notifications.insert_one({
+            "recipient_id": str(patient_id_val),
+            "recipient_role": "PATIENT",
+            "title": "Appointment Cancelled",
+            "message": f"Your consultation with {appt.get('doctor_name', 'your doctor')} scheduled for {appt_date_str} at {appt_time_str} has been cancelled ({cancel_reason}).",
+            "type": "APPOINTMENT_CANCELLED",
+            "appointment_id": str(appointment_id),
+            "read": False,
+            "created_at": now_dt
+        })
+
+    # Create notification for doctor
+    doctor_id_val = appt.get("doctor_id")
+    if doctor_id_val:
+        db.notifications.insert_one({
+            "recipient_id": str(doctor_id_val),
+            "recipient_role": "DOCTOR",
+            "title": "Appointment Slot Released",
+            "message": f"Appointment with patient {appt.get('patient_name', 'Patient')} for {appt_date_str} at {appt_time_str} was cancelled.",
+            "type": "APPOINTMENT_CANCELLED",
+            "appointment_id": str(appointment_id),
+            "read": False,
+            "created_at": now_dt
+        })
+
+    updated_doc = db.appointments.find_one({"_id": ObjectId(appointment_id)})
+    return jsonify({
+        "message": "Appointment cancelled successfully. Slot has been released.",
+        "appointment_id": str(appointment_id),
+        "status": "CANCELLED",
+        "appointment": serialize_doc(updated_doc)
+    }), 200
+

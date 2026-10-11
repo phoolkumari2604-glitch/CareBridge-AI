@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
+import DoctorFilterPanel from "../../components/patient/DoctorFilterPanel";
+import BookAppointmentModal from "../../components/patient/BookAppointmentModal";
 import "./Doctors.css";
 
 function Doctors() {
@@ -45,13 +47,20 @@ function Doctors() {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [bookingDoctor, setBookingDoctor] = useState(null);
 
-  // Booking Form State
-  const [bookingDate, setBookingDate] = useState(new Date().toISOString().split("T")[0]);
-  const [bookingTime, setBookingTime] = useState("");
-  const [bookingReason, setBookingReason] = useState("");
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(null);
-  const [bookingError, setBookingError] = useState(null);
+  // Metadata from /api/doctors/filters-meta
+  const [filtersMeta, setFiltersMeta] = useState(null);
+
+  const fetchFiltersMeta = async () => {
+    try {
+      const res = await fetch("/api/doctors/filters-meta");
+      if (res.ok) {
+        const data = await res.json();
+        setFiltersMeta(data);
+      }
+    } catch (err) {
+      console.warn("Could not load filters meta:", err);
+    }
+  };
 
   const fetchDoctorsAndHospitals = useCallback(async () => {
     try {
@@ -82,6 +91,7 @@ function Doctors() {
 
   useEffect(() => {
     fetchDoctorsAndHospitals();
+    fetchFiltersMeta();
   }, [fetchDoctorsAndHospitals]);
 
   const docList = useMemo(() => (Array.isArray(doctors) ? doctors : []), [doctors]);
@@ -295,74 +305,28 @@ function Doctors() {
       </section>
 
       {/* SEARCH AND MULTI-FACET FILTERS */}
-      <section className="doctor-search-card multi-filter-card">
-        <div className="doctor-search-box full-width-search">
-          <Search size={18} />
-          <input
-            type="text"
-            placeholder="Search by doctor, specialty, hospital, or location"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button className="clear-search-btn" onClick={() => setSearchQuery("")}>
-              ✕
-            </button>
-          )}
-        </div>
-
-        <div className="filters-subgrid">
-          <select
-            value={selectedSpecialty}
-            onChange={(e) => setSelectedSpecialty(e.target.value)}
-            className="doctor-filter-select"
-          >
-            <option value="">All Specialties ({specialties.length})</option>
-            {specialties.map((spec, i) => (
-              <option key={i} value={spec}>
-                {spec}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="doctor-filter-select"
-          >
-            <option value="">All Categories ({categories.length})</option>
-            {categories.map((cat, i) => (
-              <option key={i} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-            className="doctor-filter-select"
-          >
-            <option value="">All Countries ({countries.length})</option>
-            {countries.map((ctry, i) => (
-              <option key={i} value={ctry}>
-                {ctry}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedVerification}
-            onChange={(e) => setSelectedVerification(e.target.value)}
-            className="doctor-filter-select"
-          >
-            <option value="">All Verification Statuses</option>
-            <option value="Verified">Verified</option>
-            <option value="Needs Verification">Needs Verification</option>
-            <option value="Historical">Historical</option>
-          </select>
-        </div>
-      </section>
+      <DoctorFilterPanel
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedCountry={selectedCountry}
+        setSelectedCountry={setSelectedCountry}
+        selectedSpecialty={selectedSpecialty}
+        setSelectedSpecialty={setSelectedSpecialty}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        selectedVerification={selectedVerification}
+        setSelectedVerification={setSelectedVerification}
+        meta={filtersMeta}
+        totalDoctors={doctors.length}
+        filteredCount={sortedDoctors.length}
+        onReset={() => {
+          setSearchQuery("");
+          setSelectedSpecialty("");
+          setSelectedCategory("");
+          setSelectedCountry("");
+          setSelectedVerification("");
+        }}
+      />
 
       {/* TOOLBAR */}
       <div className="doctors-toolbar">
@@ -701,153 +665,15 @@ function Doctors() {
 
       {/* BOOK APPOINTMENT MODAL */}
       {bookingDoctor && (
-        <div className="modal-overlay" onClick={() => setBookingDoctor(null)}>
-          <div className="modal-content doctor-booking-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div>
-                <h2>Book Appointment</h2>
-                <p>Schedule a consultation with {bookingDoctor.name}</p>
-              </div>
-              <button className="modal-close-btn" onClick={() => setBookingDoctor(null)}>
-                ✕
-              </button>
-            </div>
-
-            {bookingSuccess ? (
-              <div className="booking-success-view">
-                <div className="success-icon-wrap">
-                  <CheckCircle2 size={44} />
-                </div>
-                <h3>Appointment Requested Successfully!</h3>
-                <p>
-                  Your consultation with <strong>{bookingSuccess.doctor}</strong> is scheduled for{" "}
-                  <strong>{bookingSuccess.date}</strong> at <strong>{bookingSuccess.time}</strong>.
-                </p>
-                <div className="success-actions">
-                  <button
-                    className="view-apts-btn"
-                    onClick={() => {
-                      setBookingDoctor(null);
-                      navigate("/patient/appointments");
-                    }}
-                  >
-                    View in Appointments
-                  </button>
-                  <button
-                    className="view-opd-btn"
-                    onClick={() => {
-                      setBookingDoctor(null);
-                      navigate("/patient/opd-pass");
-                    }}
-                  >
-                    View Digital OPD Pass
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleConfirmBooking} className="booking-form">
-                {bookingError && (
-                  <div className="form-error-banner">
-                    <AlertCircle size={16} />
-                    <span>{bookingError}</span>
-                  </div>
-                )}
-
-                <div className="booking-doctor-summary">
-                  <div className="summary-avatar">
-                    {bookingDoctor.name ? bookingDoctor.name.charAt(0).toUpperCase() : "D"}
-                  </div>
-                  <div>
-                    <strong>{bookingDoctor.name}</strong>
-                    <span>{bookingDoctor.specialty || bookingDoctor.specialization}</span>
-                    <small>{getDoctorHospital(bookingDoctor)}</small>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    <Calendar size={14} /> Consultation Date
-                  </label>
-                  <input
-                    type="date"
-                    min={new Date().toISOString().split("T")[0]}
-                    value={bookingDate}
-                    onChange={(e) => setBookingDate(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    <Clock3 size={14} /> Select Available Time Slot
-                  </label>
-                  <div className="slots-picker">
-                    {(bookingDoctor.available_slots || ["09:00 AM", "10:30 AM", "11:30 AM", "02:00 PM", "03:30 PM"]).map(
-                      (slot) => (
-                        <button
-                          key={slot}
-                          type="button"
-                          className={`slot-pill ${bookingTime === slot ? "selected" : ""}`}
-                          onClick={() => setBookingTime(slot)}
-                        >
-                          {slot}
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    <Stethoscope size={14} /> Primary Symptoms / Reason for Consultation
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder="Describe your symptoms or reason for visit (e.g. routine checkup, specialist opinion)..."
-                    value={bookingReason}
-                    onChange={(e) => setBookingReason(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="booking-notice">
-                  <ShieldCheck size={16} />
-                  <span>
-                    Your appointment request will be logged with the hospital OPD desk and doctor schedule.
-                  </span>
-                </div>
-
-                <div className="modal-footer-actions">
-                  <button
-                    type="button"
-                    className="cancel-booking-btn"
-                    onClick={() => setBookingDoctor(null)}
-                    disabled={bookingLoading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="confirm-booking-btn"
-                    disabled={bookingLoading}
-                  >
-                    {bookingLoading ? (
-                      <>
-                        <Loader2 size={16} className="spinner-icon" />
-                        <span>Confirming...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 size={16} />
-                        <span>Confirm Appointment</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
+        <BookAppointmentModal
+          doctor={bookingDoctor}
+          hospitals={hospitals}
+          user={user}
+          onClose={() => setBookingDoctor(null)}
+          onBookingSuccess={(res) => {
+            console.log("Appointment booked:", res);
+          }}
+        />
       )}
     </div>
   );

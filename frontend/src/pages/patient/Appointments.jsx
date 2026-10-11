@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
+import CancelAppointmentModal from "../../components/patient/CancelAppointmentModal";
 import "./Appointments.css";
 
 function Appointments() {
@@ -128,19 +129,43 @@ function Appointments() {
   const completedCount = appointments.filter((a) => (a.status || "").toUpperCase() === "COMPLETED").length;
   const pendingCount = appointments.filter((a) => (a.approval_status || "").toUpperCase() === "PENDING").length;
 
-  // Cancel Appointment
-  const handleCancelConfirm = async () => {
+  // Cancel Appointment Flow
+  const handleCancelConfirm = async ({ reason, other_reason }) => {
     if (!cancelModal) return;
+    const apptId = cancelModal._id || cancelModal.id;
     try {
       setActionLoading(true);
-      await patientService.deleteAppointment(cancelModal._id || cancelModal.id);
-      patientService.removeStoredAppointmentId(user.patient_id, cancelModal._id || cancelModal.id);
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const res = await fetch(`/api/appointments/${apptId}/cancel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ reason, other_reason })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.detail || data.error || "Failed to cancel appointment");
+        return;
+      }
+
+      patientService.removeStoredAppointmentId(user.patient_id, apptId);
       
-      setAppointments((prev) => prev.filter((a) => a._id !== cancelModal._id && a.id !== cancelModal.id));
+      // Update appointments list immediately without page reload
+      setAppointments((prev) =>
+        prev.map((a) =>
+          (a._id === apptId || a.id === apptId)
+            ? { ...a, status: "CANCELLED", approval_status: "CANCELLED" }
+            : a
+        )
+      );
+
       setCancelModal(null);
       setSelectedAppointment(null);
-      setToastMessage("Appointment cancelled successfully.");
-      setTimeout(() => setToastMessage(""), 3000);
+      setToastMessage("Appointment cancelled successfully. Slot has been released.");
+      setTimeout(() => setToastMessage(""), 4000);
     } catch (err) {
       console.error("Cancel appointment error:", err);
       alert("Failed to cancel appointment. Please try again.");
@@ -507,39 +532,13 @@ function Appointments() {
 
       {/* CANCEL CONFIRMATION MODAL */}
       {cancelModal && (
-        <div className="modal-overlay" onClick={() => setCancelModal(null)}>
-          <div className="modal-content cancel-confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Cancel Appointment?</h2>
-              <button className="modal-close-btn" onClick={() => setCancelModal(null)}>
-                ✕
-              </button>
-            </div>
-
-            <div className="modal-body">
-              <p>
-                Are you sure you want to cancel your scheduled appointment with{" "}
-                <strong>{getDoctor(cancelModal.doctor_id).name || "Doctor"}</strong> on{" "}
-                <strong>{cancelModal.appointment_date}</strong> at <strong>{cancelModal.appointment_time}</strong>?
-              </p>
-              <p className="text-muted">
-                This action will release your slot and remove the appointment from your active queue.
-              </p>
-            </div>
-
-            <div className="modal-footer">
-              <div className="modal-actions-row">
-                <button className="cancel-btn-outline" onClick={() => setCancelModal(null)} disabled={actionLoading}>
-                  Keep Appointment
-                </button>
-                <button className="danger-confirm-btn" onClick={handleCancelConfirm} disabled={actionLoading}>
-                  {actionLoading ? <Loader2 size={16} className="spinner-icon" /> : <Trash2 size={16} />}
-                  <span>Yes, Cancel Consultation</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CancelAppointmentModal
+          appointment={cancelModal}
+          doctorName={getDoctor(cancelModal.doctor_id).name || cancelModal.doctor_name}
+          onClose={() => setCancelModal(null)}
+          onConfirmCancel={handleCancelConfirm}
+          loading={actionLoading}
+        />
       )}
     </div>
   );

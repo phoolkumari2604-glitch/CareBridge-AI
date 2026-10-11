@@ -399,3 +399,247 @@ def get_doctor_earnings(doctor_id=None):
 def settle_doctor_transaction(txn_id):
     db = get_database()
     return jsonify({"message": f"Transaction {txn_id} marked as settled", "status": "SETTLED"}), 200
+
+# ============================================================
+# FILTER METADATA (LIVE DISTINCT COUNTS FOR COUNTRIES, SPECIALTIES, CATEGORIES)
+# ============================================================
+@doctor_bp.route("/filters-meta", methods=["GET"], strict_slashes=False)
+def get_doctor_filters_meta():
+    """
+    Returns live metadata for doctor filters:
+    - countries with doctor counts (e.g. [{"country": "India", "count": 25, "code": "IN"}, ...])
+    - specialties with doctor counts
+    - categories with doctor counts
+    - total_doctors count
+    """
+    db = get_database()
+    from collections import Counter
+    try:
+        docs = list(db.doctors.find({}, {"country": 1, "specialty": 1, "category": 1, "verification_status": 1}))
+        country_counter = Counter(d.get("country", "India") for d in docs if d.get("country"))
+        specialty_counter = Counter(d.get("specialty") for d in docs if d.get("specialty"))
+        category_counter = Counter(d.get("category", "Practicing Clinician") for d in docs if d.get("category"))
+        
+        # Sort countries by count descending
+        sorted_countries = [
+            {"country": c, "count": count}
+            for c, count in country_counter.most_common()
+        ]
+        
+        sorted_specialties = [
+            {"specialty": s, "count": count}
+            for s, count in specialty_counter.most_common()
+        ]
+        
+        sorted_categories = [
+            {"category": cat, "count": count}
+            for cat, count in category_counter.most_common()
+        ]
+        
+        return jsonify({
+            "total_doctors": len(docs),
+            "countries": sorted_countries,
+            "specialties": sorted_specialties,
+            "categories": sorted_categories
+        }), 200
+    except Exception as err:
+        return jsonify({"error": "Failed to fetch filter metadata", "detail": str(err)}), 500
+
+# ============================================================
+# DYNAMIC DOCTOR SCHEDULE & TIME-OFF ENDPOINTS
+# ============================================================
+@doctor_bp.route("/<doctor_id>/schedule", methods=["GET"], strict_slashes=False)
+def get_doctor_schedule(doctor_id):
+    """
+    Generates dynamic real available slots for a doctor on a specific date.
+    Checks:
+    - Doctor's weekly template in db.doctor_availability or doctor.available_days
+    - doctor.available_slots or standard clinical windows (09:00 AM - 05:00 PM)
+    - Leaves/blackouts in db.doctor_time_off
+    - Booked appointments in db.appointments for that date
+    - If date is today, filters out past hours
+    """
+    db = get_database()
+    date_str = request.args.get("date")
+    if not date_str:
+        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    # Resolve doctor
+    query = {"_id": ObjectId(doctor_id)} if is_valid_object_id(doctor_id) else {"user_id": doctor_id}
+    doctor = db.doctors.find_one(query)
+    if not doctor:
+        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
+
+    doc_oid = doctor["_id"]
+
+    # 1. Check if doctor is on time off
+    time_off = db.doctor_time_off.find_one({
+        "doctor_id": doc_oid,
+        "date": date_str
+    })
+    if time_off or doctor.get("status") in ["ON_LEAVE", "LEAVE", "UNAVAILABLE"]:
+        return jsonify({
+            "doctor_id": str(doc_oid),
+            "date": date_str,
+            "is_available": False,
+            "reason": time_off.get("reason", "Doctor is on leave or unavailable on this date") if time_off else "Doctor is currently on leave",
+            "slots": []
+        }), 200
+
+    # 2. Check day of week
+    try:
+        target_date = datetime.strptime(date_str, "%Y-%m-%d")
+        day_name = target_date.strftime("%A")
+    except ValueError:
+        return jsonify({"error": "Validation Error", "detail": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+    # Default clinical days
+    available_days = doctor.get("available_days", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
+    
+    # Check custom availability collection if present
+    custom_avail = db.doctor_availability.find_one({"doctor_id": doc_oid, "day_of_week": day_name})
+    if custom_avail and not custom_avail.get("is_active", True):
+        return jsonify({
+            "doctor_id": str(doc_oid),
+            "date": date_str,
+            "is_available": False,
+            "reason": f"Doctor does not consult on {day_name}s",
+            "slots": []
+        }), 200
+
+    if day_name not in available_days and not custom_avail:
+        return jsonify({
+            "doctor_id": str(doc_oid),
+            "date": date_str,
+            "is_available": False,
+            "reason": f"Doctor does not practice on {day_name}s",
+            "slots": []
+        }), 200
+
+    # 3. Base slots template
+    if custom_avail and custom_avail.get("slots"):
+        base_slots = custom_avail["slots"]
+    else:
+        base_slots = doctor.get("available_slots") or [
+            "09:00 AM", "09:45 AM", "10:30 AM", "11:15 AM", "12:00 PM",
+            "02:00 PM", "02:45 PM", "03:30 PM", "04:15 PM", "05:00 PM"
+        ]
+
+    # 4. Filter already booked appointments
+    booked_appts = list(db.appointments.find({
+        "doctor_id": doc_oid,
+        "appointment_date": date_str,
+        "status": {"$in": ["PENDING", "APPROVED", "CONFIRMED"]}
+    }))
+    booked_times = {a.get("appointment_time") for a in booked_appts}
+
+    # 5. Filter past hours if booking for today
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    now_dt = datetime.now(timezone.utc)
+
+    available_slots = []
+    for slot in base_slots:
+        if slot in booked_times:
+            continue
+        if date_str == today_str:
+            try:
+                slot_time = datetime.strptime(slot, "%I:%M %p").time()
+                current_time = now_dt.time()
+                if slot_time <= current_time:
+                    continue
+            except Exception:
+                pass
+        available_slots.append(slot)
+
+    return jsonify({
+        "doctor_id": str(doc_oid),
+        "doctor_name": doctor.get("name"),
+        "date": date_str,
+        "day": day_name,
+        "is_available": len(available_slots) > 0,
+        "total_slots": len(base_slots),
+        "available_count": len(available_slots),
+        "slots": available_slots
+    }), 200
+
+@doctor_bp.route("/<doctor_id>/check-free-time", methods=["POST"], strict_slashes=False)
+def check_doctor_free_time(doctor_id):
+    """
+    Checks if a patient's desired custom time window matches doctor availability.
+    Payload: { "date": "YYYY-MM-DD", "preferred_time": "10:00 AM" }
+    Returns:
+    - match: bool
+    - exact_slot: str or null
+    - nearest_slots: list of 3 nearest slots on this date
+    - next_available_date: str (if date is fully booked/off)
+    """
+    db = get_database()
+    data = request.get_json() or {}
+    date_str = data.get("date", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    pref_time = data.get("preferred_time", "").strip()
+
+    query = {"_id": ObjectId(doctor_id)} if is_valid_object_id(doctor_id) else {"user_id": doctor_id}
+    doctor = db.doctors.find_one(query)
+    if not doctor:
+        return jsonify({"error": "Not Found", "detail": "Doctor not found"}), 404
+
+    doc_oid = doctor["_id"]
+
+    # Call internal logic of schedule for date_str
+    target_date = datetime.strptime(date_str, "%Y-%m-%d")
+    day_name = target_date.strftime("%A")
+
+    time_off = db.doctor_time_off.find_one({"doctor_id": doc_oid, "date": date_str})
+    available_days = doctor.get("available_days", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
+
+    base_slots = doctor.get("available_slots") or [
+        "09:00 AM", "09:45 AM", "10:30 AM", "11:15 AM", "12:00 PM",
+        "02:00 PM", "02:45 PM", "03:30 PM", "04:15 PM", "05:00 PM"
+    ]
+
+    booked_appts = list(db.appointments.find({
+        "doctor_id": doc_oid,
+        "appointment_date": date_str,
+        "status": {"$in": ["PENDING", "APPROVED", "CONFIRMED"]}
+    }))
+    booked_times = {a.get("appointment_time") for a in booked_appts}
+
+    avail_slots = [s for s in base_slots if s not in booked_times]
+
+    if time_off or day_name not in available_days or len(avail_slots) == 0:
+        # Find next available day
+        from datetime import timedelta
+        next_date = None
+        for i in range(1, 14):
+            candidate = target_date + timedelta(days=i)
+            c_day = candidate.strftime("%A")
+            c_str = candidate.strftime("%Y-%m-%d")
+            if c_day in available_days and not db.doctor_time_off.find_one({"doctor_id": doc_oid, "date": c_str}):
+                next_date = c_str
+                break
+
+        return jsonify({
+            "match": False,
+            "message": f"Doctor is not available on {date_str} ({day_name}).",
+            "nearest_slots": [],
+            "next_available_date": next_date
+        }), 200
+
+    # If preferred time matches an available slot
+    if pref_time in avail_slots:
+        return jsonify({
+            "match": True,
+            "slot": pref_time,
+            "message": f"Great! {pref_time} is open for consultation on {date_str}.",
+            "nearest_slots": [pref_time]
+        }), 200
+
+    # Otherwise return 3 nearest slots
+    nearest = avail_slots[:3]
+    return jsonify({
+        "match": False,
+        "message": f"{pref_time} is not available on {date_str}. Here are the closest open times.",
+        "nearest_slots": nearest,
+        "next_available_date": date_str
+    }), 200
+

@@ -1,0 +1,391 @@
+/* ==========================================================================
+   BOOK APPOINTMENT MODAL CSS
+   High-contrast, mobile-friendly bottom-sheet, dynamic slots, free-time tool
+   ========================================================================== */
+
+.bam-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.bam-modal-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: bamScaleIn 0.2s ease-out;
+}
+
+@keyframes bamScaleIn {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Modal Header */
+.bam-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: var(--surface, #ffffff);
+}
+
+.bam-modal-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0 0 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bam-modal-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+.bam-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.bam-close-btn:hover {
+  background: var(--bg-primary, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+}
+
+/* Modal Body (Scrollable) */
+.bam-modal-body {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Doctor summary pill */
+.bam-doc-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-primary, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+}
+
+.bam-doc-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(2, 132, 199, 0.1);
+  color: var(--primary, #0284c7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.bam-doc-info h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0 0 0.15rem 0;
+}
+
+.bam-doc-info p {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+/* Form Groups */
+.bam-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.bam-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bam-input,
+.bam-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary, #0f172a);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.bam-input:focus,
+.bam-textarea:focus {
+  border-color: var(--primary, #0284c7);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.bam-char-count {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  text-align: right;
+}
+
+/* Slots Grid */
+.bam-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+@media (min-width: 480px) {
+  .bam-slots-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.bam-slot-btn {
+  padding: 0.6rem 0.4rem;
+  background: var(--bg-primary, #f8fafc);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary, #334155);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.bam-slot-btn:hover {
+  background: rgba(2, 132, 199, 0.08);
+  border-color: var(--primary, #0284c7);
+}
+
+.bam-slot-btn.selected {
+  background: var(--primary, #0284c7);
+  color: #ffffff;
+  border-color: var(--primary, #0284c7);
+}
+
+.bam-no-slots-alert {
+  padding: 0.85rem;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #b45309;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Free-time checker section */
+.bam-free-time-box {
+  background: var(--bg-primary, #f8fafc);
+  border: 1px dashed var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.bam-free-time-header {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.bam-free-time-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bam-check-time-btn {
+  padding: 0.5rem 0.85rem;
+  background: var(--primary, #0284c7);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bam-free-time-result {
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.bam-free-time-result.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.bam-free-time-result.warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+/* Error message banner */
+.bam-error-banner {
+  padding: 0.75rem 1rem;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Sticky Modal Footer */
+.bam-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  background: var(--surface, #ffffff);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.bam-btn-cancel {
+  padding: 0.65rem 1.25rem;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
+  color: var(--text-secondary, #475569);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bam-btn-cancel:hover {
+  background: var(--bg-primary, #f1f5f9);
+}
+
+.bam-btn-submit {
+  padding: 0.65rem 1.5rem;
+  background: var(--primary, #0284c7);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.15s;
+}
+
+.bam-btn-submit:hover:not(:disabled) {
+  background: var(--primary-hover, #0369a1);
+}
+
+.bam-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success view */
+.bam-success-view {
+  text-align: center;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bam-success-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bam-success-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+}
+
+.bam-success-details {
+  background: var(--bg-primary, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  padding: 1rem;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Mobile bottom sheet view */
+@media (max-width: 640px) {
+  .bam-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .bam-modal-card {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    max-height: 92vh;
+  }
+}

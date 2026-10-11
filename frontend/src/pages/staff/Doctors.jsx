@@ -28,6 +28,7 @@ import {
   MapPin,
 } from "lucide-react";
 import api from "../../services/api";
+import { COUNTRIES, getCountryByNameOrCode } from "../../utils/countries";
 import "./Doctors.css";
 
 const DOCTOR_TABS = [
@@ -92,6 +93,8 @@ export default function Doctors() {
     email: "",
     phone: "",
     city: "New Delhi",
+    country: "India",
+    country_code: "IN",
     license_number: "",
     experience_years: 10,
     consultation_fee: 800,
@@ -199,6 +202,8 @@ export default function Doctors() {
       email: doctor.email || "",
       phone: doctor.phone || "",
       city: doctor.city || "New Delhi",
+      country: doctor.country || "India",
+      country_code: doctor.country_code || "IN",
       license_number: doctor.license_number || "",
       experience_years: doctor.experience_years || 10,
       consultation_fee: doctor.consultation_fee || 800,
@@ -812,6 +817,33 @@ export default function Doctors() {
                     required
                   />
                   {formErrors.hospital_name && <span className="field-err">{formErrors.hospital_name}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label>Country (ISO 3166-1)</label>
+                  <select
+                    value={formData.country || "India"}
+                    onChange={(e) => {
+                      const cName = e.target.value;
+                      const cObj = getCountryByNameOrCode(cName);
+                      let newPhone = formData.phone;
+                      if (cObj && cObj.dial && (!formData.phone || formData.phone.startsWith("+"))) {
+                        newPhone = `${cObj.dial} `;
+                      }
+                      setFormData({
+                        ...formData,
+                        country: cName,
+                        country_code: cObj ? cObj.code : "IN",
+                        phone: newPhone
+                      });
+                    }}
+                  >
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.name}>
+                        {c.flag} {c.name} ({c.dial})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">

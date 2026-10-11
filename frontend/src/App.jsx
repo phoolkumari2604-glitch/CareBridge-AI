@@ -38,6 +38,7 @@ import AppLayout from "./layouts/DashboardLayout";
 // PATIENT PAGES
 // ==================================================
 import PatientDashboard from "./pages/patient/PatientDashboard";
+import PatientHospitals from "./pages/patient/PatientHospitals";
 import Doctors from "./pages/patient/Doctors";
 import Appointments from "./pages/patient/Appointments";
 import Approval from "./pages/patient/Approval";
@@ -121,7 +122,7 @@ function App() {
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
           <Route path="/patient/profile" element={<Profile />} />
           <Route path="/patient/settings" element={<Settings />} />
-          <Route path="/patient/hospitals" element={<HospitalDashboard />} />
+          <Route path="/patient/hospitals" element={<PatientHospitals />} />
           <Route path="/patient/doctors" element={<Doctors />} />
           <Route path="/patient/appointments" element={<Appointments />} />
           <Route path="/patient/approval" element={<Approval />} />
