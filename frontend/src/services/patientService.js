@@ -425,6 +425,25 @@ const patientService = {
     });
     return res.data;
   },
+
+  // Live Queue Enhanced Methods
+  async checkInQueue(appointmentId) {
+    const res = await api.post("/queue/check-in", { appointment_id: appointmentId });
+    return res.data;
+  },
+
+  async getLiveQueueState(appointmentId = null, doctorId = null) {
+    const params = {};
+    if (appointmentId) params.appointment_id = appointmentId;
+    if (doctorId) params.doctor_id = doctorId;
+    const res = await api.get("/queue/live-state", { params });
+    return res.data;
+  },
+
+  async staffQueueAction(action, tokenId, doctorId) {
+    const res = await api.post("/queue/staff-action", { action, token_id: tokenId, doctor_id: doctorId });
+    return res.data;
+  },
 };
 
 export { patientService };

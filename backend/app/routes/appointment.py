@@ -241,22 +241,33 @@ def get_appointments():
                 appt["patient_phone"] = pat.get("phone", "")
                 appt["patient_email"] = pat.get("email", "")
                 
-        if not appt.get("doctor_name") and appt.get("doctor_id"):
+        # Ensure doctor and specialty are fully resolved
+        doc = None
+        if appt.get("doctor_id"):
             doc = db.doctors.find_one({"_id": appt["doctor_id"]})
-            if doc:
-                appt["doctor_name"] = doc.get("name")
-                appt["specialty"] = doc.get("specialty")
+        if doc:
+            appt["doctor_name"] = doc.get("name") or appt.get("doctor_name", "Specialist Doctor")
+            appt["specialty"] = doc.get("specialty") or appt.get("specialty", "Medical Consultation")
+            appt["doctor_room"] = doc.get("room_number", "OPD-101")
+            appt["doctor_experience"] = doc.get("experience_years", 10)
+            if not appt.get("hospital_id") and doc.get("hospital_id"):
+                appt["hospital_id"] = doc["hospital_id"]
+            if not appt.get("hospital_name"):
                 appt["hospital_name"] = doc.get("hospital_name") or doc.get("hospital")
-            else:
-                appt["doctor_name"] = "CareBridge Specialist"
-                
-        if not appt.get("hospital_name") and appt.get("hospital_id"):
+
+        # Ensure hospital and its address are fully resolved
+        hosp = None
+        if appt.get("hospital_id"):
             hosp = db.hospitals.find_one({"_id": appt["hospital_id"]})
-            if hosp:
-                appt["hospital_name"] = hosp.get("name")
-            else:
-                appt["hospital_name"] = "CareBridge General Hospital"
-                
+        if hosp:
+            appt["hospital_name"] = hosp.get("name") or appt.get("hospital_name")
+            appt["hospital_address"] = hosp.get("address") or hosp.get("city") or "Facility Address"
+            appt["hospital_phone"] = hosp.get("phone") or "+91 40 2345 6789"
+            appt["hospital_city"] = hosp.get("city", "Hyderabad")
+        else:
+            appt["hospital_address"] = appt.get("hospital_address") or "Hospital Outpatient Department"
+            appt["hospital_phone"] = appt.get("hospital_phone") or "+91 40 2345 6789"
+
     serialized = serialize_doc(appointments)
     
     # Return structured pagination response
@@ -296,11 +307,23 @@ def get_appointment(appointment_id):
             appt["patient_phone"] = pat.get("phone")
             appt["patient_email"] = pat.get("email")
             
-    if not appt.get("doctor_name") and appt.get("doctor_id"):
+    if appt.get("doctor_id"):
         doc = db.doctors.find_one({"_id": appt["doctor_id"]})
         if doc:
-            appt["doctor_name"] = doc.get("name")
-            appt["specialty"] = doc.get("specialty")
+            appt["doctor_name"] = doc.get("name") or appt.get("doctor_name")
+            appt["specialty"] = doc.get("specialty") or appt.get("specialty")
+            appt["doctor_room"] = doc.get("room_number", "OPD-101")
+            appt["doctor_experience"] = doc.get("experience_years", 10)
+            if not appt.get("hospital_name"):
+                appt["hospital_name"] = doc.get("hospital_name") or doc.get("hospital")
+
+    if appt.get("hospital_id"):
+        hosp = db.hospitals.find_one({"_id": appt["hospital_id"]})
+        if hosp:
+            appt["hospital_name"] = hosp.get("name") or appt.get("hospital_name")
+            appt["hospital_address"] = hosp.get("address") or hosp.get("city") or "Facility Address"
+            appt["hospital_phone"] = hosp.get("phone") or "+91 40 2345 6789"
+            appt["hospital_city"] = hosp.get("city", "Hyderabad")
             
     return jsonify(serialize_doc(appt)), 200
 

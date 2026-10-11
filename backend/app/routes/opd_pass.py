@@ -19,7 +19,15 @@ def create_opd_pass(appointment_id):
     appointment = db.appointments.find_one({"_id": ObjectId(appointment_id)})
     if not appointment:
         return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
-        
+
+    appt_status = (appointment.get("status") or appointment.get("approval_status") or "").upper()
+    if appt_status not in ["APPROVED", "CONFIRMED"]:
+        return jsonify({
+            "error": "Not Permitted",
+            "detail": "OPD Pass can only be issued for Approved or Confirmed appointments.",
+            "status": "AWAITING_APPROVAL"
+        }), 400
+
     existing_pass = db.opd_passes.find_one({"appointment_id": ObjectId(appointment_id)})
     if existing_pass:
         return jsonify({
@@ -28,21 +36,57 @@ def create_opd_pass(appointment_id):
             "pass_number": existing_pass.get("pass_number"),
             "status": existing_pass.get("status", "ACTIVE")
         }), 200
-        
-    pass_number = f"OPD-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}"
+
+    # Resolve doctor
+    doc = None
+    if appointment.get("doctor_id"):
+        doc = db.doctors.find_one({"_id": appointment["doctor_id"]})
+
+    # Resolve hospital
+    hosp = None
+    hosp_id = appointment.get("hospital_id") or (doc.get("hospital_id") if doc else None)
+    if hosp_id:
+        hosp = db.hospitals.find_one({"_id": hosp_id})
+
+    # Resolve patient & ensure 6-digit patient ID
+    patient = None
+    if appointment.get("patient_id"):
+        patient = db.patients.find_one({"_id": appointment["patient_id"]})
+    
+    # Generate 6-digit numeric patient ID
+    pat_num_id = str(patient.get("patient_numeric_id") or patient.get("numeric_id") or "") if patient else ""
+    if not pat_num_id or len(pat_num_id) != 6:
+        # Generate or derive a consistent 6-digit number
+        pat_num_id = str(int(str(appointment.get("patient_id"))[-6:], 16) % 900000 + 100000)
+        if patient:
+            db.patients.update_one({"_id": patient["_id"]}, {"$set": {"patient_numeric_id": pat_num_id}})
+
+    date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+    random_hex = secrets.token_hex(3).upper()
+    pass_number = f"OPD-{date_str}-{random_hex}"
+    
+    token_payload = f"{pass_number}:{pat_num_id}:{date_str}"
+    token_hash = hashlib.sha256(token_payload.encode()).hexdigest()
+
     opd_pass = {
         "appointment_id": ObjectId(appointment_id),
         "patient_id": appointment["patient_id"],
-        "hospital_id": appointment.get("hospital_id"),
-        "doctor_id": appointment.get("doctor_id"),
-        "doctor_name": appointment.get("doctor_name"),
-        "hospital_name": appointment.get("hospital_name"),
-        "patient_name": appointment.get("patient_name"),
+        "patient_numeric_id": pat_num_id,
+        "hospital_id": hosp["_id"] if hosp else (doc.get("hospital_id") if doc else None),
+        "doctor_id": doc["_id"] if doc else appointment.get("doctor_id"),
+        "doctor_name": doc.get("name") if doc else appointment.get("doctor_name", "Clinical Specialist"),
+        "specialty": doc.get("specialty") if doc else appointment.get("specialty", "Clinical Consultation"),
+        "hospital_name": hosp.get("name") if hosp else (doc.get("hospital_name") if doc else "CareBridge General Hospital"),
+        "hospital_address": hosp.get("address") if hosp else (doc.get("city") if doc else "Hospital OPD Wing"),
+        "hospital_phone": hosp.get("phone") if hosp else "+91 40 2345 6789",
+        "patient_name": patient.get("name") if patient else appointment.get("patient_name", "Registered Patient"),
         "appointment_date": appointment.get("appointment_date"),
         "appointment_time": appointment.get("appointment_time"),
-        "reason": appointment.get("reason"),
+        "reason": appointment.get("reason", "General Consultation"),
         "pass_number": pass_number,
+        "token_hash": token_hash,
         "status": "ACTIVE",
+        "issued_at": datetime.now(timezone.utc),
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc),
     }
@@ -51,7 +95,8 @@ def create_opd_pass(appointment_id):
         "message": "Digital OPD pass created successfully",
         "opd_pass_id": str(result.inserted_id),
         "pass_number": pass_number,
-        "status": "ACTIVE"
+        "status": "ACTIVE",
+        "pass": serialize_doc(opd_pass)
     }), 201
 
 @opd_pass_bp.route("", methods=["GET"], strict_slashes=False)
