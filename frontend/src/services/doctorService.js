@@ -241,6 +241,53 @@ export const doctorService = {
     }
   },
 
+  async acknowledgeAlert(alertId, note = "", patientId = null) {
+    try {
+      const response = await api.post(`/health-alerts/${alertId}/acknowledge`, {
+        note,
+        patient_id: patientId,
+      });
+      return response.data;
+    } catch (error) {
+      // Fallback to PUT /health-alerts/:id
+      const fallbackRes = await api.put(`/health-alerts/${alertId}`, {
+        acknowledged: true,
+        note,
+        patient_id: patientId,
+      });
+      return fallbackRes.data;
+    }
+  },
+
+  async acknowledgeAllAlerts(patientIds = []) {
+    try {
+      const response = await api.post("/health-alerts/acknowledge-all", {
+        patient_ids: patientIds,
+      });
+      return response.data;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  async escalateAlert(alertId, reason = "") {
+    try {
+      const response = await api.post(`/health-alerts/${alertId}/escalate`, { reason });
+      return response.data;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  async resolveAlert(alertId, note = "") {
+    try {
+      const response = await api.post(`/health-alerts/${alertId}/resolve`, { note });
+      return response.data;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
   // ------------------------------------------------------------
   // AI ASSISTANT
   // ------------------------------------------------------------

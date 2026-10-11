@@ -1,11 +1,283 @@
 from datetime import datetime, timezone
-from flask import Blueprint, jsonify, g
+from flask import Blueprint, jsonify, request, g
 from bson import ObjectId
 from app.core.database import get_database
 from app.utils.decorators import token_required
-from app.utils.helpers import is_valid_object_id
+from app.utils.helpers import is_valid_object_id, serialize_doc
 
 health_alerts_bp = Blueprint("health_alerts", __name__)
+
+def evaluate_vitals_telemetry(vitals_list, patient_id_str):
+    """
+    Evaluates vitals into specific abnormal telemetry alerts with clinical chips,
+    normal ranges, severity levels, and specific messages.
+    """
+    alerts = []
+    if not vitals_list:
+        return alerts
+
+    for idx, vital in enumerate(vitals_list):
+        vital_id = str(vital.get("_id", ""))
+        rec = vital.get("recorded_at") or vital.get("created_at")
+        ts = rec.isoformat() if hasattr(rec, "isoformat") else datetime.now(timezone.utc).isoformat()
+        prev_vital = vitals_list[idx + 1] if idx + 1 < len(vitals_list) else None
+
+        hr = vital.get("heart_rate")
+        sys_bp = vital.get("systolic_bp")
+        dia_bp = vital.get("diastolic_bp")
+        spo2 = vital.get("spo2")
+        temp = vital.get("temperature")
+        sugar = vital.get("blood_sugar")
+
+        # SpO2 Evaluation
+        if spo2 is not None:
+            if spo2 < 90:
+                alerts.append({
+                    "alert_id": f"{vital_id}_spo2",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "spo2",
+                    "vital_label": "SpO₂",
+                    "value": f"{spo2}%",
+                    "normal_range": "95–100%",
+                    "severity": "CRITICAL",
+                    "message": f"SpO₂ {spo2}% (normal 95–100%) – Critical Hypoxia",
+                    "urgency": "Stat O₂ administration & airway evaluation required",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif spo2 < 95:
+                alerts.append({
+                    "alert_id": f"{vital_id}_spo2",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "spo2",
+                    "vital_label": "SpO₂",
+                    "value": f"{spo2}%",
+                    "normal_range": "95–100%",
+                    "severity": "WARNING",
+                    "message": f"SpO₂ {spo2}% (normal 95–100%) – Mild Hypoxemia",
+                    "urgency": "Monitor respiratory status and oxygenation trend",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+
+        # Heart Rate Evaluation
+        if hr is not None:
+            if hr > 130:
+                alerts.append({
+                    "alert_id": f"{vital_id}_hr",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "heart_rate",
+                    "vital_label": "Heart rate",
+                    "value": f"{hr} bpm",
+                    "normal_range": "60–100 bpm",
+                    "severity": "CRITICAL",
+                    "message": f"Heart rate {hr} bpm (normal 60–100) – Severe Tachycardia",
+                    "urgency": "Assess ECG, arrhythmia, hemodynamic stability",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif hr > 100:
+                alerts.append({
+                    "alert_id": f"{vital_id}_hr",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "heart_rate",
+                    "vital_label": "Heart rate",
+                    "value": f"{hr} bpm",
+                    "normal_range": "60–100 bpm",
+                    "severity": "WARNING",
+                    "message": f"Heart rate {hr} bpm (normal 60–100) – High",
+                    "urgency": "Evaluate hydration, fever, anxiety, or pain",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif hr < 50:
+                alerts.append({
+                    "alert_id": f"{vital_id}_hr",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "heart_rate",
+                    "vital_label": "Heart rate",
+                    "value": f"{hr} bpm",
+                    "normal_range": "60–100 bpm",
+                    "severity": "CRITICAL",
+                    "message": f"Heart rate {hr} bpm (normal 60–100) – Severe Bradycardia",
+                    "urgency": "Assess perfusion, AV block, and medication effect",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+
+        # Blood Pressure Evaluation
+        if sys_bp is not None:
+            bp_str = f"{sys_bp}/{dia_bp}" if dia_bp is not None else f"{sys_bp}"
+            if sys_bp >= 180 or (dia_bp is not None and dia_bp >= 120):
+                alerts.append({
+                    "alert_id": f"{vital_id}_bp",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "bp",
+                    "vital_label": "Blood Pressure",
+                    "value": f"{bp_str} mmHg",
+                    "normal_range": "120/80 mmHg",
+                    "severity": "CRITICAL",
+                    "message": f"BP {bp_str} mmHg (normal 120/80) – Stage 2 Crisis",
+                    "urgency": "Immediate antihypertensive management and organ assessment",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif sys_bp >= 140 or (dia_bp is not None and dia_bp >= 90):
+                alerts.append({
+                    "alert_id": f"{vital_id}_bp",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "bp",
+                    "vital_label": "Blood Pressure",
+                    "value": f"{bp_str} mmHg",
+                    "normal_range": "120/80 mmHg",
+                    "severity": "WARNING",
+                    "message": f"BP {bp_str} mmHg (normal 120/80) – High",
+                    "urgency": "Repeat manual blood pressure reading; check adherence",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif sys_bp < 90:
+                alerts.append({
+                    "alert_id": f"{vital_id}_bp",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "bp",
+                    "vital_label": "Blood Pressure",
+                    "value": f"{bp_str} mmHg",
+                    "normal_range": "120/80 mmHg",
+                    "severity": "CRITICAL",
+                    "message": f"BP {bp_str} mmHg (normal 120/80) – Hypotension",
+                    "urgency": "Evaluate volume status, sepsis, or shock",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+
+        # Temperature Evaluation
+        if temp is not None:
+            t_num = float(temp)
+            if t_num > 50:
+                t_c = round((t_num - 32) * 5 / 9, 1)
+            else:
+                t_c = t_num
+
+            if t_c >= 39.5:
+                alerts.append({
+                    "alert_id": f"{vital_id}_temp",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "temp",
+                    "vital_label": "Temperature",
+                    "value": f"{t_c} °C",
+                    "normal_range": "36.5–37.5 °C",
+                    "severity": "CRITICAL",
+                    "message": f"Temp {t_c} °C – High Fever / Pyrexia",
+                    "urgency": "Antipyretics, infectious workup, blood cultures indicated",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif t_c >= 38.0:
+                alerts.append({
+                    "alert_id": f"{vital_id}_temp",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "temp",
+                    "vital_label": "Temperature",
+                    "value": f"{t_c} °C",
+                    "normal_range": "36.5–37.5 °C",
+                    "severity": "WARNING",
+                    "message": f"Temp {t_c} °C – Elevated Temperature",
+                    "urgency": "Monitor temperature trajectory and clinical symptoms",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif t_c < 35.5:
+                alerts.append({
+                    "alert_id": f"{vital_id}_temp",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "temp",
+                    "vital_label": "Temperature",
+                    "value": f"{t_c} °C",
+                    "normal_range": "36.5–37.5 °C",
+                    "severity": "CRITICAL",
+                    "message": f"Temp {t_c} °C – Hypothermia",
+                    "urgency": "Active warming measures indicated",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+
+        # Blood Sugar Evaluation
+        if sugar is not None:
+            s_num = float(sugar)
+            if s_num < 54:
+                alerts.append({
+                    "alert_id": f"{vital_id}_sugar",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "blood_sugar",
+                    "vital_label": "Blood Sugar",
+                    "value": f"{sugar} mg/dL",
+                    "normal_range": "70–140 mg/dL",
+                    "severity": "CRITICAL",
+                    "message": f"Blood sugar {sugar} mg/dL (normal 70–140) – Severe Hypoglycemia",
+                    "urgency": "Stat glucose administration / IV D50W / glucagon required",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif s_num < 70:
+                alerts.append({
+                    "alert_id": f"{vital_id}_sugar",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "blood_sugar",
+                    "vital_label": "Blood Sugar",
+                    "value": f"{sugar} mg/dL",
+                    "normal_range": "70–140 mg/dL",
+                    "severity": "WARNING",
+                    "message": f"Blood sugar {sugar} mg/dL (normal 70–140) – Low",
+                    "urgency": "Provide fast-acting carbohydrate oral intake",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif s_num >= 250:
+                alerts.append({
+                    "alert_id": f"{vital_id}_sugar",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "blood_sugar",
+                    "vital_label": "Blood Sugar",
+                    "value": f"{sugar} mg/dL",
+                    "normal_range": "70–140 mg/dL",
+                    "severity": "CRITICAL",
+                    "message": f"Blood sugar {sugar} mg/dL (normal 70–140) – Critical Hyperglycemia",
+                    "urgency": "Check urine/blood ketones; evaluate for DKA or HHS",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+            elif s_num > 180:
+                alerts.append({
+                    "alert_id": f"{vital_id}_sugar",
+                    "vital_id": vital_id,
+                    "patient_id": patient_id_str,
+                    "vital_key": "blood_sugar",
+                    "vital_label": "Blood Sugar",
+                    "value": f"{sugar} mg/dL",
+                    "normal_range": "70–140 mg/dL",
+                    "severity": "WARNING",
+                    "message": f"Blood sugar {sugar} mg/dL (normal 70–140) – High",
+                    "urgency": "Review diabetic regimen, hydration, and nutritional intake",
+                    "recorded_at": ts,
+                    "created_at": ts,
+                })
+
+    return alerts
 
 @health_alerts_bp.route("/<patient_id>", methods=["GET"], strict_slashes=False)
 @token_required
@@ -13,55 +285,22 @@ def get_health_alerts(patient_id):
     db = get_database()
     if not is_valid_object_id(patient_id):
         return jsonify({"error": "Validation Error", "detail": "Invalid patient ID"}), 400
-        
-    vitals = list(db.vital_signs.find({"patient_id": ObjectId(patient_id)}).sort("recorded_at", -1))
-    alerts = []
+
+    pid = ObjectId(patient_id)
+    vitals = list(db.vital_signs.find({"patient_id": pid}).sort("recorded_at", -1))
     
-    for vital in vitals:
-        vital_id = str(vital["_id"])
-        recorded_at = vital.get("recorded_at")
-        ts = recorded_at.isoformat() if hasattr(recorded_at, "isoformat") else datetime.now(timezone.utc).isoformat()
-        
-        def add_alert(alert_type, severity, message):
-            alerts.append({
-                "patient_id": patient_id,
-                "alert_type": alert_type,
-                "severity": severity,
-                "message": message,
-                "vital_id": vital_id,
-                "created_at": ts,
-            })
-            
-        hr = vital.get("heart_rate")
-        if hr is not None:
-            if hr < 50:
-                add_alert("HEART_RATE", "HIGH", "Bradycardia detected: Heart rate is below 50 BPM.")
-            elif hr > 120:
-                add_alert("HEART_RATE", "HIGH", "Tachycardia detected: Heart rate is above 120 BPM.")
-                
-        sys = vital.get("systolic_bp")
-        dia = vital.get("diastolic_bp")
-        if sys is not None and sys >= 140:
-            add_alert("BLOOD_PRESSURE", "HIGH", "High systolic blood pressure (>= 140 mmHg).")
-        if dia is not None and dia >= 90:
-            add_alert("BLOOD_PRESSURE", "HIGH", "High diastolic blood pressure (>= 90 mmHg).")
-            
-        spo2 = vital.get("spo2")
-        if spo2 is not None and spo2 < 94:
-            add_alert("SPO2", "CRITICAL" if spo2 < 90 else "HIGH", "Low oxygen saturation (SpO2 < 94%).")
-            
-        temp = vital.get("temperature")
-        if temp is not None and temp >= 38.0:
-            add_alert("TEMPERATURE", "HIGH", "Fever detected: Body temperature is >= 38.0°C.")
-            
-        sugar = vital.get("blood_sugar")
-        if sugar is not None:
-            if sugar < 70:
-                add_alert("BLOOD_SUGAR", "HIGH", "Hypoglycemia: Blood sugar is below 70 mg/dL.")
-            elif sugar > 200:
-                add_alert("BLOOD_SUGAR", "HIGH", "Hyperglycemia: Blood sugar is above 200 mg/dL.")
-                
-    return jsonify(alerts), 200
+    # 1. Telemetry generated alerts
+    telemetry_alerts = evaluate_vitals_telemetry(vitals, patient_id)
+
+    # 2. Database persisted alerts
+    db_alerts_cursor = db.health_alerts.find({"patient_id": pid}).sort("created_at", -1)
+    db_alerts = []
+    for doc in db_alerts_cursor:
+        doc_serialized = serialize_doc(doc)
+        db_alerts.append(doc_serialized)
+
+    # Merge or return telemetry alerts
+    return jsonify(telemetry_alerts + db_alerts), 200
 
 @health_alerts_bp.route("/<patient_id>/summary", methods=["GET"], strict_slashes=False)
 @token_required
@@ -69,40 +308,203 @@ def get_health_alert_summary(patient_id):
     db = get_database()
     if not is_valid_object_id(patient_id):
         return jsonify({"error": "Validation Error", "detail": "Invalid patient ID"}), 400
-        
-    vitals = list(db.vital_signs.find({"patient_id": ObjectId(patient_id)}).sort("recorded_at", -1))
-    total_alerts = 0
-    high_alerts = 0
-    
-    for vital in vitals:
-        hr = vital.get("heart_rate")
-        sys = vital.get("systolic_bp")
-        dia = vital.get("diastolic_bp")
-        spo2 = vital.get("spo2")
-        temp = vital.get("temperature")
-        sugar = vital.get("blood_sugar")
-        
-        if hr is not None and (hr < 50 or hr > 120):
-            total_alerts += 1; high_alerts += 1
-        if sys is not None and sys >= 140:
-            total_alerts += 1; high_alerts += 1
-        if dia is not None and dia >= 90:
-            total_alerts += 1; high_alerts += 1
-        if spo2 is not None and spo2 < 94:
-            total_alerts += 1; high_alerts += 1
-        if temp is not None and temp >= 38.0:
-            total_alerts += 1; high_alerts += 1
-        if sugar is not None and (sugar < 70 or sugar > 200):
-            total_alerts += 1; high_alerts += 1
-            
+
+    pid = ObjectId(patient_id)
+    vitals = list(db.vital_signs.find({"patient_id": pid}).sort("recorded_at", -1))
+    telemetry_alerts = evaluate_vitals_telemetry(vitals, patient_id)
+
+    db_unack = list(db.health_alerts.find({
+        "patient_id": pid,
+        "is_acknowledged": {"$ne": True}
+    }))
+
+    total_alerts = len(telemetry_alerts) + len(db_unack)
+    high_alerts = sum(1 for a in telemetry_alerts if a.get("severity") in ["CRITICAL", "HIGH"]) +                   sum(1 for a in db_unack if str(a.get("severity", "")).upper() in ["CRITICAL", "HIGH"])
+
+    # Generate specific clinical reason summary
+    if telemetry_alerts:
+        specific_messages = [a["message"] for a in telemetry_alerts[:2]]
+        summary_message = " | ".join(specific_messages)
+    elif db_unack:
+        summary_message = db_unack[0].get("message", "Physiological anomaly flagged")
+    else:
+        summary_message = "All vital signs are currently within safe adult physiological parameters."
+
     return jsonify({
         "patient_id": patient_id,
         "total_alerts": total_alerts,
         "high_alerts": high_alerts,
         "status": "ALERT" if total_alerts > 0 else "NORMAL",
-        "message": (
-            "Potentially concerning vital readings detected. Please review them with a doctor."
-            if total_alerts > 0
-            else "All vital signs are currently within safe parameters."
+        "message": summary_message,
+        "abnormal_chips": telemetry_alerts[:4]
+    }), 200
+
+@health_alerts_bp.route("/<alert_id>/acknowledge", methods=["POST"], strict_slashes=False)
+@health_alerts_bp.route("/<alert_id>", methods=["PUT"], strict_slashes=False)
+@token_required
+def acknowledge_alert(alert_id):
+    db = get_database()
+    user = g.current_user or {}
+    doctor_name = user.get("name") or user.get("full_name") or f"Dr. {user.get('email', 'Physician').split('@')[0]}"
+    doctor_id = str(user.get("_id", ""))
+
+    payload = request.get_json(silent=True) or {}
+    note = payload.get("note", "").strip()
+    now_utc = datetime.now(timezone.utc)
+
+    # 1. Check if alert_id is a valid MongoDB ObjectId in db.health_alerts
+    if is_valid_object_id(alert_id):
+        res = db.health_alerts.update_one(
+            {"_id": ObjectId(alert_id)},
+            {"$set": {
+                "is_acknowledged": True,
+                "acknowledged_by": doctor_name,
+                "acknowledged_by_id": doctor_id,
+                "acknowledged_at": now_utc,
+                "doctor_note": note,
+                "status": "ACKNOWLEDGED"
+            }}
         )
+        if res.matched_count > 0:
+            return jsonify({
+                "success": True,
+                "message": f"Alert acknowledged by {doctor_name}",
+                "acknowledged_by": doctor_name,
+                "acknowledged_at": now_utc.isoformat(),
+                "note": note
+            }), 200
+
+    # 2. If alert_id is a composite or patientId (e.g. from telemetry evaluation), record in collection
+    patient_id_candidate = payload.get("patient_id")
+    if not patient_id_candidate and is_valid_object_id(alert_id):
+        patient_id_candidate = alert_id
+
+    pid_obj = ObjectId(patient_id_candidate) if (patient_id_candidate and is_valid_object_id(patient_id_candidate)) else None
+
+    # Upsert or record acknowledgment
+    ack_doc = {
+        "alert_key": alert_id,
+        "patient_id": pid_obj,
+        "is_acknowledged": True,
+        "acknowledged_by": doctor_name,
+        "acknowledged_by_id": doctor_id,
+        "acknowledged_at": now_utc,
+        "doctor_note": note,
+        "status": "ACKNOWLEDGED",
+        "created_at": now_utc
+    }
+    db.health_alerts.update_one(
+        {"alert_key": alert_id},
+        {"$set": ack_doc},
+        upsert=True
+    )
+
+    return jsonify({
+        "success": True,
+        "message": f"Alert acknowledged by {doctor_name}",
+        "acknowledged_by": doctor_name,
+        "acknowledged_at": now_utc.isoformat(),
+        "note": note
+    }), 200
+
+@health_alerts_bp.route("/acknowledge-all", methods=["POST"], strict_slashes=False)
+@token_required
+def acknowledge_all_alerts():
+    db = get_database()
+    user = g.current_user or {}
+    doctor_name = user.get("name") or user.get("full_name") or f"Dr. {user.get('email', 'Physician').split('@')[0]}"
+    doctor_id = str(user.get("_id", ""))
+    now_utc = datetime.now(timezone.utc)
+
+    payload = request.get_json(silent=True) or {}
+    patient_ids = payload.get("patient_ids", [])
+
+    query = {"is_acknowledged": {"$ne": True}}
+    if patient_ids:
+        valid_objs = [ObjectId(p) for p in patient_ids if is_valid_object_id(p)]
+        if valid_objs:
+            query["patient_id"] = {"$in": valid_objs}
+
+    result = db.health_alerts.update_many(
+        query,
+        {"$set": {
+            "is_acknowledged": True,
+            "acknowledged_by": doctor_name,
+            "acknowledged_by_id": doctor_id,
+            "acknowledged_at": now_utc,
+            "status": "ACKNOWLEDGED"
+        }}
+    )
+
+    return jsonify({
+        "success": True,
+        "message": f"Acknowledged {result.modified_count} active alerts",
+        "acknowledged_count": result.modified_count,
+        "acknowledged_by": doctor_name,
+        "acknowledged_at": now_utc.isoformat()
+    }), 200
+
+@health_alerts_bp.route("/<alert_id>/escalate", methods=["POST"], strict_slashes=False)
+@token_required
+def escalate_alert(alert_id):
+    db = get_database()
+    user = g.current_user or {}
+    doctor_name = user.get("name") or user.get("full_name") or f"Dr. {user.get('email', 'Physician').split('@')[0]}"
+    doctor_id = str(user.get("_id", ""))
+    now_utc = datetime.now(timezone.utc)
+
+    payload = request.get_json(silent=True) or {}
+    escalation_reason = payload.get("reason", "Escalated for immediate clinical team review").strip()
+
+    if is_valid_object_id(alert_id):
+        db.health_alerts.update_one(
+            {"_id": ObjectId(alert_id)},
+            {"$set": {
+                "status": "ESCALATED",
+                "escalated_by": doctor_name,
+                "escalated_by_id": doctor_id,
+                "escalated_at": now_utc,
+                "escalation_reason": escalation_reason
+            }}
+        )
+
+    return jsonify({
+        "success": True,
+        "message": f"Alert escalated by {doctor_name}",
+        "escalated_by": doctor_name,
+        "escalated_at": now_utc.isoformat(),
+        "reason": escalation_reason
+    }), 200
+
+@health_alerts_bp.route("/<alert_id>/resolve", methods=["POST"], strict_slashes=False)
+@token_required
+def resolve_alert(alert_id):
+    db = get_database()
+    user = g.current_user or {}
+    doctor_name = user.get("name") or user.get("full_name") or f"Dr. {user.get('email', 'Physician').split('@')[0]}"
+    doctor_id = str(user.get("_id", ""))
+    now_utc = datetime.now(timezone.utc)
+
+    payload = request.get_json(silent=True) or {}
+    resolution_note = payload.get("note", "Resolved after bedside review and stabilization").strip()
+
+    if is_valid_object_id(alert_id):
+        db.health_alerts.update_one(
+            {"_id": ObjectId(alert_id)},
+            {"$set": {
+                "status": "RESOLVED",
+                "resolved_by": doctor_name,
+                "resolved_by_id": doctor_id,
+                "resolved_at": now_utc,
+                "resolution_note": resolution_note,
+                "is_acknowledged": True
+            }}
+        )
+
+    return jsonify({
+        "success": True,
+        "message": f"Alert resolved by {doctor_name}",
+        "resolved_by": doctor_name,
+        "resolved_at": now_utc.isoformat(),
+        "note": resolution_note
     }), 200

@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import doctorService from "../../services/doctorService";
+import ActivePhysiologicalAlerts from "../../components/doctor/alerts/ActivePhysiologicalAlerts";
 import "./DoctorDashboard.css";
 
 function DoctorDashboard() {
@@ -649,84 +650,23 @@ function DoctorDashboard() {
           {/* ============================================================
               3. HIGH-PRIORITY PHYSIOLOGICAL ALERTS STREAM (IF ANY)
           ============================================================ */}
-          {criticalPatients.length > 0 && (
-            <section className="critical-alerts-section">
-              <div className="critical-section-header">
-                <div className="header-title-flex">
-                  <ShieldAlert size={18} className="pulse-red" />
-                  <h3>Active High-Priority Physiological Alerts</h3>
-                  <span className="alert-count-pill">
-                    {criticalPatients.filter((p) => !acknowledgedAlertIds.has(p._id || p.id)).length} Actionable
-                  </span>
-                </div>
-                <Link to="/doctor/notifications" className="all-alerts-link">
-                  <span>View All Notifications</span>
-                  <ChevronRight size={15} />
-                </Link>
-              </div>
-
-              <div className="critical-alerts-list">
-                {criticalPatients.map((pat) => {
-                  const pid = pat._id || pat.id;
-                  const isAck = acknowledgedAlertIds.has(pid);
-                  const vit = patientVitalsMap[pid];
-                  const summary = patientAlertsMap[pid];
-
-                  if (isAck) return null;
-
-                  return (
-                    <div key={pid} className="critical-alert-card">
-                      <div className="alert-badge-meta">
-                        <span className="severity-pill critical">CRITICAL TELEMETRY</span>
-                        <strong className="patient-target-name">{pat.name || "Patient"}</strong>
-                        <span className="meta-tag">ID: {pat.patient_code || String(pat.patientId || "").replace("PT-", "") || pid.slice(-6)}</span>
-                        {pat.phone && (
-                          <span className="meta-tag">
-                            <Phone size={11} /> {pat.phone}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="alert-content-body">
-                        <strong>Reason Flagged: </strong>
-                        <span>
-                          {summary?.message ||
-                            `SpO₂ ${vit?.spo2 || 92}%, HR ${vit?.heart_rate || 112} bpm, BP ${vit?.systolic_bp || 150}/${vit?.diastolic_bp || 96} mmHg`}
-                        </span>
-                      </div>
-
-                      <div className="alert-actions-row">
-                        <button
-                          className="btn-alert-action ack"
-                          onClick={() => handleAcknowledgeAlert(pid)}
-                        >
-                          <CheckCircle2 size={14} />
-                          <span>Acknowledge</span>
-                        </button>
-                        <button
-                          className="btn-alert-action triage"
-                          onClick={() => navigate(`/doctor/ai-assistant?patientId=${pid}`)}
-                        >
-                          <Sparkles size={14} />
-                          <span>AI Triage Note</span>
-                        </button>
-                        <button
-                          className="btn-alert-action view"
-                          onClick={() => {
-                            setFocusedPatientId(pid);
-                            window.scrollTo({ top: 380, behavior: "smooth" });
-                          }}
-                        >
-                          <Activity size={14} />
-                          <span>Inspect Patient</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
+          <ActivePhysiologicalAlerts
+            criticalPatients={criticalPatients}
+            patientVitalsMap={patientVitalsMap}
+            patientVitalsHistoryMap={patientVitalsHistoryMap}
+            patientAlertsMap={patientAlertsMap}
+            onInspectPatient={(pid, pat) => {
+              setFocusedPatientId(pid);
+              // Smooth scroll to the Patient Monitoring Roster & Dossier
+              const rosterElem = document.querySelector(".patient-selector-card") || document.querySelector(".dashboard-workbench-layout");
+              if (rosterElem) {
+                rosterElem.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }}
+            onAlertAcknowledged={(pid) => {
+              setAcknowledgedAlertIds((prev) => new Set([...prev, pid]));
+            }}
+          />
 
           {/* ============================================================
               4. MAIN CLINICAL SPLIT WORKBENCH (IMAGE 1 + IMAGE 2 COMBINED)

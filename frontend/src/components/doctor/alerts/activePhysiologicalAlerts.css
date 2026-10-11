@@ -1,0 +1,750 @@
+/* ============================================================
+   ACTIVE HIGH-PRIORITY PHYSIOLOGICAL ALERTS PANEL
+   Doctor-First Emergency Telemetry Surveillance
+   ============================================================ */
+
+.active-physiological-alerts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Pulsing Red Border Container */
+.critical-alerts-section-enhanced {
+  background: var(--bg-card, #ffffff);
+  border: 2px solid #ef4444;
+  border-radius: 16px;
+  padding: 1.15rem 1.4rem;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+@keyframes pulseBorderRed {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45);
+    border-color: #ef4444;
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    border-color: #b91c1c;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    border-color: #ef4444;
+  }
+}
+
+.critical-alerts-section-enhanced.pulse-active {
+  animation: pulseBorderRed 2.2s infinite ease-in-out;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .critical-alerts-section-enhanced.pulse-active {
+    animation: none;
+    border-color: #dc2626;
+  }
+}
+
+/* Section Header */
+.alerts-enhanced-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color, #fee2e2);
+}
+
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.pulse-alarm-icon {
+  color: #dc2626;
+  animation: alarmWiggle 2s infinite ease-in-out;
+}
+
+@keyframes alarmWiggle {
+  0%, 100% { transform: scale(1); }
+  10%, 30% { transform: scale(1.15) rotate(-6deg); }
+  20%, 40% { transform: scale(1.15) rotate(6deg); }
+  50% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-alarm-icon {
+    animation: none;
+  }
+}
+
+.alerts-enhanced-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.01em;
+}
+
+.alert-counter-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+.header-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-audio-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #334155);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-audio-toggle:hover {
+  background: #f8fafc;
+}
+
+.btn-audio-toggle.muted {
+  color: #94a3b8;
+  border-color: #cbd5e1;
+}
+
+.btn-ack-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-ack-all:hover {
+  background: #d1fae5;
+}
+
+.btn-expand-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary, #0284c7);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+}
+
+.btn-expand-all:hover {
+  background: rgba(2, 132, 199, 0.08);
+}
+
+/* Audio Permission Banner */
+.audio-permission-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: #eff6ff;
+  border: 1px dashed #93c5fd;
+  color: #1e40af;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.btn-banner-action {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Alerts List */
+.critical-alerts-list-enhanced {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Alert Card */
+.alert-card-enhanced {
+  background: #fffafa;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 1.05rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: all 0.15s ease;
+}
+
+.alert-card-enhanced:hover {
+  border-color: #f87171;
+  background: #fff5f5;
+}
+
+.alert-card-enhanced.acknowledged-state {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  opacity: 0.85;
+}
+
+/* Card Top Row */
+.alert-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.patient-badge-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.severity-pill-badge {
+  font-size: 0.68rem;
+  font-weight: 850;
+  padding: 0.22rem 0.55rem;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.severity-pill-badge.critical {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.severity-pill-badge.warning {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.patient-display-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+}
+
+.patient-code-chip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: var(--text-primary, #475569);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.patient-phone-chip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: var(--text-primary, #64748b);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.alert-timestamp-relative {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Abnormal Vital Chips Grid */
+.abnormal-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.vital-reading-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  transition: transform 0.1s ease;
+}
+
+.vital-reading-chip:hover {
+  transform: translateY(-1px);
+}
+
+.vital-reading-chip.critical {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.vital-reading-chip.warning {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.chip-vital-name {
+  font-weight: 800;
+}
+
+.chip-vital-value {
+  font-weight: 900;
+}
+
+.chip-vital-range {
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.chip-trend-arrow {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chip-trend-arrow.rising {
+  color: #dc2626;
+}
+
+.chip-trend-arrow.falling {
+  color: #2563eb;
+}
+
+.chip-time-tag {
+  font-size: 0.68rem;
+  opacity: 0.75;
+  margin-left: 0.2rem;
+}
+
+/* Clinical Reason Text */
+.alert-clinical-reason {
+  font-size: 0.86rem;
+  color: var(--text-primary, #7f1d1d);
+  line-height: 1.45;
+  background: rgba(254, 226, 226, 0.4);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #dc2626;
+}
+
+.reason-lead-label {
+  font-weight: 800;
+  color: #991b1b;
+}
+
+/* Card Actions Row */
+.alert-actions-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.btn-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 750;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.btn-card-action.btn-ack {
+  background: #ffffff;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.btn-card-action.btn-ack:hover {
+  background: #ecfdf5;
+}
+
+.btn-card-action.btn-triage {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.btn-card-action.btn-triage:hover {
+  background: #dbeafe;
+}
+
+.btn-card-action.btn-inspect {
+  background: var(--primary, #0284c7);
+  color: #ffffff;
+}
+
+.btn-card-action.btn-inspect:hover {
+  background: #0369a1;
+}
+
+.ack-audit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+}
+
+/* Collapsible "N More Active Alerts" Strip */
+.more-alerts-expander {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px dashed var(--border-color, #cbd5e1);
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary, #475569);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.more-alerts-expander:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+/* ============================================================
+   AI CLINICAL TRIAGE NOTE SIDE DRAWER
+   ============================================================ */
+
+.triage-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 1050;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeInBackdrop 0.2s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.triage-drawer-panel {
+  width: 100%;
+  max-width: 580px;
+  height: 100%;
+  background: var(--bg-card, #ffffff);
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  animation: slideDrawerIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDrawerIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.triage-drawer-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+}
+
+.drawer-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.drawer-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawer-header-left h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+}
+
+.drawer-header-left p {
+  margin: 0.15rem 0 0 0;
+  font-size: 0.78rem;
+  color: var(--text-primary, #64748b);
+}
+
+.btn-drawer-close {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-drawer-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.triage-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Patient Summary Strip in Drawer */
+.triage-patient-summary-strip {
+  background: #f8fafc;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.summary-strip-name {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+}
+
+.summary-strip-meta {
+  font-size: 0.75rem;
+  color: var(--text-primary, #64748b);
+  display: inline-flex;
+  gap: 0.4rem;
+}
+
+/* Clinical Triage Note Card */
+.triage-note-document {
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--text-primary, #1e293b);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.triage-note-section-title {
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0284c7;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.triage-recommendations-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.triage-recommendations-list li {
+  font-size: 0.84rem;
+}
+
+.triage-disclaimer-box {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.74rem;
+  color: #92400e;
+  line-height: 1.4;
+}
+
+/* Drawer Footer */
+.triage-drawer-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.btn-drawer-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 750;
+  padding: 0.55rem 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.btn-drawer-action.copy {
+  background: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.btn-drawer-action.copy:hover {
+  background: #f1f5f9;
+}
+
+.btn-drawer-action.print {
+  background: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.btn-drawer-action.print:hover {
+  background: #f1f5f9;
+}
+
+.btn-drawer-action.save {
+  background: var(--primary, #0284c7);
+  color: #ffffff;
+}
+
+.btn-drawer-action.save:hover {
+  background: #0369a1;
+}
+
+/* Toast feedback inside alerts */
+.alert-feedback-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #10b981;
+  color: #ffffff;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  animation: fadeInToast 0.2s ease-out;
+}
+
+@keyframes fadeInToast {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .alert-card-enhanced {
+    padding: 0.85rem 1rem;
+  }
+  .alert-actions-toolbar {
+    justify-content: stretch;
+  }
+  .btn-card-action {
+    flex: 1;
+    justify-content: center;
+  }
+  .triage-drawer-panel {
+    max-width: 100%;
+  }
+}
