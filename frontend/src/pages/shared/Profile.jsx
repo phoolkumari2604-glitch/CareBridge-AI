@@ -36,6 +36,7 @@ import patientService from "../../services/patientService";
 import doctorService from "../../services/doctorService";
 import authAPI from "../../services/auth";
 import { COUNTRIES, getCountryByNameOrCode } from "../../utils/countries";
+import PhotoEditModal from "../../components/common/PhotoEditModal";
 import "./Profile.css";
 
 function Profile() {
@@ -53,6 +54,7 @@ function Profile() {
   const [successToast, setSuccessToast] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [doctorId, setDoctorId] = useState(user?.doctor_id || null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   // Biometrics State
   const [faceVerified, setFaceVerified] = useState(Boolean(user?.faceVerified || user?.face_verified));
@@ -81,6 +83,7 @@ function Profile() {
     name: user?.name || user?.fullName || "",
     email: user?.email || "",
     phone: user?.phone || "",
+    avatar: user?.avatar || user?.photo || "",
     // Patient specific fields
     age: 28,
     gender: "Other",
@@ -89,6 +92,7 @@ function Profile() {
     allergies: "",
     medical_history: "",
     // Doctor specific fields
+    qualification: "MBBS, MD (Cardiovascular Sciences)",
     specialty: "Cardiology & Internal Medicine",
     department: "Cardiovascular Sciences",
     hospital: "CareBridge Multi-Specialty Hospital",
@@ -117,6 +121,9 @@ function Profile() {
           if (meData.faceVerifiedAt) setFaceVerifiedAt(meData.faceVerifiedAt);
           if (meData.fingerprintVerified !== undefined) setFingerprintVerified(meData.fingerprintVerified);
           if (meData.fingerprintVerifiedAt) setFingerprintVerifiedAt(meData.fingerprintVerifiedAt);
+          if (meData.avatar || meData.photo) {
+            setFormData((prev) => ({ ...prev, avatar: meData.avatar || meData.photo }));
+          }
           if (meData.phone) {
             setFormData((prev) => ({ ...prev, phone: meData.phone, name: meData.name || meData.fullName || prev.name }));
           }
@@ -135,6 +142,7 @@ function Profile() {
               name: data.name || user?.name || prev.name,
               email: data.email || user?.email || prev.email,
               phone: data.phone || user?.phone || prev.phone,
+              avatar: data.avatar || data.photo || user?.avatar || prev.avatar,
               age: data.age || prev.age,
               gender: data.gender || prev.gender,
               blood_group: data.blood_group || prev.blood_group,
@@ -157,6 +165,8 @@ function Profile() {
             name: docProfile.name || user?.name || prev.name,
             email: docProfile.email || user?.email || prev.email,
             phone: docProfile.phone || user?.phone || prev.phone,
+            avatar: docProfile.avatar || docProfile.photo || user?.avatar || prev.avatar,
+            qualification: docProfile.qualification || prev.qualification || "MBBS, MD",
             specialty: docProfile.specialty || prev.specialty,
             department: docProfile.department || prev.department,
             hospital: docProfile.hospital || prev.hospital,
@@ -201,6 +211,39 @@ function Profile() {
       navigator.clipboard.writeText(staffId);
       setCopiedId(true);
       setTimeout(() => setCopiedId(false), 2000);
+    }
+  };
+
+  const handleSavePhoto = async (newPhotoUrl) => {
+    try {
+      setLoading(true);
+      setFormData((prev) => ({ ...prev, avatar: newPhotoUrl || "" }));
+      await authAPI.updateProfile({ avatar: newPhotoUrl, photo: newPhotoUrl });
+      if (isDoctor && (doctorId || user?.doctor_id || user?.id)) {
+        await doctorService.updateDoctor(doctorId || user?.doctor_id || user?.id, {
+          avatar: newPhotoUrl,
+          photo: newPhotoUrl,
+        });
+      } else if (isPatient && (user?.patient_id || user?.id)) {
+        await patientService.updatePatientProfile(user?.patient_id || user?.id, {
+          avatar: newPhotoUrl,
+          photo: newPhotoUrl,
+        });
+      }
+      if (setUser) {
+        setUser((prev) => ({
+          ...prev,
+          avatar: newPhotoUrl,
+          photo: newPhotoUrl,
+        }));
+      }
+      setSuccessToast(newPhotoUrl ? "Profile photo updated successfully." : "Profile photo removed.");
+      setTimeout(() => setSuccessToast(""), 3500);
+    } catch (err) {
+      console.error("Failed to update profile photo:", err);
+      setErrorMessage("Failed to update profile photo. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -250,6 +293,7 @@ function Profile() {
         const docPayload = {
           name: formData.name.trim(),
           phone: formData.phone.trim(),
+          qualification: (formData.qualification || "").trim(),
           specialty: formData.specialty.trim(),
           department: formData.department.trim(),
           hospital: formData.hospital.trim(),
@@ -565,8 +609,25 @@ function Profile() {
         {/* PROFILE CARD */}
         <section className="profile-card">
           <div className="profile-cover">
-            <div className="profile-avatar">
-              {formData.name ? formData.name.charAt(0).toUpperCase() : (isStaff ? "S" : isDoctor ? "D" : "P")}
+            <div className="profile-avatar" style={{ position: "relative", overflow: "hidden" }}>
+              {formData.avatar || user?.avatar || user?.photo ? (
+                <img
+                  src={formData.avatar || user?.avatar || user?.photo}
+                  alt={formData.name || "Profile"}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                />
+              ) : (
+                formData.name ? formData.name.charAt(0).toUpperCase() : (isStaff ? "S" : isDoctor ? "D" : "P")
+              )}
+              <button
+                type="button"
+                className="profile-avatar-edit-overlay-btn"
+                onClick={() => setShowPhotoModal(true)}
+                title="Edit profile photo"
+                aria-label="Edit profile photo"
+              >
+                <Camera size={15} />
+              </button>
             </div>
 
             <div className="profile-identity">
@@ -592,10 +653,19 @@ function Profile() {
                     <Droplets size={12} /> Blood: {formData.blood_group}
                   </span>
                 )}
-                {isDoctor && formData.specialty && (
-                  <span className="blood-group-tag specialty">
-                    <Stethoscope size={12} /> {formData.specialty}
-                  </span>
+                {isDoctor && (
+                  <>
+                    {formData.qualification && (
+                      <span className="blood-group-tag" style={{ background: "rgba(14, 165, 168, 0.15)", color: "#0ea5a8", borderColor: "#0ea5a8" }}>
+                        <Award size={12} /> {formData.qualification}
+                      </span>
+                    )}
+                    {formData.specialty && (
+                      <span className="blood-group-tag specialty">
+                        <Stethoscope size={12} /> {formData.specialty}
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -757,6 +827,23 @@ function Profile() {
                 </div>
 
                 <div className="profile-grid">
+                  <div className="profile-field">
+                    <label htmlFor="prof-qualification">Medical Qualification (Degrees) *</label>
+                    {editing ? (
+                      <input
+                        id="prof-qualification"
+                        type="text"
+                        name="qualification"
+                        value={formData.qualification}
+                        onChange={handleChange}
+                        placeholder="e.g. MBBS, MD, DM, FRCP"
+                        required
+                      />
+                    ) : (
+                      <div className="profile-value">{formData.qualification || "MBBS, MD"}</div>
+                    )}
+                  </div>
+
                   <div className="profile-field">
                     <label htmlFor="prof-specialty">Medical Specialty *</label>
                     {editing ? (
@@ -1291,6 +1378,16 @@ function Profile() {
           </div>
         </div>
       )}
+
+      {/* PHOTO EDIT MODAL */}
+      <PhotoEditModal
+        isOpen={showPhotoModal}
+        onClose={() => setShowPhotoModal(false)}
+        currentPhoto={formData.avatar || user?.avatar || user?.photo}
+        onSave={handleSavePhoto}
+        title={isDoctor ? "Edit Doctor Profile Photo" : "Edit Profile Photo"}
+        subtitle="Capture live photo with camera or upload image (JPG/PNG/WebP ≤ 5MB)"
+      />
     </div>
   );
 }

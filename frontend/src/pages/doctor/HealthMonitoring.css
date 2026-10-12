@@ -150,8 +150,9 @@
   width: 100%;
   height: 310px;
   border-radius: 16px;
-  background: radial-gradient(circle at 50% 50%, #1e1124 0%, #080c16 80%);
-  border: 1px solid rgba(244, 63, 94, 0.25);
+  background: radial-gradient(circle at 50% 50%, rgba(225, 29, 72, 0.14) 0%, #05070d 75%, #000000 100%);
+  border: 1px solid rgba(244, 63, 94, 0.28);
+  box-shadow: 0 0 35px rgba(225, 29, 72, 0.12), inset 0 0 25px rgba(0, 0, 0, 0.85);
   cursor: grab;
   touch-action: pan-y;
   position: relative;
@@ -1155,3 +1156,332 @@
   gap: 12px;
   color: var(--hm-mut);
 }
+
+/* =========================================================
+   PULSEVIEW CALENDAR, LIVE PULSE INDICATOR & LOG TABLE
+========================================================= */
+
+/* Calendar Date Picker Bar */
+.hm-tabs-and-calendar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hm-calendar-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--hm-bg);
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--hm-bd);
+  flex-wrap: wrap;
+}
+
+.hm-date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hm-date-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hm-card);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--hm-bd);
+}
+
+.hm-cal-icon {
+  color: var(--hm-ac);
+  opacity: 0.8;
+}
+
+.hm-date-input {
+  background: transparent;
+  border: none;
+  color: var(--hm-tx);
+  font-size: 12px;
+  font-weight: 500;
+  outline: none;
+  font-family: inherit;
+  color-scheme: dark;
+}
+
+[data-theme="light"] .hm-date-input,
+.light .hm-date-input {
+  color-scheme: light;
+}
+
+.hm-date-sep {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hm-mut);
+  text-transform: uppercase;
+}
+
+.hm-cal-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hm-cal-btn {
+  background: var(--hm-card);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-tx);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hm-cal-btn:hover {
+  background: var(--hm-ac);
+  color: #ffffff;
+  border-color: var(--hm-ac);
+}
+
+.hm-cal-btn.clear {
+  color: var(--hm-bad);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.hm-cal-btn.clear:hover {
+  background: var(--hm-bad);
+  color: #ffffff;
+}
+
+/* Live Pulse Indicator in Chart Title */
+.hm-chart-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.hm-chart-title-row h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hm-chart-pulse-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hm-chart-beating-heart {
+  color: #ef4444;
+  animation: hmPulseHeart 1.1s infinite;
+}
+
+.hm-chart-beating-heart.paused {
+  animation: none;
+  opacity: 0.5;
+}
+
+@keyframes hmPulseHeart {
+  0% { transform: scale(1); }
+  18% { transform: scale(1.3); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.22); }
+  56% { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+/* Historical Log Header & Search Bar */
+.hm-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.hm-log-header h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hm-log-search-bar {
+  margin-bottom: 14px;
+}
+
+.hm-log-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 10px;
+  padding: 0 12px;
+  transition: border-color 0.18s ease;
+}
+
+.hm-log-search-wrap:focus-within {
+  border-color: var(--hm-ac);
+  box-shadow: 0 0 0 2px var(--hm-ac-glow);
+}
+
+.hm-search-icon {
+  color: var(--hm-mut);
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.hm-log-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 9px 0;
+  color: var(--hm-tx);
+  font-size: 13px;
+  outline: none;
+}
+
+.hm-search-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+}
+
+.hm-search-clear-btn:hover {
+  color: var(--hm-tx);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Sortable Headers */
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.sortable-th:hover {
+  color: var(--hm-ac);
+}
+
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sort-active {
+  color: var(--hm-ac);
+}
+
+/* Table Critical Row & Cell Highlights */
+.hm-row-critical {
+  background: rgba(239, 68, 68, 0.09) !important;
+  border-left: 3px solid #ef4444;
+}
+
+.hm-table td.crit {
+  color: #ef4444 !important;
+  font-weight: 800;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.hm-row-notes-preview {
+  font-size: 11.5px;
+  color: var(--hm-mut);
+  font-style: italic;
+}
+
+/* Table Pagination */
+.hm-log-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hm-bd);
+}
+
+.hm-log-page-info {
+  font-size: 12.5px;
+  color: var(--hm-mut);
+}
+
+.hm-log-page-info strong {
+  color: var(--hm-tx);
+}
+
+.hm-log-page-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hm-page-btn {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-tx);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hm-page-btn:hover:not(:disabled) {
+  background: var(--hm-card);
+  border-color: var(--hm-ac);
+  color: var(--hm-ac);
+}
+
+.hm-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hm-page-btn.num {
+  min-width: 32px;
+  justify-content: center;
+}
+
+.hm-page-btn.num.active {
+  background: var(--hm-ac);
+  color: #ffffff;
+  border-color: var(--hm-ac);
+}
+
+.hm-page-ellipsis {
+  padding: 0 4px;
+  color: var(--hm-mut);
+  font-size: 12px;
+}
+

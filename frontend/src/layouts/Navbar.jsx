@@ -398,8 +398,16 @@ function Navbar({ onMenuClick }) {
             }}
             aria-label="User Profile Menu"
           >
-            <div className="nav-avatar-circle">
-              {user?.name ? user.name.charAt(0).toUpperCase() : isStaff ? "S" : "D"}
+            <div className="nav-avatar-circle" style={{ overflow: "hidden", position: "relative" }}>
+              {user?.avatar || user?.photo || user?.profile_picture ? (
+                <img
+                  src={user?.avatar || user?.photo || user?.profile_picture}
+                  alt={user?.name || "User Avatar"}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                />
+              ) : (
+                user?.name ? user.name.charAt(0).toUpperCase() : isStaff ? "S" : "D"
+              )}
             </div>
 
             <div className="nav-user-text-col">

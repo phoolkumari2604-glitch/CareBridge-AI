@@ -31,7 +31,11 @@ import {
   Check,
   RotateCcw,
   AlertCircle,
-  X
+  X,
+  Search,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import "./HealthMonitoring.css";
 
@@ -739,6 +743,17 @@ export default function HealthMonitoring() {
   const [criticalAlert, setCriticalAlert] = useState(null);
   const consecutiveOutRef = useRef(0);
 
+  // Calendar date picker & range filter state
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Historical Telemetry Log table state (search, sort, pagination)
+  const [logSearch, setLogSearch] = useState("");
+  const [logSortField, setLogSortField] = useState("t");
+  const [logSortDir, setLogSortDir] = useState("desc"); // 'asc' | 'desc'
+  const [logPage, setLogPage] = useState(1);
+  const logPageSize = 10;
+
   const selectedPatient = useMemo(() => {
     return patients.find((p) => p.id === pid) || patients[0] || null;
   }, [patients, pid]);
@@ -1015,20 +1030,32 @@ export default function HealthMonitoring() {
     say("Telemetry curves synced with live stream");
   };
 
-  // Submit manual vital reading
+  // Submit manual vital reading with validation
   const submit = async (e) => {
     e.preventDefault();
     const o = Object.fromEntries(new FormData(e.target));
+    const hr = +o.hr;
+    const sys = +o.sys;
+    const dia = +o.dia;
+    const spo2 = +o.spo2;
+    const temp = +o.temp;
+    const sugar = +o.sugar;
+
+    if (sys <= dia) {
+      say("Validation Error: Systolic BP must be strictly greater than Diastolic BP.");
+      return;
+    }
+
     const nowMs = Date.now();
     const newVitalObj = {
       id: `manual-${nowMs}`,
       t: nowMs,
-      hr: +o.hr,
-      sys: +o.sys,
-      dia: +o.dia,
-      spo2: +o.spo2,
-      temp: +o.temp,
-      sugar: +o.sugar,
+      hr,
+      sys,
+      dia,
+      spo2,
+      temp,
+      sugar,
       weight: o.weight ? +o.weight : null,
       recorded_by: "Attending Doctor",
       notes: o.notes || "Clinical manual verification",
@@ -1036,7 +1063,7 @@ export default function HealthMonitoring() {
 
     // Update local state immediately
     setData((prev) => [...prev, newVitalObj]);
-    setLiveBpm(+o.hr);
+    setLiveBpm(hr);
     setOpen(false);
     say("Vital reading recorded and synchronized immediately");
 
@@ -1044,12 +1071,12 @@ export default function HealthMonitoring() {
     try {
       await doctorService.recordVitals({
         patient_id: pid,
-        heart_rate: +o.hr,
-        systolic_bp: +o.sys,
-        diastolic_bp: +o.dia,
-        spo2: +o.spo2,
-        temperature: +o.temp,
-        blood_sugar: +o.sugar,
+        heart_rate: hr,
+        systolic_bp: sys,
+        diastolic_bp: dia,
+        spo2,
+        temperature: temp,
+        blood_sugar: sugar,
         weight: o.weight ? +o.weight : undefined,
         notes: o.notes || "",
       });
@@ -1058,17 +1085,38 @@ export default function HealthMonitoring() {
     }
   };
 
-  // Filtered rows for selected time window
+  // Quick date shortcuts
+  const handleSetToday = () => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    setStartDate(todayStr);
+    setEndDate(todayStr);
+  };
+
+  const handleClearDateFilter = () => {
+    setStartDate("");
+    setEndDate("");
+  };
+
+  // Filtered rows for selected time window or date range
   const m = METRICS[mk];
   const rows = useMemo(() => {
-    const cutoff = Date.now() - RANGES[rk];
-    let filtered = data.filter((r) => r.t >= cutoff).sort((a, b) => a.t - b.t);
-    // If strict time cutoff has 0 points (e.g. historical records from past days and 24h selected), fallback to all records
-    if (filtered.length === 0 && data.length > 0) {
-      filtered = [...data].sort((a, b) => a.t - b.t);
+    let filtered = [...data];
+
+    if (startDate || endDate) {
+      const startMs = startDate ? new Date(`${startDate}T00:00:00`).getTime() : 0;
+      const endMs = endDate ? new Date(`${endDate}T23:59:59.999`).getTime() : Infinity;
+      filtered = filtered.filter((r) => r.t >= startMs && r.t <= endMs);
+    } else {
+      const cutoff = Date.now() - RANGES[rk];
+      filtered = filtered.filter((r) => r.t >= cutoff);
+      // If strict time cutoff has 0 points, fallback to all records
+      if (filtered.length === 0 && data.length > 0) {
+        filtered = [...data];
+      }
     }
-    return filtered;
-  }, [data, rk]);
+
+    return filtered.sort((a, b) => a.t - b.t);
+  }, [data, rk, startDate, endDate]);
 
   const vals = rows.map(m.get);
   const n = rows.length;
@@ -1095,11 +1143,23 @@ export default function HealthMonitoring() {
     }
   }
 
-  // Clinical status derivation
+  // Clinical status derivation: check out-of-range critical conditions
   let status = "STABLE";
   let statusColor = "var(--hm-ok)";
   if (last) {
-    if (last.spo2 < 90 || last.hr > 130 || last.hr < 45 || last.sys >= 180 || last.dia >= 120) {
+    const isCritical =
+      last.spo2 < 90 ||
+      last.hr > 130 ||
+      last.hr < 45 ||
+      last.sys >= 160 ||
+      last.dia >= 105 ||
+      last.sys <= last.dia ||
+      last.temp >= 38.6 ||
+      last.temp < 34.5 ||
+      last.sugar >= 250 ||
+      last.sugar < 55;
+
+    if (isCritical) {
       status = "CRITICAL";
       statusColor = "var(--hm-bad)";
     } else if (Object.keys(METRICS).some((k) => isOut(k, METRICS[k].get(last)))) {
@@ -1107,6 +1167,93 @@ export default function HealthMonitoring() {
       statusColor = "var(--hm-warn)";
     }
   }
+
+  // Filtered, sorted, and paginated data for Historical Telemetry Log table
+  const filteredLogData = useMemo(() => {
+    let result = [...data];
+
+    // Calendar date filter applies to table as well if set
+    if (startDate || endDate) {
+      const startMs = startDate ? new Date(`${startDate}T00:00:00`).getTime() : 0;
+      const endMs = endDate ? new Date(`${endDate}T23:59:59.999`).getTime() : Infinity;
+      result = result.filter((r) => r.t >= startMs && r.t <= endMs);
+    }
+
+    // Live text search across notes, recorder, date, and vital values
+    if (logSearch.trim()) {
+      const q = logSearch.toLowerCase().trim();
+      result = result.filter((r) => {
+        const dateStr = fmt(r.t).toLowerCase();
+        const hrStr = String(r.hr);
+        const bpStr = `${r.sys}/${r.dia}`;
+        const spo2Str = `${r.spo2}`;
+        const tempStr = `${r.temp}`;
+        const sugarStr = `${r.sugar}`;
+        const recorderStr = (r.recorded_by || "").toLowerCase();
+        const notesStr = (r.notes || "").toLowerCase();
+
+        return (
+          dateStr.includes(q) ||
+          hrStr.includes(q) ||
+          bpStr.includes(q) ||
+          spo2Str.includes(q) ||
+          tempStr.includes(q) ||
+          sugarStr.includes(q) ||
+          recorderStr.includes(q) ||
+          notesStr.includes(q)
+        );
+      });
+    }
+
+    // Sorting
+    result.sort((a, b) => {
+      let valA, valB;
+      if (logSortField === "t") {
+        valA = a.t;
+        valB = b.t;
+      } else if (logSortField === "hr") {
+        valA = a.hr;
+        valB = b.hr;
+      } else if (logSortField === "bp") {
+        valA = a.sys;
+        valB = b.sys;
+      } else if (logSortField === "spo2") {
+        valA = a.spo2;
+        valB = b.spo2;
+      } else if (logSortField === "temp") {
+        valA = a.temp;
+        valB = b.temp;
+      } else if (logSortField === "sugar") {
+        valA = a.sugar;
+        valB = b.sugar;
+      } else {
+        valA = a.t;
+        valB = b.t;
+      }
+
+      if (valA < valB) return logSortDir === "asc" ? -1 : 1;
+      if (valA > valB) return logSortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [data, startDate, endDate, logSearch, logSortField, logSortDir]);
+
+  const totalLogPages = Math.max(1, Math.ceil(filteredLogData.length / logPageSize));
+  const paginatedLogData = useMemo(() => {
+    const startIndex = (logPage - 1) * logPageSize;
+    return filteredLogData.slice(startIndex, startIndex + logPageSize);
+  }, [filteredLogData, logPage, logPageSize]);
+
+  const handleSortToggle = (field) => {
+    if (logSortField === field) {
+      setLogSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setLogSortField(field);
+      setLogSortDir("desc");
+    }
+    setLogPage(1);
+  };
 
   const handlePatientChange = (newPid) => {
     setPid(newPid);
@@ -1224,7 +1371,7 @@ export default function HealthMonitoring() {
           </div>
 
           <div className="hm-hero-heart-col">
-            <Heart3D bpm={liveBpm} />
+            <Heart3D bpm={liveBpm} isPaused={isPaused} />
             <div className="hm-heart-caption">
               <span>
                 Rhythm: <strong>{liveBpm} BPM ({liveBpm < 60 ? "Sinus Bradycardia" : liveBpm > 100 ? "Sinus Tachycardia" : "Sinus Normal"})</strong>
@@ -1286,7 +1433,7 @@ export default function HealthMonitoring() {
           </div>
         </section>
 
-        {/* METRIC & TIME RANGE TABS */}
+        {/* METRIC & TIME RANGE TABS WITH CALENDAR DATE PICKER */}
         <section className="hm-card hm-controls-bar">
           <div className="hm-tabs-col">
             <span className="hm-tab-group-label">PHYSIOLOGICAL PARAMETER:</span>
@@ -1310,18 +1457,72 @@ export default function HealthMonitoring() {
           </div>
 
           <div className="hm-tabs-col">
-            <span className="hm-tab-group-label">TIME WINDOW:</span>
-            <div className="hm-tabs">
-              {Object.keys(RANGES).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  className={`hm-tab ${k === rk ? "on" : ""}`}
-                  onClick={() => setRk(k)}
-                >
-                  {k}
-                </button>
-              ))}
+            <span className="hm-tab-group-label">TIME WINDOW &amp; CALENDAR RANGE:</span>
+            <div className="hm-tabs-and-calendar">
+              <div className="hm-tabs">
+                {Object.keys(RANGES).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    className={`hm-tab ${k === rk && !startDate && !endDate ? "on" : ""}`}
+                    onClick={() => {
+                      setRk(k);
+                      setStartDate("");
+                      setEndDate("");
+                    }}
+                  >
+                    {k}
+                  </button>
+                ))}
+              </div>
+
+              {/* Calendar Date Picker Bar */}
+              <div className="hm-calendar-picker-wrap">
+                <div className="hm-date-inputs">
+                  <div className="hm-date-field">
+                    <Calendar size={13} className="hm-cal-icon" />
+                    <input
+                      type="date"
+                      className="hm-date-input"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      title="Start date"
+                    />
+                  </div>
+                  <span className="hm-date-sep">to</span>
+                  <div className="hm-date-field">
+                    <Calendar size={13} className="hm-cal-icon" />
+                    <input
+                      type="date"
+                      className="hm-date-input"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      title="End date"
+                    />
+                  </div>
+                </div>
+
+                <div className="hm-cal-actions">
+                  <button
+                    type="button"
+                    className="hm-cal-btn"
+                    onClick={handleSetToday}
+                    title="Filter to today's recordings"
+                  >
+                    Today
+                  </button>
+                  {(startDate || endDate) && (
+                    <button
+                      type="button"
+                      className="hm-cal-btn clear"
+                      onClick={handleClearDateFilter}
+                      title="Clear custom date filter"
+                    >
+                      <X size={12} /> Clear
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1357,9 +1558,26 @@ export default function HealthMonitoring() {
         <section className="hm-card hm-chart-card">
           <div className="hm-chart-header">
             <div>
-              <h3>{m.label} Trend Stream ({m.unit})</h3>
+              <div className="hm-chart-title-row">
+                <h3>{m.label} Trend Stream ({m.unit})</h3>
+                {/* Live Pulse Indicator at top of chart */}
+                <div className="hm-chart-pulse-pill" title="Live beating heart telemetry">
+                  <HeartPulse
+                    size={16}
+                    className={`hm-chart-beating-heart ${isPaused ? "paused" : ""}`}
+                  />
+                  <span>
+                    <strong>{liveBpm}</strong> BPM Live Pulse
+                  </span>
+                </div>
+              </div>
               <p className="hm-mut">
-                Displaying {n} calibrated data points for time interval <strong>{rk}</strong>
+                Displaying {n} calibrated data points for time interval{" "}
+                <strong>
+                  {startDate || endDate
+                    ? `${startDate || "Start"} → ${endDate || "Now"}`
+                    : rk}
+                </strong>
               </p>
             </div>
             <span className="hm-target-badge">
@@ -1371,67 +1589,184 @@ export default function HealthMonitoring() {
 
         {/* HISTORICAL LOG TABLE */}
         <section className="hm-card hm-history-card">
-          <div className="hm-bar" style={{ marginBottom: 14 }}>
+          <div className="hm-log-header">
             <div>
               <h3>Historical Telemetry Log</h3>
               <p className="hm-mut">Verified recordings chronologically indexed</p>
             </div>
-            <span className="hm-badge count-badge">{data.length} recorded data points</span>
+            <div className="hm-log-header-right">
+              <span className="hm-badge count-badge">
+                {filteredLogData.length} of {data.length} recorded data points
+              </span>
+            </div>
+          </div>
+
+          {/* Search bar & filter controls for Historical Telemetry Log */}
+          <div className="hm-log-search-bar">
+            <div className="hm-log-search-wrap">
+              <Search size={15} className="hm-search-icon" />
+              <input
+                type="text"
+                className="hm-log-search-input"
+                placeholder="Search log by date, BPM, BP (88/90), SpO₂, temp, sugar, staff, notes..."
+                value={logSearch}
+                onChange={(e) => {
+                  setLogSearch(e.target.value);
+                  setLogPage(1);
+                }}
+              />
+              {logSearch && (
+                <button
+                  type="button"
+                  className="hm-search-clear-btn"
+                  onClick={() => {
+                    setLogSearch("");
+                    setLogPage(1);
+                  }}
+                  title="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="hm-table-responsive">
             <table className="hm-table">
               <thead>
                 <tr>
-                  <th>Timestamp</th>
-                  <th>Heart Rate (bpm)</th>
-                  <th>Blood Pressure (mmHg)</th>
-                  <th>SpO₂ (%)</th>
-                  <th>Temp (°C)</th>
-                  <th>Sugar (mg/dL)</th>
+                  <th onClick={() => handleSortToggle("t")} className="sortable-th">
+                    <span className="th-content">
+                      Timestamp
+                      <ArrowUpDown size={12} className={logSortField === "t" ? "sort-active" : ""} />
+                    </span>
+                  </th>
+                  <th onClick={() => handleSortToggle("hr")} className="sortable-th">
+                    <span className="th-content">
+                      Heart Rate (bpm)
+                      <ArrowUpDown size={12} className={logSortField === "hr" ? "sort-active" : ""} />
+                    </span>
+                  </th>
+                  <th onClick={() => handleSortToggle("bp")} className="sortable-th">
+                    <span className="th-content">
+                      Blood Pressure (mmHg)
+                      <ArrowUpDown size={12} className={logSortField === "bp" ? "sort-active" : ""} />
+                    </span>
+                  </th>
+                  <th onClick={() => handleSortToggle("spo2")} className="sortable-th">
+                    <span className="th-content">
+                      SpO₂ (%)
+                      <ArrowUpDown size={12} className={logSortField === "spo2" ? "sort-active" : ""} />
+                    </span>
+                  </th>
+                  <th onClick={() => handleSortToggle("temp")} className="sortable-th">
+                    <span className="th-content">
+                      Temp (°C)
+                      <ArrowUpDown size={12} className={logSortField === "temp" ? "sort-active" : ""} />
+                    </span>
+                  </th>
+                  <th onClick={() => handleSortToggle("sugar")} className="sortable-th">
+                    <span className="th-content">
+                      Sugar (mg/dL)
+                      <ArrowUpDown size={12} className={logSortField === "sugar" ? "sort-active" : ""} />
+                    </span>
+                  </th>
                   <th>Staff / Recorder</th>
                 </tr>
               </thead>
               <tbody>
-                {data.length > 0 ? (
-                  [...data]
-                    .reverse()
-                    .slice(0, 45)
-                    .map((r) => (
-                      <tr key={r.id}>
+                {paginatedLogData.length > 0 ? (
+                  paginatedLogData.map((r) => {
+                    const isHrCrit = r.hr > 130 || r.hr < 45;
+                    const isBpCrit = r.sys >= 160 || r.dia >= 105 || r.sys <= r.dia;
+                    const isSpo2Crit = r.spo2 < 90;
+                    const isTempCrit = r.temp >= 38.6 || r.temp < 34.5;
+                    const isSugarCrit = r.sugar >= 250 || r.sugar < 55;
+                    const isRowCrit = isHrCrit || isBpCrit || isSpo2Crit || isTempCrit || isSugarCrit;
+
+                    return (
+                      <tr key={r.id} className={isRowCrit ? "hm-row-critical" : ""}>
                         <td>
                           <strong>{fmt(r.t)}</strong>
                         </td>
-                        <td className={isOut("hr", r.hr) ? "out" : ""}>
-                          {r.hr} {isOut("hr", r.hr) && "⚠️"}
+                        <td className={isHrCrit ? "crit" : isOut("hr", r.hr) ? "out" : ""}>
+                          {r.hr} {isHrCrit ? "🚨" : isOut("hr", r.hr) ? "⚠️" : ""}
                         </td>
-                        <td className={isOut("bp", r.sys) ? "out" : ""}>
-                          {r.sys}/{r.dia} {isOut("bp", r.sys) && "⚠️"}
+                        <td className={isBpCrit ? "crit" : isOut("bp", r.sys) ? "out" : ""}>
+                          {r.sys}/{r.dia} {isBpCrit ? "🚨" : isOut("bp", r.sys) ? "⚠️" : ""}
                         </td>
-                        <td className={isOut("spo2", r.spo2) ? "out" : ""}>
-                          {r.spo2}% {isOut("spo2", r.spo2) && "⚠️"}
+                        <td className={isSpo2Crit ? "crit" : isOut("spo2", r.spo2) ? "out" : ""}>
+                          {r.spo2}% {isSpo2Crit ? "🚨" : isOut("spo2", r.spo2) ? "⚠️" : ""}
                         </td>
-                        <td className={isOut("temp", r.temp) ? "out" : ""}>
-                          {r.temp}°C {isOut("temp", r.temp) && "⚠️"}
+                        <td className={isTempCrit ? "crit" : isOut("temp", r.temp) ? "out" : ""}>
+                          {r.temp}°C {isTempCrit ? "🚨" : isOut("temp", r.temp) ? "⚠️" : ""}
                         </td>
-                        <td className={isOut("sugar", r.sugar) ? "out" : ""}>
-                          {r.sugar} {isOut("sugar", r.sugar) && "⚠️"}
+                        <td className={isSugarCrit ? "crit" : isOut("sugar", r.sugar) ? "out" : ""}>
+                          {r.sugar} {isSugarCrit ? "🚨" : isOut("sugar", r.sugar) ? "⚠️" : ""}
                         </td>
                         <td>
                           <span className="recorder-tag">{r.recorded_by}</span>
+                          {r.notes && <span className="hm-row-notes-preview"> · {r.notes}</span>}
                         </td>
                       </tr>
-                    ))
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan="7" className="hm-empty">
-                      No vital signs history recorded for this patient. Click "Log Vital Reading" to add telemetry.
+                      {logSearch || startDate || endDate
+                        ? "No telemetry readings match the active search/date filter."
+                        : 'No vital signs history recorded for this patient. Click "Log Vital Reading" to add telemetry.'}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {filteredLogData.length > logPageSize && (
+            <div className="hm-log-pagination">
+              <span className="hm-log-page-info">
+                Page <strong>{logPage}</strong> of <strong>{totalLogPages}</strong> (
+                {filteredLogData.length} records)
+              </span>
+              <div className="hm-log-page-btns">
+                <button
+                  type="button"
+                  className="hm-page-btn"
+                  disabled={logPage <= 1}
+                  onClick={() => setLogPage((p) => Math.max(1, p - 1))}
+                  title="Previous page"
+                >
+                  <ChevronLeft size={15} /> Prev
+                </button>
+                {Array.from({ length: totalLogPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalLogPages || Math.abs(p - logPage) <= 1)
+                  .map((p, idx, arr) => (
+                    <React.Fragment key={p}>
+                      {idx > 0 && arr[idx - 1] !== p - 1 && <span className="hm-page-ellipsis">…</span>}
+                      <button
+                        type="button"
+                        className={`hm-page-btn num ${p === logPage ? "active" : ""}`}
+                        onClick={() => setLogPage(p)}
+                      >
+                        {p}
+                      </button>
+                    </React.Fragment>
+                  ))}
+                <button
+                  type="button"
+                  className="hm-page-btn"
+                  disabled={logPage >= totalLogPages}
+                  onClick={() => setLogPage((p) => Math.min(totalLogPages, p + 1))}
+                  title="Next page"
+                >
+                  Next <ChevronRight size={15} />
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* AI TELEMETRY CHAT SECTION */}

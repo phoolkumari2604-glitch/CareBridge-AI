@@ -796,7 +796,9 @@ def get_me():
             "lastLogin": last_login_str,
             "createdAt": created_at_str,
             "patient_id": patient_id,
-            "doctor_id": doctor_id
+            "doctor_id": doctor_id,
+            "avatar": user.get("avatar") or user.get("photo"),
+            "photo": user.get("photo") or user.get("avatar")
         }), 200
     except Exception as err:
         return jsonify({"error": "Failed to retrieve profile", "detail": str(err)}), 500
@@ -828,6 +830,13 @@ def update_profile():
             update_fields["phone"] = f"+91 {digits}"
         else:
             update_fields["phone"] = raw_phone
+
+    if "avatar" in data:
+        update_fields["avatar"] = data["avatar"]
+    if "photo" in data:
+        update_fields["photo"] = data["photo"]
+        if "avatar" not in update_fields:
+            update_fields["avatar"] = data["photo"]
             
     if update_fields:
         update_fields["updated_at"] = datetime.now(timezone.utc)
@@ -855,6 +864,8 @@ def update_profile():
             "email": updated_user.get("email"),
             "role": role,
             "phone": updated_user.get("phone"),
+            "avatar": updated_user.get("avatar") or updated_user.get("photo"),
+            "photo": updated_user.get("photo") or updated_user.get("avatar"),
             "staffId": staff_id,
             "faceVerified": bool(updated_user.get("face_verified") or updated_user.get("faceVerified")),
             "fingerprintVerified": bool(updated_user.get("fingerprint_verified") or updated_user.get("fingerprintVerified"))
