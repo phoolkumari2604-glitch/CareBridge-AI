@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import Heart3D from "../../components/common/Heart3D";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import ReactMarkdown from "react-markdown";
@@ -77,7 +78,6 @@ const fmtShortTime = t => {
   if (isNaN(d.getTime())) return "";
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 };
-import Heart3D from "../../components/common/Heart3D";
 
 /* ====== 3. ACCURATE INTERACTIVE SVG LINE CHART ====== */
 function Chart({ rows, mk, onLog }) {

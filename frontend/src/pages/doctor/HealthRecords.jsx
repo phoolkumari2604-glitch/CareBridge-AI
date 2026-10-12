@@ -25,7 +25,8 @@ import {
   Layers,
   ShieldAlert,
   User,
-  UserCheck
+  UserCheck,
+  Activity,
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import { useAuth } from "../../context/AuthContext";
