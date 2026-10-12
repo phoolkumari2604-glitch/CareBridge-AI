@@ -80,9 +80,10 @@ def create_app():
     @app.route("/api/health", methods=["GET"])
     def health():
         return jsonify({
-            "status": "healthy",
+            "status": "ok",
+            "db": "connected",
             "framework": "Flask",
-            "database": "connected"
+            "service": "CareBridge AI"
         }), 200
 
     # ----------------------------------------------------

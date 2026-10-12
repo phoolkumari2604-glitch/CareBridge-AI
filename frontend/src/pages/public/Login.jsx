@@ -116,23 +116,44 @@ function Login() {
       console.error("CareBridge Login error:", err);
 
       if (err.name === "AbortError" || err.code === "ECONNABORTED" || controller.signal.aborted) {
-        setError("Connection timed out (15s). Please check your internet connection and try again.");
+        setError({
+          type: "unreachable",
+          message: "Connection timed out (15s). The CareBridge AI server is currently unreachable.",
+        });
       } else if (!err.response || err.message === "Network Error" || err.code === "ERR_NETWORK") {
-        setError("Unable to connect to CareBridge AI server. Please verify the backend is running on port 5000.");
+        setError({
+          type: "unreachable",
+          message: "Unable to connect to CareBridge AI server on port 5000. Please verify the backend is running.",
+        });
       } else if (err.response?.status === 401) {
-        setError(err.response?.data?.detail || "Invalid email or password. Please verify your credentials.");
+        setError({
+          type: "credentials",
+          message: err.response?.data?.detail || "Invalid email or password. Please verify your credentials and try again.",
+        });
       } else if (err.response?.status === 429) {
-        setError(err.response?.data?.detail || "Too many sign-in attempts. Please wait a few minutes and try again.");
+        setError({
+          type: "ratelimit",
+          message: err.response?.data?.detail || "Too many sign-in attempts. Please wait a few minutes before retrying.",
+        });
       } else if (err.response?.status === 403) {
-        setError(err.response?.data?.detail || "This account has been deactivated. Please contact support.");
+        setError({
+          type: "forbidden",
+          message: err.response?.data?.detail || "This account has been deactivated. Please contact clinical administration.",
+        });
       } else if (err.response?.status >= 500) {
-        setError("CareBridge clinical authentication service encountered an error. Please try again shortly.");
+        setError({
+          type: "server_error",
+          message: "CareBridge server encountered an internal error (500). Please try again shortly.",
+        });
       } else {
         const msg =
           err.response?.data?.detail ||
           err.response?.data?.message ||
-          "Unable to sign in. Please check your credentials.";
-        setError(msg);
+          "Unable to sign in. Please verify your details.";
+        setError({
+          type: "general",
+          message: msg,
+        });
       }
     } finally {
       setLoading(false);
@@ -184,14 +205,26 @@ function Login() {
       console.error("CareBridge 2FA verification error:", err);
 
       if (err.name === "AbortError" || controller.signal.aborted) {
-        setError("Verification timed out. Check your connection and try again.");
+        setError({
+          type: "unreachable",
+          message: "Verification timed out. Check your connection and try again.",
+        });
       } else if (!err.response || err.code === "ERR_NETWORK") {
-        setError("Unable to connect to CareBridge AI server. Please verify the backend is running.");
+        setError({
+          type: "unreachable",
+          message: "Unable to connect to CareBridge AI server. Please verify the backend is running.",
+        });
       } else if (err.response?.status === 401) {
-        setError("Invalid or expired OTP code.");
+        setError({
+          type: "credentials",
+          message: "Invalid or expired OTP code.",
+        });
       } else {
         const msg = err.response?.data?.detail || err.response?.data?.message || "Invalid or expired OTP code.";
-        setError(msg);
+        setError({
+          type: "general",
+          message: msg,
+        });
       }
     } finally {
       setLoading(false);
@@ -304,8 +337,19 @@ function Login() {
 
               {error && (
                 <div className="login-error" role="alert">
-                  <AlertCircle size={18} />
-                  <span>{error}</span>
+                  <div className="flex items-center gap-2 flex-1">
+                    <AlertCircle size={18} className="flex-shrink-0" />
+                    <span>{typeof error === "object" ? error.message : error}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handle2FASubmit}
+                    className="login-retry-btn"
+                    title="Retry verification"
+                  >
+                    <RotateCcw size={13} />
+                    <span>Retry</span>
+                  </button>
                 </div>
               )}
 
@@ -394,9 +438,24 @@ function Login() {
 
               {/* ERROR NOTIFICATION */}
               {error && (
-                <div className="login-error" role="alert" aria-live="polite">
-                  <AlertCircle size={18} className="flex-shrink-0" />
-                  <span>{error}</span>
+                <div
+                  className={`login-error ${typeof error === "object" ? `login-error-${error.type}` : ""}`}
+                  role="alert"
+                  aria-live="polite"
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <AlertCircle size={18} className="flex-shrink-0" />
+                    <span>{typeof error === "object" ? error.message : error}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => handleLogin(e)}
+                    className="login-retry-btn"
+                    title="Retry sign in"
+                  >
+                    <RotateCcw size={13} />
+                    <span>Retry</span>
+                  </button>
                 </div>
               )}
 

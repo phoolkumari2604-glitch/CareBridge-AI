@@ -577,3 +577,200 @@
 .btn-modal-submit.btn-reject:hover {
   background: #b91c1c;
 }
+
+/* ENHANCED DEMOGRAPHICS & VIEW DETAILS */
+.patient-demographics-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.2rem;
+}
+
+.blood-chip {
+  display: inline-block;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.patient-sub-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.25rem;
+}
+
+.age-gender-text {
+  font-size: 0.73rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.approval-action.view-details-btn {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+
+.approval-action.view-details-btn:hover {
+  background: #e2e8f0;
+}
+
+/* REJECTION REASON */
+.rejection-reason-block {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rejection-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.rejection-textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem;
+  font-size: 0.82rem;
+  color: #0f172a;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.rejection-textarea:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+/* DETAILS MODAL */
+.details-modal-box {
+  max-width: 580px;
+}
+
+.details-modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.details-patient-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.patient-avatar.large {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.details-patient-banner h4 {
+  margin: 0 0 0.2rem 0;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.details-subtext {
+  font-size: 0.78rem;
+  color: #475569;
+  margin: 0 0 0.2rem 0;
+}
+
+.details-contact {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.details-section h5 {
+  margin: 0 0 0.45rem 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #0284c7;
+}
+
+.reason-box {
+  background: #f1f5f9;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.allergies-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.allergy-tag {
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #fde68a;
+}
+
+.history-bullets {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.details-empty-note {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 0;
+}
+
+.vitals-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.5rem;
+}
+
+.vital-item {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 0.55rem;
+  text-align: center;
+}
+
+.vital-label {
+  display: block;
+  font-size: 0.68rem;
+  color: #0369a1;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.vital-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0c4a6e;
+}

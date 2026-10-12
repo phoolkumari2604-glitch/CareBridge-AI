@@ -23,7 +23,9 @@ import {
   TrendingUp,
   Clock,
   Layers,
-  ShieldAlert
+  ShieldAlert,
+  User,
+  UserCheck
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import { useAuth } from "../../context/AuthContext";
@@ -51,6 +53,41 @@ const DRUG_SUGGESTIONS = [
   { name: "Metoprolol Succinate ER", dose: "25 mg", freq: "OD", class: "Beta Blocker" },
   { name: "Apixaban", dose: "5 mg", freq: "BD", class: "Oral Anticoagulant" }
 ];
+
+function MiniSparkline({ data = [], color = "#0d9488" }) {
+  if (!data || data.length < 2) return null;
+  const W = 80;
+  const H = 26;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+
+  const points = data
+    .map((val, idx) => {
+      const x = (idx / (data.length - 1)) * (W - 8) + 4;
+      const y = H - 4 - ((val - min) / range) * (H - 8);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  const lastVal = data[data.length - 1];
+  const lastX = W - 4;
+  const lastY = H - 4 - ((lastVal - min) / range) * (H - 8);
+
+  return (
+    <svg className="hr-card-sparkline" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+      <circle cx={lastX} cy={lastY} r="2.5" fill={color} />
+    </svg>
+  );
+}
 
 export default function HealthRecords() {
   const { user } = useAuth();
