@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   Radio,
 } from "lucide-react";
-import heartImg from "../../assets/heart-realistic.png";
+import Heart3D from "../common/Heart3D";
 import "./AnatomicalHeart3D.css";
 
 /**
@@ -277,9 +277,14 @@ function AnatomicalHeart3D({ heartRate = 74, isAbnormal = false, status = "NORMA
     };
   }, [drawECG]);
 
+  const heart3DRef = useRef(null);
+
   const handleResetCamera = () => {
     setBpm(heartRate || 74);
     setIsPaused(false);
+    if (heart3DRef.current && heart3DRef.current.resetRotation) {
+      heart3DRef.current.resetRotation();
+    }
   };
 
   return (
@@ -305,28 +310,18 @@ function AnatomicalHeart3D({ heartRate = 74, isAbnormal = false, status = "NORMA
         </div>
       </div>
 
-      {/* 2. REALISTIC ANATOMICAL HEART VIEWPORT WITH LIVE LUB-DUB BEAT */}
+      {/* 2. REUSABLE WIREFRAME 3D HEART VIEWPORT WITH LIVE PARTICLES & ROTATION */}
       <div className="heart-3d-viewport">
-        <div className="heart-image-stage">
-          {/* Ambient synced cardiac glow */}
-          <div
-            className="heart-ambient-glow"
-            style={{
-              animationDuration: `${cycleDuration}s`,
-              animationPlayState: isPaused ? "paused" : "running",
-            }}
-          />
+        <Heart3D
+          ref={heart3DRef}
+          bpm={bpm}
+          isPaused={isPaused}
+          reducedMotion={reducedMotion}
+          className="heart-threejs-container"
+        />
 
-          {/* Realistic Anatomical Human Heart Image with lub-dub keyframe animation */}
-          <img
-            src={heartImg}
-            alt="Realistic Anatomical Human Heart"
-            className={`realistic-heart-img ${reducedMotion ? "no-animation" : ""}`}
-            style={{
-              animationDuration: reducedMotion ? "0s" : `${cycleDuration}s`,
-              animationPlayState: isPaused ? "paused" : "running",
-            }}
-          />
+        <div className="heart-drag-hint">
+          Drag to rotate 3D anatomical view
         </div>
 
         {/* 3. GLASSMORPHISM "HEART BEAT" CARD (BOTTOM-LEFT OVERLAY) */}
