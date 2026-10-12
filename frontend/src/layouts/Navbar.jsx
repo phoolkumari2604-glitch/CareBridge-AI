@@ -11,10 +11,14 @@ import {
   LogOut,
   AlertTriangle,
   CheckCircle2,
+  CheckCheck,
+  Calendar,
   Clock,
   ExternalLink,
   Sun,
   Moon,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -89,6 +93,7 @@ function Navbar({ onMenuClick }) {
   // Real Data States
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationsList, setNotificationsList] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [criticalAlerts, setCriticalAlerts] = useState([]);
   const [hasCriticalAlerts, setHasCriticalAlerts] = useState(false);
 
@@ -104,7 +109,7 @@ function Navbar({ onMenuClick }) {
     setProfileDropdownOpen(false);
   }, [location.pathname]);
 
-  // Click Outside Listener
+  // Click Outside and Esc Key Listener
   useEffect(() => {
     function handleClickOutside(e) {
       if (alertRef.current && !alertRef.current.contains(e.target)) {
@@ -117,9 +122,48 @@ function Navbar({ onMenuClick }) {
         setProfileDropdownOpen(false);
       }
     }
+
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setAlertDropdownOpen(false);
+        setBellDropdownOpen(false);
+        setProfileDropdownOpen(false);
+      }
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
+
+  // Format relative time helper
+  const getRelativeTime = (isoDate) => {
+    if (!isoDate) return "Just now";
+    try {
+      const diffMs = Date.now() - new Date(isoDate).getTime();
+      const diffSec = Math.floor(diffMs / 1000);
+      if (diffSec < 45) return "Just now";
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr}h ago`;
+      const diffDays = Math.floor(diffHr / 24);
+      if (diffDays === 1) return "Yesterday";
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return new Date(isoDate).toLocaleDateString([], { month: "short", day: "numeric" });
+    } catch {
+      return "Recent";
+    }
+  };
+
+  // Filter out test/demo entries
+  const isRealNotification = (item) => {
+    const text = `${item.title || ""} ${item.message || ""} ${item.patient_name || ""}`.toLowerCase();
+    return !text.includes("test patient") && !text.includes("live test") && !text.includes("demo patient");
+  };
 
   // Fetch Real Critical Alerts and Notifications
   const loadAlertsAndNotifications = useCallback(async () => {
@@ -147,30 +191,18 @@ function Navbar({ onMenuClick }) {
 
         // Fetch notifications
         try {
-          const res = await api.get("/notifications/?limit=5");
+          setNotificationsLoading(true);
+          const res = await api.get("/notifications/?limit=20");
           const items = Array.isArray(res.data) ? res.data : (res.data?.notifications || []);
-          setNotificationsList(items);
-          const unread = items.filter((n) => !n.is_read).length;
-          setUnreadCount(unread > 0 ? unread : items.length);
+          const cleanItems = items.filter(isRealNotification);
+          setNotificationsList(cleanItems);
+          const unread = cleanItems.filter((n) => !n.is_read).length;
+          setUnreadCount(unread);
         } catch {
-          // Fallback notification count
-          setUnreadCount(criticalList.length > 0 ? criticalList.length : 2);
-          setNotificationsList([
-            {
-              id: "n-1",
-              title: "System Synchronization Active",
-              message: "Clinical database connected with real-time surveillance.",
-              created_at: new Date().toISOString(),
-              is_read: false,
-            },
-            {
-              id: "n-2",
-              title: "OPD Roster Updated",
-              message: "Specialist consultation schedules confirmed for today.",
-              created_at: new Date().toISOString(),
-              is_read: true,
-            },
-          ]);
+          // If network error, preserve clean state
+          setNotificationsList((prev) => prev.filter(isRealNotification));
+        } finally {
+          setNotificationsLoading(false);
         }
       }
     } catch (err) {
@@ -180,9 +212,51 @@ function Navbar({ onMenuClick }) {
 
   useEffect(() => {
     loadAlertsAndNotifications();
-    const interval = setInterval(loadAlertsAndNotifications, 45000); // 45s refresh
+    const interval = setInterval(loadAlertsAndNotifications, 30000); // 30s real-time polling fallback
     return () => clearInterval(interval);
   }, [loadAlertsAndNotifications]);
+
+  // Mark single notification as read & navigate
+  const handleNotificationClick = async (notif) => {
+    const notifId = notif._id || notif.id;
+    if (!notif.is_read && notifId) {
+      try {
+        await api.put(`/notifications/${notifId}`, { is_read: true });
+        setNotificationsList((prev) =>
+          prev.map((n) => ((n._id || n.id) === notifId ? { ...n, is_read: true } : n))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      } catch (err) {
+        console.warn("Could not mark notification as read:", err);
+      }
+    }
+    setBellDropdownOpen(false);
+
+    // Contextual routing based on notification type
+    const typeStr = (notif.notification_type || notif.type || "").toUpperCase();
+    if (typeStr.includes("EMERGENCY") || typeStr.includes("ALERT") || typeStr.includes("VITAL")) {
+      navigate(isDoctor ? "/doctor/patient-monitoring" : "/staff/patients");
+    } else if (typeStr.includes("APPOINTMENT")) {
+      navigate(isDoctor ? "/doctor/appointments" : "/staff/appointments");
+    } else if (typeStr.includes("APPROVAL")) {
+      navigate(isDoctor ? "/doctor/approvals" : "/staff/approvals");
+    } else if (typeStr.includes("QUEUE")) {
+      navigate("/staff/queue");
+    } else {
+      navigate(allNotificationsLink);
+    }
+  };
+
+  // Mark all notifications as read
+  const handleMarkAllRead = async () => {
+    try {
+      await api.put("/notifications/mark-all-read");
+      setNotificationsList((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.warn("Failed to mark all as read:", err);
+    }
+  };
 
   const brandLink = isDoctor
     ? "/doctor/dashboard"
@@ -322,53 +396,105 @@ function Navbar({ onMenuClick }) {
           {bellDropdownOpen && (
             <div className="nav-dropdown-menu notifications-dropdown" role="menu">
               <div className="dropdown-header-bar">
-                <strong>Clinical Notifications</strong>
-                <span className="dropdown-header-tag">
-                  {unreadCount} Unread
-                </span>
+                <div className="dropdown-header-title-box">
+                  <strong>Clinical Notifications</strong>
+                  {unreadCount > 0 && (
+                    <span className="dropdown-header-tag">
+                      {unreadCount} Unread
+                    </span>
+                  )}
+                </div>
+                {unreadCount > 0 && (
+                  <button
+                    className="dropdown-mark-all-btn"
+                    onClick={handleMarkAllRead}
+                    title="Mark all as read"
+                  >
+                    <CheckCheck size={14} />
+                    <span>Mark all read</span>
+                  </button>
+                )}
               </div>
 
               <div className="dropdown-items-list">
-                {notificationsList.length > 0 ? (
-                  notificationsList.map((notif) => (
-                    <Link
-                      key={notif.id || notif._id || Math.random()}
-                      to={allNotificationsLink}
-                      className={`dropdown-item-row ${!notif.is_read ? "unread" : ""}`}
-                      onClick={() => setBellDropdownOpen(false)}
-                    >
-                      <div className="dropdown-item-icon icon-info">
-                        <Activity size={15} />
+                {notificationsLoading && notificationsList.length === 0 ? (
+                  <div className="dropdown-empty-state">
+                    <Loader2 size={24} className="spin-icon" style={{ margin: "0 auto 8px" }} />
+                    <p>Syncing notifications...</p>
+                  </div>
+                ) : notificationsList.length > 0 ? (
+                  notificationsList.map((notif) => {
+                    const typeStr = (notif.notification_type || notif.type || "").toUpperCase();
+                    const isAlert = typeStr.includes("EMERGENCY") || typeStr.includes("ALERT") || typeStr.includes("CRITICAL");
+                    const isApt = typeStr.includes("APPOINTMENT");
+                    const isApproval = typeStr.includes("APPROVAL");
+                    const isVitals = typeStr.includes("VITAL") || typeStr.includes("HEALTH");
+
+                    return (
+                      <div
+                        key={notif._id || notif.id || Math.random()}
+                        className={`dropdown-item-row ${!notif.is_read ? "unread" : ""}`}
+                        onClick={() => handleNotificationClick(notif)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            handleNotificationClick(notif);
+                          }
+                        }}
+                      >
+                        <div
+                          className={`dropdown-item-icon ${
+                            isAlert ? "icon-alert" : isApt ? "icon-apt" : isApproval ? "icon-approval" : "icon-info"
+                          }`}
+                        >
+                          {isAlert ? (
+                            <AlertTriangle size={15} />
+                          ) : isApt ? (
+                            <Calendar size={15} />
+                          ) : isApproval ? (
+                            <CheckCheck size={15} />
+                          ) : isVitals ? (
+                            <Activity size={15} />
+                          ) : (
+                            <Activity size={15} />
+                          )}
+                        </div>
+                        <div className="dropdown-item-content">
+                          <div className="dropdown-item-title-row">
+                            <strong className="dropdown-item-title">
+                              {notif.title || "Notification"}
+                            </strong>
+                            {!notif.is_read && <span className="unread-dot" title="Unread" />}
+                          </div>
+                          <span className="dropdown-item-desc">
+                            {notif.message || notif.detail || ""}
+                          </span>
+                          <span className="dropdown-item-time">
+                            {getRelativeTime(notif.created_at)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="dropdown-item-content">
-                        <strong className="dropdown-item-title">
-                          {notif.title || "Notification"}
-                        </strong>
-                        <span className="dropdown-item-desc">
-                          {notif.message || notif.detail || ""}
-                        </span>
-                        <span className="dropdown-item-time">
-                          {notif.created_at
-                            ? new Date(notif.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                            : "Recent"}
-                        </span>
-                      </div>
-                    </Link>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="dropdown-empty-state">
-                    <p>No new notifications.</p>
+                    <Sparkles size={24} className="text-muted" style={{ margin: "0 auto 8px" }} />
+                    <p>You're all caught up!</p>
+                    <span style={{ fontSize: "11px", color: "#94a3b8" }}>No active unread clinical notifications.</span>
                   </div>
                 )}
               </div>
 
-              <Link
-                to={allNotificationsLink}
-                className="dropdown-footer-link"
-                onClick={() => setBellDropdownOpen(false)}
-              >
-                View All Notifications →
-              </Link>
+              <div className="dropdown-footer-actions">
+                <Link
+                  to={allNotificationsLink}
+                  className="dropdown-footer-link"
+                  onClick={() => setBellDropdownOpen(false)}
+                >
+                  View All Notifications →
+                </Link>
+              </div>
             </div>
           )}
         </div>

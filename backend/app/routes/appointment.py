@@ -85,8 +85,8 @@ def create_appointment():
         "appointment_date": appointment_date,
         "appointment_time": appointment_time,
         "reason": reason,
-        "status": "APPROVED" if current_user.get("role") in ["STAFF", "ADMIN", "DOCTOR"] else "PENDING",
-        "approval_status": "APPROVED" if current_user.get("role") in ["STAFF", "ADMIN", "DOCTOR"] else "PENDING",
+        "status": data.get("status") or ("APPROVED" if current_user.get("role") in ["STAFF", "ADMIN", "DOCTOR"] else "PENDING"),
+        "approval_status": data.get("status") or ("APPROVED" if current_user.get("role") in ["STAFF", "ADMIN", "DOCTOR"] else "PENDING"),
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc)
     }

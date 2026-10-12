@@ -500,13 +500,13 @@ export default function Queue() {
               <tbody>
                 {queueItems.map((item) => {
                   const qId = item._id || item.id;
-                  const tokenCode = item.token_code || `T-${String(item.token_number || 1).zfill(3)}`;
+                  const tokenCode = item.token_code || `T-${String(item.token_number || 1).padStart(3, "0")}`;
                   const isEmergency = item.priority === "EMERGENCY";
-                  const patientName = item.patient_name || "—";
+                  const patientName = item.patient_name && item.patient_name !== "—" ? item.patient_name : "Walk-in Patient";
                   const patientPhone = item.patient_phone || "—";
                   const patientCode = item.patient_id_code || "—";
-                  const doctorName = item.doctor_name || "—";
-                  const specialty = item.specialty || "General Medicine";
+                  const doctorName = item.doctor_name && item.doctor_name !== "—" ? item.doctor_name : "On-Duty Physician";
+                  const specialty = item.specialty && item.specialty !== "—" ? item.specialty : "General Medicine";
                   const status = (item.status || "WAITING").toUpperCase();
                   const waitTime = getWaitTime(item.created_at);
 
