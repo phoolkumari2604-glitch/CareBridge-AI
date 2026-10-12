@@ -131,6 +131,34 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  margin: 0;
+  padding: 0;
+}
+
+.login-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.login-field-header label {
+  margin: 0;
+}
+
+.forgot-password-link {
+  font-size: 12px;
+  color: #2dd4bf !important;
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.15s ease, text-decoration 0.15s ease;
+}
+
+.forgot-password-link:hover {
+  color: #5eead4 !important;
+  text-decoration: underline;
 }
 
 .input-wrap {

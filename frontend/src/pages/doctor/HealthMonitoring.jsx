@@ -1234,6 +1234,50 @@ export default function HealthMonitoring() {
     }
   }, [pid, loadVitals]);
 
+  // Listen to external vitalsUpdated event (from Dossier or Patient Monitoring)
+  useEffect(() => {
+    const handleExternalVital = (evt) => {
+      const { patientId: targetPid, vital, isCritical } = evt.detail || {};
+      if (!vital) return;
+
+      // If matches currently selected patient, immediately integrate
+      if (String(targetPid) === String(pid)) {
+        const newPoint = {
+          id: vital._id || `ext-${Date.now()}`,
+          t: vital.recorded_at ? new Date(vital.recorded_at).getTime() : Date.now(),
+          hr: Number(vital.heart_rate) || 72,
+          sys: Number(vital.systolic_bp) || 120,
+          dia: Number(vital.diastolic_bp) || 80,
+          spo2: Number(vital.spo2) || 98,
+          temp: Number(vital.temperature) || 36.8,
+          sugar: Number(vital.blood_sugar) || 95,
+          weight: vital.weight ? Number(vital.weight) : null,
+          recorded_by: "Clinical Staff (Live Dossier)",
+          notes: vital.notes || "Live logged reading"
+        };
+
+        setData((prev) => [...prev, newPoint]);
+        setLiveBpm(newPoint.hr);
+        setLastSync(new Date());
+
+        if (isCritical) {
+          setCriticalAlert({
+            metric: mk,
+            val: METRICS[mk]?.get(newPoint) || newPoint.hr,
+            time: new Date().toLocaleTimeString()
+          });
+          say(`CRITICAL ALERT: Out-of-bounds reading detected for this patient`);
+        } else {
+          setCriticalAlert(null);
+          say(`Live vital reading synchronized immediately`);
+        }
+      }
+    };
+
+    window.addEventListener("vitalsUpdated", handleExternalVital);
+    return () => window.removeEventListener("vitalsUpdated", handleExternalVital);
+  }, [pid, mk, say]);
+
   // Real-time live telemetry stream updates every 2.5 seconds
   useEffect(() => {
     if (isPaused || !pid) return;

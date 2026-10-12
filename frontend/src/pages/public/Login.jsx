@@ -422,13 +422,13 @@ function Login() {
                 </div>
 
                 <div className="login-field">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label htmlFor="login-password" className="text-slate-300 block text-xs font-semibold uppercase tracking-wider">
+                  <div className="login-field-header">
+                    <label htmlFor="login-password">
                       Password
                     </label>
                     <Link
                       to="/forgot-password"
-                      className="text-xs text-teal-400 hover:underline font-medium"
+                      className="forgot-password-link"
                     >
                       Forgot password?
                     </Link>

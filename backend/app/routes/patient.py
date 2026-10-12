@@ -354,10 +354,12 @@ def get_patients():
     except (ValueError, TypeError):
         limit = 10
 
-    # Base Filter: exclude junk / "string"
+    # Base Filter: exclude junk / "string" and isolate test patients
     base_filter = {
-        "name": {"$nin": ["string", "None", "", None]}
+        "name": {"$nin": ["string", "None", "", None]},
     }
+    if request.args.get("include_test") != "true":
+        base_filter["is_test"] = {"$ne": True}
 
     # Handle Search
     if search:
