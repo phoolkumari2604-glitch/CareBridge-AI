@@ -48,11 +48,11 @@ def validate_patient_payload(data: dict, is_create: bool = True):
         errors["phone"] = "Phone number is required."
     elif phone is not None:
         phone_str = str(phone).strip()
-        digits = normalize_phone(phone_str)
-        if phone_str.lower() == "string" or len(digits) != 10:
-            errors["phone"] = "Please enter a valid 10-digit mobile number."
+        digits = re.sub(r"\D", "", phone_str)
+        if phone_str.lower() == "string" or len(digits) < 7 or len(digits) > 15:
+            errors["phone"] = "Please enter a valid phone number (7 to 15 digits)."
         else:
-            data["phone"] = f"+91 {digits}"
+            data["phone"] = phone_str
 
     # 3. Email validation
     email = data.get("email")
@@ -354,10 +354,12 @@ def get_patients():
     except (ValueError, TypeError):
         limit = 10
 
-    # Base Filter: exclude junk / "string"
+    # Base Filter: exclude junk / "string" and isolate test patients
     base_filter = {
-        "name": {"$nin": ["string", "None", "", None]}
+        "name": {"$nin": ["string", "None", "", None]},
     }
+    if request.args.get("include_test") != "true":
+        base_filter["is_test"] = {"$ne": True}
 
     # Handle Search
     if search:

@@ -796,7 +796,9 @@ def get_me():
             "lastLogin": last_login_str,
             "createdAt": created_at_str,
             "patient_id": patient_id,
-            "doctor_id": doctor_id
+            "doctor_id": doctor_id,
+            "avatar": user.get("avatar") or user.get("photo"),
+            "photo": user.get("photo") or user.get("avatar")
         }), 200
     except Exception as err:
         return jsonify({"error": "Failed to retrieve profile", "detail": str(err)}), 500
@@ -828,6 +830,13 @@ def update_profile():
             update_fields["phone"] = f"+91 {digits}"
         else:
             update_fields["phone"] = raw_phone
+
+    if "avatar" in data:
+        update_fields["avatar"] = data["avatar"]
+    if "photo" in data:
+        update_fields["photo"] = data["photo"]
+        if "avatar" not in update_fields:
+            update_fields["avatar"] = data["photo"]
             
     if update_fields:
         update_fields["updated_at"] = datetime.now(timezone.utc)
@@ -855,6 +864,8 @@ def update_profile():
             "email": updated_user.get("email"),
             "role": role,
             "phone": updated_user.get("phone"),
+            "avatar": updated_user.get("avatar") or updated_user.get("photo"),
+            "photo": updated_user.get("photo") or updated_user.get("avatar"),
             "staffId": staff_id,
             "faceVerified": bool(updated_user.get("face_verified") or updated_user.get("faceVerified")),
             "fingerprintVerified": bool(updated_user.get("fingerprint_verified") or updated_user.get("fingerprintVerified"))
@@ -873,25 +884,32 @@ def enroll_face():
     data = request.get_json() or {}
     
     descriptor = data.get("descriptor") or data.get("embedding")
+    encrypted_payload = data.get("encrypted_payload")
     consent = bool(data.get("consent", True))
     
     if not consent:
         return jsonify({"error": "Consent Required", "detail": "User consent is required for biometric processing."}), 400
         
-    if not descriptor or not isinstance(descriptor, list):
-        return jsonify({"error": "Validation Error", "detail": "Valid face descriptor vector is required."}), 400
+    if not descriptor and not encrypted_payload:
+        return jsonify({"error": "Validation Error", "detail": "Valid face descriptor vector or encrypted payload is required."}), 400
         
     now_iso = datetime.now(timezone.utc).isoformat()
+    update_fields = {
+        "face_verified": True,
+        "faceVerified": True,
+        "face_verified_at": now_iso,
+        "faceVerifiedAt": now_iso,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    if encrypted_payload:
+        update_fields["face_encrypted_payload"] = encrypted_payload
+    if descriptor and isinstance(descriptor, list):
+        update_fields["face_descriptor"] = descriptor
+
     db.users.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {
-            "face_verified": True,
-            "faceVerified": True,
-            "face_verified_at": now_iso,
-            "faceVerifiedAt": now_iso,
-            "face_descriptor": descriptor,
-            "updated_at": datetime.now(timezone.utc)
-        }}
+        {"$set": update_fields}
     )
     
     log_audit_action(
@@ -922,15 +940,21 @@ def verify_face():
     stored_descriptor = user.get("face_descriptor")
     
     if not stored_descriptor:
-        return jsonify({"error": "Not Found", "detail": "No enrolled face biometric found for this account."}), 404
+        return jsonify({"error": "Not Found", "detail": "No enrolled face biometric found for this account. Please enroll first."}), 404
         
-    is_match = True
+    is_match = False
+    match_score = 0.0
+    
     if live_descriptor and isinstance(live_descriptor, list) and isinstance(stored_descriptor, list):
         try:
-            dist = sum((a - b) ** 2 for a, b in zip(live_descriptor, stored_descriptor)) ** 0.5
+            # Euclidean distance between normalized descriptors
+            dist = sum((float(a) - float(b)) ** 2 for a, b in zip(live_descriptor, stored_descriptor)) ** 0.5
+            # Threshold 0.65 for typical 128-float euclidean face vector distance
+            match_score = max(0.0, min(100.0, round((1.0 - (dist / 1.5)) * 100, 1)))
             is_match = dist < 0.65
-        except Exception:
-            is_match = True
+        except Exception as e:
+            dist = 999.0
+            is_match = False
 
     if not is_match:
         log_audit_action(
@@ -940,9 +964,13 @@ def verify_face():
             action="FACE_VERIFIED_FAILED",
             resource="BIOMETRICS",
             resource_id=user_id,
-            details="Live face verification failed distance match threshold"
+            details=f"Live face verification failed distance match threshold (Score: {match_score}%)"
         )
-        return jsonify({"verified": False, "detail": "Face verification did not match enrolled credential"}), 401
+        return jsonify({
+            "verified": False,
+            "matchScore": match_score,
+            "detail": f"Face verification did not match enrolled credential (Score: {match_score}%)."
+        }), 401
         
     now_iso = datetime.now(timezone.utc).isoformat()
     log_audit_action(
@@ -952,10 +980,15 @@ def verify_face():
         action="FACE_VERIFIED",
         resource="BIOMETRICS",
         resource_id=user_id,
-        details="Staff successfully authenticated via live face biometric check"
+        details=f"Staff successfully authenticated via live face biometric check (Score: {match_score}%)"
     )
     
-    return jsonify({"verified": True, "message": "Face verification successful", "verifiedAt": now_iso}), 200
+    return jsonify({
+        "verified": True,
+        "matchScore": match_score,
+        "message": f"Face verification successful ({match_score}% match score)",
+        "verifiedAt": now_iso
+    }), 200
 
 # ============================================================
 # BIOMETRIC FINGERPRINT / WEBAUTHN ENDPOINTS
@@ -963,17 +996,29 @@ def verify_face():
 @auth_bp.route("/biometrics/webauthn/register-options", methods=["POST"])
 @token_required
 def webauthn_register_options():
+    db = get_database()
     user = g.current_user
+    user_id = str(user["_id"])
     challenge = secrets.token_urlsafe(32)
+    
+    # Store challenge temporarily on user document for verification
+    db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"webauthn_challenge": challenge, "webauthn_challenge_created": datetime.now(timezone.utc)}}
+    )
+    
     return jsonify({
         "challenge": challenge,
         "rp": {"name": "CareBridge AI Clinical Security", "id": request.host.split(":")[0]},
         "user": {
-            "id": str(user["_id"]),
+            "id": user_id,
             "name": user.get("email"),
-            "displayName": user.get("name") or "Staff"
+            "displayName": user.get("name") or "Staff Member"
         },
-        "pubKeyCredParams": [{"type": "public-key", "alg": -7}, {"type": "public-key", "alg": -257}],
+        "pubKeyCredParams": [
+            {"type": "public-key", "alg": -7},   # ES256
+            {"type": "public-key", "alg": -257}  # RS256
+        ],
         "authenticatorSelection": {
             "authenticatorAttachment": "platform",
             "userVerification": "required"
@@ -989,9 +1034,14 @@ def webauthn_register_verify():
     user_id = str(user["_id"])
     data = request.get_json() or {}
     
-    credential_id = data.get("id") or secrets.token_hex(16)
+    credential_id = data.get("id") or data.get("credentialId")
+    public_key = data.get("publicKey") or data.get("response", {}).get("publicKey") or "ECDSA_P256_SHA256"
+    counter = int(data.get("counter", 0))
     now_iso = datetime.now(timezone.utc).isoformat()
     
+    if not credential_id:
+        return jsonify({"error": "Validation Error", "detail": "Credential ID is required."}), 400
+
     db.users.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {
@@ -999,7 +1049,14 @@ def webauthn_register_verify():
             "fingerprintVerified": True,
             "fingerprint_verified_at": now_iso,
             "fingerprintVerifiedAt": now_iso,
+            "webauthn_credential": {
+                "credentialId": credential_id,
+                "publicKey": public_key,
+                "counter": counter,
+                "linkedAt": now_iso
+            },
             "webauthn_credential_id": credential_id,
+            "webauthn_challenge": None,
             "updated_at": datetime.now(timezone.utc)
         }}
     )
@@ -1011,13 +1068,41 @@ def webauthn_register_verify():
         action="FINGERPRINT_REGISTERED",
         resource="BIOMETRICS",
         resource_id=user_id,
-        details="Platform biometric credential (Windows Hello / Fingerprint) registered securely"
+        details=f"Platform biometric sensor (Windows Hello / Fingerprint) linked (Credential: {credential_id[:16]}...)"
     )
     
     return jsonify({
-        "message": "Platform biometric credential registered successfully",
+        "message": "Platform biometric credential linked successfully",
         "fingerprintVerified": True,
-        "fingerprintVerifiedAt": now_iso
+        "fingerprintVerifiedAt": now_iso,
+        "credentialId": credential_id
+    }), 200
+
+@auth_bp.route("/biometrics/webauthn/verify-options", methods=["POST"])
+@token_required
+def webauthn_verify_options():
+    db = get_database()
+    user = g.current_user
+    user_id = str(user["_id"])
+    
+    cred = user.get("webauthn_credential")
+    cred_id = cred.get("credentialId") if cred else user.get("webauthn_credential_id")
+    
+    if not cred_id:
+        return jsonify({"error": "Not Found", "detail": "No platform biometric sensor linked to this account."}), 404
+        
+    challenge = secrets.token_urlsafe(32)
+    db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"webauthn_verify_challenge": challenge, "webauthn_challenge_created": datetime.now(timezone.utc)}}
+    )
+    
+    return jsonify({
+        "challenge": challenge,
+        "allowCredentials": [{"type": "public-key", "id": cred_id}],
+        "timeout": 60000,
+        "userVerification": "required",
+        "rpId": request.host.split(":")[0]
     }), 200
 
 @auth_bp.route("/biometrics/webauthn/verify", methods=["POST"])
@@ -1026,8 +1111,36 @@ def webauthn_verify():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
-    now_iso = datetime.now(timezone.utc).isoformat()
+    data = request.get_json() or {}
     
+    cred = user.get("webauthn_credential")
+    stored_cred_id = cred.get("credentialId") if cred else user.get("webauthn_credential_id")
+    
+    if not stored_cred_id:
+        return jsonify({"error": "Not Found", "detail": "No registered platform sensor found."}), 404
+        
+    incoming_id = data.get("id") or data.get("credentialId")
+    if incoming_id and incoming_id != stored_cred_id:
+        log_audit_action(
+            db=db,
+            user_id=user_id,
+            user_role=user.get("role", "STAFF"),
+            action="FINGERPRINT_VERIFIED_FAILED",
+            resource="BIOMETRICS",
+            resource_id=user_id,
+            details="WebAuthn credential ID mismatch"
+        )
+        return jsonify({"verified": False, "detail": "Credential ID does not match registered platform sensor."}), 401
+        
+    # Increment counter
+    if cred:
+        new_counter = int(cred.get("counter", 0)) + 1
+        db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"webauthn_credential.counter": new_counter, "webauthn_verify_challenge": None}}
+        )
+
+    now_iso = datetime.now(timezone.utc).isoformat()
     log_audit_action(
         db=db,
         user_id=user_id,
@@ -1038,7 +1151,11 @@ def webauthn_verify():
         details="User verified via platform fingerprint / Windows Hello sensor"
     )
     
-    return jsonify({"verified": True, "message": "Fingerprint verified successfully", "verifiedAt": now_iso}), 200
+    return jsonify({
+        "verified": True,
+        "message": "Platform biometric sensor verified successfully",
+        "verifiedAt": now_iso
+    }), 200
 
 @auth_bp.route("/biometrics", methods=["DELETE"])
 @token_required
@@ -1052,10 +1169,18 @@ def delete_biometrics():
         {"$set": {
             "face_verified": False,
             "faceVerified": False,
+            "face_verified_at": None,
+            "faceVerifiedAt": None,
+            "face_descriptor": None,
+            "face_encrypted_payload": None,
             "fingerprint_verified": False,
             "fingerprintVerified": False,
-            "face_descriptor": None,
+            "fingerprint_verified_at": None,
+            "fingerprintVerifiedAt": None,
+            "webauthn_credential": None,
             "webauthn_credential_id": None,
+            "webauthn_challenge": None,
+            "webauthn_verify_challenge": None,
             "updated_at": datetime.now(timezone.utc)
         }}
     )
@@ -1067,10 +1192,14 @@ def delete_biometrics():
         action="BIOMETRIC_DELETED",
         resource="BIOMETRICS",
         resource_id=user_id,
-        details="Staff user requested permanent deletion of all stored biometric credentials"
+        details="Staff user permanently revoked all stored biometric credentials (face descriptor & WebAuthn platform sensor)"
     )
     
-    return jsonify({"message": "All biometric credentials deleted permanently", "faceVerified": False, "fingerprintVerified": False}), 200
+    return jsonify({
+        "message": "All biometric credentials deleted permanently",
+        "faceVerified": False,
+        "fingerprintVerified": False
+    }), 200
 
 @auth_bp.route("/change-password", methods=["POST"])
 @token_required

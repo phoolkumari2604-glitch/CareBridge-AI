@@ -128,20 +128,29 @@ export const doctorService = {
   // ------------------------------------------------------------
   // APPROVALS
   // ------------------------------------------------------------
-  async getApprovals() {
+  async getApprovals(params = {}) {
     try {
-      const response = await api.get("/approvals/");
-      return Array.isArray(response.data) ? response.data : [];
+      const response = await api.get("/approvals/", { params: { limit: 100, ...params } });
+      const data = response.data;
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.approvals)) return data.approvals;
+      return [];
     } catch (error) {
       console.warn("Failed to fetch approvals from /approvals/:", error?.message);
       return [];
     }
   },
 
-  async updateApproval(approvalId, status) {
+  async updateApproval(approvalId, status, rejectionReason = "") {
     if (!approvalId) throw new Error("Approval ID required");
     const normalizedStatus = status.toUpperCase();
-    const response = await api.put(`/approvals/${approvalId}?status=${normalizedStatus}`);
+    const payload = { status: normalizedStatus };
+    if (rejectionReason) {
+      payload.rejection_reason = rejectionReason;
+    }
+    const response = await api.put(`/approvals/${approvalId}`, payload, {
+      params: { status: normalizedStatus }
+    });
     return response.data;
   },
 
@@ -176,28 +185,34 @@ export const doctorService = {
   // ------------------------------------------------------------
   // HEALTH RECORDS
   // ------------------------------------------------------------
-  async getHealthRecords(patientIdOrParams) {
+  async getHealthRecords(params = {}) {
     try {
-      if (typeof patientIdOrParams === "string" && patientIdOrParams) {
-        const response = await api.get(`/health-records/${patientIdOrParams}`);
-        return Array.isArray(response.data) ? response.data : [];
+      const queryParams = typeof params === "string" ? { patient: params } : { ...params };
+      if (queryParams.patientId && !queryParams.patient) {
+        queryParams.patient = queryParams.patientId;
       }
-      const params = typeof patientIdOrParams === "object" ? patientIdOrParams : {};
-      const response = await api.get("/health-records/", { params });
+      const response = await api.get("/health-records/", { params: queryParams });
       if (Array.isArray(response.data)) return response.data;
+      if (response.data && Array.isArray(response.data.items)) return response.data.items;
       if (response.data && Array.isArray(response.data.records)) return response.data.records;
       return [];
     } catch (error) {
+      console.warn("Error fetching health records:", error?.message);
       return [];
     }
   },
 
   async getHealthRecordsSummary(params = {}) {
     try {
-      const response = await api.get("/health-records/", { params });
-      return response.data || { records: [], stats: { total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 } };
+      const queryParams = typeof params === "string" ? { patient: params } : { ...params };
+      if (queryParams.patientId && !queryParams.patient) {
+        queryParams.patient = queryParams.patientId;
+      }
+      const response = await api.get("/health-records/", { params: queryParams });
+      return response.data || { items: [], records: [], total: 0, stats: { records: 0, consultations: 0, prescriptions: 0, diagnoses: 0, checkups: 0 } };
     } catch (error) {
-      return { records: [], stats: { total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 } };
+      console.warn("Error fetching health records summary:", error?.message);
+      return { items: [], records: [], total: 0, stats: { records: 0, consultations: 0, prescriptions: 0, diagnoses: 0, checkups: 0 } };
     }
   },
 
@@ -215,6 +230,21 @@ export const doctorService = {
   async deleteHealthRecord(recordId) {
     if (!recordId) throw new Error("Record ID required");
     const response = await api.delete(`/health-records/${recordId}`);
+    return response.data;
+  },
+
+  async restoreHealthRecord(recordId) {
+    if (!recordId) throw new Error("Record ID required");
+    const response = await api.post(`/health-records/${recordId}/restore`);
+    return response.data;
+  },
+
+  async uploadRecordAttachment(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post("/health-records/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
     return response.data;
   },
 

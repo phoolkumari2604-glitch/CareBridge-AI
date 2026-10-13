@@ -1305,6 +1305,24 @@
   gap: 14px;
 }
 
+.phone-input-country-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.country-dial-select {
+  width: 130px !important;
+  flex-shrink: 0;
+  font-size: 13px !important;
+  padding: 10px 8px !important;
+  cursor: pointer;
+}
+
+.phone-num-input {
+  flex: 1;
+}
+
 .form-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

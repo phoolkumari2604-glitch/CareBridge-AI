@@ -143,6 +143,11 @@ export const authAPI = {
     return response.data;
   },
 
+  getWebAuthnVerifyOptions: async () => {
+    const response = await api.post("/auth/biometrics/webauthn/verify-options");
+    return response.data;
+  },
+
   verifyWebAuthn: async (data = {}) => {
     const response = await api.post("/auth/biometrics/webauthn/verify", data);
     return response.data;

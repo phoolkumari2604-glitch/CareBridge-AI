@@ -132,12 +132,48 @@ def create_vitals():
     except (ValueError, TypeError) as e:
         return jsonify({"error": "Validation Error", "detail": f"Invalid vital reading format: {str(e)}"}), 400
 
+    # Ensure systolic BP is strictly greater than diastolic BP
+    if "systolic_bp" in vital_doc and "diastolic_bp" in vital_doc:
+        if vital_doc["systolic_bp"] <= vital_doc["diastolic_bp"]:
+            return jsonify({
+                "error": "Validation Error",
+                "detail": f"Systolic pressure ({vital_doc['systolic_bp']} mmHg) must be higher than diastolic pressure ({vital_doc['diastolic_bp']} mmHg)"
+            }), 400
+
+    # Guard against duplicate submissions within 60 seconds
+    dup_query = {
+        "patient_id": target_patient_id,
+        "heart_rate": vital_doc.get("heart_rate"),
+        "systolic_bp": vital_doc.get("systolic_bp"),
+        "diastolic_bp": vital_doc.get("diastolic_bp"),
+        "spo2": vital_doc.get("spo2"),
+        "temperature": vital_doc.get("temperature"),
+        "blood_sugar": vital_doc.get("blood_sugar")
+    }
+    recent_dup = db.vital_signs.find_one(dup_query, sort=[("created_at", -1)])
+    if recent_dup:
+        dup_time = recent_dup.get("created_at") or recent_dup.get("recorded_at")
+        if dup_time:
+            dt = dup_time.replace(tzinfo=timezone.utc) if dup_time.tzinfo is None else dup_time
+            if (now - dt).total_seconds() < 60:
+                return jsonify({
+                    "error": "Conflict",
+                    "detail": "Duplicate vital signs reading already recorded recently"
+                }), 409
+
     result = db.vital_signs.insert_one(vital_doc)
     
-    # Update last vitals timestamp on patient document
+    # Update last vitals timestamp and patient clinical status on patient document
+    patient_status_val = "Critical" if is_critical else "Active"
     db.patients.update_one(
         {"_id": target_patient_id},
-        {"$set": {"last_vitals_at": now, "updated_at": now}}
+        {"$set": {
+            "last_vitals_at": now,
+            "updated_at": now,
+            "status": patient_status_val,
+            "clinical_status": "Critical" if is_critical else "Stable",
+            "telemetry_status": "Critical" if is_critical else "Normal"
+        }}
     )
 
     # If critical reading, create automatic emergency notification
@@ -243,6 +279,17 @@ def update_vitals(vital_id):
         
     data = request.get_json() or {}
     data.pop("_id", None)
+    
+    if "systolic_bp" in data and "diastolic_bp" in data:
+        try:
+            if float(data["systolic_bp"]) <= float(data["diastolic_bp"]):
+                return jsonify({
+                    "error": "Validation Error",
+                    "detail": "Systolic BP must be higher than diastolic BP"
+                }), 400
+        except (ValueError, TypeError):
+            pass
+
     data["updated_at"] = datetime.now(timezone.utc)
     
     res = db.vital_signs.update_one({"_id": ObjectId(vital_id)}, {"$set": data})

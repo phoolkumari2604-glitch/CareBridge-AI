@@ -197,6 +197,7 @@ def get_doctor_profile():
             "department": "Cardiovascular Sciences",
             "hospital": "CareBridge Multi-Specialty Hospital",
             "hospital_name": "CareBridge Multi-Specialty Hospital",
+            "qualification": "MBBS, MD (Cardiovascular Sciences)",
             "license_number": "MCI-IND-" + str(user_id)[-6:].upper(),
             "experience_years": 10,
             "consultation_fee": 800,
@@ -267,6 +268,21 @@ def update_doctor(doctor_id):
     data["updated_at"] = datetime.now(timezone.utc)
     
     db.doctors.update_one({"_id": doctor["_id"]}, {"$set": data})
+    
+    # Sync avatar and name to users collection if present
+    user_sync = {}
+    if "avatar" in data:
+        user_sync["avatar"] = data["avatar"]
+    if "photo" in data:
+        user_sync["photo"] = data["photo"]
+    if "name" in data:
+        user_sync["name"] = data["name"]
+    if user_sync and doctor.get("user_id"):
+        try:
+            db.users.update_one({"_id": ObjectId(doctor["user_id"])}, {"$set": user_sync})
+        except Exception:
+            pass
+
     updated_doc = db.doctors.find_one({"_id": doctor["_id"]})
     
     return jsonify({

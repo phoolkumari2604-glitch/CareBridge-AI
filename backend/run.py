@@ -6,5 +6,8 @@ app = create_app()
 
 if __name__ == "__main__":
     debug_mode = FLASK_ENV == "development"
-    print(f"[*] Starting CareBridge AI Flask Server on http://127.0.0.1:{PORT} (Debug: {debug_mode})")
-    app.run(host="127.0.0.1", port=PORT, debug=debug_mode)
+    host = os.getenv("HOST", "0.0.0.0")
+    print(f"[*] Starting CareBridge AI Flask Server on http://localhost:{PORT} and http://127.0.0.1:{PORT} (Host: {host}, Debug: {debug_mode})")
+    print(f"API running on http://localhost:{PORT}")
+    app.run(host=host, port=PORT, debug=debug_mode)
+

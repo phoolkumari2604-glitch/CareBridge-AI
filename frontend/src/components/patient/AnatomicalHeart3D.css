@@ -95,80 +95,45 @@
   position: relative;
   width: 100%;
   height: 380px;
-  background: radial-gradient(circle at center, #152442 0%, #080d19 100%);
+  background: radial-gradient(circle at center, rgba(225, 29, 72, 0.15) 0%, #060912 65%, #000000 100%);
+  border-bottom: 1px solid rgba(244, 63, 94, 0.2);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.heart-image-stage {
-  position: relative;
+.heart-threejs-container {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-/* Ambient Radial Cardiac Glow Behind Realistic Heart */
-.heart-ambient-glow {
   position: absolute;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.22) 0%, rgba(56, 189, 248, 0.12) 45%, transparent 70%);
-  filter: blur(28px);
+  top: 0;
+  left: 0;
+  cursor: grab;
+  touch-action: pan-y;
+  overflow: hidden;
+}
+
+.heart-threejs-container:active {
+  cursor: grabbing;
+}
+
+
+.heart-drag-hint {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  font-size: 11px;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+  background: rgba(11, 20, 38, 0.7);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(56, 189, 248, 0.15);
   pointer-events: none;
-  animation: ambientGlowPulse infinite cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 5;
 }
 
-@keyframes ambientGlowPulse {
-  0% { transform: scale(0.9); opacity: 0.4; }
-  14% { transform: scale(1.15); opacity: 0.85; }
-  28% { transform: scale(1.02); opacity: 0.55; }
-  42% { transform: scale(1.1); opacity: 0.75; }
-  60%, 100% { transform: scale(0.9); opacity: 0.4; }
-}
-
-/* Realistic Anatomical Heart PNG with Lub-Dub Beat */
-.realistic-heart-img {
-  max-height: 290px;
-  max-width: 85%;
-  object-fit: contain;
-  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 24px rgba(239, 68, 68, 0.25));
-  user-select: none;
-  -webkit-user-drag: none;
-  transform-origin: center center;
-  animation: lubDubHeartbeat infinite cubic-bezier(0.21, 0.61, 0.35, 1);
-  will-change: transform;
-}
-
-/* Two-Phase Lub-Dub Cardiac Cycle Keyframe Animation */
-@keyframes lubDubHeartbeat {
-  0% {
-    transform: scale(1);
-  }
-  /* Primary Systole (Lub - Ventricular Contraction) */
-  14% {
-    transform: scale(1.085);
-  }
-  24% {
-    transform: scale(1.01);
-  }
-  /* Secondary Systole (Dub - Atrial/Aortic recoil) */
-  38% {
-    transform: scale(1.052);
-  }
-  50% {
-    transform: scale(1);
-  }
-  /* Diastolic resting phase until next cycle */
-  100% {
-    transform: scale(1);
-  }
-}
 
 /* =========================================================
    3. GLASSMORPHISM "HEART BEAT" OVERLAY CARD (BOTTOM-LEFT)
@@ -510,8 +475,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .realistic-heart-img,
-  .heart-ambient-glow,
   .overlay-heart-pulse,
   .pulsing-led {
     animation: none !important;

@@ -58,37 +58,203 @@
   flex-wrap: wrap;
 }
 
-.date-picker-wrap {
+.date-picker-container {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+}
+
+.date-picker-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 0.45rem 0.75rem;
+  padding: 0.5rem 0.85rem;
   border-radius: 8px;
   color: #ffffff;
-}
-
-.calendar-date-input {
-  background: transparent;
-  border: none;
-  color: #ffffff;
   font-size: 0.82rem;
-  outline: none;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.calendar-date-input::-webkit-calendar-picker-indicator {
-  filter: invert(1);
+.date-picker-trigger:hover,
+.date-picker-trigger.has-date {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(56, 189, 248, 0.5);
+}
+
+.date-picker-trigger.has-date .selected-date-label {
+  color: #38bdf8;
+  font-weight: 600;
 }
 
 .clear-date-btn {
-  background: none;
-  border: none;
-  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #cbd5e1;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.8rem;
-  padding: 0 0.2rem;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  margin-left: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.clear-date-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* CALENDAR POPOVER */
+.calendar-popover-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1000;
+  width: 270px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 0.85rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.15s ease-out;
+}
+
+.calendar-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.calendar-month-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.calendar-nav-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.calendar-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.calendar-weekdays-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 0.35rem;
+}
+
+.calendar-weekday-cell {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.calendar-grid-cells {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.calendar-cell {
+  position: relative;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  padding: 0.4rem 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.calendar-cell.empty {
+  cursor: default;
+}
+
+.calendar-cell:not(.empty):hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.calendar-cell.selected {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.appointment-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #38bdf8;
+  margin-top: 2px;
+}
+
+.calendar-cell.selected .appointment-dot {
+  background: #ffffff;
+}
+
+.calendar-popover-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cal-footer-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.cal-footer-btn.today {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.cal-footer-btn.today:hover {
+  background: rgba(56, 189, 248, 0.2);
+}
+
+.cal-footer-btn.clear {
+  color: #94a3b8;
+}
+
+.cal-footer-btn.clear:hover {
+  color: #ffffff;
 }
 
 .refresh-schedule-btn {

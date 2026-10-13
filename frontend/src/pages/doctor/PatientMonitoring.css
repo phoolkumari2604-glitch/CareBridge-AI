@@ -1052,6 +1052,10 @@
   animation: fadeIn 0.2s ease forwards;
 }
 
+.monitoring-modal-backdrop.vitals-modal-backdrop {
+  z-index: 10001;
+}
+
 .monitoring-modal-card {
   background: #ffffff;
   border-radius: 18px;

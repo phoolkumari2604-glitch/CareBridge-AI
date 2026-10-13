@@ -248,6 +248,8 @@ function PatientMonitoring() {
     const dbp = Number(vitalsForm.diastolic_bp);
     if (!vitalsForm.diastolic_bp || isNaN(dbp) || dbp < 30 || dbp > 160) {
       errs.diastolic_bp = "Diastolic BP must be between 30 and 160 mmHg.";
+    } else if (!isNaN(sbp) && dbp >= sbp) {
+      errs.diastolic_bp = "Diastolic BP must be lower than Systolic BP.";
     }
 
     const hr = Number(vitalsForm.heart_rate);
@@ -267,6 +269,13 @@ function PatientMonitoring() {
       }
     }
 
+    if (vitalsForm.blood_sugar) {
+      const sugar = Number(vitalsForm.blood_sugar);
+      if (isNaN(sugar) || sugar < 20 || sugar > 600) {
+        errs.blood_sugar = "Blood sugar must be between 20 and 600 mg/dL.";
+      }
+    }
+
     setVitalsErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -281,15 +290,91 @@ function PatientMonitoring() {
 
     try {
       setSavingVitals(true);
+      const nowIso = new Date().toISOString();
+      const sbpVal = parseInt(vitalsForm.systolic_bp, 10);
+      const dbpVal = parseInt(vitalsForm.diastolic_bp, 10);
+      const hrVal = parseInt(vitalsForm.heart_rate, 10);
+      const spo2Val = parseFloat(vitalsForm.spo2);
+      const tempVal = vitalsForm.temperature ? parseFloat(vitalsForm.temperature) : undefined;
+      const sugarVal = vitalsForm.blood_sugar ? parseFloat(vitalsForm.blood_sugar) : undefined;
+      const notesVal = vitalsForm.notes?.trim() || undefined;
+
+      // Check if values trigger a Critical Alert
+      const isCritical =
+        hrVal < 50 || hrVal > 120 ||
+        spo2Val < 92 ||
+        sbpVal > 160 || sbpVal < 85 ||
+        (tempVal !== undefined && (tempVal > 38.5 || tempVal < 35.5)) ||
+        (sugarVal !== undefined && (sugarVal < 65 || sugarVal > 220));
+
+      const newVitalEntry = {
+        _id: `v_${Date.now()}`,
+        patient_id: vitalsForm.patient_id,
+        systolic_bp: sbpVal,
+        diastolic_bp: dbpVal,
+        heart_rate: hrVal,
+        spo2: spo2Val,
+        temperature: tempVal,
+        blood_sugar: sugarVal,
+        notes: notesVal,
+        recorded_at: nowIso,
+        status: isCritical ? "Critical" : "Normal"
+      };
+
+      // 1. Immediately update vitals history in the Dossier
+      setVitalsHistory((prev) => [newVitalEntry, ...prev]);
+
+      // 2. Immediately update patient in local state
+      const newTelemetryLevel = isCritical ? "critical" : "stable";
+      const newTelemetryLabel = isCritical ? "Critical Alert" : "Stable";
+
+      setPatients((prev) =>
+        prev.map((p) => {
+          if ((p._id || p.id) === vitalsForm.patient_id) {
+            return {
+              ...p,
+              latest_vital: newVitalEntry,
+              last_vitals_time: nowIso,
+              telemetry_level: newTelemetryLevel,
+              telemetry_label: newTelemetryLabel
+            };
+          }
+          return p;
+        })
+      );
+
+      // If dossier modal is open for this patient, update selectedPatient immediately
+      if (selectedPatient && (selectedPatient._id || selectedPatient.id) === vitalsForm.patient_id) {
+        setSelectedPatient((prev) => ({
+          ...prev,
+          latest_vital: newVitalEntry,
+          last_vitals_time: nowIso,
+          telemetry_level: newTelemetryLevel,
+          telemetry_label: newTelemetryLabel
+        }));
+      }
+
+      // 3. Dispatch global vitalsUpdated event so PulseView & DoctorDashboard sync live
+      window.dispatchEvent(
+        new CustomEvent("vitalsUpdated", {
+          detail: {
+            patientId: vitalsForm.patient_id,
+            vital: newVitalEntry,
+            isCritical: isCritical
+          }
+        })
+      );
+
+      // 4. Persist to API
       const payload = {
         patient_id: vitalsForm.patient_id,
-        systolic_bp: parseInt(vitalsForm.systolic_bp, 10),
-        diastolic_bp: parseInt(vitalsForm.diastolic_bp, 10),
-        heart_rate: parseInt(vitalsForm.heart_rate, 10),
-        spo2: parseFloat(vitalsForm.spo2),
-        temperature: vitalsForm.temperature ? parseFloat(vitalsForm.temperature) : undefined,
-        blood_sugar: vitalsForm.blood_sugar ? parseFloat(vitalsForm.blood_sugar) : undefined,
-        notes: vitalsForm.notes?.trim() || undefined,
+        systolic_bp: sbpVal,
+        diastolic_bp: dbpVal,
+        heart_rate: hrVal,
+        spo2: spo2Val,
+        temperature: tempVal,
+        blood_sugar: sugarVal,
+        notes: notesVal,
       };
 
       await doctorService.recordVitals(payload);
@@ -297,17 +382,18 @@ function PatientMonitoring() {
       const targetPatient = patients.find(
         (p) => (p._id || p.id) === vitalsForm.patient_id
       );
-      const name = targetPatient?.name || "Patient";
+      const name = targetPatient?.name || selectedPatient?.name || "Patient";
 
       setShowVitalsModal(false);
-      showToast("success", `Vitals recorded successfully for ${name}`);
-      await loadPatientsData(true);
 
-      // If drawer is open for this patient, update history
-      if (selectedPatient && (selectedPatient._id || selectedPatient.id) === vitalsForm.patient_id) {
-        const history = await doctorService.getPatientVitals(vitalsForm.patient_id);
-        setVitalsHistory(Array.isArray(history) ? history : []);
+      if (isCritical) {
+        showToast("error", `CRITICAL ALERT: Vitals for ${name} are outside normal range! (HR: ${hrVal}, SpO2: ${spo2Val}%, BP: ${sbpVal}/${dbpVal})`, 6000);
+      } else {
+        showToast("success", `Vitals recorded successfully for ${name}. Patient status is Stable.`);
       }
+
+      // Silent background fetch to guarantee database consistency
+      loadPatientsData(true);
     } catch (err) {
       console.error("Failed to save vitals:", err);
       const msg = err.response?.data?.detail || "Failed to record vital signs.";
@@ -861,7 +947,7 @@ function PatientMonitoring() {
       {/* RECORD VITALS MODAL */}
       {/* ============================================================ */}
       {showVitalsModal && (
-        <div className="monitoring-modal-backdrop" onClick={() => !savingVitals && setShowVitalsModal(false)}>
+        <div className="monitoring-modal-backdrop vitals-modal-backdrop" onClick={() => !savingVitals && setShowVitalsModal(false)}>
           <div
             className="monitoring-modal-card record-vitals-modal-card"
             onClick={(e) => e.stopPropagation()}

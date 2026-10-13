@@ -11,11 +11,15 @@ from app.core.database import get_database
 from app.utils.decorators import token_required
 from app.utils.helpers import serialize_doc, is_valid_object_id
 
-# PDF Generation via ReportLab
-from reportlab.lib.pagesizes import A5
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+# PDF Generation via ReportLab (safe import)
+try:
+    from reportlab.lib.pagesizes import A5
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+    REPORTLAB_AVAILABLE = True
+except ImportError:
+    REPORTLAB_AVAILABLE = False
 
 # Optional Razorpay Integration
 try:

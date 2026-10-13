@@ -102,7 +102,27 @@ function DoctorAppointments() {
     }
   };
 
-  // Filter appointments
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+
+  // Dates with appointments for calendar indicators
+  const appointmentDates = React.useMemo(() => {
+    const dates = new Set();
+    appointments.forEach((apt) => {
+      if (apt.appointment_date) {
+        dates.add(apt.appointment_date);
+      }
+    });
+    return dates;
+  }, [appointments]);
+
+  // Appointments filtered strictly by selectedDate (for counts and tabs)
+  const dateScopedAppointments = React.useMemo(() => {
+    if (!selectedDate) return appointments;
+    return appointments.filter((apt) => apt.appointment_date === selectedDate);
+  }, [appointments, selectedDate]);
+
+  // Filter appointments combining Tab, Search, and Date
   const filteredAppointments = appointments.filter((apt) => {
     const statusUpper = (apt.status || "PENDING").toUpperCase();
 
@@ -136,21 +156,70 @@ function DoctorAppointments() {
     return matchesTab && matchesSearch && matchesDate;
   });
 
-  const totalCount = appointments.length;
-  const confirmedCount = appointments.filter((a) => {
+  // Calculate summary counts matching the active date selection
+  const totalCount = dateScopedAppointments.length;
+  const confirmedCount = dateScopedAppointments.filter((a) => {
     const s = (a.status || "").toUpperCase();
     return s === "APPROVED" || s === "CONFIRMED";
   }).length;
-  const pendingCount = appointments.filter(
+  const pendingCount = dateScopedAppointments.filter(
     (a) => (a.status || "").toUpperCase() === "PENDING"
   ).length;
-  const completedCount = appointments.filter(
+  const completedCount = dateScopedAppointments.filter(
     (a) => (a.status || "").toUpperCase() === "COMPLETED"
   ).length;
-  const cancelledCount = appointments.filter((a) => {
+  const cancelledCount = dateScopedAppointments.filter((a) => {
     const s = (a.status || "").toUpperCase();
     return s === "CANCELLED" || s === "REJECTED";
   }).length;
+
+  // Calendar generation helpers
+  const getCalendarDays = () => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const days = [];
+    for (let i = 0; i < firstDayIndex; i++) {
+      days.push(null);
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      days.push({ day: d, dateStr });
+    }
+    return days;
+  };
+
+  const handlePrevMonth = (e) => {
+    e.stopPropagation();
+    setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = (e) => {
+    e.stopPropagation();
+    setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1));
+  };
+
+  const handleSelectDate = (dateStr) => {
+    setSelectedDate(dateStr);
+    setShowCalendar(false);
+  };
+
+  const handleSelectToday = (e) => {
+    e.stopPropagation();
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    setSelectedDate(todayStr);
+    setCalendarMonth(now);
+    setShowCalendar(false);
+  };
+
+  const handleClearDate = (e) => {
+    e.stopPropagation();
+    setSelectedDate("");
+    setShowCalendar(false);
+  };
 
   return (
     <div className="doctor-appointments-page">
@@ -165,23 +234,85 @@ function DoctorAppointments() {
         </div>
 
         <div className="header-date-and-actions">
-          <div className="date-picker-wrap">
-            <CalendarDays size={16} />
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="calendar-date-input"
+          {/* INTERACTIVE CALENDAR DATE PICKER */}
+          <div className="date-picker-container">
+            <button
+              type="button"
+              className={`date-picker-trigger ${selectedDate ? "has-date" : ""}`}
+              onClick={() => setShowCalendar((prev) => !prev)}
               title="Filter by appointment date"
-            />
+            >
+              <CalendarDays size={16} />
+              <span className="selected-date-label">
+                {selectedDate ? selectedDate : "Filter by date..."}
+              </span>
+            </button>
+
             {selectedDate && (
               <button
+                type="button"
                 className="clear-date-btn"
-                onClick={() => setSelectedDate("")}
-                title="Clear date filter"
+                onClick={handleClearDate}
+                title="Show all dates"
               >
                 ✕
               </button>
+            )}
+
+            {/* CALENDAR POPOVER */}
+            {showCalendar && (
+              <div className="calendar-popover-card" onClick={(e) => e.stopPropagation()}>
+                <div className="calendar-popover-header">
+                  <button type="button" onClick={handlePrevMonth} className="calendar-nav-btn">
+                    &lt;
+                  </button>
+                  <span className="calendar-month-title">
+                    {calendarMonth.toLocaleString("default", { month: "long", year: "numeric" })}
+                  </span>
+                  <button type="button" onClick={handleNextMonth} className="calendar-nav-btn">
+                    &gt;
+                  </button>
+                </div>
+
+                <div className="calendar-weekdays-row">
+                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((w) => (
+                    <span key={w} className="calendar-weekday-cell">
+                      {w}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="calendar-grid-cells">
+                  {getCalendarDays().map((cell, idx) => {
+                    if (!cell) {
+                      return <div key={`empty-${idx}`} className="calendar-cell empty" />;
+                    }
+                    const isSelected = selectedDate === cell.dateStr;
+                    const hasAppts = appointmentDates.has(cell.dateStr);
+
+                    return (
+                      <button
+                        key={cell.dateStr}
+                        type="button"
+                        onClick={() => handleSelectDate(cell.dateStr)}
+                        className={`calendar-cell ${isSelected ? "selected" : ""} ${hasAppts ? "has-appointments" : ""}`}
+                      >
+                        <span className="day-number">{cell.day}</span>
+                        {hasAppts && <span className="appointment-dot" title="Has appointments" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="calendar-popover-footer">
+                  <button type="button" className="cal-footer-btn today" onClick={handleSelectToday}>
+                    Today
+                  </button>
+                  <button type="button" className="cal-footer-btn clear" onClick={handleClearDate}>
+                    All Dates
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
@@ -368,7 +499,11 @@ function DoctorAppointments() {
                   <tr>
                     <td colSpan="5" className="empty-appointments-cell">
                       <CalendarDays size={36} />
-                      <p>No appointments match your filter criteria.</p>
+                      <p>
+                        {selectedDate
+                          ? `No appointments on this date (${selectedDate}).`
+                          : "No appointments match your filter criteria."}
+                      </p>
                     </td>
                   </tr>
                 ) : (
