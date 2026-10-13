@@ -42,7 +42,13 @@ import {
   X,
   Zap,
   Flame,
-  AlertCircle
+  AlertCircle,
+  Paperclip,
+  Camera,
+  RotateCcw,
+  FlipHorizontal,
+  Eye,
+  File
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import api from "../../services/api";
@@ -128,6 +134,20 @@ export default function DoctorAIAssistant() {
   const [newKbDisposition, setNewKbDisposition] = useState("");
   const [isSavingKb, setIsSavingKb] = useState(false);
 
+  // Attachment & File Upload State
+  const [attachments, setAttachments] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [previewModalFile, setPreviewModalFile] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Camera Capture Modal State
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [cameraFacingMode, setCameraFacingMode] = useState("user"); // "user" | "environment"
+  const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [cameraError, setCameraError] = useState("");
+  const cameraVideoRef = useRef(null);
+  const cameraStreamRef = useRef(null);
+
   const messagesEndRef = useRef(null);
   const abortControllerRef = useRef(null);
 
@@ -138,6 +158,200 @@ export default function DoctorAIAssistant() {
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(""), 3000);
+  };
+
+  // Camera lifecycle handlers
+  const stopCameraStream = useCallback(() => {
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch (_) {}
+      });
+      cameraStreamRef.current = null;
+    }
+    if (cameraVideoRef.current) {
+      cameraVideoRef.current.srcObject = null;
+    }
+  }, []);
+
+  const startCamera = useCallback(async (facing = "user") => {
+    setCameraError("");
+    stopCameraStream();
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError("Camera access requires HTTPS or is not supported by your browser.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facing,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+      cameraStreamRef.current = stream;
+      if (cameraVideoRef.current) {
+        cameraVideoRef.current.srcObject = stream;
+        try {
+          await cameraVideoRef.current.play();
+        } catch (_) {}
+      }
+    } catch (err) {
+      console.warn("Camera start error:", err.name);
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setCameraError("Camera permission denied. Please allow camera permissions in your browser.");
+      } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+        setCameraError("No camera hardware detected on this machine.");
+      } else {
+        setCameraError("Unable to open camera: " + (err.message || "Unknown error"));
+      }
+    }
+  }, [stopCameraStream]);
+
+  useEffect(() => {
+    if (isCameraModalOpen && !capturedPhoto) {
+      startCamera(cameraFacingMode);
+    } else if (!isCameraModalOpen) {
+      stopCameraStream();
+    }
+    return () => {
+      stopCameraStream();
+    };
+  }, [isCameraModalOpen, cameraFacingMode, capturedPhoto, startCamera, stopCameraStream]);
+
+  const handleCapturePhoto = () => {
+    if (!cameraVideoRef.current) return;
+    const video = cameraVideoRef.current;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+    setCapturedPhoto(dataUrl);
+    stopCameraStream();
+  };
+
+  const handleRetakePhoto = () => {
+    setCapturedPhoto(null);
+    startCamera(cameraFacingMode);
+  };
+
+  const handleUsePhoto = () => {
+    if (!capturedPhoto) return;
+    const newAtt = {
+      id: `cam-${Date.now()}`,
+      name: `clinical-photo-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.jpg`,
+      size: Math.round((capturedPhoto.length * 3) / 4),
+      type: "image/jpeg",
+      dataUrl: capturedPhoto,
+      progress: 100,
+    };
+    setAttachments((prev) => [...prev, newAtt].slice(0, 5));
+    setCapturedPhoto(null);
+    setIsCameraModalOpen(false);
+    stopCameraStream();
+    showToast("Captured clinical photo attached");
+  };
+
+  const handleFlipCamera = () => {
+    const nextMode = cameraFacingMode === "user" ? "environment" : "user";
+    setCameraFacingMode(nextMode);
+    if (!capturedPhoto) {
+      startCamera(nextMode);
+    }
+  };
+
+  // File Upload Handlers (Max 10 MB per file, max 5 files, no console logging of file contents)
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+  const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+
+  const handleFilesSelected = (fileList) => {
+    if (!fileList || !fileList.length) return;
+    const filesArray = Array.from(fileList);
+
+    if (attachments.length + filesArray.length > 5) {
+      showToast("Maximum 5 attachments allowed. Only first eligible files will be added.");
+    }
+
+    const availableSlots = 5 - attachments.length;
+    const filesToProcess = filesArray.slice(0, Math.max(0, availableSlots));
+
+    filesToProcess.forEach((file) => {
+      if (file.size > MAX_FILE_SIZE) {
+        showToast(`"${file.name}" exceeds 10 MB limit (${(file.size / (1024 * 1024)).toFixed(1)} MB).`);
+        return;
+      }
+
+      const isAllowed =
+        ALLOWED_MIME.includes(file.type) ||
+        file.name.toLowerCase().endsWith(".pdf") ||
+        file.name.toLowerCase().endsWith(".jpg") ||
+        file.name.toLowerCase().endsWith(".jpeg") ||
+        file.name.toLowerCase().endsWith(".png") ||
+        file.name.toLowerCase().endsWith(".webp");
+
+      if (!isAllowed) {
+        showToast(`"${file.name}" has an unsupported format. Accept images (JPG, PNG, WebP) and PDFs.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      const attId = `att-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        // Never log file contents to console for patient confidentiality
+        const newAtt = {
+          id: attId,
+          name: file.name,
+          size: file.size,
+          type: file.type || (file.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "image/jpeg"),
+          dataUrl,
+          progress: 100,
+        };
+        setAttachments((prev) => [...prev, newAtt].slice(0, 5));
+        showToast(`Attached "${file.name}"`);
+      };
+
+      reader.onerror = () => {
+        showToast(`Failed to read "${file.name}".`);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveAttachment = (id) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const handleSaveAttachmentToChart = async (att) => {
+    if (!selectedPatientId) {
+      showToast("Please select a patient chart first.");
+      return;
+    }
+    try {
+      await doctorService.createHealthRecord({
+        patient_id: selectedPatientId,
+        record_type: "LAB_REPORT",
+        title: att.name || "Medical Attachment",
+        diagnosis: "MedAI Diagnostic Attachment",
+        treatment: "Archived in Electronic Health Record",
+        notes: `Clinical file attached during MedAI triage consultation on ${new Date().toLocaleDateString()}`,
+        file_url: att.dataUrl,
+        attachments: [att],
+      });
+      showToast(`Saved "${att.name}" to patient chart`);
+      loadPatientDetails(selectedPatientId);
+    } catch (err) {
+      console.error("Save attachment error:", err);
+      showToast("Failed to save attachment to chart.");
+    }
   };
 
   // 1. Load Patients
@@ -232,15 +446,17 @@ export default function DoctorAIAssistant() {
   // -------------------------------------------------------------
   const handleSendMessage = async (customText = null) => {
     const textToSend = typeof customText === "string" ? customText.trim() : input.trim();
-    if (!textToSend || busy) return;
+    if ((!textToSend && attachments.length === 0) || busy) return;
 
+    const currentAttachments = [...attachments];
     const userMsgId = `usr-${Date.now()}`;
     const aiMsgId = `ai-${Date.now()}`;
 
     const userMsg = {
       id: userMsgId,
       role: "user",
-      content: textToSend,
+      content: textToSend || "(Clinical file attached for assessment)",
+      attachments: currentAttachments,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
 
@@ -255,6 +471,7 @@ export default function DoctorAIAssistant() {
 
     setMessages((prev) => [...prev, userMsg, aiMsg]);
     setInput("");
+    setAttachments([]);
     setBusy(true);
 
     abortControllerRef.current = new AbortController();
@@ -272,8 +489,14 @@ export default function DoctorAIAssistant() {
           Authorization: token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify({
-          message: textToSend,
+          message: textToSend || "Please clinically assess the attached medical documents or images for this patient.",
           patient_id: selectedPatientId,
+          attachments: currentAttachments.map((a) => ({
+            name: a.name,
+            type: a.type,
+            size: a.size,
+            dataUrl: a.dataUrl,
+          })),
           stream: true,
         }),
         signal: abortControllerRef.current.signal,
@@ -529,7 +752,31 @@ export default function DoctorAIAssistant() {
       </aside>
 
       {/* 2. CENTER PANEL: CHAT STREAM & MARKDOWN CARDS */}
-      <main className="ai-center-panel">
+      <main
+        className={`ai-center-panel ${isDragging ? "dragging-over" : ""}`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setIsDragging(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          if (e.dataTransfer.files?.length) {
+            handleFilesSelected(e.dataTransfer.files);
+          }
+        }}
+      >
+        {isDragging && (
+          <div className="chat-drop-overlay">
+            <Upload size={36} className="bounce-icon" />
+            <h3>Drop clinical documents or images here</h3>
+            <p>Accepts JPG, PNG, WebP, and PDF (Max 10 MB each, up to 5 files)</p>
+          </div>
+        )}
+
         {/* Top Chat Bar */}
         <header className="chat-top-bar">
           <div className="chat-patient-summary">
@@ -576,6 +823,47 @@ export default function DoctorAIAssistant() {
                     </span>
                     <span className="time-tag">{msg.timestamp}</span>
                   </div>
+
+                  {/* Attached Files in User Message */}
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="chat-bubble-attachments-grid">
+                      {msg.attachments.map((att, attIdx) => (
+                        <div key={att.id || attIdx} className="message-attachment-card">
+                          {att.type?.startsWith("image/") ? (
+                            <div className="msg-att-img-wrap" onClick={() => setPreviewModalFile(att)}>
+                              <img src={att.dataUrl} alt={att.name} className="msg-att-img" />
+                            </div>
+                          ) : (
+                            <div className="msg-att-pdf-wrap" onClick={() => setPreviewModalFile(att)}>
+                              <FileText size={24} className="pdf-icon" />
+                              <div className="pdf-meta">
+                                <span className="pdf-name">{att.name}</span>
+                                <span className="pdf-size">{(att.size / 1024).toFixed(0)} KB</span>
+                              </div>
+                            </div>
+                          )}
+                          <div className="msg-att-actions-strip">
+                            <button
+                              type="button"
+                              className="att-action-btn"
+                              onClick={() => setPreviewModalFile(att)}
+                              title="Full-size Preview"
+                            >
+                              <Eye size={12} /> View
+                            </button>
+                            <button
+                              type="button"
+                              className="att-action-btn chart-btn"
+                              onClick={() => handleSaveAttachmentToChart(att)}
+                              title="Save attachment to patient chart"
+                            >
+                              <FileText size={12} /> Save to Chart
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Markdown Rendered Content */}
                   <div className="markdown-content">
@@ -629,9 +917,46 @@ export default function DoctorAIAssistant() {
         {/* Input Bar */}
         <div className="chat-input-bar">
           <div className="input-field-wrapper">
+            {/* Attachment preview chips tray */}
+            {attachments.length > 0 && (
+              <div className="input-attachments-tray">
+                {attachments.map((att) => (
+                  <div key={att.id} className="input-att-chip">
+                    {att.type?.startsWith("image/") ? (
+                      <img
+                        src={att.dataUrl}
+                        alt={att.name}
+                        className="chip-thumb"
+                        onClick={() => setPreviewModalFile(att)}
+                      />
+                    ) : (
+                      <div className="chip-pdf-box" onClick={() => setPreviewModalFile(att)}>
+                        <FileText size={15} />
+                      </div>
+                    )}
+                    <div className="chip-info" onClick={() => setPreviewModalFile(att)}>
+                      <span className="chip-filename" title={att.name}>{att.name}</span>
+                      <span className="chip-filesize">{(att.size / 1024).toFixed(0)} KB</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="chip-remove-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveAttachment(att.id);
+                      }}
+                      title="Remove attachment"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <textarea
               rows={2}
-              placeholder="Enter symptoms, findings, or clinical questions (e.g. 'i got electric shock', 'chest pain 2 hours')..."
+              placeholder="Enter symptoms, findings, or clinical questions (or attach wound/rash photo, ECG, lab report)..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -644,10 +969,45 @@ export default function DoctorAIAssistant() {
             />
 
             <div className="input-buttons-row">
+              <input
+                type="file"
+                ref={fileInputRef}
+                multiple
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  if (e.target.files) handleFilesSelected(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+
+              <button
+                type="button"
+                className="attach-btn"
+                onClick={() => fileInputRef.current?.click()}
+                title="Attach Images or PDFs (max 10MB each, up to 5 files)"
+                disabled={busy}
+              >
+                <Paperclip size={16} />
+              </button>
+
+              <button
+                type="button"
+                className="camera-btn"
+                onClick={() => {
+                  setIsCameraModalOpen(true);
+                  setCapturedPhoto(null);
+                }}
+                title="Capture Medical Photo with Camera"
+                disabled={busy}
+              >
+                <Camera size={16} />
+              </button>
+
               <button
                 className={`mic-btn ${isListening ? "listening" : ""}`}
                 onClick={handleToggleVoice}
-                title="Voice Dictation"
+                title={isListening ? "Listening... (Click to stop)" : "Voice Dictation"}
                 type="button"
               >
                 {isListening ? <MicOff size={16} /> : <Mic size={16} />}
@@ -661,7 +1021,7 @@ export default function DoctorAIAssistant() {
                 <button
                   className="send-btn"
                   onClick={() => handleSendMessage()}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() && attachments.length === 0}
                   type="button"
                 >
                   <Send size={15} /> Send
@@ -669,9 +1029,15 @@ export default function DoctorAIAssistant() {
               )}
             </div>
           </div>
-          <span className="disclaimer-note">
-            ⚠️ Clinical decision support is meant to assist, not replace, certified clinician bedside judgment.
-          </span>
+
+          <div className="chat-footer-notes">
+            <span className="privacy-note">
+              🔒 <strong>Privacy Notice:</strong> Do not upload data you are not authorized to share. Files are evaluated strictly for decision support.
+            </span>
+            <span className="disclaimer-note">
+              ⚠️ AI suggestions assist clinicians and do not replace certified clinician bedside judgment.
+            </span>
+          </div>
         </div>
       </main>
 
@@ -761,6 +1127,174 @@ export default function DoctorAIAssistant() {
           </div>
         )}
       </aside>
+
+      {/* CAMERA CAPTURE MODAL */}
+      {isCameraModalOpen && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setIsCameraModalOpen(false);
+            stopCameraStream();
+          }}
+        >
+          <div className="modal-box camera-capture-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-row">
+                <Camera size={20} className="modal-icon-blue" />
+                <h3>Capture Medical Photo / Clinical Document</h3>
+              </div>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setIsCameraModalOpen(false);
+                  stopCameraStream();
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="camera-modal-body">
+              {cameraError ? (
+                <div className="camera-error-banner">
+                  <AlertCircle size={24} className="text-red" />
+                  <strong>Camera Error</strong>
+                  <p>{cameraError}</p>
+                  <button
+                    type="button"
+                    className="action-btn-primary"
+                    onClick={() => startCamera(cameraFacingMode)}
+                  >
+                    Retry Camera
+                  </button>
+                </div>
+              ) : capturedPhoto ? (
+                <div className="captured-preview-box">
+                  <img src={capturedPhoto} alt="Captured" className="captured-image-preview" />
+                </div>
+              ) : (
+                <div className="camera-live-feed-box">
+                  <video
+                    ref={cameraVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="camera-video-elem"
+                  />
+                  <div className="camera-overlay-crosshair">
+                    <div className="crosshair-corner tl" />
+                    <div className="crosshair-corner tr" />
+                    <div className="crosshair-corner bl" />
+                    <div className="crosshair-corner br" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="camera-modal-footer">
+              {!capturedPhoto && !cameraError && (
+                <>
+                  <button
+                    type="button"
+                    className="camera-switch-btn"
+                    onClick={handleFlipCamera}
+                    title="Switch Front / Back Camera"
+                  >
+                    <FlipHorizontal size={16} /> Switch Camera
+                  </button>
+                  <button
+                    type="button"
+                    className="camera-shutter-btn"
+                    onClick={handleCapturePhoto}
+                  >
+                    <Camera size={16} /> Capture Photo
+                  </button>
+                </>
+              )}
+
+              {capturedPhoto && (
+                <div className="captured-action-buttons">
+                  <button
+                    type="button"
+                    className="action-btn-secondary"
+                    onClick={handleRetakePhoto}
+                  >
+                    <RotateCcw size={15} /> Retake
+                  </button>
+                  <button
+                    type="button"
+                    className="action-btn-primary"
+                    onClick={handleUsePhoto}
+                  >
+                    <Check size={15} /> Use Photo
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FULL-SIZE ATTACHMENT PREVIEW MODAL */}
+      {previewModalFile && (
+        <div className="modal-overlay" onClick={() => setPreviewModalFile(null)}>
+          <div className="modal-box full-preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-row">
+                {previewModalFile.type?.startsWith("image/") ? (
+                  <Eye size={20} className="modal-icon-blue" />
+                ) : (
+                  <FileText size={20} className="modal-icon-blue" />
+                )}
+                <div>
+                  <h3>{previewModalFile.name}</h3>
+                  <span className="modal-subtitle">
+                    {(previewModalFile.size / 1024).toFixed(0)} KB · {previewModalFile.type}
+                  </span>
+                </div>
+              </div>
+              <button className="modal-close" onClick={() => setPreviewModalFile(null)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="full-preview-body">
+              {previewModalFile.type?.startsWith("image/") ? (
+                <img
+                  src={previewModalFile.dataUrl}
+                  alt={previewModalFile.name}
+                  className="full-preview-image"
+                />
+              ) : (
+                <div className="full-preview-pdf-container">
+                  <iframe
+                    src={previewModalFile.dataUrl}
+                    title={previewModalFile.name}
+                    className="pdf-preview-frame"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="full-preview-footer">
+              <button
+                type="button"
+                className="action-btn-secondary"
+                onClick={() => handleSaveAttachmentToChart(previewModalFile)}
+              >
+                <FileText size={15} /> Save to Patient Chart
+              </button>
+              <a
+                href={previewModalFile.dataUrl}
+                download={previewModalFile.name}
+                className="action-btn-primary"
+              >
+                <Download size={15} /> Download File
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* =========================================================
           4. KNOWLEDGE BASE MANAGER MODAL

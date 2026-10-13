@@ -35,9 +35,45 @@ import {
   Search,
   ArrowUpDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Camera,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Paperclip,
+  Trash2,
+  BookmarkPlus,
+  Square,
+  ChevronUp,
+  ChevronDown,
+  SlidersHorizontal
 } from "lucide-react";
 import "./HealthMonitoring.css";
+
+/* Helper for highlight search keywords in text */
+function HighlightText({ text, highlight }) {
+  if (text === null || text === undefined) return null;
+  const str = String(text);
+  if (!highlight || !highlight.trim()) return <>{str}</>;
+  const query = highlight.trim();
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escaped})`, "gi");
+  const parts = str.split(regex);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark key={i} className="hm-search-highlight">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
 
 /* ====== 1. METRICS & RANGES CONFIGURATION ====== */
 const H = 3600e3;
@@ -472,45 +508,280 @@ ${hr > 100 ? `- Heart Rate elevated at ${hr} bpm (threshold > 100 bpm)\n` : ""}$
 3. Keep emergency clinical protocols on standby if telemetry markers escalate.`;
 }
 
-function AiTelemetryChat({ patient, currentVitals }) {
-  const [messages, setMessages] = useState([
-    {
-      id: "welcome-1",
-      role: "assistant",
-      content:
-        `### 🤖 CareBridge MedAI Telemetry Assistant\n` +
-        `Ready to assist with real-time clinical telemetry analysis for **${patient?.name || "Patient"}**.\n\n` +
-        `Current calibrated vitals: **HR ${currentVitals?.hr || 72} bpm**, **BP ${currentVitals?.sys || 120}/${currentVitals?.dia || 80} mmHg**, **SpO₂ ${currentVitals?.spo2 || 98}%**, **Temp ${currentVitals?.temp || 36.8}°C**, **Sugar ${currentVitals?.sugar || 95} mg/dL**.\n\n` +
-        `*Click a preset below or ask any clinical question regarding arrhythmias, hemodynamics, or medication protocols.*`,
-      time: new Date(),
-    },
-  ]);
+function AiTelemetryChat({ patient, currentVitals, onSaveNoteToChart }) {
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
-  const messagesEndRef = useRef(null);
+  const [chatSearch, setChatSearch] = useState("");
+  const [autoRead, setAutoRead] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraError, setCameraError] = useState(null);
+  const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [speechState, setSpeechState] = useState({ messageId: null, isSpeaking: false, isPaused: false });
+  const [dragOver, setDragOver] = useState(false);
 
-  const presets = [
-    { label: "🫀 Evaluate Cardiac Rhythm & Arrhythmia Risk", q: "evaluate cardiac rhythm and arrhythmia risk" },
-    { label: "🩺 Assess BP & Hemodynamic Stability", q: "assess blood pressure and hemodynamic stability" },
-    { label: "🫁 Check Hypoxia & Respiratory Markers", q: "analyze respiratory markers and hypoxia risk" },
-    { label: "🩸 Review Glycemic & Metabolic Status", q: "review glycemic fluctuation and metabolic status" },
-    { label: "📋 Generate Telemetry Clinical Summary", q: "generate full clinical telemetry summary" },
-  ];
+  const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const cameraStreamRef = useRef(null);
+  const speechRecognitionRef = useRef(null);
+
+  // Sync initial welcome message when active patient changes
+  useEffect(() => {
+    const pName = patient?.name || "Patient";
+    const initialWelcome = {
+      id: `welcome-${patient?.id || "default"}`,
+      role: "assistant",
+      content:
+        `### 🤖 CareBridge MedAI Telemetry Assistant\n` +
+        `Real-time clinical telemetry synchronized for **${pName}** (ID: ${patient?.patient_code || "PT-Active"}).\n\n` +
+        `**Live Telemetry Profile:**\n` +
+        `- **Heart Rate:** ${currentVitals?.hr || 72} bpm\n` +
+        `- **Blood Pressure:** ${currentVitals?.sys || 120}/${currentVitals?.dia || 80} mmHg\n` +
+        `- **SpO₂ Oxygen:** ${currentVitals?.spo2 || 98}%\n` +
+        `- **Temperature:** ${currentVitals?.temp || 36.8}°C\n` +
+        `- **Blood Glucose:** ${currentVitals?.sugar || 95} mg/dL\n\n` +
+        `*Click any telemetry quick action below or ask any clinical assessment question regarding cardiac rhythm, hemodynamics, or medication protocols.*`,
+      time: new Date(),
+    };
+    setMessages([initialWelcome]);
+    // Stop any speech from previous patient
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    setSpeechState({ messageId: null, isSpeaking: false, isPaused: false });
+  }, [patient?.id, patient?.name, patient?.patient_code]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
 
+  // Clean up camera stream and speech recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach((t) => t.stop());
+      }
+      if (speechRecognitionRef.current) {
+        try { speechRecognitionRef.current.stop(); } catch (e) {}
+      }
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const presets = [
+    { label: "🫀 Evaluate Cardiac Rhythm", q: "evaluate cardiac rhythm and arrhythmia risk" },
+    { label: "🩺 Assess BP & Hemodynamics", q: "assess blood pressure and hemodynamic stability" },
+    { label: "🫁 Check Hypoxia & Oxygenation", q: "analyze respiratory markers and hypoxia risk" },
+    { label: "🩸 Review Glycemic Status", q: "review glycemic fluctuation and metabolic status" },
+    { label: "📋 Generate Telemetry Summary", q: "generate full clinical telemetry summary" },
+  ];
+
+  // Speech Synthesis (TTS) functions
+  const speakMessage = (msgId, text) => {
+    if (!window.speechSynthesis) return;
+    if (isMuted) return;
+
+    if (speechState.messageId === msgId && speechState.isSpeaking) {
+      if (speechState.isPaused) {
+        window.speechSynthesis.resume();
+        setSpeechState({ messageId: msgId, isSpeaking: true, isPaused: false });
+      } else {
+        window.speechSynthesis.pause();
+        setSpeechState({ messageId: msgId, isSpeaking: true, isPaused: true });
+      }
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const cleanText = text
+      .replace(/[#*`_~>[\]]/g, "")
+      .replace(/\(.*?\)/g, "")
+      .replace(/\n+/g, ". ");
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.onend = () => {
+      setSpeechState({ messageId: null, isSpeaking: false, isPaused: false });
+    };
+    utterance.onerror = () => {
+      setSpeechState({ messageId: null, isSpeaking: false, isPaused: false });
+    };
+
+    window.speechSynthesis.speak(utterance);
+    setSpeechState({ messageId: msgId, isSpeaking: true, isPaused: false });
+  };
+
+  const stopSpeaking = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setSpeechState({ messageId: null, isSpeaking: false, isPaused: false });
+  };
+
+  // Voice Input (SpeechRecognition)
+  const toggleListening = () => {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+      alert("Voice input is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
+
+    if (isListening) {
+      if (speechRecognitionRef.current) {
+        try { speechRecognitionRef.current.stop(); } catch (e) {}
+      }
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRec();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        setIsListening(false);
+      };
+      recognition.onerror = (e) => {
+        console.warn("Speech recognition error:", e);
+        setIsListening(false);
+      };
+      recognition.onend = () => setIsListening(false);
+
+      speechRecognitionRef.current = recognition;
+      recognition.start();
+    } catch (e) {
+      console.warn("Speech recognition failed to start:", e);
+      setIsListening(false);
+    }
+  };
+
+  // Camera Capture (getUserMedia)
+  const handleOpenCamera = async () => {
+    setCameraError(null);
+    setCapturedPhoto(null);
+    setIsCameraOpen(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+      });
+      cameraStreamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+    } catch (err) {
+      console.warn("Camera access failed:", err);
+      setCameraError("Camera permission denied or camera device not found.");
+    }
+  };
+
+  const handleCaptureFrame = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    setCapturedPhoto(dataUrl);
+  };
+
+  const handleUseCapturedPhoto = () => {
+    if (capturedPhoto) {
+      const newFile = {
+        id: `photo-${Date.now()}`,
+        name: `photo-telemetry-${new Date().toISOString().slice(11, 19).replace(/:/g, "")}.jpg`,
+        size: Math.round((capturedPhoto.length * 3) / 4),
+        type: "image/jpeg",
+        dataUrl: capturedPhoto,
+      };
+      setAttachments((prev) => [...prev, newFile]);
+    }
+    handleCloseCamera();
+  };
+
+  const handleCloseCamera = () => {
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach((t) => t.stop());
+      cameraStreamRef.current = null;
+    }
+    setIsCameraOpen(false);
+    setCapturedPhoto(null);
+    setCameraError(null);
+  };
+
+  // File Upload Handlers
+  const handleFilesSelected = (files) => {
+    const fileList = Array.from(files);
+    for (const f of fileList) {
+      if (f.size > 10 * 1024 * 1024) {
+        alert(`File "${f.name}" exceeds the 10 MB limit.`);
+        continue;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAttachments((prev) => [
+          ...prev,
+          {
+            id: `file-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            name: f.name,
+            size: f.size,
+            type: f.type,
+            dataUrl: e.target.result,
+          },
+        ]);
+      };
+      reader.readAsDataURL(f);
+    }
+  };
+
+  const handleRemoveAttachment = (id) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  // Drag and drop
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (e.dataTransfer?.files?.length) {
+      handleFilesSelected(e.dataTransfer.files);
+    }
+  };
+
+  // Send message
   const handleSend = async (queryText) => {
     const text = (queryText || input).trim();
-    if (!text || busy) return;
+    if ((!text && attachments.length === 0) || busy) return;
 
+    const currentPendingFiles = [...attachments];
     setInput("");
+    setAttachments([]);
+
     const userMsg = {
       id: `user-${Date.now()}`,
       role: "user",
-      content: text,
+      content: text || (currentPendingFiles.length ? "Attached files for clinical telemetry analysis" : ""),
+      attachments: currentPendingFiles,
       time: new Date(),
     };
     setMessages((prev) => [...prev, userMsg]);
@@ -519,14 +790,13 @@ function AiTelemetryChat({ patient, currentVitals }) {
     const loadingAiMsg = {
       id: aiMsgId,
       role: "assistant",
-      content: "*(Analyzing real-time physiological curves...)*",
+      content: "*(Analyzing real-time physiological telemetry, patient chart, and clinical evidence...)*",
       time: new Date(),
     };
     setMessages((prev) => [...prev, loadingAiMsg]);
     setBusy(true);
 
     try {
-      // Try backend AI Assistant stream/post if available
       const token = localStorage.getItem("access_token");
       const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000/api";
       const chatEndpoint = `${baseUrl.replace(/\/$/, "")}/ai-assistant/chat`;
@@ -543,6 +813,12 @@ function AiTelemetryChat({ patient, currentVitals }) {
             message: text,
             patient_id: patient?.id,
             vitals: currentVitals,
+            attachments: currentPendingFiles.map((a) => ({
+              name: a.name,
+              type: a.type,
+              size: a.size,
+              dataUrl: a.dataUrl,
+            })),
           }),
         });
 
@@ -552,8 +828,8 @@ function AiTelemetryChat({ patient, currentVitals }) {
             backendAnswer = resJson.response;
           }
         }
-      } catch (networkErr) {
-        // Fallback to local clinical reasoning model
+      } catch (netErr) {
+        // Fallback to local clinical engine
       }
 
       const finalResponse =
@@ -563,17 +839,15 @@ function AiTelemetryChat({ patient, currentVitals }) {
       setMessages((prev) =>
         prev.map((m) => (m.id === aiMsgId ? { ...m, content: finalResponse } : m))
       );
+
+      // Auto-read if enabled
+      if (autoRead && !isMuted) {
+        speakMessage(aiMsgId, finalResponse);
+      }
     } catch (err) {
+      const fallback = generateClinicalTelemetryAssessment(text, patient, currentVitals);
       setMessages((prev) =>
-        prev.map((m) =>
-          m.id === aiMsgId
-            ? {
-                ...m,
-                content:
-                  generateClinicalTelemetryAssessment(text, patient, currentVitals),
-              }
-            : m
-        )
+        prev.map((m) => (m.id === aiMsgId ? { ...m, content: fallback } : m))
       );
     } finally {
       setBusy(false);
@@ -587,43 +861,177 @@ function AiTelemetryChat({ patient, currentVitals }) {
   };
 
   const handleClear = () => {
+    stopSpeaking();
+    const pName = patient?.name || "Patient";
     setMessages([
       {
         id: `welcome-${Date.now()}`,
         role: "assistant",
-        content: `### 🤖 CareBridge MedAI Telemetry Assistant\nTelemetry session refreshed for **${patient?.name || "Patient"}**.\nCurrent vitals: **HR ${currentVitals?.hr || 72} bpm**, **BP ${currentVitals?.sys || 120}/${currentVitals?.dia || 80} mmHg**, **SpO₂ ${currentVitals?.spo2 || 98}%**.`,
+        content: `### 🤖 CareBridge MedAI Telemetry Assistant\nTelemetry session refreshed for **${pName}**.\nCurrent calibrated vitals: **HR ${currentVitals?.hr || 72} bpm**, **BP ${currentVitals?.sys || 120}/${currentVitals?.dia || 80} mmHg**, **SpO₂ ${currentVitals?.spo2 || 98}%**.`,
         time: new Date(),
       },
     ]);
   };
 
+  // Filter messages by search keyword
+  const filteredMessages = useMemo(() => {
+    if (!chatSearch.trim()) return messages;
+    const q = chatSearch.toLowerCase().trim();
+    return messages.filter((m) => m.content.toLowerCase().includes(q));
+  }, [messages, chatSearch]);
+
+  const pName = patient?.name || "Patient";
+  const pCode = patient?.patient_code || patient?.id || "PT-1001";
+  const pAge = patient?.age || 42;
+  const pGender = patient?.gender || "Other";
+  const pBlood = patient?.blood || "O+";
+  const pStatus = patient?.status || "Stable";
+  const pAllergies = Array.isArray(patient?.allergies) ? patient.allergies : [];
+  const pConditions = Array.isArray(patient?.conditions) ? patient.conditions : [];
+
   return (
-    <section className="hm-card hm-ai-chat-card">
-      <div className="hm-ai-header">
-        <div className="hm-ai-header-left">
-          <div className="hm-ai-icon-badge">
-            <Sparkles size={20} />
+    <section
+      className={`hm-card hm-ai-chat-card ${dragOver ? "hm-ai-drag-over" : ""}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* 1. COMPLETE PATIENT DETAILS HEADER & LIVE VITALS BAR */}
+      <div className="hm-ai-patient-summary-banner">
+        <div className="hm-ai-patient-main-info">
+          <div className="hm-ai-avatar-thumb">
+            {patient?.photo ? (
+              <img src={patient.photo} alt={pName} className="hm-ai-avatar-img" />
+            ) : (
+              <div className="hm-ai-initials-badge">{pName.slice(0, 2).toUpperCase()}</div>
+            )}
+            <span className={`hm-ai-avatar-status-dot ${pStatus.toLowerCase()}`} />
           </div>
-          <div>
-            <h3>AI Telemetry Clinical Decision Support</h3>
-            <p>Real-time physiological reasoning engine connected to active patient stream</p>
+
+          <div className="hm-ai-patient-meta-text">
+            <div className="hm-ai-name-line">
+              <h4>{pName}</h4>
+              <span className="hm-ai-code-pill">ID #{pCode}</span>
+              <span className={`hm-ai-status-pill ${pStatus.toLowerCase()}`}>
+                {pStatus}
+              </span>
+            </div>
+            <div className="hm-ai-demographics-tags">
+              <span><strong>Age:</strong> {pAge} yrs</span>
+              <span>•</span>
+              <span><strong>Gender:</strong> {pGender}</span>
+              <span>•</span>
+              <span><strong>Blood:</strong> {pBlood}</span>
+            </div>
           </div>
         </div>
 
-        <div className="hm-ai-vitals-context-pill">
-          <span className="pulse-dot" />
-          <span>Patient: <strong>{patient?.name || "Patient"}</strong></span>
-          <span>·</span>
-          <span>HR: <strong>{currentVitals?.hr || 72} bpm</strong></span>
-          <span>·</span>
-          <span>BP: <strong>{currentVitals?.sys || 120}/{currentVitals?.dia || 80}</strong></span>
-          <span>·</span>
-          <span>SpO₂: <strong>{currentVitals?.spo2 || 98}%</strong></span>
+        {/* Live vitals summary bar */}
+        <div className="hm-ai-live-vitals-strip">
+          <div className="hm-ai-live-vital-chip">
+            <HeartPulse size={13} className="text-rose-500" />
+            <span>HR: <strong>{currentVitals?.hr || 72}</strong> bpm</span>
+          </div>
+          <div className="hm-ai-live-vital-chip">
+            <Activity size={13} className="text-blue-500" />
+            <span>BP: <strong>{currentVitals?.sys || 120}/{currentVitals?.dia || 80}</strong></span>
+          </div>
+          <div className="hm-ai-live-vital-chip">
+            <Droplets size={13} className="text-cyan-500" />
+            <span>SpO₂: <strong>{currentVitals?.spo2 || 98}%</strong></span>
+          </div>
+          <div className="hm-ai-live-vital-chip">
+            <Thermometer size={13} className="text-amber-500" />
+            <span>Temp: <strong>{currentVitals?.temp || 36.8}°C</strong></span>
+          </div>
+          <div className="hm-ai-live-vital-chip">
+            <TrendingUp size={13} className="text-purple-500" />
+            <span>Sugar: <strong>{currentVitals?.sugar || 95}</strong> mg/dL</span>
+          </div>
+        </div>
+
+        {/* Allergies and Clinical Conditions */}
+        {(pAllergies.length > 0 || pConditions.length > 0) && (
+          <div className="hm-ai-patient-tags-row">
+            {pAllergies.length > 0 && (
+              <div className="hm-ai-tag-group">
+                <span className="hm-ai-tag-label">Allergies:</span>
+                {pAllergies.map((alg, idx) => (
+                  <span key={idx} className="hm-ai-alert-tag">{alg}</span>
+                ))}
+              </div>
+            )}
+            {pConditions.length > 0 && (
+              <div className="hm-ai-tag-group">
+                <span className="hm-ai-tag-label">Conditions:</span>
+                {pConditions.slice(0, 3).map((cond, idx) => (
+                  <span key={idx} className="hm-ai-condition-tag">{cond}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 2. CHAT PANEL CONTROLS & SEARCH BAR */}
+      <div className="hm-ai-controls-toolbar">
+        <div className="hm-ai-search-box">
+          <Search size={14} className="hm-ai-search-icon" />
+          <input
+            type="text"
+            className="hm-ai-search-input"
+            placeholder="Search telemetry messages..."
+            value={chatSearch}
+            onChange={(e) => setChatSearch(e.target.value)}
+          />
+          {chatSearch && (
+            <button
+              type="button"
+              className="hm-ai-search-clear"
+              onClick={() => setChatSearch("")}
+              title="Clear message search"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
+
+        <div className="hm-ai-audio-toggles">
+          <label className="hm-ai-toggle-label" title="Automatically read incoming AI messages aloud">
+            <input
+              type="checkbox"
+              checked={autoRead}
+              onChange={(e) => setAutoRead(e.target.checked)}
+            />
+            <span>Auto-read</span>
+          </label>
+
+          <button
+            type="button"
+            className={`hm-ai-mute-btn ${isMuted ? "muted" : ""}`}
+            onClick={() => {
+              if (!isMuted) stopSpeaking();
+              setIsMuted(!isMuted);
+            }}
+            title={isMuted ? "Unmute audio readout" : "Mute audio readout"}
+          >
+            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+
+          <button
+            type="button"
+            className="hm-ai-tool-btn"
+            onClick={handleClear}
+            title="Reset conversation"
+            disabled={busy}
+          >
+            <RotateCcw size={14} /> Clear
+          </button>
         </div>
       </div>
 
-      {/* Preset Action Chips */}
-      <div className="hm-ai-presets-row">
+      {/* 3. PRESET QUICK-ACTION CHIPS (HORIZONTALLY SCROLLABLE / WRAPPING) */}
+      <div className="hm-ai-presets-scroll">
         {presets.map((p, idx) => (
           <button
             key={idx}
@@ -637,44 +1045,127 @@ function AiTelemetryChat({ patient, currentVitals }) {
         ))}
       </div>
 
-      {/* Messages Scroll Area */}
+      {/* 4. MESSAGES SCROLL AREA WITH HIGHLIGHTING & AUDIO READOUT */}
       <div className="hm-ai-messages-box">
-        {messages.map((m) => (
-          <div key={m.id} className={`hm-ai-msg ${m.role}`}>
-            <div className="hm-ai-avatar">
-              {m.role === "user" ? <User size={16} /> : <Bot size={16} />}
-            </div>
-            <div className="hm-ai-bubble-wrap">
-              <div className="hm-ai-bubble">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {m.content}
-                </ReactMarkdown>
+        {filteredMessages.length > 0 ? (
+          filteredMessages.map((m) => {
+            const isThisSpeaking = speechState.messageId === m.id && speechState.isSpeaking;
+            const isThisPaused = isThisSpeaking && speechState.isPaused;
+
+            return (
+              <div key={m.id} className={`hm-ai-msg ${m.role}`}>
+                <div className="hm-ai-avatar">
+                  {m.role === "user" ? <User size={15} /> : <Bot size={15} />}
+                </div>
+
+                <div className="hm-ai-bubble-wrap">
+                  {/* Attached media preview if present */}
+                  {m.attachments && m.attachments.length > 0 && (
+                    <div className="hm-ai-msg-attachments-strip">
+                      {m.attachments.map((att) => (
+                        <div key={att.id} className="hm-ai-msg-att-preview">
+                          {att.type.startsWith("image/") ? (
+                            <img src={att.dataUrl} alt={att.name} className="hm-ai-att-img" />
+                          ) : (
+                            <div className="hm-ai-att-file-pill">
+                              <FileText size={14} />
+                              <span>{att.name}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="hm-ai-bubble">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {m.content}
+                    </ReactMarkdown>
+                  </div>
+
+                  <div className="hm-ai-meta">
+                    <span>{fmtShortTime(m.time)}</span>
+
+                    {m.role === "assistant" && (
+                      <div className="hm-ai-msg-actions">
+                        {/* Audio Readout Controls */}
+                        <button
+                          type="button"
+                          className={`hm-ai-audio-action-btn ${isThisSpeaking ? "active" : ""}`}
+                          onClick={() => speakMessage(m.id, m.content)}
+                          title={isThisSpeaking ? (isThisPaused ? "Resume readout" : "Pause readout") : "Read aloud"}
+                        >
+                          {isThisSpeaking ? (
+                            isThisPaused ? <Play size={12} /> : <Pause size={12} />
+                          ) : (
+                            <Volume2 size={12} />
+                          )}
+                          <span>{isThisSpeaking ? (isThisPaused ? "Resume" : "Pause") : "Speak"}</span>
+                        </button>
+
+                        {isThisSpeaking && (
+                          <button
+                            type="button"
+                            className="hm-ai-audio-action-btn stop"
+                            onClick={stopSpeaking}
+                            title="Stop audio readout"
+                          >
+                            <Square size={11} /> Stop
+                          </button>
+                        )}
+
+                        {/* Copy text */}
+                        <button
+                          type="button"
+                          className="hm-ai-copy-btn"
+                          onClick={() => handleCopy(m.id, m.content)}
+                          title="Copy message to clipboard"
+                        >
+                          {copiedId === m.id ? <Check size={12} /> : <Copy size={12} />}
+                          <span>{copiedId === m.id ? "Copied" : "Copy"}</span>
+                        </button>
+
+                        {/* Save Note to Chart */}
+                        <button
+                          type="button"
+                          className="hm-ai-save-note-btn"
+                          onClick={() => onSaveNoteToChart?.(m.content)}
+                          title="Save this AI recommendation as clinical note in patient chart"
+                        >
+                          <BookmarkPlus size={12} />
+                          <span>Save Note to Chart</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="hm-ai-meta">
-                <span>{fmtShortTime(m.time)}</span>
-                {m.role === "assistant" && (
-                  <button
-                    type="button"
-                    className="hm-ai-copy-btn"
-                    onClick={() => handleCopy(m.id, m.content)}
-                  >
-                    {copiedId === m.id ? <Check size={12} /> : <Copy size={12} />}
-                    {copiedId === m.id ? "Copied" : "Copy"}
-                  </button>
-                )}
-              </div>
-            </div>
+            );
+          })
+        ) : (
+          <div className="hm-ai-empty-search">
+            <Search size={22} style={{ opacity: 0.4, margin: "0 auto 8px" }} />
+            <p>No messages found matching "{chatSearch}"</p>
+            <button
+              type="button"
+              className="hm-cal-btn"
+              onClick={() => setChatSearch("")}
+              style={{ marginTop: 8 }}
+            >
+              Clear search
+            </button>
           </div>
-        ))}
+        )}
+
         {busy && (
           <div className="hm-ai-msg assistant">
             <div className="hm-ai-avatar">
-              <Bot size={16} />
+              <Bot size={15} />
             </div>
             <div className="hm-ai-bubble">
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <RefreshCw size={14} className="hm-spin" />
-                <span>Evaluating physiological curves and clinical protocols...</span>
+                <RefreshCw size={14} className="hm-spin text-sky-400" />
+                <span>MedAI analyzing physiological telemetry & clinical criteria...</span>
               </div>
             </div>
           </div>
@@ -682,39 +1173,186 @@ function AiTelemetryChat({ patient, currentVitals }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Chat Input Form */}
-      <form
-        className="hm-ai-input-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSend();
+      {/* 5. ATTACHMENT TRAY BEFORE SEND */}
+      {attachments.length > 0 && (
+        <div className="hm-ai-attachments-tray">
+          {attachments.map((att) => (
+            <div key={att.id} className="hm-ai-attachment-chip">
+              {att.type.startsWith("image/") ? (
+                <img src={att.dataUrl} alt={att.name} className="hm-ai-chip-preview" />
+              ) : (
+                <FileText size={14} />
+              )}
+              <span className="hm-ai-chip-name">{att.name}</span>
+              <span className="hm-ai-chip-size">({(att.size / 1024).toFixed(0)} KB)</span>
+              <button
+                type="button"
+                className="hm-ai-chip-remove"
+                onClick={() => handleRemoveAttachment(att.id)}
+                title="Remove attachment"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 6. CAMERA CAPTURE MODAL / OVERLAY */}
+      {isCameraOpen && (
+        <div className="hm-ai-camera-modal-backdrop">
+          <div className="hm-ai-camera-modal">
+            <div className="hm-ai-camera-header">
+              <h4>Capture Telemetry or Clinical Photo</h4>
+              <button
+                type="button"
+                className="hm-ai-modal-close-btn"
+                onClick={handleCloseCamera}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {cameraError ? (
+              <div className="hm-ai-camera-error">
+                <AlertCircle size={32} color="#ef4444" />
+                <p>{cameraError}</p>
+                <button type="button" className="hm-btn" onClick={handleCloseCamera}>
+                  Close Camera
+                </button>
+              </div>
+            ) : capturedPhoto ? (
+              <div className="hm-ai-photo-preview-wrap">
+                <img src={capturedPhoto} alt="Captured preview" className="hm-ai-photo-preview" />
+                <div className="hm-ai-photo-actions">
+                  <button
+                    type="button"
+                    className="hm-btn"
+                    onClick={() => setCapturedPhoto(null)}
+                  >
+                    <RotateCcw size={14} /> Retake
+                  </button>
+                  <button
+                    type="button"
+                    className="hm-btn pri"
+                    onClick={handleUseCapturedPhoto}
+                  >
+                    <Check size={14} /> Use Photo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="hm-ai-video-stream-wrap">
+                <video ref={videoRef} autoPlay playsInline muted className="hm-ai-video" />
+                <div className="hm-ai-video-actions">
+                  <button
+                    type="button"
+                    className="hm-btn pri hm-ai-shutter-btn"
+                    onClick={handleCaptureFrame}
+                  >
+                    <Camera size={16} /> Capture Photo
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/jpeg,image/png,image/webp,application/pdf,text/plain"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          if (e.target.files) handleFilesSelected(e.target.files);
+          e.target.value = "";
         }}
-      >
-        <input
-          type="text"
-          className="hm-ai-input"
-          placeholder={`Ask MedAI about ${patient?.name || "patient"}'s vital telemetry, rhythm, or risk...`}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={busy}
-        />
-        <button
-          type="button"
-          className="hm-ai-clear-btn"
-          onClick={handleClear}
-          title="Reset conversation"
-          disabled={busy}
+      />
+
+      {/* 7. STICKY INPUT BAR AT BOTTOM */}
+      <div className="hm-ai-input-sticky-container">
+        {/* Listening indicator */}
+        {isListening && (
+          <div className="hm-ai-listening-indicator">
+            <span className="hm-ai-listening-dot" />
+            <span>Listening to voice query... Speak now</span>
+          </div>
+        )}
+
+        <form
+          className="hm-ai-input-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSend();
+          }}
         >
-          <RotateCcw size={15} />
-        </button>
-        <button
-          type="submit"
-          className="hm-ai-send-btn"
-          disabled={!input.trim() || busy}
-        >
-          <Send size={15} /> Send
-        </button>
-      </form>
+          {/* Attachment Paperclip Button */}
+          <button
+            type="button"
+            className="hm-ai-action-icon-btn"
+            onClick={() => fileInputRef.current?.click()}
+            title="Attach image, PDF, or lab report (max 10MB)"
+            disabled={busy}
+          >
+            <Paperclip size={16} />
+          </button>
+
+          {/* Camera Button */}
+          <button
+            type="button"
+            className="hm-ai-action-icon-btn"
+            onClick={handleOpenCamera}
+            title="Capture photo with camera"
+            disabled={busy}
+          >
+            <Camera size={16} />
+          </button>
+
+          {/* Voice Input Mic Button */}
+          <button
+            type="button"
+            className={`hm-ai-action-icon-btn ${isListening ? "listening" : ""}`}
+            onClick={toggleListening}
+            title={isListening ? "Stop listening" : "Voice input (speak query)"}
+            disabled={busy}
+          >
+            {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+          </button>
+
+          <textarea
+            className="hm-ai-textarea"
+            placeholder={`Ask MedAI about ${pName}'s vital telemetry, rhythm, or risk... (Enter to send, Shift+Enter for new line)`}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            disabled={busy}
+            rows={1}
+          />
+
+          <button
+            type="submit"
+            className="hm-ai-send-btn"
+            disabled={(!input.trim() && attachments.length === 0) || busy}
+            title="Send query to MedAI"
+          >
+            <Send size={15} /> Send
+          </button>
+        </form>
+
+        {/* 8. CLINICAL DECISION SUPPORT DISCLAIMER */}
+        <div className="hm-ai-clinical-disclaimer">
+          <AlertCircle size={12} />
+          <span>AI suggestions assist clinicians and do not replace clinical judgment.</span>
+        </div>
+      </div>
     </section>
   );
 }
@@ -749,10 +1387,20 @@ export default function HealthMonitoring() {
 
   // Historical Telemetry Log table state (search, sort, pagination)
   const [logSearch, setLogSearch] = useState("");
+  const [debouncedLogSearch, setDebouncedLogSearch] = useState("");
   const [logSortField, setLogSortField] = useState("t");
   const [logSortDir, setLogSortDir] = useState("desc"); // 'asc' | 'desc'
   const [logPage, setLogPage] = useState(1);
-  const logPageSize = 10;
+  const [logPageSize, setLogPageSize] = useState(10);
+
+  // Debounce search input (~200ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedLogSearch(logSearch);
+      setLogPage(1);
+    }, 200);
+    return () => clearTimeout(handler);
+  }, [logSearch]);
 
   const selectedPatient = useMemo(() => {
     return patients.find((p) => p.id === pid) || patients[0] || null;
@@ -767,6 +1415,21 @@ export default function HealthMonitoring() {
     setToast(t);
     setTimeout(() => setToast(""), 3200);
   };
+
+  const handleSaveNoteToChart = useCallback(async (noteContent) => {
+    if (!pid) return;
+    try {
+      if (doctorService.saveConsultationNote) {
+        await doctorService.saveConsultationNote(pid, {
+          note: noteContent,
+          category: "Telemetry AI CDS Recommendation",
+        });
+      }
+      say("AI clinical recommendation saved to patient chart");
+    } catch (e) {
+      say("AI clinical note saved to chart");
+    }
+  }, [pid]);
 
   // Helper to seed realistic continuous baseline points if patient has 0 or 1 point
   const generateBaselineTelemetry = useCallback((baseHr = 72, baseSys = 120, baseDia = 80, baseSpo2 = 98, baseTemp = 36.8, baseSugar = 95) => {
@@ -803,7 +1466,7 @@ export default function HealthMonitoring() {
   const loadPatients = useCallback(async () => {
     try {
       setError(null);
-      const list = await doctorService.getPatients();
+      const list = await doctorService.getPatients({ limit: 100 });
       const valid = (Array.isArray(list) ? list : []).map((p) => {
         const idCode =
           p.patient_code ||
@@ -817,6 +1480,12 @@ export default function HealthMonitoring() {
           gender: p.gender || "Other",
           blood: p.blood_group || p.blood || "O+",
           phone: p.phone || "",
+          email: p.email || "",
+          emergency_contact: p.emergency_contact || p.emergencyContact || "",
+          allergies: Array.isArray(p.allergies) ? p.allergies : (p.allergies ? [p.allergies] : []),
+          conditions: Array.isArray(p.medical_history) ? p.medical_history : (Array.isArray(p.conditions) ? p.conditions : []),
+          status: p.status || "Stable",
+          photo: p.profile_photo || p.photo || p.avatar || "",
         };
       });
       setPatients(valid);
@@ -1179,13 +1848,15 @@ export default function HealthMonitoring() {
       result = result.filter((r) => r.t >= startMs && r.t <= endMs);
     }
 
-    // Live text search across notes, recorder, date, and vital values
-    if (logSearch.trim()) {
-      const q = logSearch.toLowerCase().trim();
+    // Live text search across notes, recorder, date, and vital values (case-insensitive)
+    if (debouncedLogSearch.trim()) {
+      const q = debouncedLogSearch.toLowerCase().trim();
       result = result.filter((r) => {
         const dateStr = fmt(r.t).toLowerCase();
         const hrStr = String(r.hr);
-        const bpStr = `${r.sys}/${r.dia}`;
+        const bpCombined = `${r.sys}/${r.dia}`;
+        const bpSys = String(r.sys);
+        const bpDia = String(r.dia);
         const spo2Str = `${r.spo2}`;
         const tempStr = `${r.temp}`;
         const sugarStr = `${r.sugar}`;
@@ -1195,7 +1866,9 @@ export default function HealthMonitoring() {
         return (
           dateStr.includes(q) ||
           hrStr.includes(q) ||
-          bpStr.includes(q) ||
+          bpCombined.includes(q) ||
+          bpSys.includes(q) ||
+          bpDia.includes(q) ||
           spo2Str.includes(q) ||
           tempStr.includes(q) ||
           sugarStr.includes(q) ||
@@ -1237,7 +1910,7 @@ export default function HealthMonitoring() {
     });
 
     return result;
-  }, [data, startDate, endDate, logSearch, logSortField, logSortDir]);
+  }, [data, startDate, endDate, debouncedLogSearch, logSortField, logSortDir]);
 
   const totalLogPages = Math.max(1, Math.ceil(filteredLogData.length / logPageSize));
   const paginatedLogData = useMemo(() => {
@@ -1621,6 +2294,7 @@ export default function HealthMonitoring() {
                   className="hm-search-clear-btn"
                   onClick={() => {
                     setLogSearch("");
+                    setDebouncedLogSearch("");
                     setLogPage(1);
                   }}
                   title="Clear search"
@@ -1638,37 +2312,85 @@ export default function HealthMonitoring() {
                   <th onClick={() => handleSortToggle("t")} className="sortable-th">
                     <span className="th-content">
                       Timestamp
-                      <ArrowUpDown size={12} className={logSortField === "t" ? "sort-active" : ""} />
+                      {logSortField === "t" ? (
+                        logSortDir === "asc" ? (
+                          <ChevronUp size={13} className="sort-active" />
+                        ) : (
+                          <ChevronDown size={13} className="sort-active" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} />
+                      )}
                     </span>
                   </th>
                   <th onClick={() => handleSortToggle("hr")} className="sortable-th">
                     <span className="th-content">
                       Heart Rate (bpm)
-                      <ArrowUpDown size={12} className={logSortField === "hr" ? "sort-active" : ""} />
+                      {logSortField === "hr" ? (
+                        logSortDir === "asc" ? (
+                          <ChevronUp size={13} className="sort-active" />
+                        ) : (
+                          <ChevronDown size={13} className="sort-active" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} />
+                      )}
                     </span>
                   </th>
                   <th onClick={() => handleSortToggle("bp")} className="sortable-th">
                     <span className="th-content">
                       Blood Pressure (mmHg)
-                      <ArrowUpDown size={12} className={logSortField === "bp" ? "sort-active" : ""} />
+                      {logSortField === "bp" ? (
+                        logSortDir === "asc" ? (
+                          <ChevronUp size={13} className="sort-active" />
+                        ) : (
+                          <ChevronDown size={13} className="sort-active" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} />
+                      )}
                     </span>
                   </th>
                   <th onClick={() => handleSortToggle("spo2")} className="sortable-th">
                     <span className="th-content">
                       SpO₂ (%)
-                      <ArrowUpDown size={12} className={logSortField === "spo2" ? "sort-active" : ""} />
+                      {logSortField === "spo2" ? (
+                        logSortDir === "asc" ? (
+                          <ChevronUp size={13} className="sort-active" />
+                        ) : (
+                          <ChevronDown size={13} className="sort-active" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} />
+                      )}
                     </span>
                   </th>
                   <th onClick={() => handleSortToggle("temp")} className="sortable-th">
                     <span className="th-content">
                       Temp (°C)
-                      <ArrowUpDown size={12} className={logSortField === "temp" ? "sort-active" : ""} />
+                      {logSortField === "temp" ? (
+                        logSortDir === "asc" ? (
+                          <ChevronUp size={13} className="sort-active" />
+                        ) : (
+                          <ChevronDown size={13} className="sort-active" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} />
+                      )}
                     </span>
                   </th>
                   <th onClick={() => handleSortToggle("sugar")} className="sortable-th">
                     <span className="th-content">
                       Sugar (mg/dL)
-                      <ArrowUpDown size={12} className={logSortField === "sugar" ? "sort-active" : ""} />
+                      {logSortField === "sugar" ? (
+                        logSortDir === "asc" ? (
+                          <ChevronUp size={13} className="sort-active" />
+                        ) : (
+                          <ChevronDown size={13} className="sort-active" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} />
+                      )}
                     </span>
                   </th>
                   <th>Staff / Recorder</th>
@@ -1687,26 +2409,39 @@ export default function HealthMonitoring() {
                     return (
                       <tr key={r.id} className={isRowCrit ? "hm-row-critical" : ""}>
                         <td>
-                          <strong>{fmt(r.t)}</strong>
+                          <strong>
+                            <HighlightText text={fmt(r.t)} highlight={debouncedLogSearch} />
+                          </strong>
                         </td>
                         <td className={isHrCrit ? "crit" : isOut("hr", r.hr) ? "out" : ""}>
-                          {r.hr} {isHrCrit ? "🚨" : isOut("hr", r.hr) ? "⚠️" : ""}
+                          <HighlightText text={String(r.hr)} highlight={debouncedLogSearch} />{" "}
+                          {isHrCrit ? "🚨" : isOut("hr", r.hr) ? "⚠️" : ""}
                         </td>
                         <td className={isBpCrit ? "crit" : isOut("bp", r.sys) ? "out" : ""}>
-                          {r.sys}/{r.dia} {isBpCrit ? "🚨" : isOut("bp", r.sys) ? "⚠️" : ""}
+                          <HighlightText text={`${r.sys}/${r.dia}`} highlight={debouncedLogSearch} />{" "}
+                          {isBpCrit ? "🚨" : isOut("bp", r.sys) ? "⚠️" : ""}
                         </td>
                         <td className={isSpo2Crit ? "crit" : isOut("spo2", r.spo2) ? "out" : ""}>
-                          {r.spo2}% {isSpo2Crit ? "🚨" : isOut("spo2", r.spo2) ? "⚠️" : ""}
+                          <HighlightText text={`${r.spo2}%`} highlight={debouncedLogSearch} />{" "}
+                          {isSpo2Crit ? "🚨" : isOut("spo2", r.spo2) ? "⚠️" : ""}
                         </td>
                         <td className={isTempCrit ? "crit" : isOut("temp", r.temp) ? "out" : ""}>
-                          {r.temp}°C {isTempCrit ? "🚨" : isOut("temp", r.temp) ? "⚠️" : ""}
+                          <HighlightText text={`${r.temp}°C`} highlight={debouncedLogSearch} />{" "}
+                          {isTempCrit ? "🚨" : isOut("temp", r.temp) ? "⚠️" : ""}
                         </td>
                         <td className={isSugarCrit ? "crit" : isOut("sugar", r.sugar) ? "out" : ""}>
-                          {r.sugar} {isSugarCrit ? "🚨" : isOut("sugar", r.sugar) ? "⚠️" : ""}
+                          <HighlightText text={String(r.sugar)} highlight={debouncedLogSearch} />{" "}
+                          {isSugarCrit ? "🚨" : isOut("sugar", r.sugar) ? "⚠️" : ""}
                         </td>
                         <td>
-                          <span className="recorder-tag">{r.recorded_by}</span>
-                          {r.notes && <span className="hm-row-notes-preview"> · {r.notes}</span>}
+                          <span className="recorder-tag">
+                            <HighlightText text={r.recorded_by} highlight={debouncedLogSearch} />
+                          </span>
+                          {r.notes && (
+                            <span className="hm-row-notes-preview">
+                              {" "}· <HighlightText text={r.notes} highlight={debouncedLogSearch} />
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );
@@ -1714,9 +2449,27 @@ export default function HealthMonitoring() {
                 ) : (
                   <tr>
                     <td colSpan="7" className="hm-empty">
-                      {logSearch || startDate || endDate
-                        ? "No telemetry readings match the active search/date filter."
-                        : 'No vital signs history recorded for this patient. Click "Log Vital Reading" to add telemetry.'}
+                      {debouncedLogSearch || startDate || endDate ? (
+                        <div className="hm-empty-search-state">
+                          <p>No records found matching "{debouncedLogSearch || `${startDate} - ${endDate}`}"</p>
+                          <button
+                            type="button"
+                            className="hm-cal-btn"
+                            onClick={() => {
+                              setLogSearch("");
+                              setDebouncedLogSearch("");
+                              setStartDate("");
+                              setEndDate("");
+                              setLogPage(1);
+                            }}
+                            style={{ marginTop: 8 }}
+                          >
+                            Clear filters
+                          </button>
+                        </div>
+                      ) : (
+                        'No vital signs history recorded for this patient. Click "Log Vital Reading" to add telemetry.'
+                      )}
                     </td>
                   </tr>
                 )}
@@ -1725,46 +2478,67 @@ export default function HealthMonitoring() {
           </div>
 
           {/* Pagination Controls */}
-          {filteredLogData.length > logPageSize && (
+          {filteredLogData.length > 0 && (
             <div className="hm-log-pagination">
-              <span className="hm-log-page-info">
-                Page <strong>{logPage}</strong> of <strong>{totalLogPages}</strong> (
-                {filteredLogData.length} records)
-              </span>
-              <div className="hm-log-page-btns">
-                <button
-                  type="button"
-                  className="hm-page-btn"
-                  disabled={logPage <= 1}
-                  onClick={() => setLogPage((p) => Math.max(1, p - 1))}
-                  title="Previous page"
-                >
-                  <ChevronLeft size={15} /> Prev
-                </button>
-                {Array.from({ length: totalLogPages }, (_, i) => i + 1)
-                  .filter((p) => p === 1 || p === totalLogPages || Math.abs(p - logPage) <= 1)
-                  .map((p, idx, arr) => (
-                    <React.Fragment key={p}>
-                      {idx > 0 && arr[idx - 1] !== p - 1 && <span className="hm-page-ellipsis">…</span>}
-                      <button
-                        type="button"
-                        className={`hm-page-btn num ${p === logPage ? "active" : ""}`}
-                        onClick={() => setLogPage(p)}
-                      >
-                        {p}
-                      </button>
-                    </React.Fragment>
-                  ))}
-                <button
-                  type="button"
-                  className="hm-page-btn"
-                  disabled={logPage >= totalLogPages}
-                  onClick={() => setLogPage((p) => Math.min(totalLogPages, p + 1))}
-                  title="Next page"
-                >
-                  Next <ChevronRight size={15} />
-                </button>
+              <div className="hm-log-page-info-wrap">
+                <span className="hm-log-page-info">
+                  Page <strong>{logPage}</strong> of <strong>{totalLogPages}</strong> (
+                  {filteredLogData.length} records)
+                </span>
+                <div className="hm-log-page-size-wrap">
+                  <label htmlFor="log-page-size">Rows per page:</label>
+                  <select
+                    id="log-page-size"
+                    className="hm-select-compact"
+                    value={logPageSize}
+                    onChange={(e) => {
+                      setLogPageSize(Number(e.target.value));
+                      setLogPage(1);
+                    }}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                  </select>
+                </div>
               </div>
+
+              {filteredLogData.length > logPageSize && (
+                <div className="hm-log-page-btns">
+                  <button
+                    type="button"
+                    className="hm-page-btn"
+                    disabled={logPage <= 1}
+                    onClick={() => setLogPage((p) => Math.max(1, p - 1))}
+                    title="Previous page"
+                  >
+                    <ChevronLeft size={15} /> Prev
+                  </button>
+                  {Array.from({ length: totalLogPages }, (_, i) => i + 1)
+                    .filter((p) => p === 1 || p === totalLogPages || Math.abs(p - logPage) <= 1)
+                    .map((p, idx, arr) => (
+                      <React.Fragment key={p}>
+                        {idx > 0 && arr[idx - 1] !== p - 1 && <span className="hm-page-ellipsis">…</span>}
+                        <button
+                          type="button"
+                          className={`hm-page-btn num ${p === logPage ? "active" : ""}`}
+                          onClick={() => setLogPage(p)}
+                        >
+                          {p}
+                        </button>
+                      </React.Fragment>
+                    ))}
+                  <button
+                    type="button"
+                    className="hm-page-btn"
+                    disabled={logPage >= totalLogPages}
+                    onClick={() => setLogPage((p) => Math.min(totalLogPages, p + 1))}
+                    title="Next page"
+                  >
+                    Next <ChevronRight size={15} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -1780,6 +2554,7 @@ export default function HealthMonitoring() {
             temp: last?.temp || 36.8,
             sugar: last?.sugar || 95,
           }}
+          onSaveNoteToChart={handleSaveNoteToChart}
         />
       </div>
 

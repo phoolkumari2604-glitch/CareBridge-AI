@@ -1485,3 +1485,674 @@
   font-size: 12px;
 }
 
+/* Rows per page selector */
+.hm-log-page-info-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hm-log-page-size-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--hm-mut);
+}
+
+.hm-select-compact {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 6px;
+  color: var(--hm-tx);
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.hm-empty-search-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--hm-mut);
+}
+
+/* Search match highlighting */
+.hm-search-highlight {
+  background: rgba(234, 179, 8, 0.35);
+  color: inherit;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   AI TELEMETRY CDS PANEL UPGRADES
+   ========================================================= */
+
+.hm-ai-chat-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hm-ai-drag-over {
+  border-color: var(--hm-ac) !important;
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.25);
+}
+
+/* 1. Patient Summary Banner */
+.hm-ai-patient-summary-banner {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.hm-ai-patient-main-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hm-ai-avatar-thumb {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(2, 132, 199, 0.15);
+  border: 1px solid var(--hm-bd);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.hm-ai-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hm-ai-initials-badge {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--hm-ac);
+}
+
+.hm-ai-avatar-status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--hm-bg);
+  background: var(--hm-ok);
+}
+
+.hm-ai-avatar-status-dot.critical {
+  background: var(--hm-bad);
+}
+
+.hm-ai-avatar-status-dot.warning,
+.hm-ai-avatar-status-dot.attention {
+  background: var(--hm-warn);
+}
+
+.hm-ai-patient-meta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.hm-ai-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hm-ai-name-line h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--hm-tx);
+}
+
+.hm-ai-code-pill {
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--hm-bd);
+  padding: 1px 6px;
+  border-radius: 5px;
+  color: var(--hm-mut);
+}
+
+.hm-ai-status-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.hm-ai-status-pill.stable {
+  color: var(--hm-ok);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.hm-ai-status-pill.critical {
+  color: var(--hm-bad);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.hm-ai-status-pill.warning,
+.hm-ai-status-pill.attention {
+  color: var(--hm-warn);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.hm-ai-demographics-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--hm-mut);
+}
+
+.hm-ai-demographics-tags strong {
+  color: var(--hm-tx);
+}
+
+/* Live Vitals Summary Strip */
+.hm-ai-live-vitals-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px dashed var(--hm-bd);
+}
+
+.hm-ai-live-vital-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--hm-card);
+  border: 1px solid var(--hm-bd);
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  color: var(--hm-tx);
+}
+
+.hm-ai-live-vital-chip strong {
+  color: var(--hm-tx);
+}
+
+/* Allergies and conditions row */
+.hm-ai-patient-tags-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+  font-size: 11.5px;
+}
+
+.hm-ai-tag-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.hm-ai-tag-label {
+  font-weight: 700;
+  color: var(--hm-mut);
+  font-size: 11px;
+}
+
+.hm-ai-alert-tag {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.hm-ai-condition-tag {
+  background: rgba(2, 132, 199, 0.12);
+  color: var(--hm-ac);
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 11px;
+}
+
+/* 2. Controls Toolbar & Search Bar */
+.hm-ai-controls-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.hm-ai-search-box {
+  display: flex;
+  align-items: center;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 8px;
+  padding: 0 8px;
+  flex: 1;
+  min-width: 180px;
+  max-width: 320px;
+}
+
+.hm-ai-search-box:focus-within {
+  border-color: var(--hm-ac);
+}
+
+.hm-ai-search-icon {
+  color: var(--hm-mut);
+  margin-right: 6px;
+}
+
+.hm-ai-search-input {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  color: var(--hm-tx);
+  padding: 6px 0;
+  outline: none;
+  width: 100%;
+}
+
+.hm-ai-search-clear {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.hm-ai-audio-toggles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hm-ai-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--hm-mut);
+  cursor: pointer;
+  user-select: none;
+}
+
+.hm-ai-mute-btn,
+.hm-ai-tool-btn {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-mut);
+  border-radius: 7px;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hm-ai-mute-btn:hover,
+.hm-ai-tool-btn:hover {
+  color: var(--hm-tx);
+  border-color: var(--hm-ac);
+}
+
+.hm-ai-mute-btn.muted {
+  color: var(--hm-bad);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* 3. Preset chips scrolling / wrapping */
+.hm-ai-presets-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex-wrap: wrap;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+/* 4. Message Actions & Audio Controls */
+.hm-ai-msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.hm-ai-audio-action-btn,
+.hm-ai-save-note-btn {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: color 0.15s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.hm-ai-audio-action-btn:hover,
+.hm-ai-save-note-btn:hover {
+  color: var(--hm-tx);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hm-ai-audio-action-btn.active {
+  color: var(--hm-ac);
+}
+
+.hm-ai-audio-action-btn.stop {
+  color: var(--hm-bad);
+}
+
+.hm-ai-msg-attachments-strip {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.hm-ai-msg-att-preview {
+  max-width: 140px;
+}
+
+.hm-ai-att-img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--hm-bd);
+}
+
+.hm-ai-att-file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+}
+
+.hm-ai-empty-search {
+  padding: 30px;
+  text-align: center;
+  color: var(--hm-mut);
+  font-size: 13px;
+}
+
+/* 5. Pre-send Attachments Tray */
+.hm-ai-attachments-tray {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 10px;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.hm-ai-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hm-card);
+  border: 1px solid var(--hm-bd);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: var(--hm-tx);
+  flex-shrink: 0;
+}
+
+.hm-ai-chip-preview {
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.hm-ai-chip-name {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hm-ai-chip-size {
+  color: var(--hm-mut);
+  font-size: 10.5px;
+}
+
+.hm-ai-chip-remove {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.hm-ai-chip-remove:hover {
+  color: var(--hm-bad);
+}
+
+/* 6. Camera Modal */
+.hm-ai-camera-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: grid;
+  place-items: center;
+  z-index: 1500;
+  padding: 16px;
+}
+
+.hm-ai-camera-modal {
+  background: var(--hm-card);
+  border: 1px solid var(--hm-bd);
+  border-radius: 16px;
+  padding: 18px;
+  width: min(520px, 100%);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hm-ai-camera-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hm-ai-camera-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.hm-ai-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+}
+
+.hm-ai-video-stream-wrap,
+.hm-ai-photo-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.hm-ai-video,
+.hm-ai-photo-preview {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--hm-bd);
+  background: #000;
+}
+
+.hm-ai-video-actions,
+.hm-ai-photo-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.hm-ai-camera-error {
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--hm-mut);
+}
+
+/* 7. Sticky Bottom Input & Voice Indicator */
+.hm-ai-input-sticky-container {
+  position: sticky;
+  bottom: 0;
+  background: var(--hm-card);
+  border-top: 1px solid var(--hm-bd);
+  padding-top: 10px;
+  margin-top: auto;
+  z-index: 5;
+}
+
+.hm-ai-listening-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  color: #ef4444;
+  margin-bottom: 8px;
+  animation: hmListenPulse 1.2s infinite;
+}
+
+.hm-ai-listening-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+@keyframes hmListenPulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.hm-ai-input-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hm-ai-action-icon-btn {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-mut);
+  border-radius: 9px;
+  padding: 9px 10px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.hm-ai-action-icon-btn:hover:not(:disabled) {
+  color: var(--hm-tx);
+  border-color: var(--hm-ac);
+}
+
+.hm-ai-action-icon-btn.listening {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.hm-ai-textarea {
+  flex: 1;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--hm-tx);
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.hm-ai-textarea:focus {
+  border-color: var(--hm-ac);
+  box-shadow: 0 0 0 2px var(--hm-ac-glow);
+}
+
+.hm-ai-clinical-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--hm-mut);
+  padding: 6px 2px 0;
+  opacity: 0.75;
+}
+
+

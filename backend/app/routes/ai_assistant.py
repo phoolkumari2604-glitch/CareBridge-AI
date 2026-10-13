@@ -279,12 +279,17 @@ def clinical_ai_chat():
             context["blood_group"] = p_doc.get("blood_group", "O+")
             context["patient_code"] = p_doc.get("patient_code") or str(p_doc.get("_id"))[-6:]
 
-        latest_vital = db.vitals.find_one(
+        latest_vital = db.vital_signs.find_one(
             {"$or": [{"patient_id": p_obj}, {"patient_id": patient_id}] if p_obj else [{"patient_id": patient_id}]},
             sort=[("recorded_at", -1)]
         )
         if latest_vital:
             context["vitals"] = latest_vital
+
+    attachments = data.get("attachments") or []
+    attachment_analysis_md = ""
+    if attachments:
+        attachment_analysis_md = analyze_medical_images(attachments, message, context)
 
     # Step 1: Check Clinical Knowledge Base for approved protocol
     kb_hits = search_kb_conditions(message, limit=1)
@@ -302,6 +307,8 @@ def clinical_ai_chat():
 
     # Assemble full content
     full_parts = []
+    if attachment_analysis_md:
+        full_parts.append(attachment_analysis_md)
     if protocol_card_md:
         full_parts.append(protocol_card_md)
     if drug_interaction_md:
@@ -320,9 +327,11 @@ def clinical_ai_chat():
         "patient_id": patient_id,
         "role": role,
         "user_message": message,
+        "attachments": attachments,
         "ai_response": final_response_text,
         "has_kb_protocol": bool(kb_hits),
         "has_drug_interaction": bool(drug_interaction_md),
+        "has_attachments": bool(attachments),
         "created_at": now
     })
 
@@ -337,6 +346,14 @@ def clinical_ai_chat():
 
     # Stream token by token (SSE)
     def generate_sse():
+        if attachment_analysis_md:
+            att_payload = {
+                "type": "content",
+                "delta": attachment_analysis_md + "\n\n---\n\n"
+            }
+            yield f"data: {json.dumps(att_payload)}\n\n"
+            time.sleep(0.05)
+
         # First send instant protocol card if available
         if protocol_card_md:
             instant_payload = {

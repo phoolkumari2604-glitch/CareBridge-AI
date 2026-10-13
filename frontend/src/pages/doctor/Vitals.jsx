@@ -34,12 +34,19 @@ import {
   ChevronDown,
   FileSpreadsheet,
   AlertCircle,
-  Award
+  Award,
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff,
+  FileText,
+  Mail
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import patientService from "../../services/patientService";
 import api from "../../services/api";
 import PhotoEditModal from "../../components/common/PhotoEditModal";
+import PatientDocumentsModal from "../../components/common/PatientDocumentsModal";
 import "./Vitals.css";
 
 /* Helper: relative time formatter */
@@ -205,6 +212,15 @@ export default function Vitals() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAppointmentsModalOpen, setIsAppointmentsModalOpen] = useState(false);
   const [isPatientPhotoModalOpen, setIsPatientPhotoModalOpen] = useState(false);
+  const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  // Global search above cards
+  const [globalPatientSearch, setGlobalPatientSearch] = useState("");
+
+  // Voice SpeechRecognition state for Record Vitals modal
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
+  const [voiceNotice, setVoiceNotice] = useState("");
 
   const [activeReading, setActiveReading] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -252,6 +268,116 @@ export default function Vitals() {
     setTimeout(() => setToastMessage(""), 3500);
   };
 
+  // TTS Readout for vital cards
+  const speakReading = useCallback((card) => {
+    if (!window.speechSynthesis) {
+      showToast("Speech synthesis not supported in this browser.");
+      return;
+    }
+    if (isMuted) return;
+
+    window.speechSynthesis.cancel();
+    if (!card.value) {
+      const u = new SpeechSynthesisUtterance(`${card.title}, no data recorded.`);
+      window.speechSynthesis.speak(u);
+      return;
+    }
+
+    let phrase = "";
+    if (card.id === "hr") {
+      phrase = `Heart rate, ${card.value} beats per minute, ${card.status || "normal"}.`;
+    } else if (card.id === "bp") {
+      const [s, d] = String(card.value).split("/");
+      phrase = `Blood pressure, ${s} over ${d || ""} millimeters of mercury, ${card.status || "normal"}.`;
+    } else if (card.id === "spo2") {
+      phrase = `Blood oxygen, ${card.value} percent, ${card.status || "normal"}.`;
+    } else if (card.id === "temp") {
+      phrase = `Body temperature, ${card.value} degrees Celsius, ${card.status || "normal"}.`;
+    } else if (card.id === "sugar") {
+      phrase = `Blood sugar, ${card.value} milligrams per deciliter, ${card.status || "normal"}.`;
+    } else if (card.id === "weight") {
+      phrase = `Body weight, ${card.value} kilograms.`;
+    } else {
+      phrase = `${card.title}, ${card.value} ${card.unit}, ${card.status || "normal"}.`;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(phrase);
+    utterance.rate = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }, [isMuted]);
+
+  // Voice Input for Record Vitals Form
+  const handleVoiceInputVitals = useCallback(() => {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+      showToast("Speech recognition is not supported in this browser.");
+      return;
+    }
+    if (isVoiceListening) {
+      setIsVoiceListening(false);
+      return;
+    }
+
+    try {
+      const rec = new SpeechRec();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = "en-US";
+      rec.onstart = () => {
+        setIsVoiceListening(true);
+        setVoiceNotice("Listening... e.g. 'Blood pressure 120 over 80, pulse 72, oxygen 98, temp 36.8, sugar 95, weight 70'");
+      };
+      rec.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        setIsVoiceListening(false);
+
+        const lower = transcript.toLowerCase();
+        const updates = {};
+
+        // BP e.g. 120 over 80 or 120/80
+        const bpMatch = lower.match(/(?:bp|blood pressure|pressure)?\s*(\d{2,3})\s*(?:over|\/)\s*(\d{2,3})/);
+        if (bpMatch) {
+          updates.systolic_bp = bpMatch[1];
+          updates.diastolic_bp = bpMatch[2];
+        }
+
+        // Heart rate
+        const hrMatch = lower.match(/(?:heart rate|pulse|rate|bpm|hr)\s*(\d{2,3})/);
+        if (hrMatch) updates.heart_rate = hrMatch[1];
+
+        // SpO2
+        const spo2Match = lower.match(/(?:spo2|oxygen|saturation|o2)\s*(\d{2,3})/);
+        if (spo2Match) updates.spo2 = spo2Match[1];
+
+        // Temp
+        const tempMatch = lower.match(/(?:temp|temperature)\s*(\d{2}(?:\.\d)?)/);
+        if (tempMatch) updates.temperature = tempMatch[1];
+
+        // Sugar
+        const sugarMatch = lower.match(/(?:sugar|glucose|blood sugar)\s*(\d{2,3})/);
+        if (sugarMatch) updates.blood_sugar = sugarMatch[1];
+
+        // Weight
+        const weightMatch = lower.match(/(?:weight|mass|kg)\s*(\d{2,3}(?:\.\d)?)/);
+        if (weightMatch) updates.weight = weightMatch[1];
+
+        setFormData((prev) => ({ ...prev, ...updates }));
+        setVoiceNotice(`Recognized: "${transcript}". Please confirm all values before saving.`);
+      };
+      rec.onerror = () => {
+        setIsVoiceListening(false);
+        setVoiceNotice("");
+      };
+      rec.onend = () => {
+        setIsVoiceListening(false);
+      };
+      rec.start();
+    } catch (err) {
+      console.warn("Speech recognition error:", err);
+      setIsVoiceListening(false);
+    }
+  }, [isVoiceListening]);
+
   // Click outside to close patient dropdown
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -266,17 +392,21 @@ export default function Vitals() {
   // 1. Fetch Patients
   const loadPatients = useCallback(async () => {
     try {
-      const list = await doctorService.getPatients();
+      const list = await doctorService.getPatients({ limit: 100 });
       const valid = (Array.isArray(list) ? list : []).map((p) => ({
         id: p._id || p.id,
         patient_code: p.patient_code || String(p.patientId || "").replace("PT-", "") || String(p._id || p.id).slice(-6),
         name: p.name || "Patient Record",
-        avatar: p.avatar || p.photo || null,
-        photo: p.photo || p.avatar || null,
+        avatar: p.avatar || p.photo || p.profile_photo || null,
+        photo: p.photo || p.avatar || p.profile_photo || null,
         age: p.age || 42,
         gender: p.gender || "Other",
         blood_group: p.blood_group || p.blood || "O+",
         phone: p.phone || "+91 98765 43210",
+        email: p.email || "patient@carebridge.health",
+        emergency_contact: p.emergency_contact || p.emergencyContact || "Anita Malhotra (+91 98710 66783)",
+        allergies: Array.isArray(p.allergies) ? p.allergies : (p.allergies ? [p.allergies] : []),
+        conditions: Array.isArray(p.medical_history) ? p.medical_history : (Array.isArray(p.conditions) ? p.conditions : []),
         clinical_status: p.clinical_status || p.status || "Active",
       }));
       setPatients(valid);
@@ -428,43 +558,43 @@ export default function Vitals() {
     const hrVal = latestVital?.heart_rate != null ? Number(latestVital.heart_rate) : null;
     const hrPrev = previousVital?.heart_rate != null ? Number(previousVital.heart_rate) : null;
     const hrDelta = hrVal != null && hrPrev != null ? hrVal - hrPrev : null;
-    const hrStatus = METRIC_RANGES.hr.classify(hrVal);
-    const hrSpark = historyChronological.map((r) => Number(r.heart_rate) || 72).slice(-10);
+    const hrStatus = hrVal != null ? METRIC_RANGES.hr.classify(hrVal) : null;
+    const hrSpark = hrVal != null ? historyChronological.map((r) => Number(r.heart_rate) || 72).slice(-10) : [];
 
     // BP
     const sysVal = latestVital?.systolic_bp != null ? Number(latestVital.systolic_bp) : null;
     const diaVal = latestVital?.diastolic_bp != null ? Number(latestVital.diastolic_bp) : null;
     const sysPrev = previousVital?.systolic_bp != null ? Number(previousVital.systolic_bp) : null;
     const diaPrev = previousVital?.diastolic_bp != null ? Number(previousVital.diastolic_bp) : null;
-    const bpStatus = METRIC_RANGES.bp.classify(sysVal, diaVal);
-    const bpSpark = historyChronological.map((r) => Number(r.systolic_bp) || 120).slice(-10);
+    const bpStatus = sysVal != null && diaVal != null ? METRIC_RANGES.bp.classify(sysVal, diaVal) : null;
+    const bpSpark = sysVal != null ? historyChronological.map((r) => Number(r.systolic_bp) || 120).slice(-10) : [];
 
     // SpO2
     const spo2Val = latestVital?.spo2 != null ? Number(latestVital.spo2) : null;
     const spo2Prev = previousVital?.spo2 != null ? Number(previousVital.spo2) : null;
     const spo2Delta = spo2Val != null && spo2Prev != null ? spo2Val - spo2Prev : null;
-    const spo2Status = METRIC_RANGES.spo2.classify(spo2Val);
-    const spo2Spark = historyChronological.map((r) => Number(r.spo2) || 98).slice(-10);
+    const spo2Status = spo2Val != null ? METRIC_RANGES.spo2.classify(spo2Val) : null;
+    const spo2Spark = spo2Val != null ? historyChronological.map((r) => Number(r.spo2) || 98).slice(-10) : [];
 
     // Temp
     const tempVal = latestVital?.temperature != null ? Number(latestVital.temperature) : null;
     const tempPrev = previousVital?.temperature != null ? Number(previousVital.temperature) : null;
     const tempDelta = tempVal != null && tempPrev != null ? +(tempVal - tempPrev).toFixed(1) : null;
-    const tempStatus = METRIC_RANGES.temp.classify(tempVal);
-    const tempSpark = historyChronological.map((r) => Number(r.temperature) || 36.8).slice(-10);
+    const tempStatus = tempVal != null ? METRIC_RANGES.temp.classify(tempVal) : null;
+    const tempSpark = tempVal != null ? historyChronological.map((r) => Number(r.temperature) || 36.8).slice(-10) : [];
 
     // Blood Sugar
     const sugarVal = latestVital?.blood_sugar != null ? Number(latestVital.blood_sugar) : null;
     const sugarPrev = previousVital?.blood_sugar != null ? Number(previousVital.blood_sugar) : null;
     const sugarDelta = sugarVal != null && sugarPrev != null ? sugarVal - sugarPrev : null;
-    const sugarStatus = METRIC_RANGES.sugar.classify(sugarVal);
-    const sugarSpark = historyChronological.map((r) => Number(r.blood_sugar) || 95).slice(-10);
+    const sugarStatus = sugarVal != null ? METRIC_RANGES.sugar.classify(sugarVal) : null;
+    const sugarSpark = sugarVal != null ? historyChronological.map((r) => Number(r.blood_sugar) || 95).slice(-10) : [];
 
     // Weight
     const weightVal = latestVital?.weight != null ? Number(latestVital.weight) : null;
     const weightPrev = previousVital?.weight != null ? Number(previousVital.weight) : null;
     const weightDelta = weightVal != null && weightPrev != null ? +(weightVal - weightPrev).toFixed(1) : null;
-    const weightSpark = historyChronological.filter((r) => r.weight != null).map((r) => Number(r.weight)).slice(-10);
+    const weightSpark = weightVal != null ? historyChronological.filter((r) => r.weight != null).map((r) => Number(r.weight)).slice(-10) : [];
 
     return [
       {
@@ -479,7 +609,7 @@ export default function Vitals() {
         deltaGood: hrDelta != null && Math.abs(hrVal - 75) <= Math.abs(hrPrev - 75),
         sparkline: hrSpark,
         color: "#ef4444",
-        time: latestVital?.recorded_at,
+        time: latestVital?.recorded_at || latestVital?.created_at,
         metricKey: "hr",
       },
       {
@@ -494,7 +624,7 @@ export default function Vitals() {
         deltaGood: sysVal != null && sysVal <= 125,
         sparkline: bpSpark,
         color: "#3b82f6",
-        time: latestVital?.recorded_at,
+        time: latestVital?.recorded_at || latestVital?.created_at,
         metricKey: "bp",
       },
       {
@@ -509,7 +639,7 @@ export default function Vitals() {
         deltaGood: spo2Delta != null && spo2Delta >= 0,
         sparkline: spo2Spark,
         color: "#06b6d4",
-        time: latestVital?.recorded_at,
+        time: latestVital?.recorded_at || latestVital?.created_at,
         metricKey: "spo2",
       },
       {
@@ -524,7 +654,7 @@ export default function Vitals() {
         deltaGood: tempDelta != null && Math.abs(tempVal - 36.8) <= Math.abs(tempPrev - 36.8),
         sparkline: tempSpark,
         color: "#f59e0b",
-        time: latestVital?.recorded_at,
+        time: latestVital?.recorded_at || latestVital?.created_at,
         metricKey: "temp",
       },
       {
@@ -539,22 +669,22 @@ export default function Vitals() {
         deltaGood: sugarDelta != null && Math.abs(sugarVal - 100) <= Math.abs(sugarPrev - 100),
         sparkline: sugarSpark,
         color: "#8b5cf6",
-        time: latestVital?.recorded_at,
+        time: latestVital?.recorded_at || latestVital?.created_at,
         metricKey: "sugar",
       },
       {
         id: "weight",
         title: "Body Weight & Mass",
         icon: Weight,
-        value: weightVal != null ? `${weightVal.toFixed(1)}` : "72.4",
+        value: weightVal != null ? `${weightVal.toFixed(1)}` : null,
         unit: "kg",
-        status: "normal",
-        prevText: weightPrev != null ? `Prev: ${weightPrev.toFixed(1)} kg` : "Standard baseline",
+        status: weightVal != null ? "normal" : null,
+        prevText: weightPrev != null ? `Prev: ${weightPrev.toFixed(1)} kg` : "No prior reading",
         deltaText: weightDelta != null ? `${weightDelta > 0 ? "▲ +" : "▼ "}${weightDelta} kg` : null,
         deltaGood: true,
-        sparkline: weightSpark.length > 0 ? weightSpark : [72.0, 72.2, 72.4],
+        sparkline: weightSpark,
         color: "#10b981",
-        time: latestVital?.recorded_at,
+        time: latestVital?.recorded_at || latestVital?.created_at,
         metricKey: "weight",
       },
     ];
@@ -1108,6 +1238,29 @@ export default function Vitals() {
                 </strong>
               </div>
               <div className="demographic-chip">
+                <span className="lbl">Email</span>
+                <strong>
+                  <Mail size={11} style={{ marginRight: 4 }} />
+                  {activePatient.email}
+                </strong>
+              </div>
+              <div className="demographic-chip">
+                <span className="lbl">Emergency</span>
+                <strong>{activePatient.emergency_contact}</strong>
+              </div>
+              <div className="demographic-chip">
+                <span className="lbl">Allergies</span>
+                <strong style={{ color: activePatient.allergies?.length ? "#f87171" : "inherit" }}>
+                  {activePatient.allergies?.length ? activePatient.allergies.join(", ") : "NKDA"}
+                </strong>
+              </div>
+              <div className="demographic-chip">
+                <span className="lbl">Conditions</span>
+                <strong>
+                  {activePatient.conditions?.length ? activePatient.conditions.join(", ") : "None reported"}
+                </strong>
+              </div>
+              <div className="demographic-chip">
                 <span className="lbl">Status</span>
                 <span className={`patient-health-status-badge ${isPatientCritical ? "critical" : "stable"}`}>
                   {isPatientCritical ? <ShieldAlert size={12} /> : <CheckCircle2 size={12} />}
@@ -1117,6 +1270,15 @@ export default function Vitals() {
             </div>
 
             <div className="patient-appointments-quick-btn">
+              <button
+                type="button"
+                className="vitals-btn secondary"
+                onClick={() => setIsDocumentsModalOpen(true)}
+                title="Manage lab reports, prescriptions, scans"
+                style={{ marginRight: 8 }}
+              >
+                <FileText size={14} /> Documents
+              </button>
               <button
                 type="button"
                 className="vitals-btn secondary"
@@ -1130,17 +1292,89 @@ export default function Vitals() {
         )}
       </div>
 
-      {/* 6 METRIC CARDS GRID */}
+      {/* QUICK SEARCH BAR ABOVE CARDS */}
+      <div className="vitals-quick-search-section">
+        <div className="vitals-quick-search-box">
+          <Search size={16} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search patient by name, ID, or phone to switch charts (or filter vitals log)..."
+            value={globalPatientSearch}
+            onChange={(e) => {
+              const val = e.target.value;
+              setGlobalPatientSearch(val);
+              setSearchFilter(val);
+              setCurrentPage(1);
+            }}
+          />
+          {globalPatientSearch && (
+            <button
+              type="button"
+              className="clear-search-btn"
+              onClick={() => {
+                setGlobalPatientSearch("");
+                setSearchFilter("");
+                setCurrentPage(1);
+              }}
+              title="Clear search"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+
+        {globalPatientSearch.trim() && (
+          <div className="quick-search-dropdown-matches">
+            {filteredPatientsList.length === 0 ? (
+              <div className="no-matches-item">No results found for "{globalPatientSearch}"</div>
+            ) : (
+              filteredPatientsList.slice(0, 5).map((p) => (
+                <div
+                  key={p.id}
+                  className={`match-item ${p.id === selectedPatientId ? "active" : ""}`}
+                  onClick={() => {
+                    handlePatientSelectChange(p.id);
+                    setGlobalPatientSearch("");
+                    setSearchFilter("");
+                  }}
+                >
+                  <span className="match-name">{p.name}</span>
+                  <span className="match-sub">ID: #{p.patient_code} · {p.phone}</span>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 6 METRIC CARDS HEADER & GRID */}
+      <div className="vitals-cards-header-bar">
+        <span className="vitals-cards-header-title">Live Calibrated Telemetry Metrics</span>
+        <button
+          type="button"
+          className={`vitals-mute-btn ${isMuted ? "muted" : ""}`}
+          onClick={() => {
+            setIsMuted(!isMuted);
+            if (!isMuted && window.speechSynthesis) window.speechSynthesis.cancel();
+          }}
+          title={isMuted ? "Unmute TTS audio readouts" : "Mute TTS audio readouts"}
+        >
+          {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+          <span>{isMuted ? "Audio Muted" : "Mute Audio"}</span>
+        </button>
+      </div>
+
       <div className="vitals-cards-grid">
         {metricCards.map((card) => {
           const IconComp = card.icon;
           const isCritical = card.status === "critical";
           const isWarning = card.status === "warning";
+          const isNormal = card.status === "normal";
 
           return (
             <div
               key={card.id}
-              className={`vital-metric-card ${card.status} ${isCritical ? "pulse-critical" : ""}`}
+              className={`vital-metric-card ${card.status || "no-data"} ${isCritical ? "pulse-critical" : ""}`}
               onClick={() =>
                 navigate(
                   `/doctor/health-monitoring?patientId=${selectedPatientId}&metric=${card.metricKey}`
@@ -1163,14 +1397,28 @@ export default function Vitals() {
                   <IconComp size={20} />
                 </div>
 
-                <div className="card-status-badge-wrap">
-                  {isCritical ? (
-                    <span className="badge-chip red">CRITICAL</span>
-                  ) : isWarning ? (
-                    <span className="badge-chip amber">WARNING</span>
-                  ) : (
-                    <span className="badge-chip green">NORMAL</span>
-                  )}
+                <div className="card-top-actions">
+                  <button
+                    type="button"
+                    className="card-speaker-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      speakReading(card);
+                    }}
+                    title={`Read aloud ${card.title}`}
+                  >
+                    <Volume2 size={14} />
+                  </button>
+
+                  <div className="card-status-badge-wrap">
+                    {isCritical ? (
+                      <span className="badge-chip red">CRITICAL</span>
+                    ) : isWarning ? (
+                      <span className="badge-chip amber">WARNING</span>
+                    ) : isNormal ? (
+                      <span className="badge-chip green">NORMAL</span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
@@ -1183,20 +1431,34 @@ export default function Vitals() {
                       <span className="metric-unit">{card.unit}</span>
                     </>
                   ) : (
-                    <span className="empty-val">No readings</span>
+                    <div className="card-no-data-wrap">
+                      <span className="empty-val">No data</span>
+                      <button
+                        type="button"
+                        className="card-record-cta-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsRecordModalOpen(true);
+                        }}
+                      >
+                        + Record vitals
+                      </button>
+                    </div>
                   )}
                 </div>
 
                 <div className="metric-delta-row">
-                  {card.deltaText ? (
+                  {card.value && card.deltaText ? (
                     <span className={`delta-tag ${card.deltaGood ? "good" : "bad"}`}>
                       {card.deltaGood ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
                       {card.deltaText}
                     </span>
-                  ) : (
+                  ) : card.value ? (
                     <span className="delta-neutral">{card.prevText}</span>
+                  ) : (
+                    <span className="delta-neutral">No readings recorded</span>
                   )}
-                  <span className="time-subtext">{timeAgo(card.time)}</span>
+                  {card.time && <span className="time-subtext">{timeAgo(card.time)}</span>}
                 </div>
               </div>
 
@@ -1230,6 +1492,41 @@ export default function Vitals() {
             <button className="vitals-btn primary" onClick={() => setIsRecordModalOpen(true)}>
               <Plus size={15} /> Record Vitals Now
             </button>
+          </div>
+        </div>
+
+        {/* PATIENT INFO BAR ABOVE TABLE */}
+        <div className="table-patient-info-strip">
+          <div className="info-strip-item">
+            <span className="lbl">Patient:</span>
+            <strong>{activePatient?.name || "--"}</strong>
+          </div>
+          <div className="info-strip-divider" />
+          <div className="info-strip-item">
+            <span className="lbl">Patient ID:</span>
+            <strong>#{activePatient?.patient_code || "--"}</strong>
+          </div>
+          <div className="info-strip-divider" />
+          <div className="info-strip-item">
+            <span className="lbl">Age:</span>
+            <strong>{activePatient?.age || "--"} yrs</strong>
+          </div>
+          <div className="info-strip-divider" />
+          <div className="info-strip-item">
+            <span className="lbl">Gender:</span>
+            <strong>{activePatient?.gender || "--"}</strong>
+          </div>
+          <div className="info-strip-divider" />
+          <div className="info-strip-item">
+            <span className="lbl">Blood Group:</span>
+            <strong>{activePatient?.blood_group || "--"}</strong>
+          </div>
+          <div className="info-strip-divider" />
+          <div className="info-strip-item">
+            <span className="lbl">Status:</span>
+            <span className={`info-strip-status ${isPatientCritical ? "critical" : "stable"}`}>
+              {isPatientCritical ? "Critical Alert" : "Stable"}
+            </span>
           </div>
         </div>
 
@@ -1378,27 +1675,33 @@ export default function Vitals() {
                   <td colSpan="9" className="stream-empty-row">
                     <div className="empty-box">
                       <HeartPulse size={36} className="empty-icon" />
-                      <p>
-                        {searchFilter
-                          ? `No recordings found matching "${searchFilter}"`
-                          : "No recorded vital signs found matching filter criteria."}
-                      </p>
-                      {searchFilter ? (
-                        <button
-                          type="button"
-                          className="vitals-btn secondary"
-                          onClick={() => setSearchFilter("")}
-                        >
-                          Clear Search Filter
-                        </button>
+                      {vitalsHistory.length === 0 ? (
+                        <>
+                          <p>No vitals recorded yet</p>
+                          <button
+                            type="button"
+                            className="vitals-btn primary"
+                            onClick={() => setIsRecordModalOpen(true)}
+                          >
+                            <Plus size={15} /> Record Vitals Now
+                          </button>
+                        </>
                       ) : (
-                        <button
-                          type="button"
-                          className="vitals-btn primary"
-                          onClick={() => setIsRecordModalOpen(true)}
-                        >
-                          <Plus size={15} /> Record Vitals Now
-                        </button>
+                        <>
+                          <p>No recordings found</p>
+                          <button
+                            type="button"
+                            className="vitals-btn secondary"
+                            onClick={() => {
+                              setSearchFilter("");
+                              setGlobalPatientSearch("");
+                              setRangeFilter("All");
+                              setStatusFilter("All");
+                            }}
+                          >
+                            Clear search
+                          </button>
+                        </>
                       )}
                     </div>
                   </td>
@@ -1609,6 +1912,19 @@ export default function Vitals() {
                 <span>{modalError}</span>
               </div>
             )}
+
+            {/* VOICE DICTATION OPTION */}
+            <div className="vitals-voice-dictation-bar">
+              <button
+                type="button"
+                className={`voice-mic-btn ${isVoiceListening ? "listening" : ""}`}
+                onClick={handleVoiceInputVitals}
+              >
+                {isVoiceListening ? <MicOff size={15} /> : <Mic size={15} />}
+                <span>{isVoiceListening ? "Listening... (Click to stop)" : "Dictate Vitals by Voice"}</span>
+              </button>
+              {voiceNotice && <div className="voice-dictation-notice">{voiceNotice}</div>}
+            </div>
 
             <form onSubmit={handleSaveVital}>
               <div className="modal-inputs-grid">
@@ -2075,6 +2391,13 @@ export default function Vitals() {
         onSave={handleSavePatientPhoto}
         title={`Edit Photo for ${activePatient?.name || "Patient"}`}
         subtitle={`Patient ID #${activePatient?.patient_code} · Camera capture or upload (≤ 5MB)`}
+      />
+
+      {/* PATIENT DOCUMENTS MANAGEMENT MODAL */}
+      <PatientDocumentsModal
+        isOpen={isDocumentsModalOpen}
+        onClose={() => setIsDocumentsModalOpen(false)}
+        patient={activePatient}
       />
 
       {/* DELETE CONFIRMATION DIALOG */}

@@ -182,6 +182,18 @@ export const doctorService = {
     return response.data;
   },
 
+  async updateVitals(vitalId, data) {
+    if (!vitalId) throw new Error("Vital ID required");
+    const response = await api.put(`/vitals/${vitalId}`, data);
+    return response.data;
+  },
+
+  async deleteVitals(vitalId) {
+    if (!vitalId) throw new Error("Vital ID required");
+    const response = await api.delete(`/vitals/${vitalId}`);
+    return response.data;
+  },
+
   // ------------------------------------------------------------
   // HEALTH RECORDS
   // ------------------------------------------------------------
@@ -246,6 +258,38 @@ export const doctorService = {
       headers: { "Content-Type": "multipart/form-data" }
     });
     return response.data;
+  },
+
+  async uploadPatientDocument(patientId, file, title = "Clinical Document", recordType = "DIAGNOSTIC_REPORT") {
+    if (!patientId) throw new Error("Patient ID required");
+    const uploadRes = await this.uploadRecordAttachment(file);
+    const fileUrl = uploadRes.file_url || uploadRes.url || "";
+    const recordPayload = {
+      patient_id: patientId,
+      record_type: recordType,
+      title: title || file.name,
+      notes: `Document uploaded: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`,
+      attachments: [{
+        name: file.name,
+        url: fileUrl,
+        size: file.size,
+        type: file.type,
+      }],
+      file_url: fileUrl,
+      file_name: file.name,
+      file_size: file.size,
+    };
+    return await this.createHealthRecord(recordPayload);
+  },
+
+  async getPatientDocuments(patientId) {
+    if (!patientId) return [];
+    const records = await this.getHealthRecords({ patientId, limit: 100 });
+    return records;
+  },
+
+  async deletePatientDocument(recordId) {
+    return await this.deleteHealthRecord(recordId);
   },
 
   // ------------------------------------------------------------
@@ -422,8 +466,8 @@ export const doctorService = {
     return response.data;
   },
 
-  async refundInvoice(id) {
-    const response = await api.post(`/billing/invoices/${id}/refund`);
+  async refundInvoice(id, data = {}) {
+    const response = await api.post(`/billing/invoices/${id}/refund`, data);
     return response.data;
   },
 

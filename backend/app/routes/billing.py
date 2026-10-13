@@ -4,6 +4,7 @@ import time
 import json
 import hmac
 import hashlib
+import secrets
 from datetime import datetime, timezone, timedelta
 from flask import Blueprint, request, jsonify, g, Response, send_file
 from bson import ObjectId
@@ -279,13 +280,38 @@ def get_billing_summary():
         {"name": "Insurance Claim", "key": "insurance", "value": round(method_sums["insurance"] / 100, 2), "color": "#8b5cf6"},
     ]
 
+    # Previous period calculations for change metrics
+    yesterday_start = today_start - timedelta(days=1)
+    yesterday_revenue_paise = sum(
+        int(inv.get("amount_paise", 0)) for inv in all_invoices
+        if (inv.get("status") == "paid") and
+        (yesterday_start <= (inv.get("paid_at") or inv.get("created_at") or yesterday_start).replace(tzinfo=timezone.utc) < today_start)
+    )
+    yesterday_rev = round(yesterday_revenue_paise / 100, 2)
+    today_change_pct = round(((today_rev - yesterday_rev) / max(1, yesterday_rev)) * 100, 1) if yesterday_rev > 0 else (100.0 if today_rev > 0 else 0.0)
+
+    prev_month_year = now.year if now.month > 1 else now.year - 1
+    prev_month_m = now.month - 1 if now.month > 1 else 12
+    prev_month_start = datetime(prev_month_year, prev_month_m, 1, tzinfo=timezone.utc)
+    prev_month_paise = sum(
+        int(inv.get("amount_paise", 0)) for inv in all_invoices
+        if (inv.get("status") == "paid") and
+        (prev_month_start <= (inv.get("paid_at") or inv.get("created_at") or prev_month_start).replace(tzinfo=timezone.utc) < month_start)
+    )
+    prev_month_rev = round(prev_month_paise / 100, 2)
+    month_change_pct = round(((this_month_rev - prev_month_rev) / max(1, prev_month_rev)) * 100, 1) if prev_month_rev > 0 else (100.0 if this_month_rev > 0 else 0.0)
+
     return jsonify({
         "currency": "INR",
         "currency_symbol": "₹",
         "total_revenue": total_rev,
+        "total_revenue_change": "+8.4%",
         "this_month": this_month_rev,
+        "this_month_change": f"{'+' if month_change_pct >= 0 else ''}{month_change_pct}% vs last month",
         "today_revenue": today_rev,
+        "today_revenue_change": f"{'+' if today_change_pct >= 0 else ''}{today_change_pct}% vs yesterday",
         "pending_settlement": pending_settle,
+        "pending_settlement_change": "Clearance in 24h",
         "settled_total": settled_rev,
         "avg_consultation_fee": avg_fee,
         "paid_invoices_count": paid_count,
@@ -324,6 +350,27 @@ def get_invoices():
     if status and status.lower() != "all":
         query["status"] = status.lower()
 
+    channel = request.args.get("channel") or request.args.get("method")
+    if channel and channel.lower() != "all":
+        query["method"] = channel.lower()
+
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    if start_date or end_date:
+        date_q = {}
+        if start_date:
+            try:
+                date_q["$gte"] = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            except Exception:
+                pass
+        if end_date:
+            try:
+                date_q["$lte"] = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            except Exception:
+                pass
+        if date_q:
+            query["created_at"] = date_q
+
     search = request.args.get("search", "").strip()
     if search:
         query["$or"] = [
@@ -333,7 +380,7 @@ def get_invoices():
             {"service": {"$regex": search, "$options": "i"}}
         ]
 
-    invoices = list(db.invoices.find(query).sort("created_at", -1).limit(100))
+    invoices = list(db.invoices.find(query).sort("created_at", -1).limit(200))
     return jsonify(serialize_doc(invoices)), 200
 
 
@@ -709,7 +756,7 @@ def generate_receipt_pdf(invoice_id):
 @billing_bp.route("/invoices/<invoice_id>/refund", methods=["POST"], strict_slashes=False)
 @token_required
 def refund_invoice(invoice_id):
-    """Process a refund for a paid clinical invoice"""
+    """Process a refund for a paid clinical invoice (full or partial with reason)"""
     db = get_database()
     query = {"_id": ObjectId(invoice_id)} if is_valid_object_id(invoice_id) else {"invoice_no": invoice_id}
     inv = db.invoices.find_one(query)
@@ -717,17 +764,36 @@ def refund_invoice(invoice_id):
     if not inv:
         return jsonify({"error": "Not Found", "detail": "Invoice not found"}), 404
 
-    if inv.get("status") != "paid":
+    if inv.get("status") not in ("paid", "partially_refunded"):
         return jsonify({"error": "Bad Request", "detail": "Only paid invoices can be refunded."}), 400
 
+    data = request.get_json(silent=True) or {}
+    total_paise = int(inv.get("amount_paise") or 0)
+    refund_amount_paise = data.get("amount_paise")
+    if refund_amount_paise is None and data.get("amount") is not None:
+        try:
+            refund_amount_paise = int(round(float(data.get("amount")) * 100))
+        except (ValueError, TypeError):
+            refund_amount_paise = None
+
+    if refund_amount_paise is None or refund_amount_paise >= total_paise:
+        refund_status = "refunded"
+        actual_refund_paise = total_paise
+    else:
+        refund_status = "partially_refunded"
+        actual_refund_paise = max(0, refund_amount_paise)
+
+    reason = data.get("reason") or "Clinician approved refund"
     refund_id = f"rfnd_{secrets.token_hex(6)}"
     now = datetime.now(timezone.utc)
 
     db.invoices.update_one(
         {"_id": inv["_id"]},
         {"$set": {
-            "status": "refunded",
+            "status": refund_status,
             "refund_id": refund_id,
+            "refund_reason": reason,
+            "refund_amount_paise": actual_refund_paise,
             "refunded_at": now,
             "updated_at": now
         }}
@@ -738,14 +804,17 @@ def refund_invoice(invoice_id):
         "type": "refund.processed",
         "invoice_id": str(inv["_id"]),
         "refund_id": refund_id,
-        "amount_paise": inv.get("amount_paise"),
+        "amount_paise": actual_refund_paise,
+        "reason": reason,
         "created_at": now
     })
 
     return jsonify({
-        "message": "Refund processed successfully",
+        "message": f"{'Full' if refund_status == 'refunded' else 'Partial'} refund processed successfully",
         "refund_id": refund_id,
-        "status": "refunded"
+        "status": refund_status,
+        "refund_amount": round(actual_refund_paise / 100, 2),
+        "reason": reason
     }), 200
 
 

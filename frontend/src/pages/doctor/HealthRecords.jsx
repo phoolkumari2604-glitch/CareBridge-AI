@@ -1242,6 +1242,7 @@ export default function HealthRecords() {
                   </div>
                 </div>
               );
+            })}
           </div>
         )}
 
