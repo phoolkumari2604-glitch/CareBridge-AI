@@ -20,6 +20,9 @@ import {
   Copy,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
+  Table,
+  Upload,
   TrendingUp,
   Clock,
   Layers,
@@ -28,21 +31,28 @@ import {
   UserCheck,
   Activity,
   Filter,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import { useAuth } from "../../context/AuthContext";
 import "./HealthRecords.css";
 
-const ICD10_SUGGESTIONS = [
-  { code: "I10", label: "Essential (primary) hypertension" },
-  { code: "E11.9", label: "Type 2 diabetes mellitus without complications" },
-  { code: "J45.909", label: "Unspecified asthma, uncomplicated" },
-  { code: "I48.0", label: "Paroxysmal atrial fibrillation" },
-  { code: "N18.2", label: "Chronic kidney disease, stage 2 (mild)" },
-  { code: "E03.9", label: "Hypothyroidism, unspecified" },
-  { code: "K21.9", label: "Gastro-esophageal reflux disease without esophagitis" },
-  { code: "M17.12", label: "Primary osteoarthritis of left knee" }
+const ICD10_DATABASE = [
+  { code: "I10", name: "Essential (primary) hypertension", label: "Essential (primary) hypertension", category: "Cardiovascular" },
+  { code: "E11.9", name: "Type 2 diabetes mellitus without complications", label: "Type 2 diabetes mellitus without complications", category: "Endocrine" },
+  { code: "J45.909", name: "Unspecified asthma, uncomplicated", label: "Unspecified asthma, uncomplicated", category: "Respiratory" },
+  { code: "I48.0", name: "Paroxysmal atrial fibrillation", label: "Paroxysmal atrial fibrillation", category: "Cardiovascular" },
+  { code: "N18.2", name: "Chronic kidney disease, stage 2 (mild)", label: "Chronic kidney disease, stage 2 (mild)", category: "Renal" },
+  { code: "E03.9", name: "Hypothyroidism, unspecified", label: "Hypothyroidism, unspecified", category: "Endocrine" },
+  { code: "K21.9", name: "Gastro-esophageal reflux disease without esophagitis", label: "Gastro-esophageal reflux disease without esophagitis", category: "Gastrointestinal" },
+  { code: "M17.12", name: "Primary osteoarthritis of left knee", label: "Primary osteoarthritis of left knee", category: "Musculoskeletal" },
+  { code: "J20.9", name: "Acute bronchitis, unspecified", label: "Acute bronchitis, unspecified", category: "Respiratory" },
+  { code: "E78.5", name: "Hyperlipidemia, unspecified", label: "Hyperlipidemia, unspecified", category: "Metabolic" },
+  { code: "K29.70", name: "Gastritis, unspecified, without bleeding", label: "Gastritis, unspecified, without bleeding", category: "Gastrointestinal" },
+  { code: "R05.9", name: "Cough, unspecified", label: "Cough, unspecified", category: "Symptom" }
 ];
+const ICD10_SUGGESTIONS = ICD10_DATABASE;
 
 const DRUG_SUGGESTIONS = [
   { name: "Telmisartan", dose: "40 mg", freq: "OD", class: "Antihypertensive (ARB)" },
@@ -95,7 +105,8 @@ export default function HealthRecords() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialPatient = searchParams.get("patient") || sessionStorage.getItem("carebridge_last_patient") || "all";
+  const urlPatient = searchParams.get("patient") || searchParams.get("patientId");
+  const initialPatient = urlPatient || sessionStorage.getItem("carebridge_last_patient") || "all";
   const initialFrom = searchParams.get("from") || "";
   const initialTo = searchParams.get("to") || "";
 
@@ -122,6 +133,7 @@ export default function HealthRecords() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [activePreset, setActivePreset] = useState(initialFrom ? "Custom" : "30d");
   const [viewMode, setViewMode] = useState("table");
+  const [uploadingFile, setUploadingFile] = useState(false);
   const searchInputRef = useRef(null);
 
   const [selectedRowIds, setSelectedRowIds] = useState([]);
@@ -176,6 +188,14 @@ export default function HealthRecords() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [searchQuery]);
+
+  useEffect(() => {
+    const urlPid = searchParams.get("patient") || searchParams.get("patientId");
+    if (urlPid && urlPid !== selectedPatientId) {
+      setSelectedPatientId(urlPid);
+      sessionStorage.setItem("carebridge_last_patient", urlPid);
+    }
+  }, [searchParams, selectedPatientId]);
 
   const fetchPatients = useCallback(async () => {
     try {
@@ -316,6 +336,33 @@ export default function HealthRecords() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFile(true);
+    try {
+      const res = await doctorService.uploadRecordAttachment(file);
+      if (res && res.file_url) {
+        const newAtt = {
+          file_name: res.file_name || file.name,
+          file_url: res.file_url,
+          size_bytes: res.size_bytes || file.size
+        };
+        setFormData((prev) => ({
+          ...prev,
+          attachments: [...(prev.attachments || []), newAtt],
+          file_url: res.file_url,
+          file_name: res.file_name || file.name
+        }));
+        setToastMessage({ text: `Attachment "${file.name}" uploaded successfully.` });
+      }
+    } catch (err) {
+      alert("Failed to upload document: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   const handleOpenCreateModal = () => {
@@ -1195,7 +1242,56 @@ export default function HealthRecords() {
                   </div>
                 </div>
               );
-            })}
+          </div>
+        )}
+
+        {/* ── Pagination Bar ── */}
+        {!loading && records.length > 0 && (
+          <div className="records-pagination-bar">
+            <div className="pagination-info">
+              Showing <strong>{((currentPage - 1) * limit) + 1}</strong> - <strong>{Math.min(currentPage * limit, totalRecords)}</strong> of <strong>{totalRecords}</strong> clinical records
+            </div>
+            <div className="pagination-controls">
+              <div className="page-size-select">
+                <span>Per page:</span>
+                <select
+                  value={limit}
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  aria-label="Records per page"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+              <div className="page-buttons">
+                <button
+                  type="button"
+                  className="btn-page-nav"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  aria-label="Previous page"
+                >
+                  Previous
+                </button>
+                <span className="page-indicator">
+                  Page <strong>{currentPage}</strong> of <strong>{totalPages || 1}</strong>
+                </span>
+                <button
+                  type="button"
+                  className="btn-page-nav"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  aria-label="Next page"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </section>
@@ -1288,6 +1384,62 @@ export default function HealthRecords() {
               <div className="drawer-section">
                 <h3>Clinical Notes &amp; Observations</h3>
                 <p className="notes-box">{drawerRecord.notes || drawerRecord.description || "None recorded."}</p>
+              </div>
+
+              <div className="drawer-section">
+                <h3>Attached Clinical Documents &amp; Lab Reports</h3>
+                {drawerRecord.attachments && drawerRecord.attachments.length > 0 ? (
+                  <div className="drawer-attachments-list">
+                    {drawerRecord.attachments.map((att, attIdx) => {
+                      const fileUrl = att.file_url || `/api/health-records/files/${att.file_name}`;
+                      return (
+                        <div key={attIdx} className="attachment-card">
+                          <div className="attachment-info">
+                            <FileText size={18} className="att-icon" />
+                            <div>
+                              <strong className="att-name">{att.file_name || "Clinical_Report.pdf"}</strong>
+                              <span className="att-size">
+                                {att.size_bytes ? `${Math.round(att.size_bytes / 1024)} KB` : "140 KB"} • PDF Document
+                              </span>
+                            </div>
+                          </div>
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-download-att"
+                            download={att.file_name || "Clinical_Report.pdf"}
+                          >
+                            <Download size={14} /> Download
+                          </a>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : drawerRecord.file_url ? (
+                  <div className="drawer-attachments-list">
+                    <div className="attachment-card">
+                      <div className="attachment-info">
+                        <FileText size={18} className="att-icon" />
+                        <div>
+                          <strong className="att-name">{drawerRecord.file_name || "Clinical_Report.pdf"}</strong>
+                          <span className="att-size">PDF Document</span>
+                        </div>
+                      </div>
+                      <a
+                        href={drawerRecord.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-download-att"
+                        download={drawerRecord.file_name || "Clinical_Report.pdf"}
+                      >
+                        <Download size={14} /> Download
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-muted">No external documents attached to this record.</p>
+                )}
               </div>
 
               <div className="drawer-section">
@@ -1597,6 +1749,45 @@ export default function HealthRecords() {
                         <option value="draft">Draft (Preliminary notes)</option>
                         <option value="amended">Amended (Correction applied)</option>
                       </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Clinical Document Attachments (PDF / Scans)</label>
+                      <div className="file-upload-box">
+                        <label className="file-upload-label">
+                          <Upload size={18} />
+                          <span>{uploadingFile ? "Uploading document..." : "Click or drag to attach PDF or Medical Scan"}</span>
+                          <input
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg,.docx"
+                            onChange={handleFileUpload}
+                            disabled={uploadingFile}
+                            style={{ display: "none" }}
+                          />
+                        </label>
+                        {formData.attachments && formData.attachments.length > 0 && (
+                          <div className="modal-attachments-chips">
+                            {formData.attachments.map((att, attI) => (
+                              <div key={attI} className="modal-att-chip">
+                                <FileText size={14} />
+                                <span>{att.file_name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      attachments: prev.attachments.filter((_, i) => i !== attI)
+                                    }));
+                                  }}
+                                  aria-label="Remove attachment"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="final-review-summary">

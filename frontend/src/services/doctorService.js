@@ -187,21 +187,31 @@ export const doctorService = {
   // ------------------------------------------------------------
   async getHealthRecords(params = {}) {
     try {
-      const response = await api.get("/health-records/", { params });
+      const queryParams = typeof params === "string" ? { patient: params } : { ...params };
+      if (queryParams.patientId && !queryParams.patient) {
+        queryParams.patient = queryParams.patientId;
+      }
+      const response = await api.get("/health-records/", { params: queryParams });
       if (Array.isArray(response.data)) return response.data;
       if (response.data && Array.isArray(response.data.items)) return response.data.items;
       if (response.data && Array.isArray(response.data.records)) return response.data.records;
       return [];
     } catch (error) {
+      console.warn("Error fetching health records:", error?.message);
       return [];
     }
   },
 
   async getHealthRecordsSummary(params = {}) {
     try {
-      const response = await api.get("/health-records/", { params });
+      const queryParams = typeof params === "string" ? { patient: params } : { ...params };
+      if (queryParams.patientId && !queryParams.patient) {
+        queryParams.patient = queryParams.patientId;
+      }
+      const response = await api.get("/health-records/", { params: queryParams });
       return response.data || { items: [], records: [], total: 0, stats: { records: 0, consultations: 0, prescriptions: 0, diagnoses: 0, checkups: 0 } };
     } catch (error) {
+      console.warn("Error fetching health records summary:", error?.message);
       return { items: [], records: [], total: 0, stats: { records: 0, consultations: 0, prescriptions: 0, diagnoses: 0, checkups: 0 } };
     }
   },

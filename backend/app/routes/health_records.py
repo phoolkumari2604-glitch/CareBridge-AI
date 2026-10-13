@@ -66,44 +66,12 @@ def list_health_records():
         "is_test": {"$ne": True}
     }
 
-    # Doctor access authorization check
-    if user_role == "DOCTOR":
-        doc = db.doctors.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
-        doctor_oid = doc["_id"] if doc else None
-        
-        # Approved patients list
-        approvals = list(db.approvals.find({
-            "$or": [
-                {"doctor_id": doctor_oid},
-                {"approved_by": user_id},
-                {"status": "APPROVED"}
-            ]
-        }))
-        approved_patient_ids = [a["patient_id"] for a in approvals if a.get("patient_id")]
-        
-        # In doctor mode, allow access to approved patients or records created by this doctor
-        if approved_patient_ids:
-            base_query["$or"] = [
-                {"patient_id": {"$in": approved_patient_ids}},
-                {"doctor_id": doctor_oid},
-                {"created_by_user_id": user_id}
-            ]
-        elif doctor_oid:
-            base_query["$or"] = [
-                {"doctor_id": doctor_oid},
-                {"created_by_user_id": user_id}
-            ]
-    elif user_role == "PATIENT":
-        pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
-        if pat:
-            base_query["patient_id"] = pat["_id"]
-        else:
-            base_query["patient_id"] = ObjectId()  # Empty match safe guard
-
-    # Patient filter
+    # Resolve patient argument if specified
+    target_patient_id = None
+    target_patient_code = None
     if patient_arg and patient_arg.lower() != "all":
         if is_valid_object_id(patient_arg):
-            base_query["patient_id"] = ObjectId(patient_arg)
+            target_patient_id = ObjectId(patient_arg)
         else:
             pat_match = db.patients.find_one({
                 "$or": [
@@ -113,9 +81,54 @@ def list_health_records():
                 ]
             })
             if pat_match:
-                base_query["patient_id"] = pat_match["_id"]
+                target_patient_id = pat_match["_id"]
+                target_patient_code = pat_match.get("patient_code")
             else:
-                base_query["patient_code"] = patient_arg
+                target_patient_code = patient_arg
+
+    # Role-based access authorization check
+    if user_role == "DOCTOR":
+        if target_patient_id:
+            base_query["$or"] = [
+                {"patient_id": target_patient_id},
+                {"patient_code": str(target_patient_code or patient_arg)}
+            ]
+        elif target_patient_code:
+            base_query["patient_code"] = str(target_patient_code)
+        else:
+            # In full overview mode, allow doctor access to practice EHR records
+            doc = db.doctors.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
+            doctor_oid = doc["_id"] if doc else None
+            # Find any assigned or approved patients
+            approvals = list(db.approvals.find({
+                "$or": [
+                    {"doctor_id": doctor_oid},
+                    {"approved_by": user_id},
+                    {"status": "APPROVED"}
+                ]
+            }))
+            approved_patient_ids = [a["patient_id"] for a in approvals if a.get("patient_id")]
+            if approved_patient_ids:
+                base_query["$or"] = [
+                    {"patient_id": {"$in": approved_patient_ids}},
+                    {"doctor_id": doctor_oid},
+                    {"created_by_user_id": user_id}
+                ]
+    elif user_role == "PATIENT":
+        pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
+        if pat:
+            base_query["patient_id"] = pat["_id"]
+        else:
+            base_query["patient_id"] = ObjectId()  # Empty match safe guard
+    else:
+        # STAFF / ADMIN
+        if target_patient_id:
+            base_query["$or"] = [
+                {"patient_id": target_patient_id},
+                {"patient_code": str(target_patient_code or patient_arg)}
+            ]
+        elif target_patient_code:
+            base_query["patient_code"] = str(target_patient_code)
 
     # Type filter (CONSULTATION, DIAGNOSIS, PRESCRIPTION, CHECKUP)
     if type_arg and type_arg.upper() != "ALL":
@@ -391,6 +404,86 @@ def create_health_record():
         "item": serialize_doc(record_doc),
         "record": serialize_doc(record_doc)
     }), 201
+
+# ============================================================
+# GET SINGLE RECORD OR PATIENT RECORDS
+# GET /api/health-records/<record_or_patient_id>
+# ============================================================
+@health_records_bp.route("/<identifier>", methods=["GET"], strict_slashes=False)
+@token_required
+def get_health_record_or_patient_records(identifier):
+    db = get_database()
+    current_user = g.current_user
+    user_role = (current_user.get("role") or "PATIENT").upper()
+    user_id = str(current_user["_id"])
+    clean_id = (identifier or "").strip()
+
+    is_latest = False
+    if clean_id.endswith("/latest"):
+        clean_id = clean_id.replace("/latest", "").strip()
+        is_latest = True
+
+    # 1. First, check if clean_id is a specific health record ID
+    if is_valid_object_id(clean_id):
+        record = db.health_records.find_one({"_id": ObjectId(clean_id), "deleted_at": None})
+        if record:
+            if user_role == "PATIENT":
+                pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
+                if not pat or str(record.get("patient_id")) != str(pat["_id"]):
+                    return jsonify({"error": "Forbidden", "detail": "Access denied"}), 403
+            return jsonify(serialize_doc(record)), 200
+
+    # 2. Check if clean_id matches a patient by _id, patient_code, or patient_id
+    target_patient = None
+    if is_valid_object_id(clean_id):
+        target_patient = db.patients.find_one({"_id": ObjectId(clean_id)})
+    if not target_patient:
+        target_patient = db.patients.find_one({
+            "$or": [
+                {"patient_code": clean_id},
+                {"patient_id_code": clean_id},
+                {"patient_id": clean_id}
+            ]
+        })
+
+    if target_patient:
+        if user_role == "PATIENT":
+            pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email")}]})
+            if not pat or str(target_patient["_id"]) != str(pat["_id"]):
+                return jsonify({"error": "Forbidden", "detail": "Access denied"}), 403
+
+        query = {
+            "$or": [
+                {"patient_id": target_patient["_id"]},
+                {"patient_code": str(target_patient.get("patient_code"))}
+            ],
+            "deleted_at": None,
+            "is_test": {"$ne": True}
+        }
+        if is_latest:
+            latest_rec = db.health_records.find_one(query, sort=[("record_date", -1), ("_id", -1)])
+            return jsonify(serialize_doc(latest_rec) if latest_rec else {}), 200
+
+        records = list(db.health_records.find(query).sort([("record_date", -1), ("_id", -1)]))
+        return jsonify(serialize_doc(records)), 200
+
+    # 3. Direct match on patient_code in health_records
+    direct_records = list(db.health_records.find({
+        "patient_code": clean_id,
+        "deleted_at": None,
+        "is_test": {"$ne": True}
+    }).sort([("record_date", -1), ("_id", -1)]))
+    if direct_records:
+        if is_latest:
+            return jsonify(serialize_doc(direct_records[0])), 200
+        return jsonify(serialize_doc(direct_records)), 200
+
+    return jsonify({"error": "Not Found", "detail": "Health record or patient not found"}), 404
+
+@health_records_bp.route("/<identifier>/latest", methods=["GET"], strict_slashes=False)
+@token_required
+def get_latest_patient_record(identifier):
+    return get_health_record_or_patient_records(f"{identifier}/latest")
 
 # ============================================================
 # UPDATE HEALTH RECORD

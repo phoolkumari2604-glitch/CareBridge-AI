@@ -819,7 +819,7 @@ function DoctorDashboard() {
                     <div className="patient-quick-nav-actions">
                       <button
                         className="btn-quick-nav primary"
-                        onClick={() => navigate(`/doctor/records?patientId=${focusedPid}`)}
+                        onClick={() => navigate(`/doctor/records?patient=${focusedPid}&patientId=${focusedPid}`)}
                         title="Open full medical chart"
                       >
                         <FileText size={15} />
@@ -1209,7 +1209,7 @@ function DoctorDashboard() {
 
                       <button
                         className="btn-text-link"
-                        onClick={() => navigate(`/doctor/records?patientId=${focusedPid}`)}
+                        onClick={() => navigate(`/doctor/records?patient=${focusedPid}&patientId=${focusedPid}`)}
                       >
                         <span>Open Complete Chart</span>
                         <ArrowUpRight size={14} />
@@ -1223,7 +1223,7 @@ function DoctorDashboard() {
                           <p>No health records logged yet for this patient.</p>
                           <button
                             className="btn-create-record-link"
-                            onClick={() => navigate(`/doctor/records?patientId=${focusedPid}`)}
+                            onClick={() => navigate(`/doctor/records?patient=${focusedPid}&patientId=${focusedPid}`)}
                           >
                             + Create Clinical Record
                           </button>
@@ -1245,11 +1245,14 @@ function DoctorDashboard() {
                               {Array.isArray(rec.medications) && rec.medications.length > 0 && (
                                 <div className="meds-tag-row">
                                   <Pill size={12} />
-                                  {rec.medications.map((m, mIdx) => (
-                                    <span key={mIdx} className="med-tag">
-                                      {m}
-                                    </span>
-                                  ))}
+                                  {rec.medications.map((m, mIdx) => {
+                                    const medText = typeof m === "string" ? m : `${m.name || "Medication"}${m.dose ? ` (${m.dose})` : ""}`;
+                                    return (
+                                      <span key={mIdx} className="med-tag">
+                                        {medText}
+                                      </span>
+                                    );
+                                  })}
                                 </div>
                               )}
                             </div>

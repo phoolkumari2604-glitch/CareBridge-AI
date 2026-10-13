@@ -79,37 +79,68 @@ def run_migration():
         print(f" - {p.get('name')} (Code: {p.get('patient_code')})")
 
     # 3. Find Doctor Dr. Ananya Sharma (Primary Doctor user)
+    doc_user = db.users.find_one({"email": "doctor@carebridge.ai"})
     doc = db.doctors.find_one({"email": "doctor@carebridge.ai"})
-    if not doc:
+    
+    if not doc and doc_user:
+        doc_id = db.doctors.insert_one({
+            "name": doc_user.get("name", "Dr. Ananya Sharma"),
+            "email": "doctor@carebridge.ai",
+            "user_id": str(doc_user["_id"]),
+            "specialization": "Cardiology & Critical Care",
+            "department": "Cardiology",
+            "hospital": "CareBridge Medical Center",
+            "hospital_name": "CareBridge Medical Center",
+            "phone": doc_user.get("phone", "+91 9876543211"),
+            "created_at": datetime.now(timezone.utc)
+        }).inserted_id
+        doc = db.doctors.find_one({"_id": doc_id})
+    elif not doc:
         doc = db.doctors.find_one()
-    doctor_id = doc["_id"]
-    doctor_user_id = doc.get("user_id") or str(doctor_id)
-    doctor_name = doc.get("name", "Dr. Ananya Sharma")
+        
+    doctor_id = doc["_id"] if doc else ObjectId()
+    doctor_user_id = str(doc_user["_id"]) if doc_user else (str(doc.get("user_id")) if doc and doc.get("user_id") else str(doctor_id))
+    doctor_name = doc.get("name", "Dr. Ananya Sharma") if doc else "Dr. Ananya Sharma"
     hospital_name = "CareBridge Medical Center"
-    print(f"[3] Using Doctor: {doctor_name} ({doctor_id})")
+    print(f"[3] Using Doctor: {doctor_name} (Doctor ID: {doctor_id}, User ID: {doctor_user_id})")
 
-    # Ensure approvals exist for Dr. Ananya Sharma across real patients
+    # Ensure sample clinical report file exists on disk in uploads directory
+    uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
+    os.makedirs(uploads_dir, exist_ok=True)
+    sample_pdf_path = os.path.join(uploads_dir, "sample_clinical_report.pdf")
+    if not os.path.exists(sample_pdf_path) or os.path.getsize(sample_pdf_path) < 100:
+        minimal_pdf = (
+            b"%PDF-1.4\n"
+            b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+            b"2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n"
+            b"3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>/Contents 4 0 R>>endobj\n"
+            b"4 0 obj<</Length 95>>stream\n"
+            b"BT\n/F1 18 Tf\n72 720 Td\n(CareBridge AI - Clinical Health Record & Laboratory Summary) Tj\nET\n"
+            b"endstream\nendobj\n"
+            b"xref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000056 00000 n\n0000000111 00000 n\n0000000212 00000 n\n"
+            b"trailer<</Size 5/Root 1 0 R>>\nstartxref\n356\n%%EOF\n"
+        )
+        with open(sample_pdf_path, "wb") as f:
+            f.write(minimal_pdf)
+        print(f"Created authentic sample report PDF at: {sample_pdf_path}")
+
+    # Ensure approvals exist for Dr. Ananya Sharma across all real patients
     now = datetime.now(timezone.utc)
     for p in real_patients:
-        existing_approval = db.approvals.find_one({
-            "patient_id": p["_id"],
-            "status": "APPROVED"
-        })
-        if not existing_approval:
-            db.approvals.insert_one({
+        db.approvals.update_one(
+            {"patient_id": p["_id"]},
+            {"$set": {
                 "patient_id": p["_id"],
                 "doctor_id": doctor_id,
                 "approved_by": doctor_user_id,
                 "status": "APPROVED",
                 "reason": "Direct clinical chart clearance",
-                "created_at": now - timedelta(days=15),
-                "approved_at": now - timedelta(days=15),
-                "updated_at": now - timedelta(days=15)
-            })
+                "updated_at": now
+            }},
+            upsert=True
+        )
 
-    # 4. Remove existing test health records
-    db.health_records.delete_many({"$or": [{"is_test": True}, {"patient_name": {"$regex": "test", "$options": "i"}}]})
-    # Reset existing records to guarantee clean, rich, structured clinical data
+    # 4. Reset health records to guarantee clean, rich, structured clinical data
     db.health_records.delete_many({})
     print("[4] Purged outdated health records. Seeding clinical records for real patients...")
 
