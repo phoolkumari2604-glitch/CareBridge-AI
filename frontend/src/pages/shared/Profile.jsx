@@ -86,6 +86,14 @@ function Profile() {
   const [deleteBioLoading, setDeleteBioLoading] = useState(false);
   const [relinkConfirmModal, setRelinkConfirmModal] = useState(false);
 
+  // Live Security & Compliance Status
+  const [securityStatus, setSecurityStatus] = useState({
+    isHttps: typeof window !== "undefined" && window.location.protocol === "https:",
+    sessionValid: false,
+    sessionExpiry: null,
+    auditLoggingActive: false,
+  });
+
   // Profile Form Data
   const [formData, setFormData] = useState({
     name: user?.name || user?.fullName || "",
@@ -200,6 +208,73 @@ function Profile() {
     loadProfile();
   }, [loadProfile]);
 
+  // Live Security & Compliance Checks
+  useEffect(() => {
+    // 1. Live Protocol / Encrypted Connection check
+    const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+
+    // 2. Live JWT Session verification and expiration extraction
+    let sessionValid = false;
+    let sessionExpiry = null;
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+      if (token) {
+        const parts = token.split(".");
+        if (parts.length >= 2) {
+          const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          );
+          const parsed = JSON.parse(jsonPayload);
+          if (parsed.exp) {
+            const expMs = parsed.exp * 1000;
+            if (Date.now() < expMs) {
+              sessionValid = true;
+              sessionExpiry = new Date(expMs).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+            }
+          } else {
+            sessionValid = true;
+            sessionExpiry = "Active";
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not parse session token:", e);
+    }
+
+    setSecurityStatus((prev) => ({
+      ...prev,
+      isHttps,
+      sessionValid,
+      sessionExpiry,
+    }));
+
+    // 3. Live check if audit_logs is receiving entries
+    const checkAuditLogging = async () => {
+      try {
+        const data = await authAPI.getAuditStats();
+        const isActive = Boolean(
+          data &&
+          (data.total_events > 0 ||
+           data.events_24h > 0 ||
+           data.audit_engine_status === "ACTIVE")
+        );
+        setSecurityStatus((prev) => ({ ...prev, auditLoggingActive: isActive }));
+      } catch (err) {
+        console.warn("Audit logs status check fallback:", err);
+        setSecurityStatus((prev) => ({ ...prev, auditLoggingActive: false }));
+      }
+    };
+
+    checkAuditLogging();
+  }, [user]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -222,34 +297,46 @@ function Profile() {
     }
   };
 
-  const handleSavePhoto = async (newPhotoUrl) => {
+  const handleSavePhoto = async (newPhotoUrl, blob) => {
     try {
       setLoading(true);
-      setFormData((prev) => ({ ...prev, avatar: newPhotoUrl || "" }));
-      await authAPI.updateProfile({ avatar: newPhotoUrl, photo: newPhotoUrl });
+      const photoStr =
+        typeof newPhotoUrl === "object" && newPhotoUrl?.dataUrl
+          ? newPhotoUrl.dataUrl
+          : newPhotoUrl;
+
+      setFormData((prev) => ({ ...prev, avatar: photoStr || "" }));
+      await authAPI.updateProfile({ avatar: photoStr, photo: photoStr });
       if (isDoctor && (doctorId || user?.doctor_id || user?.id)) {
         await doctorService.updateDoctor(doctorId || user?.doctor_id || user?.id, {
-          avatar: newPhotoUrl,
-          photo: newPhotoUrl,
+          avatar: photoStr,
+          photo: photoStr,
         });
       } else if (isPatient && (user?.patient_id || user?.id)) {
         await patientService.updatePatientProfile(user?.patient_id || user?.id, {
-          avatar: newPhotoUrl,
-          photo: newPhotoUrl,
+          avatar: photoStr,
+          photo: photoStr,
         });
       }
       if (setUser) {
-        setUser((prev) => ({
-          ...prev,
-          avatar: newPhotoUrl,
-          photo: newPhotoUrl,
-        }));
+        setUser((prev) => {
+          const updated = {
+            ...prev,
+            avatar: photoStr,
+            photo: photoStr,
+          };
+          try {
+            localStorage.setItem("user", JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
       }
-      setSuccessToast(newPhotoUrl ? "Profile photo updated successfully." : "Profile photo removed.");
+      setSuccessToast(photoStr ? "Profile photo updated successfully." : "Profile photo removed.");
       setTimeout(() => setSuccessToast(""), 3500);
     } catch (err) {
       console.error("Failed to update profile photo:", err);
       setErrorMessage("Failed to update profile photo. Please try again.");
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -1622,19 +1709,39 @@ function Profile() {
           <div className="security-content">
             <h3>CareBridge AI Clinical Security & Compliance</h3>
             <p>
-              Your clinical identity and health telemetry are protected with end-to-end TLS 1.3 encryption, cryptographic tokens, and immutable audit logs. HIPAA, NABH, and DISHA data protection standards are enforced.
+              Your clinical identity and health data are protected with encrypted connections, signed session tokens, and audit logging. Built with HIPAA and DPDP Act principles in mind.
             </p>
 
             <div className="security-pills-row">
-              <span className="sec-pill">
-                <Lock size={13} /> TLS 1.3 Active
-              </span>
-              <span className="sec-pill">
-                <KeyRound size={13} /> OAuth2 JWT Signed
-              </span>
-              <span className="sec-pill">
-                <ShieldCheck size={13} /> HIPAA & NABH Compliant
-              </span>
+              {securityStatus.isHttps ? (
+                <span className="sec-pill status-green">
+                  <Lock size={13} /> Encrypted Connection
+                </span>
+              ) : (
+                <span className="sec-pill status-amber">
+                  <AlertCircle size={13} /> Dev Mode (HTTP)
+                </span>
+              )}
+
+              {securityStatus.sessionValid ? (
+                <span className="sec-pill status-green">
+                  <KeyRound size={13} /> Secure Session {securityStatus.sessionExpiry && securityStatus.sessionExpiry !== "Active" ? `(Expires: ${securityStatus.sessionExpiry})` : "(Active)"}
+                </span>
+              ) : (
+                <span className="sec-pill status-amber">
+                  <AlertCircle size={13} /> Session Inactive
+                </span>
+              )}
+
+              {securityStatus.auditLoggingActive ? (
+                <span className="sec-pill status-green">
+                  <ShieldCheck size={13} /> Audit Logging Active
+                </span>
+              ) : (
+                <span className="sec-pill status-amber">
+                  <ShieldAlert size={13} /> Audit Logging Idle
+                </span>
+              )}
             </div>
           </div>
         </section>

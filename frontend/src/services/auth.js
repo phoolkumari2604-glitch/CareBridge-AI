@@ -120,6 +120,11 @@ export const authAPI = {
     return response.data;
   },
 
+  getAuditStats: async () => {
+    const response = await api.get("/audit-logs/stats");
+    return response.data;
+  },
+
   // ==================================================
   // BIOMETRICS
   // ==================================================
@@ -155,6 +160,11 @@ export const authAPI = {
 
   deleteBiometrics: async () => {
     const response = await api.delete("/auth/biometrics");
+    return response.data;
+  },
+
+  getBiometricsStatus: async () => {
+    const response = await api.get("/auth/biometrics/status");
     return response.data;
   },
 };

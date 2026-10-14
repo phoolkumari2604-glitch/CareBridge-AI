@@ -59,8 +59,16 @@ function Navbar({ onMenuClick }) {
         </Link>
 
         <Link to="/profile" className="navbar-profile">
-          <div className="navbar-avatar">
-            {user?.name?.charAt(0)?.toUpperCase() || "U"}
+          <div className="navbar-avatar" style={{ overflow: "hidden" }}>
+            {user?.avatar || user?.photo ? (
+              <img
+                src={user?.avatar || user?.photo}
+                alt={user?.name || "User"}
+                style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+              />
+            ) : (
+              user?.name?.charAt(0)?.toUpperCase() || "U"
+            )}
           </div>
 
           <div className="navbar-user-info">

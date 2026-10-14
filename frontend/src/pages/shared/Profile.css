@@ -694,13 +694,26 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   background: var(--surface-soft, #f8fafc);
   border: 1px solid var(--border, #e2e8f0);
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary, #475569);
+  transition: all 0.2s ease;
+}
+
+.sec-pill.status-green {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #059669;
+}
+
+.sec-pill.status-amber {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #d97706;
 }
 
 /* ==================================================
@@ -1193,6 +1206,20 @@
   background: #0b1220;
   border-color: #1f2a44;
   color: #cbd5e1;
+}
+
+[data-theme="dark"] .sec-pill.status-green,
+.dark-theme .sec-pill.status-green {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+[data-theme="dark"] .sec-pill.status-amber,
+.dark-theme .sec-pill.status-amber {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
 }
 
 /* ==================================================

@@ -27,18 +27,23 @@ export interface AuthResponse {
 }
 
 export const authApi = {
-  login: async (credentials: { email: string; password: string }) => {
-    const res = await client.post<AuthResponse>("/auth/login", credentials);
+  login: async (credentials: { email: string; password: string }, signal?: AbortSignal) => {
+    const res = await client.post<AuthResponse>("/auth/login", credentials, { signal });
     return res.data;
   },
 
-  register: async (data: any) => {
-    const res = await client.post<AuthResponse>("/auth/register", data);
+  verify2FA: async (data: { temp_token: string; otp: string }, signal?: AbortSignal) => {
+    const res = await client.post<AuthResponse>("/auth/login/2fa-verify", data, { signal });
     return res.data;
   },
 
-  getMe: async () => {
-    const res = await client.get<User>("/auth/me");
+  register: async (data: any, signal?: AbortSignal) => {
+    const res = await client.post<AuthResponse>("/auth/register", data, { signal });
+    return res.data;
+  },
+
+  getMe: async (signal?: AbortSignal) => {
+    const res = await client.get<User>("/auth/me", { signal });
     return res.data;
   },
 

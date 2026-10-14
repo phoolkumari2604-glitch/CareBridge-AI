@@ -3,8 +3,9 @@ import axios, { AxiosInstance } from "axios";
 // Standardize API Base URL from environment or fallback to local Flask server
 const getBaseUrl = (): string => {
   const envUrl = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_API_BASE_URL;
-  if (envUrl) {
-    return envUrl.endsWith("/api") ? envUrl : `${envUrl.replace(/\/$/, "")}/api`;
+  if (envUrl && typeof envUrl === "string") {
+    const cleanUrl = envUrl.trim().replace(/\/+$/, "");
+    return cleanUrl.endsWith("/api") ? cleanUrl : `${cleanUrl}/api`;
   }
   return "http://localhost:5000/api";
 };
@@ -38,8 +39,8 @@ client.interceptors.response.use(
     const status = error.response ? error.response.status : null;
 
     if (status === 401 && !originalRequest?._retry) {
-      const currentPath = window.location.pathname;
-      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/") {
+      const currentPath = window.location.pathname.replace(/\/+$/, "");
+      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "") {
         localStorage.removeItem("access_token");
         localStorage.removeItem("user");
         window.location.href = "/login";

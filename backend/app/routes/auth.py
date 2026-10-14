@@ -402,7 +402,7 @@ def login():
             "fingerprintVerified": bool(user.get("fingerprint_verified") or user.get("fingerprintVerified")),
             "emailVerified": bool(user.get("email_verified", False)),
             "lastLogin": now_time.isoformat(),
-            "createdAt": user.get("created_at", now_time).isoformat() if hasattr(user.get("created_at"), "isoformat") else str(user.get("created_at")),
+            "createdAt": (user.get("created_at") or user.get("createdAt") or now_time).isoformat() if hasattr(user.get("created_at") or user.get("createdAt") or now_time, "isoformat") else str(user.get("created_at") or user.get("createdAt") or now_time),
             "patient_id": patient_id,
             "doctor_id": doctor_id
         }
@@ -777,6 +777,15 @@ def get_me():
         else:
             created_at_str = str(created_at or "")
 
+        bio = db.staff_biometrics.find_one({"user_id": user_id})
+        fp = bio.get("fingerprint") if bio else None
+        face = bio.get("face") if bio else None
+
+        face_verified = bool(face or user.get("face_verified") or user.get("faceVerified"))
+        face_verified_at = face.get("enrolled_at") if (face and face.get("enrolled_at")) else (user.get("face_verified_at") or user.get("faceVerifiedAt"))
+        fp_verified = bool(fp or user.get("fingerprint_verified") or user.get("fingerprintVerified"))
+        fp_verified_at = fp.get("linked_at") if (fp and fp.get("linked_at")) else (user.get("fingerprint_verified_at") or user.get("fingerprintVerifiedAt"))
+
         return jsonify({
             "id": user_id,
             "_id": user_id,
@@ -787,10 +796,11 @@ def get_me():
             "phone": user.get("phone", ""),
             "staffId": staff_id,
             "staff_id": staff_id,
-            "faceVerified": bool(user.get("face_verified") or user.get("faceVerified")),
-            "faceVerifiedAt": user.get("face_verified_at") or user.get("faceVerifiedAt"),
-            "fingerprintVerified": bool(user.get("fingerprint_verified") or user.get("fingerprintVerified")),
-            "fingerprintVerifiedAt": user.get("fingerprint_verified_at") or user.get("fingerprintVerifiedAt"),
+            "faceVerified": face_verified,
+            "faceVerifiedAt": face_verified_at,
+            "fingerprintVerified": fp_verified,
+            "fingerprintVerifiedAt": fp_verified_at,
+            "credentialId": fp.get("credentialId") if fp else user.get("webauthn_credential_id"),
             "emailVerified": bool(user.get("email_verified", False)),
             "is_primary_admin": bool(user.get("is_primary_admin", False)),
             "lastLogin": last_login_str,
@@ -873,6 +883,40 @@ def update_profile():
     }), 200
 
 # ============================================================
+# BIOMETRIC STATUS & CREDENTIAL MANAGEMENT
+# ============================================================
+@auth_bp.route("/biometrics/status", methods=["GET"])
+@token_required
+def get_biometrics_status():
+    db = get_database()
+    user = g.current_user
+    user_id = str(user["_id"])
+    role = user.get("role", "STAFF")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+
+    bio = db.staff_biometrics.find_one({"user_id": user_id})
+    fp = bio.get("fingerprint") if bio else None
+    face = bio.get("face") if bio else None
+
+    fp_linked = bool(fp and fp.get("credentialId"))
+    fp_linked_at = fp.get("linked_at") if fp_linked else None
+    face_enrolled = bool(face and (face.get("descriptor") or face.get("encrypted_payload")))
+    face_enrolled_at = face.get("enrolled_at") if face_enrolled else None
+
+    return jsonify({
+        "staff_id": staff_id,
+        "fingerprintLinked": fp_linked,
+        "fingerprintVerified": fp_linked,
+        "fingerprintLinkedAt": fp_linked_at,
+        "fingerprintVerifiedAt": fp_linked_at,
+        "credentialId": fp.get("credentialId") if fp_linked else None,
+        "faceEnrolled": face_enrolled,
+        "faceVerified": face_enrolled,
+        "faceEnrolledAt": face_enrolled_at,
+        "faceVerifiedAt": face_enrolled_at,
+    }), 200
+
+# ============================================================
 # BIOMETRIC FACE ENDPOINTS
 # ============================================================
 @auth_bp.route("/biometrics/face/enroll", methods=["POST"])
@@ -881,6 +925,8 @@ def enroll_face():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
+    role = user.get("role", "STAFF")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
     data = request.get_json() or {}
     
     descriptor = data.get("descriptor") or data.get("embedding")
@@ -894,38 +940,52 @@ def enroll_face():
         return jsonify({"error": "Validation Error", "detail": "Valid face descriptor vector or encrypted payload is required."}), 400
         
     now_iso = datetime.now(timezone.utc).isoformat()
-    update_fields = {
-        "face_verified": True,
-        "faceVerified": True,
-        "face_verified_at": now_iso,
-        "faceVerifiedAt": now_iso,
-        "updated_at": datetime.now(timezone.utc)
-    }
     
-    if encrypted_payload:
-        update_fields["face_encrypted_payload"] = encrypted_payload
-    if descriptor and isinstance(descriptor, list):
-        update_fields["face_descriptor"] = descriptor
+    # Store ONLY the encrypted descriptor vector in staff_biometrics table
+    stored_descriptor = encrypted_payload if encrypted_payload else descriptor
+    db.staff_biometrics.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "user_id": user_id,
+            "staff_id": staff_id,
+            "face": {
+                "descriptor": stored_descriptor,
+                "raw_vector": descriptor if isinstance(descriptor, list) else None,
+                "enrolled_at": now_iso
+            },
+            "updated_at": datetime.now(timezone.utc)
+        }},
+        upsert=True
+    )
 
+    # Mirror active verified status onto user document for token sessions
     db.users.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": update_fields}
+        {"$set": {
+            "face_verified": True,
+            "faceVerified": True,
+            "face_verified_at": now_iso,
+            "faceVerifiedAt": now_iso,
+            "updated_at": datetime.now(timezone.utc)
+        }}
     )
     
     log_audit_action(
         db=db,
         user_id=user_id,
-        user_role=user.get("role", "STAFF"),
+        user_role=role,
         action="FACE_ENROLLED",
         resource="BIOMETRICS",
-        resource_id=user_id,
-        details="Staff completed camera liveness check and face biometric enrollment"
+        resource_id=staff_id,
+        details=f"Staff {staff_id} completed live face camera guided liveness and enrolled encrypted descriptor vector"
     )
     
     return jsonify({
-        "message": "Face biometric credential enrolled successfully",
+        "message": "Face biometric descriptor enrolled successfully",
         "faceVerified": True,
-        "faceVerifiedAt": now_iso
+        "faceEnrolled": True,
+        "faceVerifiedAt": now_iso,
+        "faceEnrolledAt": now_iso
     }), 200
 
 @auth_bp.route("/biometrics/face/verify", methods=["POST"])
@@ -934,59 +994,71 @@ def verify_face():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
+    role = user.get("role", "STAFF")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
     data = request.get_json() or {}
     
     live_descriptor = data.get("descriptor")
-    stored_descriptor = user.get("face_descriptor")
-    
+    if not live_descriptor or not isinstance(live_descriptor, list):
+        return jsonify({"error": "Validation Error", "detail": "Live face descriptor array is required."}), 400
+
+    bio = db.staff_biometrics.find_one({"user_id": user_id})
+    stored_descriptor = None
+    if bio and bio.get("face"):
+        stored_descriptor = bio["face"].get("raw_vector") or bio["face"].get("descriptor")
     if not stored_descriptor:
+        stored_descriptor = user.get("face_descriptor")
+    
+    if not stored_descriptor or not isinstance(stored_descriptor, list):
         return jsonify({"error": "Not Found", "detail": "No enrolled face biometric found for this account. Please enroll first."}), 404
         
     is_match = False
+    dist = 999.0
     match_score = 0.0
     
-    if live_descriptor and isinstance(live_descriptor, list) and isinstance(stored_descriptor, list):
-        try:
-            # Euclidean distance between normalized descriptors
-            dist = sum((float(a) - float(b)) ** 2 for a, b in zip(live_descriptor, stored_descriptor)) ** 0.5
-            # Threshold 0.65 for typical 128-float euclidean face vector distance
-            match_score = max(0.0, min(100.0, round((1.0 - (dist / 1.5)) * 100, 1)))
-            is_match = dist < 0.65
-        except Exception as e:
-            dist = 999.0
-            is_match = False
+    try:
+        # Euclidean distance between fresh 128-d descriptor and stored descriptor
+        dist = sum((float(a) - float(b)) ** 2 for a, b in zip(live_descriptor, stored_descriptor)) ** 0.5
+        # Required Euclidean threshold: distance < 0.5
+        is_match = dist < 0.5
+        match_score = max(0.0, min(100.0, round((1.0 - (dist / 0.7)) * 100, 1)))
+    except Exception as e:
+        dist = 999.0
+        is_match = False
 
     if not is_match:
         log_audit_action(
             db=db,
             user_id=user_id,
-            user_role=user.get("role", "STAFF"),
+            user_role=role,
             action="FACE_VERIFIED_FAILED",
             resource="BIOMETRICS",
-            resource_id=user_id,
-            details=f"Live face verification failed distance match threshold (Score: {match_score}%)"
+            resource_id=staff_id,
+            details=f"Staff {staff_id} face verification failed Euclidean distance threshold (dist: {round(dist, 4)}, threshold: < 0.5)"
         )
         return jsonify({
             "verified": False,
+            "distance": round(dist, 4),
             "matchScore": match_score,
-            "detail": f"Face verification did not match enrolled credential (Score: {match_score}%)."
+            "detail": f"Face verification did not match enrolled credential (distance: {round(dist, 3)}, threshold: < 0.5)."
         }), 401
         
     now_iso = datetime.now(timezone.utc).isoformat()
     log_audit_action(
         db=db,
         user_id=user_id,
-        user_role=user.get("role", "STAFF"),
+        user_role=role,
         action="FACE_VERIFIED",
         resource="BIOMETRICS",
-        resource_id=user_id,
-        details=f"Staff successfully authenticated via live face biometric check (Score: {match_score}%)"
+        resource_id=staff_id,
+        details=f"Staff {staff_id} successfully authenticated via live face descriptor match (dist: {round(dist, 4)} < 0.5, score: {match_score}%)"
     )
     
     return jsonify({
         "verified": True,
+        "distance": round(dist, 4),
         "matchScore": match_score,
-        "message": f"Face verification successful ({match_score}% match score)",
+        "message": f"Face verification successful ({match_score}% confidence match)",
         "verifiedAt": now_iso
     }), 200
 
@@ -999,9 +1071,11 @@ def webauthn_register_options():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
+    role = user.get("role", "STAFF")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    
     challenge = secrets.token_urlsafe(32)
     
-    # Store challenge temporarily on user document for verification
     db.users.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {"webauthn_challenge": challenge, "webauthn_challenge_created": datetime.now(timezone.utc)}}
@@ -1011,9 +1085,9 @@ def webauthn_register_options():
         "challenge": challenge,
         "rp": {"name": "CareBridge AI Clinical Security", "id": request.host.split(":")[0]},
         "user": {
-            "id": user_id,
+            "id": staff_id,
             "name": user.get("email"),
-            "displayName": user.get("name") or "Staff Member"
+            "displayName": user.get("name") or f"Staff #{staff_id}"
         },
         "pubKeyCredParams": [
             {"type": "public-key", "alg": -7},   # ES256
@@ -1021,7 +1095,8 @@ def webauthn_register_options():
         ],
         "authenticatorSelection": {
             "authenticatorAttachment": "platform",
-            "userVerification": "required"
+            "userVerification": "required",
+            "residentKey": "preferred"
         },
         "timeout": 60000
     }), 200
@@ -1032,15 +1107,34 @@ def webauthn_register_verify():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
+    role = user.get("role", "STAFF")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
     data = request.get_json() or {}
     
     credential_id = data.get("id") or data.get("credentialId")
     public_key = data.get("publicKey") or data.get("response", {}).get("publicKey") or "ECDSA_P256_SHA256"
-    counter = int(data.get("counter", 0))
+    counter = int(data.get("counter", 1))
     now_iso = datetime.now(timezone.utc).isoformat()
     
     if not credential_id:
         return jsonify({"error": "Validation Error", "detail": "Credential ID is required."}), 400
+
+    # Store credentialId, publicKey, counter, linked_at in staff_biometrics table
+    db.staff_biometrics.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "user_id": user_id,
+            "staff_id": staff_id,
+            "fingerprint": {
+                "credentialId": credential_id,
+                "publicKey": public_key,
+                "counter": counter,
+                "linked_at": now_iso
+            },
+            "updated_at": datetime.now(timezone.utc)
+        }},
+        upsert=True
+    )
 
     db.users.update_one(
         {"_id": ObjectId(user_id)},
@@ -1049,12 +1143,6 @@ def webauthn_register_verify():
             "fingerprintVerified": True,
             "fingerprint_verified_at": now_iso,
             "fingerprintVerifiedAt": now_iso,
-            "webauthn_credential": {
-                "credentialId": credential_id,
-                "publicKey": public_key,
-                "counter": counter,
-                "linkedAt": now_iso
-            },
             "webauthn_credential_id": credential_id,
             "webauthn_challenge": None,
             "updated_at": datetime.now(timezone.utc)
@@ -1064,17 +1152,19 @@ def webauthn_register_verify():
     log_audit_action(
         db=db,
         user_id=user_id,
-        user_role=user.get("role", "STAFF"),
-        action="FINGERPRINT_REGISTERED",
+        user_role=role,
+        action="FINGERPRINT_LINKED",
         resource="BIOMETRICS",
-        resource_id=user_id,
-        details=f"Platform biometric sensor (Windows Hello / Fingerprint) linked (Credential: {credential_id[:16]}...)"
+        resource_id=staff_id,
+        details=f"Staff {staff_id} linked platform fingerprint sensor (credentialId: {credential_id[:16]}...)"
     )
     
     return jsonify({
-        "message": "Platform biometric credential linked successfully",
+        "message": "Platform biometric sensor linked successfully",
         "fingerprintVerified": True,
+        "fingerprintLinked": True,
         "fingerprintVerifiedAt": now_iso,
+        "fingerprintLinkedAt": now_iso,
         "credentialId": credential_id
     }), 200
 
@@ -1085,8 +1175,9 @@ def webauthn_verify_options():
     user = g.current_user
     user_id = str(user["_id"])
     
-    cred = user.get("webauthn_credential")
-    cred_id = cred.get("credentialId") if cred else user.get("webauthn_credential_id")
+    bio = db.staff_biometrics.find_one({"user_id": user_id})
+    fp = bio.get("fingerprint") if bio else None
+    cred_id = fp.get("credentialId") if fp else user.get("webauthn_credential_id")
     
     if not cred_id:
         return jsonify({"error": "Not Found", "detail": "No platform biometric sensor linked to this account."}), 404
@@ -1111,10 +1202,13 @@ def webauthn_verify():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
+    role = user.get("role", "STAFF")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
     data = request.get_json() or {}
     
-    cred = user.get("webauthn_credential")
-    stored_cred_id = cred.get("credentialId") if cred else user.get("webauthn_credential_id")
+    bio = db.staff_biometrics.find_one({"user_id": user_id})
+    fp = bio.get("fingerprint") if bio else None
+    stored_cred_id = fp.get("credentialId") if fp else user.get("webauthn_credential_id")
     
     if not stored_cred_id:
         return jsonify({"error": "Not Found", "detail": "No registered platform sensor found."}), 404
@@ -1124,31 +1218,31 @@ def webauthn_verify():
         log_audit_action(
             db=db,
             user_id=user_id,
-            user_role=user.get("role", "STAFF"),
+            user_role=role,
             action="FINGERPRINT_VERIFIED_FAILED",
             resource="BIOMETRICS",
-            resource_id=user_id,
-            details="WebAuthn credential ID mismatch"
+            resource_id=staff_id,
+            details=f"Staff {staff_id} WebAuthn credential ID mismatch"
         )
         return jsonify({"verified": False, "detail": "Credential ID does not match registered platform sensor."}), 401
         
     # Increment counter
-    if cred:
-        new_counter = int(cred.get("counter", 0)) + 1
-        db.users.update_one(
-            {"_id": ObjectId(user_id)},
-            {"$set": {"webauthn_credential.counter": new_counter, "webauthn_verify_challenge": None}}
+    if fp:
+        new_counter = int(fp.get("counter", 1)) + 1
+        db.staff_biometrics.update_one(
+            {"user_id": user_id},
+            {"$set": {"fingerprint.counter": new_counter}}
         )
 
     now_iso = datetime.now(timezone.utc).isoformat()
     log_audit_action(
         db=db,
         user_id=user_id,
-        user_role=user.get("role", "STAFF"),
+        user_role=role,
         action="FINGERPRINT_VERIFIED",
         resource="BIOMETRICS",
-        resource_id=user_id,
-        details="User verified via platform fingerprint / Windows Hello sensor"
+        resource_id=staff_id,
+        details=f"Staff {staff_id} verified via platform fingerprint sensor"
     )
     
     return jsonify({
@@ -1163,6 +1257,11 @@ def delete_biometrics():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
+    role = user.get("role", "STAFF")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    
+    # Remove both credential and descriptor from staff_biometrics table
+    db.staff_biometrics.delete_one({"user_id": user_id})
     
     db.users.update_one(
         {"_id": ObjectId(user_id)},
@@ -1188,17 +1287,19 @@ def delete_biometrics():
     log_audit_action(
         db=db,
         user_id=user_id,
-        user_role=user.get("role", "STAFF"),
+        user_role=role,
         action="BIOMETRIC_DELETED",
         resource="BIOMETRICS",
-        resource_id=user_id,
-        details="Staff user permanently revoked all stored biometric credentials (face descriptor & WebAuthn platform sensor)"
+        resource_id=staff_id,
+        details=f"Staff {staff_id} permanently removed stored biometric credentials (face descriptor & WebAuthn platform sensor)"
     )
     
     return jsonify({
         "message": "All biometric credentials deleted permanently",
         "faceVerified": False,
-        "fingerprintVerified": False
+        "faceEnrolled": False,
+        "fingerprintVerified": False,
+        "fingerprintLinked": False
     }), 200
 
 @auth_bp.route("/change-password", methods=["POST"])

@@ -1,6 +1,11 @@
 import os
 from dotenv import load_dotenv
 
+# Explicitly load backend .env first, then fallback to current working directory
+_backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_env_file = os.path.join(_backend_dir, ".env")
+if os.path.exists(_env_file):
+    load_dotenv(_env_file)
 load_dotenv()
 
 MONGO_URI = os.getenv("MONGO_URI")
