@@ -18,10 +18,10 @@ def seed_demo_accounts():
         # 1. DEMO PATIENT
         patient_email = "patient@carebridge.ai"
         patient_password = os.getenv("DEMO_PATIENT_PASSWORD", "CareBridge#Pt2026!Secure")
-        patient_name = "Demo Patient"
+        patient_name = "Priya Sharma"
         patient_phone = "+91 9876543210"
 
-        print(f"Seeding demo patient: {patient_email}")
+        print(f"Seeding patient: {patient_email}")
         db.users.delete_many({"email": patient_email})
         
         patient_user = create_user_document(
@@ -31,6 +31,8 @@ def seed_demo_accounts():
             role="PATIENT",
             phone=patient_phone,
         )
+        patient_user["patient_code"] = "394762"
+        patient_user["patientId"] = "394762"
         user_res = db.users.insert_one(patient_user)
         patient_user_id = str(user_res.inserted_id)
 
@@ -40,6 +42,9 @@ def seed_demo_accounts():
             "name": patient_name,
             "email": patient_email,
             "phone": patient_phone,
+            "patient_code": "394762",
+            "patientId": "394762",
+            "patient_id_code": "PT-394762",
             "age": 32,
             "gender": "Female",
             "blood_group": "O+",

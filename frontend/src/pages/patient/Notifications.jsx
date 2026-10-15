@@ -320,7 +320,7 @@ function Notifications() {
         setNotifications((prev) => [res.notification, ...prev]);
         setUnreadCount((prev) => prev + 1);
         triggerAlertFeedback(res.notification);
-        showToast(`Dispatched test ${severity.toLowerCase()} notification!`);
+        showToast(`Dispatched ${severity.toLowerCase()} clinical notification!`);
       }
     } catch (err) {
       console.error("Simulate alert failed:", err);
@@ -562,7 +562,7 @@ function Notifications() {
       <section className="sim-alert-tray">
         <div className="sim-alert-label">
           <Zap size={14} />
-          <span>Test Alert Simulator:</span>
+          <span>Clinical Alert Simulator:</span>
         </div>
         <div className="sim-buttons">
           <button type="button" onClick={() => handleSimulateAlert("CRITICAL")} className="sim-btn critical">

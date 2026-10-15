@@ -2,7 +2,8 @@ import re
 import math
 import secrets
 import string
-from datetime import datetime, timezone
+import hashlib
+from datetime import datetime, timezone, timedelta
 from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
 from app.core.database import get_database
@@ -118,6 +119,73 @@ def create_appointment():
     except Exception as e:
         print("Warning: could not auto-create approval doc:", e)
         
+    # Auto-create OPD Pass in db.opd_passes
+    try:
+        apt_date = appointment_doc.get("appointment_date") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        date_clean = apt_date.replace("-", "")
+        apt_suffix = str(result.inserted_id)[-6:].upper()
+        pass_number = f"OPD-{date_clean}-{apt_suffix}"
+        
+        # 6-digit patient ID
+        p_num_id = (
+            str(patient.get("patient_numeric_id"))
+            if patient and patient.get("patient_numeric_id") and len(str(patient.get("patient_numeric_id"))) == 6
+            else "104829"
+        )
+        
+        otp_code = f"{secrets.randbelow(900000) + 100000}"
+        hashed_otp = hashlib.sha256(otp_code.encode("utf-8")).hexdigest()
+        try:
+            exp_date = datetime.strptime(apt_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
+        except Exception:
+            exp_date = datetime.now(timezone.utc) + timedelta(days=30)
+            
+        queue_token = f"Q-{str(int(apt_suffix, 16) % 900 + 100)}"
+        
+        opd_pass_doc = {
+            "appointment_id": result.inserted_id,
+            "patient_id": ObjectId(patient_id),
+            "patient_numeric_id": p_num_id,
+            "patient_name": appointment_doc["patient_name"],
+            "doctor_id": ObjectId(doctor_id),
+            "doctor_name": appointment_doc["doctor_name"],
+            "department": appointment_doc["specialty"],
+            "specialty": appointment_doc["specialty"],
+            "hospital_id": appointment_doc["hospital_id"],
+            "hospital_name": appointment_doc["hospital_name"],
+            "hospital_address": hospital.get("address", "CareBridge Medical Enclave, Hyderabad") if hospital else "CareBridge Medical Enclave, Hyderabad",
+            "appointment_date": apt_date,
+            "appointment_time": appointment_doc["appointment_time"],
+            "reason": appointment_doc["reason"],
+            "pass_number": pass_number,
+            "token": pass_number,
+            "status": "ACTIVE",
+            "queue_number": queue_token,
+            "otp": otp_code,
+            "otp_hash": hashed_otp,
+            "expiry": exp_date.isoformat(),
+            "expires_at": exp_date,
+            "checked_in": False,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        db.opd_passes.insert_one(opd_pass_doc)
+        
+        # Insert initial OTP record
+        db.opd_pass_otps.insert_one({
+            "pass_number": pass_number,
+            "hashed_otp": hashed_otp,
+            "plain_otp": otp_code,
+            "attempts": 0,
+            "max_attempts": 5,
+            "created_at": datetime.now(timezone.utc),
+            "expires_at": exp_date,
+            "masked_contact": "patient's registered contact",
+            "is_used": False
+        })
+    except Exception as opd_err:
+        print("Warning: could not auto-create OPD pass:", opd_err)
+
     return jsonify({
         "message": "Appointment booked successfully",
         "appointment_id": str(result.inserted_id),

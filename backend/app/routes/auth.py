@@ -238,8 +238,8 @@ def login():
     if not user:
         log_audit_action(
             db=db,
-            user_id="UNKNOWN",
-            user_role="ANONYMOUS",
+            user_id="SYSTEM",
+            user_role="SYSTEM",
             action="LOGIN_FAILED",
             resource="AUTH",
             resource_id=email,
@@ -755,11 +755,13 @@ def get_me():
         staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else None
         
         patient_id = None
+        patient_code = None
         doctor_id = None
         if role == "PATIENT":
             pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
             if pat:
                 patient_id = str(pat["_id"])
+                patient_code = pat.get("patient_code") or pat.get("patientId") or str(pat["_id"])[-6:]
         elif role == "DOCTOR":
             doc = db.doctors.find_one({"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]})
             if doc:
@@ -806,6 +808,8 @@ def get_me():
             "lastLogin": last_login_str,
             "createdAt": created_at_str,
             "patient_id": patient_id,
+            "patient_code": patient_code,
+            "patientId": patient_code,
             "doctor_id": doctor_id,
             "avatar": user.get("avatar") or user.get("photo"),
             "photo": user.get("photo") or user.get("avatar")
@@ -830,6 +834,33 @@ def update_profile():
     elif "name" in data and data["name"].strip():
         update_fields["name"] = data["name"].strip()
         update_fields["fullName"] = data["name"].strip()
+
+    if "email" in data:
+        new_email = str(data["email"] or "").strip().lower()
+        if new_email and new_email != str(user.get("email", "")).strip().lower():
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", new_email):
+                return jsonify({"error": "Validation Error", "detail": "Please provide a valid email address"}), 400
+            
+            conflict = db.users.find_one({"email": new_email, "_id": {"$ne": ObjectId(user_id)}})
+            if conflict:
+                return jsonify({"error": "Conflict", "detail": "This email address is already in use by another account."}), 409
+
+            conflict_pat = db.patients.find_one({"email": new_email, "user_id": {"$ne": user_id}})
+            if conflict_pat:
+                return jsonify({"error": "Conflict", "detail": "This email address is already in use by another account."}), 409
+                
+            update_fields["email"] = new_email
+            
+            if role == "PATIENT":
+                db.patients.update_many(
+                    {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+                    {"$set": {"email": new_email, "updated_at": datetime.now(timezone.utc)}}
+                )
+            elif role == "DOCTOR":
+                db.doctors.update_many(
+                    {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+                    {"$set": {"email": new_email, "updated_at": datetime.now(timezone.utc)}}
+                )
         
     if "phone" in data:
         raw_phone = data["phone"].strip()
@@ -852,6 +883,19 @@ def update_profile():
         update_fields["updated_at"] = datetime.now(timezone.utc)
         db.users.update_one({"_id": ObjectId(user_id)}, {"$set": update_fields})
         
+        # If name was updated, sync to patients or doctors
+        if "name" in update_fields:
+            if role == "PATIENT":
+                db.patients.update_many(
+                    {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+                    {"$set": {"name": update_fields["name"], "updated_at": datetime.now(timezone.utc)}}
+                )
+            elif role == "DOCTOR":
+                db.doctors.update_many(
+                    {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+                    {"$set": {"name": update_fields["name"], "updated_at": datetime.now(timezone.utc)}}
+                )
+
         log_audit_action(
             db=db,
             user_id=user_id,
@@ -864,11 +908,28 @@ def update_profile():
         
     updated_user = db.users.find_one({"_id": ObjectId(user_id)})
     staff_id = get_or_create_staff_id(db, updated_user) if role in ["STAFF", "DOCTOR", "ADMIN"] else None
+
+    # Mint fresh token with updated email
+    fresh_token = create_access_token({
+        "sub": user_id,
+        "email": updated_user.get("email"),
+        "role": role
+    })
+
+    pat_code = None
+    pat_id = None
+    if role == "PATIENT":
+        p_doc = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": updated_user.get("email", "").lower()}]})
+        if p_doc:
+            pat_id = str(p_doc["_id"])
+            pat_code = p_doc.get("patient_code") or p_doc.get("patientId") or str(p_doc["_id"])[-6:]
     
     return jsonify({
         "message": "Profile updated successfully",
+        "access_token": fresh_token,
         "user": {
             "id": user_id,
+            "_id": user_id,
             "name": updated_user.get("name"),
             "fullName": updated_user.get("name") or updated_user.get("fullName"),
             "email": updated_user.get("email"),
@@ -877,6 +938,9 @@ def update_profile():
             "avatar": updated_user.get("avatar") or updated_user.get("photo"),
             "photo": updated_user.get("photo") or updated_user.get("avatar"),
             "staffId": staff_id,
+            "patient_id": pat_id,
+            "patient_code": pat_code,
+            "patientId": pat_code,
             "faceVerified": bool(updated_user.get("face_verified") or updated_user.get("faceVerified")),
             "fingerprintVerified": bool(updated_user.get("fingerprint_verified") or updated_user.get("fingerprintVerified"))
         }
@@ -891,17 +955,18 @@ def get_biometrics_status():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
-    role = user.get("role", "STAFF")
-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    role = user.get("role", "PATIENT")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
 
     bio = db.staff_biometrics.find_one({"user_id": user_id})
     fp = bio.get("fingerprint") if bio else None
     face = bio.get("face") if bio else None
 
-    fp_linked = bool(fp and fp.get("credentialId"))
-    fp_linked_at = fp.get("linked_at") if fp_linked else None
-    face_enrolled = bool(face and (face.get("descriptor") or face.get("encrypted_payload")))
-    face_enrolled_at = face.get("enrolled_at") if face_enrolled else None
+    fp_linked = bool((fp and fp.get("credentialId")) or user.get("fingerprint_verified") or user.get("fingerprintVerified"))
+    fp_linked_at = (fp.get("linked_at") if fp else None) or user.get("fingerprint_verified_at") or user.get("fingerprintVerifiedAt")
+    face_enrolled = bool((face and (face.get("descriptor") or face.get("encrypted_payload"))) or user.get("face_verified") or user.get("faceVerified"))
+    face_enrolled_at = (face.get("enrolled_at") if face else None) or user.get("face_verified_at") or user.get("faceVerifiedAt")
+    cred_id = (fp.get("credentialId") if fp else None) or user.get("webauthn_credential_id")
 
     return jsonify({
         "staff_id": staff_id,
@@ -909,7 +974,7 @@ def get_biometrics_status():
         "fingerprintVerified": fp_linked,
         "fingerprintLinkedAt": fp_linked_at,
         "fingerprintVerifiedAt": fp_linked_at,
-        "credentialId": fp.get("credentialId") if fp_linked else None,
+        "credentialId": cred_id,
         "faceEnrolled": face_enrolled,
         "faceVerified": face_enrolled,
         "faceEnrolledAt": face_enrolled_at,
@@ -925,8 +990,9 @@ def enroll_face():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
-    role = user.get("role", "STAFF")
-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    role = user.get("role", "PATIENT")
+    user_name = user.get("name") or user.get("fullName") or "User"
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
     data = request.get_json() or {}
     
     descriptor = data.get("descriptor") or data.get("embedding")
@@ -941,16 +1007,19 @@ def enroll_face():
         
     now_iso = datetime.now(timezone.utc).isoformat()
     
-    # Store ONLY the encrypted descriptor vector in staff_biometrics table
+    # Store ONLY the encrypted descriptor vector. Never store raw photos.
     stored_descriptor = encrypted_payload if encrypted_payload else descriptor
     db.staff_biometrics.update_one(
         {"user_id": user_id},
         {"$set": {
             "user_id": user_id,
             "staff_id": staff_id,
+            "user_name": user_name,
+            "role": role,
             "face": {
                 "descriptor": stored_descriptor,
                 "raw_vector": descriptor if isinstance(descriptor, list) else None,
+                "encrypted_payload": encrypted_payload,
                 "enrolled_at": now_iso
             },
             "updated_at": datetime.now(timezone.utc)
@@ -969,6 +1038,18 @@ def enroll_face():
             "updated_at": datetime.now(timezone.utc)
         }}
     )
+
+    if role == "PATIENT":
+        db.patients.update_one(
+            {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+            {"$set": {
+                "face_verified": True,
+                "faceVerified": True,
+                "face_verified_at": now_iso,
+                "faceVerifiedAt": now_iso,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
     
     log_audit_action(
         db=db,
@@ -977,7 +1058,7 @@ def enroll_face():
         action="FACE_ENROLLED",
         resource="BIOMETRICS",
         resource_id=staff_id,
-        details=f"Staff {staff_id} completed live face camera guided liveness and enrolled encrypted descriptor vector"
+        details=f"User {user_name} ({role} #{staff_id}) completed live face camera guided liveness and enrolled encrypted descriptor vector"
     )
     
     return jsonify({
@@ -994,8 +1075,9 @@ def verify_face():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
-    role = user.get("role", "STAFF")
-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    role = user.get("role", "PATIENT")
+    user_name = user.get("name") or user.get("fullName") or "User"
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
     data = request.get_json() or {}
     
     live_descriptor = data.get("descriptor")
@@ -1012,16 +1094,15 @@ def verify_face():
     if not stored_descriptor or not isinstance(stored_descriptor, list):
         return jsonify({"error": "Not Found", "detail": "No enrolled face biometric found for this account. Please enroll first."}), 404
         
-    is_match = False
     dist = 999.0
     match_score = 0.0
     
     try:
         # Euclidean distance between fresh 128-d descriptor and stored descriptor
         dist = sum((float(a) - float(b)) ** 2 for a, b in zip(live_descriptor, stored_descriptor)) ** 0.5
-        # Required Euclidean threshold: distance < 0.5
-        is_match = dist < 0.5
-        match_score = max(0.0, min(100.0, round((1.0 - (dist / 0.7)) * 100, 1)))
+        # Required Euclidean threshold: distance < 0.55
+        is_match = dist < 0.55
+        match_score = max(0.0, min(100.0, round((1.0 - (dist / 0.75)) * 100, 1)))
     except Exception as e:
         dist = 999.0
         is_match = False
@@ -1034,13 +1115,13 @@ def verify_face():
             action="FACE_VERIFIED_FAILED",
             resource="BIOMETRICS",
             resource_id=staff_id,
-            details=f"Staff {staff_id} face verification failed Euclidean distance threshold (dist: {round(dist, 4)}, threshold: < 0.5)"
+            details=f"User {user_name} ({role} #{staff_id}) face verification failed Euclidean distance threshold (dist: {round(dist, 4)}, threshold: < 0.55)"
         )
         return jsonify({
             "verified": False,
             "distance": round(dist, 4),
             "matchScore": match_score,
-            "detail": f"Face verification did not match enrolled credential (distance: {round(dist, 3)}, threshold: < 0.5)."
+            "detail": f"Face verification did not match enrolled credential (distance: {round(dist, 3)}, threshold: < 0.55)."
         }), 401
         
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -1051,7 +1132,7 @@ def verify_face():
         action="FACE_VERIFIED",
         resource="BIOMETRICS",
         resource_id=staff_id,
-        details=f"Staff {staff_id} successfully authenticated via live face descriptor match (dist: {round(dist, 4)} < 0.5, score: {match_score}%)"
+        details=f"User {user_name} ({role} #{staff_id}) successfully authenticated via live face descriptor match (dist: {round(dist, 4)} < 0.55, score: {match_score}%)"
     )
     
     return jsonify({
@@ -1060,6 +1141,62 @@ def verify_face():
         "matchScore": match_score,
         "message": f"Face verification successful ({match_score}% confidence match)",
         "verifiedAt": now_iso
+    }), 200
+
+@auth_bp.route("/biometrics/face", methods=["DELETE"])
+@token_required
+def remove_face_biometric():
+    db = get_database()
+    user = g.current_user
+    user_id = str(user["_id"])
+    role = user.get("role", "PATIENT")
+    user_name = user.get("name") or user.get("fullName") or "User"
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
+
+    db.staff_biometrics.update_one(
+        {"user_id": user_id},
+        {"$unset": {"face": ""}, "$set": {"updated_at": datetime.now(timezone.utc)}}
+    )
+
+    db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {
+            "face_verified": False,
+            "faceVerified": False,
+            "face_verified_at": None,
+            "faceVerifiedAt": None,
+            "face_descriptor": None,
+            "face_encrypted_payload": None,
+            "updated_at": datetime.now(timezone.utc)
+        }}
+    )
+
+    if role == "PATIENT":
+        db.patients.update_one(
+            {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+            {"$set": {
+                "face_verified": False,
+                "faceVerified": False,
+                "face_verified_at": None,
+                "faceVerifiedAt": None,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+
+    log_audit_action(
+        db=db,
+        user_id=user_id,
+        user_role=role,
+        action="FACE_REMOVED",
+        resource="BIOMETRICS",
+        resource_id=staff_id,
+        details=f"User {user_name} ({role} #{staff_id}) removed enrolled face biometric descriptor"
+    )
+
+    return jsonify({
+        "message": "Face biometric credential removed successfully",
+        "faceVerified": False,
+        "faceEnrolled": False
     }), 200
 
 # ============================================================
@@ -1071,10 +1208,12 @@ def webauthn_register_options():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
-    role = user.get("role", "STAFF")
-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    role = user.get("role", "PATIENT")
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
+    user_name = user.get("name") or user.get("fullName") or f"User #{staff_id}"
     
     challenge = secrets.token_urlsafe(32)
+    rp_id = request.host.split(":")[0]
     
     db.users.update_one(
         {"_id": ObjectId(user_id)},
@@ -1083,11 +1222,11 @@ def webauthn_register_options():
     
     return jsonify({
         "challenge": challenge,
-        "rp": {"name": "CareBridge AI Clinical Security", "id": request.host.split(":")[0]},
+        "rp": {"name": "CareBridge AI Clinical Security", "id": rp_id},
         "user": {
             "id": staff_id,
             "name": user.get("email"),
-            "displayName": user.get("name") or f"Staff #{staff_id}"
+            "displayName": user_name
         },
         "pubKeyCredParams": [
             {"type": "public-key", "alg": -7},   # ES256
@@ -1107,8 +1246,9 @@ def webauthn_register_verify():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
-    role = user.get("role", "STAFF")
-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    role = user.get("role", "PATIENT")
+    user_name = user.get("name") or user.get("fullName") or "User"
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
     data = request.get_json() or {}
     
     credential_id = data.get("id") or data.get("credentialId")
@@ -1125,6 +1265,8 @@ def webauthn_register_verify():
         {"$set": {
             "user_id": user_id,
             "staff_id": staff_id,
+            "user_name": user_name,
+            "role": role,
             "fingerprint": {
                 "credentialId": credential_id,
                 "publicKey": public_key,
@@ -1148,6 +1290,19 @@ def webauthn_register_verify():
             "updated_at": datetime.now(timezone.utc)
         }}
     )
+
+    if role == "PATIENT":
+        db.patients.update_one(
+            {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+            {"$set": {
+                "fingerprint_verified": True,
+                "fingerprintVerified": True,
+                "fingerprint_verified_at": now_iso,
+                "fingerprintVerifiedAt": now_iso,
+                "webauthn_credential_id": credential_id,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
     
     log_audit_action(
         db=db,
@@ -1156,7 +1311,7 @@ def webauthn_register_verify():
         action="FINGERPRINT_LINKED",
         resource="BIOMETRICS",
         resource_id=staff_id,
-        details=f"Staff {staff_id} linked platform fingerprint sensor (credentialId: {credential_id[:16]}...)"
+        details=f"User {user_name} ({role} #{staff_id}) linked platform fingerprint sensor (credentialId: {str(credential_id)[:16]}...)"
     )
     
     return jsonify({
@@ -1177,7 +1332,7 @@ def webauthn_verify_options():
     
     bio = db.staff_biometrics.find_one({"user_id": user_id})
     fp = bio.get("fingerprint") if bio else None
-    cred_id = fp.get("credentialId") if fp else user.get("webauthn_credential_id")
+    cred_id = (fp.get("credentialId") if fp else None) or user.get("webauthn_credential_id")
     
     if not cred_id:
         return jsonify({"error": "Not Found", "detail": "No platform biometric sensor linked to this account."}), 404
@@ -1202,13 +1357,14 @@ def webauthn_verify():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
-    role = user.get("role", "STAFF")
-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    role = user.get("role", "PATIENT")
+    user_name = user.get("name") or user.get("fullName") or "User"
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
     data = request.get_json() or {}
     
     bio = db.staff_biometrics.find_one({"user_id": user_id})
     fp = bio.get("fingerprint") if bio else None
-    stored_cred_id = fp.get("credentialId") if fp else user.get("webauthn_credential_id")
+    stored_cred_id = (fp.get("credentialId") if fp else None) or user.get("webauthn_credential_id")
     
     if not stored_cred_id:
         return jsonify({"error": "Not Found", "detail": "No registered platform sensor found."}), 404
@@ -1222,7 +1378,7 @@ def webauthn_verify():
             action="FINGERPRINT_VERIFIED_FAILED",
             resource="BIOMETRICS",
             resource_id=staff_id,
-            details=f"Staff {staff_id} WebAuthn credential ID mismatch"
+            details=f"User {user_name} ({role} #{staff_id}) WebAuthn credential ID mismatch"
         )
         return jsonify({"verified": False, "detail": "Credential ID does not match registered platform sensor."}), 401
         
@@ -1242,7 +1398,7 @@ def webauthn_verify():
         action="FINGERPRINT_VERIFIED",
         resource="BIOMETRICS",
         resource_id=staff_id,
-        details=f"Staff {staff_id} verified via platform fingerprint sensor"
+        details=f"User {user_name} ({role} #{staff_id}) verified identity via platform fingerprint sensor"
     )
     
     return jsonify({
@@ -1251,14 +1407,75 @@ def webauthn_verify():
         "verifiedAt": now_iso
     }), 200
 
+@auth_bp.route("/biometrics/webauthn", methods=["DELETE"])
+@auth_bp.route("/biometrics/fingerprint", methods=["DELETE"])
+@token_required
+def unlink_webauthn():
+    db = get_database()
+    user = g.current_user
+    user_id = str(user["_id"])
+    role = user.get("role", "PATIENT")
+    user_name = user.get("name") or user.get("fullName") or "User"
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
+
+    db.staff_biometrics.update_one(
+        {"user_id": user_id},
+        {"$unset": {"fingerprint": ""}, "$set": {"updated_at": datetime.now(timezone.utc)}}
+    )
+
+    db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {
+            "fingerprint_verified": False,
+            "fingerprintVerified": False,
+            "fingerprint_verified_at": None,
+            "fingerprintVerifiedAt": None,
+            "webauthn_credential": None,
+            "webauthn_credential_id": None,
+            "webauthn_challenge": None,
+            "webauthn_verify_challenge": None,
+            "updated_at": datetime.now(timezone.utc)
+        }}
+    )
+
+    if role == "PATIENT":
+        db.patients.update_one(
+            {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+            {"$set": {
+                "fingerprint_verified": False,
+                "fingerprintVerified": False,
+                "fingerprint_verified_at": None,
+                "fingerprintVerifiedAt": None,
+                "webauthn_credential_id": None,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+
+    log_audit_action(
+        db=db,
+        user_id=user_id,
+        user_role=role,
+        action="FINGERPRINT_UNLINKED",
+        resource="BIOMETRICS",
+        resource_id=staff_id,
+        details=f"User {user_name} ({role} #{staff_id}) unlinked platform fingerprint sensor"
+    )
+
+    return jsonify({
+        "message": "Platform sensor unlinked successfully",
+        "fingerprintVerified": False,
+        "fingerprintLinked": False
+    }), 200
+
 @auth_bp.route("/biometrics", methods=["DELETE"])
 @token_required
 def delete_biometrics():
     db = get_database()
     user = g.current_user
     user_id = str(user["_id"])
-    role = user.get("role", "STAFF")
-    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("staff_id") or user.get("id") or user_id)
+    role = user.get("role", "PATIENT")
+    user_name = user.get("name") or user.get("fullName") or "User"
+    staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR", "ADMIN"] else str(user.get("patient_code") or user.get("patientId") or user_id[-6:])
     
     # Remove both credential and descriptor from staff_biometrics table
     db.staff_biometrics.delete_one({"user_id": user_id})
@@ -1283,6 +1500,23 @@ def delete_biometrics():
             "updated_at": datetime.now(timezone.utc)
         }}
     )
+
+    if role == "PATIENT":
+        db.patients.update_one(
+            {"$or": [{"user_id": user_id}, {"email": user.get("email", "").lower()}]},
+            {"$set": {
+                "face_verified": False,
+                "faceVerified": False,
+                "face_verified_at": None,
+                "faceVerifiedAt": None,
+                "fingerprint_verified": False,
+                "fingerprintVerified": False,
+                "fingerprint_verified_at": None,
+                "fingerprintVerifiedAt": None,
+                "webauthn_credential_id": None,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
     
     log_audit_action(
         db=db,
@@ -1291,7 +1525,7 @@ def delete_biometrics():
         action="BIOMETRIC_DELETED",
         resource="BIOMETRICS",
         resource_id=staff_id,
-        details=f"Staff {staff_id} permanently removed stored biometric credentials (face descriptor & WebAuthn platform sensor)"
+        details=f"User {user_name} ({role} #{staff_id}) permanently removed all stored biometric credentials"
     )
     
     return jsonify({

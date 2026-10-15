@@ -16,7 +16,7 @@ with app.app_context():
         sys.exit(1)
         
     pid = demo_patient["_id"]
-    pname = demo_patient.get("name", "Demo Patient")
+    pname = demo_patient.get("name", "Priya Sharma")
     pphone = demo_patient.get("phone", "+91 9876543210")
     pemail = demo_patient.get("email", "patient@carebridge.ai")
     

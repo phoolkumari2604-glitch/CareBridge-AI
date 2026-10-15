@@ -331,7 +331,8 @@ def create_health_record():
         return jsonify({"error": "Validation Error", "detail": "title is required"}), 400
 
     record_type = (data.get("record_type") or "CONSULTATION").upper()
-    if record_type not in ["CONSULTATION", "DIAGNOSIS", "PRESCRIPTION", "CHECKUP"]:
+    valid_types = ["CONSULTATION", "LAB_REPORT", "PRESCRIPTION", "SCAN", "IMAGING", "DIAGNOSIS", "CHECKUP", "DISCHARGE_SUMMARY"]
+    if record_type not in valid_types:
         record_type = "CONSULTATION"
 
     # Normalize medications
@@ -343,6 +344,9 @@ def create_health_record():
         except Exception:
             medications = [{"name": m.strip(), "dose": "", "frequency": "", "duration": "", "drug_class": "General"} for m in medications.split(",") if m.strip()]
 
+    now = datetime.now(timezone.utc)
+    rec_date = data.get("record_date") or now.strftime("%Y-%m-%d")
+
     # Normalize attachments
     attachments = data.get("attachments", [])
     if isinstance(attachments, str):
@@ -352,8 +356,35 @@ def create_health_record():
         except Exception:
             attachments = []
 
-    now = datetime.now(timezone.utc)
-    rec_date = data.get("record_date") or now.strftime("%Y-%m-%d")
+    # Process files uploaded directly in multipart/form-data
+    uploaded_files = request.files.getlist("files") or request.files.getlist("file")
+    if not uploaded_files and "file" in request.files:
+        f_single = request.files["file"]
+        if f_single and f_single.filename:
+            uploaded_files = [f_single]
+
+    for f in uploaded_files:
+        if f and f.filename and allowed_file(f.filename):
+            f_bytes = f.read()
+            if len(f_bytes) <= MAX_FILE_SIZE_BYTES:
+                ext = f.filename.rsplit(".", 1)[-1].lower()
+                if ext in {"png", "jpg", "jpeg", "webp"}:
+                    clean_bytes, clean_name = strip_exif_and_sanitize(f_bytes, f.filename)
+                else:
+                    clean_bytes, clean_name = f_bytes, secure_filename(f.filename)
+                unique_name = f"{int(datetime.now(timezone.utc).timestamp())}_{secrets.token_hex(3)}_{clean_name}"
+                save_path = os.path.join(UPLOAD_FOLDER, unique_name)
+                try:
+                    with open(save_path, "wb") as out_f:
+                        out_f.write(clean_bytes)
+                    attachments.append({
+                        "file_name": clean_name,
+                        "file_url": f"/api/health-records/files/{unique_name}",
+                        "size_bytes": len(clean_bytes),
+                        "uploaded_at": now.isoformat()
+                    })
+                except Exception as save_err:
+                    print(f"Warning: Failed to save record file: {save_err}")
 
     record_doc = {
         "patient_id": patient["_id"],

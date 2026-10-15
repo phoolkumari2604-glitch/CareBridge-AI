@@ -23,12 +23,22 @@ import {
   Calendar,
   Radio,
   ExternalLink,
+  ChevronDown,
+  Check,
+  RotateCcw,
+  Bot,
 } from "lucide-react";
 import api from "../../services/api";
 import "./AuditSecurity.css";
 
-const ROLE_OPTIONS = ["All", "ADMIN", "STAFF", "DOCTOR", "PATIENT", "SYSTEM"];
-const STATUS_OPTIONS = ["All", "SUCCESS", "FAILED", "SENSITIVE", "INFO"];
+const ROLE_OPTIONS = ["All Roles", "ADMIN", "STAFF", "DOCTOR", "PATIENT", "SYSTEM"];
+const STATUS_OPTIONS = [
+  { value: "All", label: "All Statuses" },
+  { value: "SUCCESS", label: "SUCCESS" },
+  { value: "FAILED", label: "FAILED" },
+  { value: "SENSITIVE", label: "SENSITIVE" },
+  { value: "INFO", label: "INFO" },
+];
 const DATE_OPTIONS = [
   { value: "all", label: "All Time" },
   { value: "24h", label: "Past 24 Hours" },
@@ -46,6 +56,14 @@ export default function AuditSecurity() {
     unique_active_users: 0,
     engine_status: "ACTIVE",
   });
+  const [roleCounts, setRoleCounts] = useState({
+    ALL: 0,
+    ADMIN: 0,
+    STAFF: 0,
+    DOCTOR: 0,
+    PATIENT: 0,
+    SYSTEM: 0,
+  });
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,10 +72,34 @@ export default function AuditSecurity() {
   // Filters & Search
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("All");
+  const [roleFilter, setRoleFilter] = useState("All Roles");
   const [statusFilter, setStatusFilter] = useState("All");
   const [dateRange, setDateRange] = useState("all");
   const [criticalOnly, setCriticalOnly] = useState(false);
+
+  // Custom Dropdown State & Ref
+  const [activeDropdown, setActiveDropdown] = useState(null); // 'role' | 'status' | 'date' | null
+  const filterGroupRef = useRef(null);
+
+  // Close custom dropdowns on click outside or Escape
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterGroupRef.current && !filterGroupRef.current.contains(e.target)) {
+        setActiveDropdown(null);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   // Auto-refresh (30s)
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
@@ -105,8 +147,8 @@ export default function AuditSecurity() {
         page: currentPage,
         limit: pageSize,
         search: debouncedSearch,
-        role: roleFilter !== "All" ? roleFilter : undefined,
-        status: statusFilter !== "All" ? statusFilter : undefined,
+        role: roleFilter !== "All Roles" && roleFilter !== "All" ? roleFilter : undefined,
+        status: statusFilter !== "All" && statusFilter !== "All Statuses" ? statusFilter : undefined,
         date_range: dateRange,
         critical_only: criticalOnly,
       };
@@ -123,6 +165,7 @@ export default function AuditSecurity() {
         setTotalCount(data.total || 0);
         setTotalPages(data.pages || 1);
         if (data.stats) setStats(data.stats);
+        if (data.role_counts) setRoleCounts(data.role_counts);
       }
 
       setLastUpdatedTime(new Date());
@@ -168,8 +211,8 @@ export default function AuditSecurity() {
       setExportingCsv(true);
       const params = new URLSearchParams({
         search: debouncedSearch,
-        role: roleFilter !== "All" ? roleFilter : "",
-        status: statusFilter !== "All" ? statusFilter : "",
+        role: roleFilter !== "All" && roleFilter !== "All Roles" ? roleFilter : "",
+        status: statusFilter !== "All" && statusFilter !== "All Statuses" ? statusFilter : "",
         critical_only: criticalOnly ? "true" : "false",
       });
 
@@ -192,6 +235,18 @@ export default function AuditSecurity() {
     } finally {
       setExportingCsv(false);
     }
+  };
+
+  // Clear all filters action
+  const handleClearFilters = () => {
+    setSearch("");
+    setDebouncedSearch("");
+    setRoleFilter("All Roles");
+    setStatusFilter("All");
+    setDateRange("all");
+    setCriticalOnly(false);
+    setCurrentPage(1);
+    setActiveDropdown(null);
   };
 
   // Row Click for Side Drawer
@@ -338,68 +393,171 @@ export default function AuditSecurity() {
             )}
           </div>
 
-          <div className="audit-filters-group">
+          <div className="audit-filters-group" ref={filterGroupRef}>
             {/* Critical Events Tab Toggle */}
             <button
+              type="button"
               className={`btn-critical-toggle ${criticalOnly ? "active-critical" : ""}`}
               onClick={() => {
                 setCriticalOnly(!criticalOnly);
                 setCurrentPage(1);
               }}
+              title="Show only failed, unauthorized or error events"
             >
               <AlertTriangle size={14} />
               <span>Critical Events Only</span>
             </button>
 
-            {/* Role Filter */}
-            <div className="select-wrapper">
-              <select
-                value={roleFilter}
-                onChange={(e) => {
-                  setRoleFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
+            {/* Role Filter Custom Dropdown */}
+            <div className="audit-custom-dropdown">
+              <button
+                type="button"
+                className={`audit-dropdown-trigger ${activeDropdown === "role" ? "is-active" : ""} ${roleFilter !== "All Roles" ? "has-value" : ""}`}
+                onClick={() => setActiveDropdown(activeDropdown === "role" ? null : "role")}
+                aria-haspopup="listbox"
+                aria-expanded={activeDropdown === "role"}
+                title="Filter by Role"
               >
-                {ROLE_OPTIONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r === "All" ? "All Roles" : r}
-                  </option>
-                ))}
-              </select>
+                <div className="trigger-content">
+                  <span className="trigger-label">Role:</span>
+                  <span className="trigger-value">
+                    {roleFilter}
+                    {roleFilter === "All Roles"
+                      ? ` (${(roleCounts.ALL || totalCount).toLocaleString()})`
+                      : roleCounts[roleFilter.toUpperCase()] !== undefined
+                      ? ` (${(roleCounts[roleFilter.toUpperCase()] || 0).toLocaleString()})`
+                      : ""}
+                  </span>
+                </div>
+                <ChevronDown size={14} className={`dropdown-chevron ${activeDropdown === "role" ? "chevron-open" : ""}`} />
+              </button>
+
+              {activeDropdown === "role" && (
+                <div className="audit-dropdown-menu" role="listbox">
+                  {ROLE_OPTIONS.map((r) => {
+                    const isSelected = roleFilter === r;
+                    const count = r === "All Roles"
+                      ? (roleCounts.ALL || totalCount || 0)
+                      : (roleCounts[r.toUpperCase()] || 0);
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        className={`audit-dropdown-item ${isSelected ? "item-selected" : ""}`}
+                        onClick={() => {
+                          setRoleFilter(r);
+                          setCurrentPage(1);
+                          setActiveDropdown(null);
+                        }}
+                        role="option"
+                        aria-selected={isSelected}
+                      >
+                        <div className="item-main">
+                          <span className={`item-role-dot role-dot-${r.toLowerCase().replace(/\s+/g, "-")}`} />
+                          <span className="item-text">{r}</span>
+                        </div>
+                        <div className="item-meta">
+                          <span className="item-count">({count.toLocaleString()})</span>
+                          {isSelected && <Check size={14} className="item-check" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Status Filter */}
-            <div className="select-wrapper">
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
+            {/* Status Filter Custom Dropdown */}
+            <div className="audit-custom-dropdown">
+              <button
+                type="button"
+                className={`audit-dropdown-trigger ${activeDropdown === "status" ? "is-active" : ""} ${statusFilter !== "All" ? "has-value" : ""}`}
+                onClick={() => setActiveDropdown(activeDropdown === "status" ? null : "status")}
+                aria-haspopup="listbox"
+                aria-expanded={activeDropdown === "status"}
+                title="Filter by Status"
               >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {s === "All" ? "All Statuses" : s}
-                  </option>
-                ))}
-              </select>
+                <div className="trigger-content">
+                  <span className="trigger-label">Status:</span>
+                  <span className="trigger-value">{statusFilter === "All" ? "All Statuses" : statusFilter}</span>
+                </div>
+                <ChevronDown size={14} className={`dropdown-chevron ${activeDropdown === "status" ? "chevron-open" : ""}`} />
+              </button>
+
+              {activeDropdown === "status" && (
+                <div className="audit-dropdown-menu" role="listbox">
+                  {STATUS_OPTIONS.map((s) => {
+                    const isSelected = statusFilter === s.value;
+                    return (
+                      <button
+                        key={s.value}
+                        type="button"
+                        className={`audit-dropdown-item ${isSelected ? "item-selected" : ""}`}
+                        onClick={() => {
+                          setStatusFilter(s.value);
+                          setCurrentPage(1);
+                          setActiveDropdown(null);
+                        }}
+                        role="option"
+                        aria-selected={isSelected}
+                      >
+                        <div className="item-main">
+                          {s.value !== "All" && (
+                            <span className={`item-status-dot status-dot-${s.value.toLowerCase()}`} />
+                          )}
+                          <span className="item-text">{s.label}</span>
+                        </div>
+                        {isSelected && <Check size={14} className="item-check" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Date Range Filter */}
-            <div className="select-wrapper">
-              <select
-                value={dateRange}
-                onChange={(e) => {
-                  setDateRange(e.target.value);
-                  setCurrentPage(1);
-                }}
+            {/* Date Range Filter Custom Dropdown */}
+            <div className="audit-custom-dropdown">
+              <button
+                type="button"
+                className={`audit-dropdown-trigger ${activeDropdown === "date" ? "is-active" : ""} ${dateRange !== "all" ? "has-value" : ""}`}
+                onClick={() => setActiveDropdown(activeDropdown === "date" ? null : "date")}
+                aria-haspopup="listbox"
+                aria-expanded={activeDropdown === "date"}
+                title="Filter by Time Range"
               >
-                {DATE_OPTIONS.map((d) => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
+                <div className="trigger-content">
+                  <Calendar size={13} className="trigger-sub-icon" />
+                  <span className="trigger-value">
+                    {DATE_OPTIONS.find((d) => d.value === dateRange)?.label || "All Time"}
+                  </span>
+                </div>
+                <ChevronDown size={14} className={`dropdown-chevron ${activeDropdown === "date" ? "chevron-open" : ""}`} />
+              </button>
+
+              {activeDropdown === "date" && (
+                <div className="audit-dropdown-menu" role="listbox">
+                  {DATE_OPTIONS.map((d) => {
+                    const isSelected = dateRange === d.value;
+                    return (
+                      <button
+                        key={d.value}
+                        type="button"
+                        className={`audit-dropdown-item ${isSelected ? "item-selected" : ""}`}
+                        onClick={() => {
+                          setDateRange(d.value);
+                          setCurrentPage(1);
+                          setActiveDropdown(null);
+                        }}
+                        role="option"
+                        aria-selected={isSelected}
+                      >
+                        <span className="item-text">{d.label}</span>
+                        {isSelected && <Check size={14} className="item-check" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -424,14 +582,23 @@ export default function AuditSecurity() {
         {!loading && logs.length === 0 && (
           <div className="audit-empty-state">
             <div className="empty-icon-wrap">
-              <Shield size={42} />
+              <Shield size={44} />
             </div>
-            <h3>No audit records found</h3>
-            <p>
-              {search || roleFilter !== "All" || statusFilter !== "All" || criticalOnly
-                ? "No audit events match your active search and filter criteria."
+            <h3 className="empty-title">No audit records found</h3>
+            <p className="empty-description">
+              {search || (roleFilter !== "All" && roleFilter !== "All Roles") || statusFilter !== "All" || dateRange !== "all" || criticalOnly
+                ? "No audit events match your active search and filter criteria. Clear your filters to view all recorded telemetry."
                 : "No security audit events recorded in the system yet."}
             </p>
+            <button
+              type="button"
+              className="audit-clear-filters-btn"
+              onClick={handleClearFilters}
+              title="Reset all search and filter parameters"
+            >
+              <RotateCcw size={15} />
+              <span>Clear filters</span>
+            </button>
           </div>
         )}
 
@@ -471,7 +638,17 @@ export default function AuditSecurity() {
                         </div>
                       </td>
 
-                      <td className="td-role">{renderRoleBadge(log.user_role)}</td>
+                      <td className="td-role">
+                        <div className="role-cell-wrapper">
+                          {renderRoleBadge(log.user_role)}
+                          {(log.user_role === "SYSTEM" || log.is_automated) && (
+                            <span className="audit-automated-badge" title="Automated System Event">
+                              <Bot size={11} className="auto-badge-icon" />
+                              Automated
+                            </span>
+                          )}
+                        </div>
+                      </td>
 
                       <td className="td-action">
                         <span className="action-tag">{log.action}</span>
@@ -530,7 +707,15 @@ export default function AuditSecurity() {
                 <div className="mobile-card-body">
                   <div className="mobile-row">
                     <strong>{log.user_name}</strong>
-                    {renderRoleBadge(log.user_role)}
+                    <div className="mobile-role-wrap">
+                      {renderRoleBadge(log.user_role)}
+                      {(log.user_role === "SYSTEM" || log.is_automated) && (
+                        <span className="audit-automated-badge" title="Automated System Event">
+                          <Bot size={10} className="auto-badge-icon" />
+                          Automated
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="mobile-row">
@@ -614,7 +799,15 @@ export default function AuditSecurity() {
                 <label>Initiating User</label>
                 <div className="drawer-card-box">
                   <p><strong>Name:</strong> {selectedLog.user_name}</p>
-                  <p><strong>Role:</strong> {selectedLog.user_role}</p>
+                  <p className="drawer-role-line">
+                    <strong>Role:</strong> {selectedLog.user_role}
+                    {(selectedLog.user_role === "SYSTEM" || selectedLog.is_automated) && (
+                      <span className="audit-automated-badge">
+                        <Bot size={11} className="auto-badge-icon" />
+                        Automated
+                      </span>
+                    )}
+                  </p>
                   <p><strong>User ID:</strong> <code>{selectedLog.user_id || "SYSTEM"}</code></p>
                 </div>
               </div>

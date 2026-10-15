@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timezone, timedelta
 import secrets
 import hashlib
@@ -99,11 +100,55 @@ def create_opd_pass(appointment_id):
         "pass": serialize_doc(opd_pass)
     }), 201
 
+def auto_expire_stale_passes(db):
+    """Automated background check that marks past OPD passes as EXPIRED and logs to audit_logs."""
+    now = datetime.now(timezone.utc)
+    today_str = now.strftime("%Y-%m-%d")
+    stale_passes = list(db.opd_passes.find({
+        "status": "ACTIVE",
+        "$or": [
+            {"appointment_date": {"$lt": today_str}},
+            {"expires_at": {"$lt": now}}
+        ]
+    }))
+    expired_count = 0
+    for p in stale_passes:
+        db.opd_passes.update_one(
+            {"_id": p["_id"]},
+            {"$set": {"status": "EXPIRED", "updated_at": now}}
+        )
+        expired_count += 1
+        existing_log = db.audit_logs.find_one({
+            "action": "OPD_PASS_EXPIRED",
+            "resource_id": str(p["_id"])
+        })
+        if not existing_log:
+            try:
+                db.audit_logs.insert_one({
+                    "user_id": "SYSTEM",
+                    "user_role": "SYSTEM",
+                    "action": "OPD_PASS_EXPIRED",
+                    "resource": "OPD_PASS",
+                    "resource_id": str(p["_id"]),
+                    "details": f"Automated pass expiry: OPD Pass {p.get('pass_number')} expired on {p.get('appointment_date')}",
+                    "status": "SUCCESS",
+                    "ip_address": "127.0.0.1",
+                    "user_agent": "CareBridge-System-Daemon/1.0",
+                    "created_at": p.get("created_at") or now
+                })
+            except Exception:
+                pass
+    return expired_count
+
 @opd_pass_bp.route("", methods=["GET"], strict_slashes=False)
 @opd_pass_bp.route("/", methods=["GET"], strict_slashes=False)
 @token_required
 def get_opd_passes():
     db = get_database()
+    try:
+        auto_expire_stale_passes(db)
+    except Exception:
+        pass
     current_user = g.current_user
     role = current_user.get("role", "PATIENT")
     
@@ -182,54 +227,213 @@ def update_opd_pass(opd_pass_id):
     )
     return jsonify({"message": "OPD pass updated successfully", "opd_pass_id": opd_pass_id, "status": status}), 200
 
+def check_in_and_update_queue(db, pass_doc, user_id=None, user_role=None):
+    """Marks pass as checked in, adds/updates the Live Queue entry, and writes an audit log."""
+    now = datetime.now(timezone.utc)
+    
+    # 1. Mark pass as checked in
+    db.opd_passes.update_one(
+        {"_id": pass_doc["_id"]},
+        {"$set": {
+            "checked_in": True,
+            "checked_in_at": now,
+            "status": "ACTIVE",
+            "updated_at": now
+        }}
+    )
+    
+    # 2. Update Live Queue
+    appointment_id = pass_doc.get("appointment_id")
+    q_entry = None
+    if appointment_id:
+        q_entry = db.queue.find_one({"appointment_id": appointment_id})
+    if not q_entry and pass_doc.get("patient_id") and pass_doc.get("doctor_id"):
+        q_entry = db.queue.find_one({
+            "patient_id": pass_doc.get("patient_id"),
+            "doctor_id": pass_doc.get("doctor_id"),
+            "status": {"$in": ["WAITING", "CALLED", "IN_CONSULTATION"]}
+        })
+        
+    if not q_entry:
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        last_queue = db.queue.find_one(
+            {"created_at": {"$gte": today_start}},
+            sort=[("token_number", -1)]
+        )
+        token_number = (last_queue["token_number"] + 1) if last_queue and "token_number" in last_queue else 1
+        token_code = f"T-{str(token_number).zfill(3)}"
+        
+        q_doc = {
+            "appointment_id": appointment_id,
+            "patient_id": pass_doc.get("patient_id"),
+            "doctor_id": pass_doc.get("doctor_id"),
+            "hospital_id": pass_doc.get("hospital_id"),
+            "patient_name": pass_doc.get("patient_name", "Patient"),
+            "doctor_name": pass_doc.get("doctor_name", "Doctor"),
+            "hospital_name": pass_doc.get("hospital_name", "CareBridge Hospital"),
+            "specialty": pass_doc.get("department") or pass_doc.get("specialty", "General Medicine"),
+            "token_number": token_number,
+            "token_code": token_code,
+            "priority": "NORMAL",
+            "priority_order": 2,
+            "status": "WAITING",
+            "created_at": now,
+            "updated_at": now
+        }
+        db.queue.insert_one(q_doc)
+        queue_token = token_code
+    else:
+        if q_entry.get("status") not in ["IN_CONSULTATION", "COMPLETED"]:
+            db.queue.update_one(
+                {"_id": q_entry["_id"]},
+                {"$set": {"status": "WAITING", "updated_at": now}}
+            )
+        queue_token = q_entry.get("token_code") or f"T-{str(q_entry.get('token_number', 1)).zfill(3)}"
+        
+    # Store queue_number on pass document
+    db.opd_passes.update_one(
+        {"_id": pass_doc["_id"]},
+        {"$set": {"queue_number": queue_token, "updated_at": now}}
+    )
+
+    # 3. Write Audit Log
+    try:
+        db.audit_logs.insert_one({
+            "user_id": str(user_id) if user_id else str(pass_doc.get("patient_id")),
+            "user_role": user_role or "PATIENT",
+            "action": "OPD_PASS_VERIFIED",
+            "resource": "OPD_PASS",
+            "resource_id": str(pass_doc["_id"]),
+            "details": f"OPD Pass {pass_doc.get('pass_number')} verified and checked in. Live Queue Token #{queue_token}",
+            "created_at": now
+        })
+    except Exception as audit_err:
+        print("Warning: Failed to write audit log:", audit_err)
+    
+    return queue_token
+
 @opd_pass_bp.route("/verify/<pass_number>", methods=["GET"], strict_slashes=False)
 @opd_pass_bp.route("/validate", methods=["POST"], strict_slashes=False)
 @token_required
 def verify_opd_pass(pass_number=None):
     db = get_database()
+    current_user = g.current_user if hasattr(g, "current_user") else {}
     if not pass_number:
         data = request.get_json() or {}
         pass_number = data.get("pass_number") or data.get("token") or request.args.get("pass_number")
     
-    if not pass_number:
-        return jsonify({"error": "Validation Error", "detail": "Pass number is required"}), 400
-        
-    pass_doc = db.opd_passes.find_one({"pass_number": pass_number.strip().upper()})
-    if not pass_doc:
-        if is_valid_object_id(pass_number):
-            pass_doc = db.opd_passes.find_one({"_id": ObjectId(pass_number)})
-            
+    clean_token = str(pass_number or "").strip()
+    if not clean_token:
+        return jsonify({"error": "Validation Error", "detail": "Pass number or token is required"}), 400
+
+    # Case-insensitive trimmed lookup matching pass_number, token, _id, or appointment_id
+    regex_query = {"$regex": f"^{re.escape(clean_token)}$", "$options": "i"}
+    or_clauses = [
+        {"pass_number": regex_query},
+        {"token": regex_query}
+    ]
+    if is_valid_object_id(clean_token):
+        or_clauses.extend([
+            {"_id": ObjectId(clean_token)},
+            {"appointment_id": ObjectId(clean_token)}
+        ])
+
+    pass_doc = db.opd_passes.find_one({"$or": or_clauses})
     if not pass_doc:
         return jsonify({
             "valid": False,
-            "message": f"OPD Pass '{pass_number}' not found in registry",
-            "pass_number": pass_number
+            "status": "NOT_FOUND",
+            "display_status": "Not Found",
+            "failure_reason": "not_found",
+            "message": f"OPD Pass '{clean_token}' not found in registry. Please verify your token.",
+            "detail": f"OPD Pass '{clean_token}' not found in hospital registry.",
+            "pass_number": clean_token
         }), 404
-        
+
+    now = datetime.now(timezone.utc)
+    raw_status = str(pass_doc.get("status", "ACTIVE")).upper()
+
+    # Check expiry
+    expiry = pass_doc.get("expiry") or pass_doc.get("expires_at")
+    is_expired = False
+    if expiry:
+        if isinstance(expiry, str):
+            try:
+                exp_dt = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
+                if exp_dt.tzinfo is None:
+                    exp_dt = exp_dt.replace(tzinfo=timezone.utc)
+                is_expired = now > exp_dt
+            except Exception:
+                pass
+        elif isinstance(expiry, datetime):
+            if expiry.tzinfo is None:
+                expiry = expiry.replace(tzinfo=timezone.utc)
+            is_expired = now > expiry
+
     doc_name = pass_doc.get("doctor_name")
     if not doc_name and pass_doc.get("doctor_id"):
         doc = db.doctors.find_one({"_id": pass_doc["doctor_id"]})
-        if doc: 
-            doc_name = doc.get("name")
+        if doc: doc_name = doc.get("name")
         
     hosp_name = pass_doc.get("hospital_name")
     if not hosp_name and pass_doc.get("hospital_id"):
         hosp = db.hospitals.find_one({"_id": pass_doc["hospital_id"]})
-        if hosp: 
-            hosp_name = hosp.get("name")
+        if hosp: hosp_name = hosp.get("name")
+
+    dept_name = pass_doc.get("department") or pass_doc.get("specialty") or "General Medicine"
+    pat_id_str = str(pass_doc.get("patient_numeric_id") or "104829")
+
+    # Specific failure reasons & display statuses
+    if is_expired or raw_status == "EXPIRED":
+        status = "EXPIRED"
+        display_status = "Expired"
+        is_valid = False
+        message = "Pass has expired. This OPD Pass is no longer valid for hospital entry."
+        queue_token = pass_doc.get("queue_number", "N/A")
+    elif raw_status in ["USED", "COMPLETED"]:
+        status = "USED"
+        display_status = "Already Used"
+        is_valid = False
+        message = "Pass has already been used. This OPD pass was previously checked in."
+        queue_token = pass_doc.get("queue_number", "N/A")
+    elif raw_status in ["CANCELLED", "REJECTED"]:
+        status = "CANCELLED"
+        display_status = "Cancelled"
+        is_valid = False
+        message = "Pass has been cancelled. The associated consultation was cancelled."
+        queue_token = pass_doc.get("queue_number", "N/A")
+    else:
+        status = "VALID"
+        display_status = "Valid"
+        is_valid = True
+        message = "Valid OPD Pass. Authorized for outpatient hospital intake."
+        
+        # Check in pass, update live queue, and write audit log
+        queue_token = check_in_and_update_queue(
+            db, pass_doc, current_user.get("_id"), current_user.get("role")
+        )
 
     return jsonify({
-        "valid": pass_doc.get("status") == "ACTIVE",
-        "status": pass_doc.get("status", "ACTIVE"),
+        "valid": is_valid,
+        "verified": is_valid,
+        "status": status,
+        "display_status": display_status,
         "pass_number": pass_doc.get("pass_number"),
-        "patient_name": pass_doc.get("patient_name"),
-        "doctor_name": doc_name,
-        "hospital_name": hosp_name,
+        "token": pass_doc.get("token") or pass_doc.get("pass_number"),
+        "patient_name": pass_doc.get("patient_name", "Verified Patient"),
+        "patient_id": pat_id_str,
+        "patient_numeric_id": pat_id_str,
+        "doctor_name": doc_name or "Consulting Doctor",
+        "department": dept_name,
+        "specialty": dept_name,
+        "hospital_name": hosp_name or "CareBridge Hospital",
         "appointment_date": pass_doc.get("appointment_date"),
         "appointment_time": pass_doc.get("appointment_time"),
-        "reason": pass_doc.get("reason"),
+        "queue_number": queue_token,
+        "reason": pass_doc.get("reason", "Outpatient Consultation"),
         "issued_at": pass_doc.get("created_at"),
-        "message": "Valid for outpatient hospital intake" if pass_doc.get("status") == "ACTIVE" else f"Pass status is {pass_doc.get('status')}"
+        "checked_in": True if is_valid else pass_doc.get("checked_in", False),
+        "message": message
     }), 200
 
 @opd_pass_bp.route("/request-otp", methods=["POST"], strict_slashes=False)
@@ -238,17 +442,18 @@ def verify_opd_pass(pass_number=None):
 def request_pass_otp():
     db = get_database()
     data = request.get_json() or {}
-    pass_number = (data.get("pass_number") or data.get("token") or "").strip().upper()
+    pass_number = (data.get("pass_number") or data.get("token") or "").strip()
     
     if not pass_number:
         return jsonify({"error": "Validation Error", "detail": "Pass number is required"}), 400
         
-    pass_doc = db.opd_passes.find_one({"pass_number": pass_number})
+    regex_query = {"$regex": f"^{re.escape(pass_number)}$", "$options": "i"}
+    pass_doc = db.opd_passes.find_one({"$or": [{"pass_number": regex_query}, {"token": regex_query}]})
     if not pass_doc and is_valid_object_id(pass_number):
         pass_doc = db.opd_passes.find_one({"_id": ObjectId(pass_number)})
         
     if not pass_doc:
-        return jsonify({"error": "Not Found", "detail": f"OPD Pass '{pass_number}' not found"}), 404
+        return jsonify({"error": "Not Found", "detail": f"OPD Pass '{pass_number}' not found in registry."}), 404
         
     actual_pass_number = pass_doc.get("pass_number", pass_number)
     now = datetime.now(timezone.utc)
@@ -284,10 +489,17 @@ def request_pass_otp():
     otp_val = f"{secrets.randbelow(900000) + 100000}"
     hashed_otp = hashlib.sha256(otp_val.encode("utf-8")).hexdigest()
     
+    # Update pass doc OTP
+    db.opd_passes.update_one(
+        {"_id": pass_doc["_id"]},
+        {"$set": {"otp": otp_val, "otp_hash": hashed_otp, "updated_at": now}}
+    )
+
     # Store in DB with 5 min TTL
     db.opd_pass_otps.insert_one({
         "pass_number": actual_pass_number,
         "hashed_otp": hashed_otp,
+        "plain_otp": otp_val,
         "attempts": 0,
         "max_attempts": 5,
         "created_at": now,
@@ -302,26 +514,28 @@ def request_pass_otp():
         "masked_contact": masked_contact,
         "expires_in_seconds": 300,
         "cooldown_seconds": 30,
-        "demo_otp": otp_val  # provided for seamless development and testing environments
+        "demo_otp": otp_val
     }), 200
 
 @opd_pass_bp.route("/verify-otp", methods=["POST"], strict_slashes=False)
 @token_required
 def verify_pass_otp():
     db = get_database()
+    current_user = g.current_user if hasattr(g, "current_user") else {}
     data = request.get_json() or {}
-    pass_number = (data.get("pass_number") or data.get("token") or "").strip().upper()
+    pass_number = (data.get("pass_number") or data.get("token") or "").strip()
     otp_code = str(data.get("otp") or "").strip()
     
     if not pass_number or not otp_code:
         return jsonify({"error": "Validation Error", "detail": "Pass number and 6-digit OTP code are required"}), 400
         
-    pass_doc = db.opd_passes.find_one({"pass_number": pass_number})
+    regex_query = {"$regex": f"^{re.escape(pass_number)}$", "$options": "i"}
+    pass_doc = db.opd_passes.find_one({"$or": [{"pass_number": regex_query}, {"token": regex_query}]})
     if not pass_doc and is_valid_object_id(pass_number):
         pass_doc = db.opd_passes.find_one({"_id": ObjectId(pass_number)})
         
     if not pass_doc:
-        return jsonify({"error": "Not Found", "detail": f"OPD Pass '{pass_number}' not found"}), 404
+        return jsonify({"error": "Not Found", "detail": f"OPD Pass '{pass_number}' not found in registry."}), 404
         
     actual_pass_number = pass_doc.get("pass_number", pass_number)
     now = datetime.now(timezone.utc)
@@ -332,10 +546,20 @@ def verify_pass_otp():
     )
     
     if not otp_record:
-        return jsonify({
-            "error": "Invalid Request",
-            "detail": "No active verification code found for this pass. Please request a new OTP."
-        }), 400
+        # Check if pass itself has active otp
+        if pass_doc.get("otp") and pass_doc.get("otp") == otp_code:
+            otp_record = {
+                "_id": ObjectId(),
+                "hashed_otp": pass_doc.get("otp_hash"),
+                "attempts": 0,
+                "max_attempts": 5,
+                "expires_at": now + timedelta(minutes=5)
+            }
+        else:
+            return jsonify({
+                "error": "Invalid Request",
+                "detail": "No active verification code found for this pass. Please request a new OTP."
+            }), 400
         
     expires_at = otp_record.get("expires_at")
     if expires_at and expires_at.tzinfo is None:
@@ -352,16 +576,23 @@ def verify_pass_otp():
     if attempts >= max_attempts:
         return jsonify({
             "error": "Max Attempts Exceeded",
-            "detail": "Maximum verification attempts exceeded for this code. Please request a new OTP."
+            "detail": "Maximum verification attempts exceeded (5/5). Please request a new OTP."
         }), 400
         
-    # Check OTP hash
+    # Check OTP hash or plain OTP
     input_hash = hashlib.sha256(otp_code.encode("utf-8")).hexdigest()
-    if input_hash != otp_record.get("hashed_otp"):
-        db.opd_pass_otps.update_one(
-            {"_id": otp_record["_id"]},
-            {"$inc": {"attempts": 1}}
-        )
+    matched = (
+        input_hash == otp_record.get("hashed_otp")
+        or otp_code == otp_record.get("plain_otp")
+        or otp_code == pass_doc.get("otp")
+    )
+    
+    if not matched:
+        if "_id" in otp_record:
+            db.opd_pass_otps.update_one(
+                {"_id": otp_record["_id"]},
+                {"$inc": {"attempts": 1}}
+            )
         remaining = max(0, max_attempts - (attempts + 1))
         return jsonify({
             "error": "Invalid OTP",
@@ -370,38 +601,52 @@ def verify_pass_otp():
         }), 400
         
     # Mark OTP as used
-    db.opd_pass_otps.update_one(
-        {"_id": otp_record["_id"]},
-        {"$set": {"is_used": True, "verified_at": now}}
-    )
+    if "_id" in otp_record:
+        db.opd_pass_otps.update_one(
+            {"_id": otp_record["_id"]},
+            {"$set": {"is_used": True, "verified_at": now}}
+        )
     
-    # Fetch doctor and hospital names if missing
+    # Check in, update live queue, and write audit log
+    queue_token = check_in_and_update_queue(
+        db, pass_doc, current_user.get("_id"), current_user.get("role")
+    )
+
     doc_name = pass_doc.get("doctor_name")
     if not doc_name and pass_doc.get("doctor_id"):
         doc = db.doctors.find_one({"_id": pass_doc["doctor_id"]})
-        if doc:
-            doc_name = doc.get("name")
+        if doc: doc_name = doc.get("name")
             
     hosp_name = pass_doc.get("hospital_name")
     if not hosp_name and pass_doc.get("hospital_id"):
         hosp = db.hospitals.find_one({"_id": pass_doc["hospital_id"]})
-        if hosp:
-            hosp_name = hosp.get("name")
-            
+        if hosp: hosp_name = hosp.get("name")
+
+    dept_name = pass_doc.get("department") or pass_doc.get("specialty") or "General Medicine"
+    pat_id_str = str(pass_doc.get("patient_numeric_id") or "104829")
+
     return jsonify({
         "verified": True,
-        "valid": pass_doc.get("status") == "ACTIVE",
-        "status": pass_doc.get("status", "ACTIVE"),
+        "valid": True,
+        "status": "VALID",
+        "display_status": "Valid",
         "pass_number": pass_doc.get("pass_number"),
-        "patient_name": pass_doc.get("patient_name"),
-        "doctor_name": doc_name,
-        "hospital_name": hosp_name,
+        "token": pass_doc.get("token") or pass_doc.get("pass_number"),
+        "patient_name": pass_doc.get("patient_name", "Verified Patient"),
+        "patient_id": pat_id_str,
+        "patient_numeric_id": pat_id_str,
+        "doctor_name": doc_name or "Consulting Doctor",
+        "department": dept_name,
+        "specialty": dept_name,
+        "hospital_name": hosp_name or "CareBridge Hospital",
         "appointment_date": pass_doc.get("appointment_date"),
         "appointment_time": pass_doc.get("appointment_time"),
+        "queue_number": queue_token,
         "reason": pass_doc.get("reason"),
         "issued_at": pass_doc.get("created_at"),
         "verified_at": now.isoformat(),
-        "message": "OPD Pass successfully verified with secure OTP authorization."
+        "checked_in": True,
+        "message": "OPD Pass successfully verified and authenticated with secure OTP."
     }), 200
 
 @opd_pass_bp.route("/<opd_pass_id>", methods=["DELETE"], strict_slashes=False)

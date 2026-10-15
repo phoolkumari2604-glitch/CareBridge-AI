@@ -8,7 +8,7 @@ from bson import ObjectId
 from app.core.database import get_database
 from app.utils.decorators import token_required, staff_or_admin_required
 from app.utils.helpers import serialize_doc, is_valid_object_id
-from app.utils.security import hash_password
+from app.utils.security import hash_password, create_access_token
 
 patient_bp = Blueprint("patients", __name__)
 
@@ -564,6 +564,8 @@ def update_patient(patient_id):
     if not existing:
         return jsonify({"error": "Not Found", "detail": "Patient not found"}), 404
 
+    target_user_id = str(existing.get("user_id") or current_user.get("_id", ""))
+
     if current_user.get("role") == "PATIENT":
         user_id = str(current_user["_id"])
         owns_record = (
@@ -576,6 +578,29 @@ def update_patient(patient_id):
     errors = validate_patient_payload(data, is_create=False)
     if errors:
         return jsonify({"error": "Validation Error", "detail": "Invalid update data", "fields": errors}), 400
+
+    new_email = str(data.get("email") or "").strip().lower()
+    if new_email and new_email != str(existing.get("email") or "").strip().lower():
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", new_email):
+            return jsonify({"error": "Validation Error", "detail": "Please provide a valid email address"}), 400
+
+        # Uniqueness check in users collection
+        conflict_query = {"email": new_email}
+        if is_valid_object_id(target_user_id):
+            conflict_query["_id"] = {"$ne": ObjectId(target_user_id)}
+        else:
+            conflict_query["_id"] = {"$ne": target_user_id}
+            
+        conflict_user = db.users.find_one(conflict_query)
+        if conflict_user:
+            return jsonify({"error": "Conflict", "detail": "This email address is already registered to another account."}), 409
+
+        # Uniqueness check in patients collection
+        conflict_patient = db.patients.find_one({"email": new_email, "_id": {"$ne": existing["_id"]}})
+        if conflict_patient:
+            return jsonify({"error": "Conflict", "detail": "This email address is already in use by another patient profile."}), 409
+
+        data["email"] = new_email
 
     data.pop("_id", None)
     data.pop("user_id", None)
@@ -590,7 +615,48 @@ def update_patient(patient_id):
     doc["patient_code"] = p_code
     doc["patientId"] = p_code
 
-    return jsonify({"message": "Patient updated successfully", "patient": doc}), 200
+    # Synchronize users collection
+    user_updates = {}
+    if new_email:
+        user_updates["email"] = new_email
+    if "name" in data and data["name"].strip():
+        user_updates["name"] = data["name"].strip()
+        user_updates["fullName"] = data["name"].strip()
+    if "phone" in data and data["phone"].strip():
+        user_updates["phone"] = data["phone"].strip()
+
+    if user_updates and target_user_id:
+        user_updates["updated_at"] = datetime.now(timezone.utc)
+        if is_valid_object_id(target_user_id):
+            db.users.update_one({"_id": ObjectId(target_user_id)}, {"$set": user_updates})
+        else:
+            db.users.update_one({"$or": [{"_id": target_user_id}, {"id": target_user_id}]}, {"$set": user_updates})
+
+    # Mint fresh token for the updated user
+    final_email = new_email or current_user.get("email")
+    fresh_token = create_access_token({
+        "sub": str(target_user_id or current_user["_id"]),
+        "email": final_email,
+        "role": current_user.get("role", "PATIENT")
+    })
+
+    return jsonify({
+        "message": "Patient profile and login email updated successfully",
+        "patient": doc,
+        "access_token": fresh_token,
+        "user": {
+            "id": str(target_user_id),
+            "_id": str(target_user_id),
+            "name": doc.get("name"),
+            "fullName": doc.get("name"),
+            "email": doc.get("email"),
+            "role": current_user.get("role", "PATIENT"),
+            "phone": doc.get("phone"),
+            "patient_code": p_code,
+            "patientId": p_code,
+            "patient_id": str(existing["_id"])
+        }
+    }), 200
 
 @patient_bp.route("/<patient_id>", methods=["DELETE"], strict_slashes=False)
 @staff_or_admin_required

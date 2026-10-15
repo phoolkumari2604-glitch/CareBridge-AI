@@ -302,6 +302,15 @@ const patientService = {
     return [];
   },
 
+  async logVitals(vitalData) {
+    const res = await api.post("/vitals/", vitalData);
+    return res.data;
+  },
+
+  async createVitals(vitalData) {
+    return this.logVitals(vitalData);
+  },
+
   async getLatestVitals(patientId) {
     const pId = patientId || this.getCurrentPatientId();
     const res = await api.get(`/vitals/${pId}/latest`);

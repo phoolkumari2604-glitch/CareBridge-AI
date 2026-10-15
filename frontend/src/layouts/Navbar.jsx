@@ -534,16 +534,16 @@ function Navbar({ onMenuClick }) {
                   style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
                 />
               ) : (
-                user?.name ? user.name.charAt(0).toUpperCase() : isStaff ? "S" : "D"
+                user?.name ? user.name.charAt(0).toUpperCase() : isStaff ? "S" : isDoctor ? "D" : "P"
               )}
             </div>
 
             <div className="nav-user-text-col">
               <strong className="nav-username">
-                {user?.name || (isStaff ? "Staff Admin" : isDoctor ? "Doctor" : "User")}
+                {user?.name || (isStaff ? "Staff Admin" : isDoctor ? "Doctor" : "Patient")}
               </strong>
               <span className="nav-user-role-badge">
-                {isStaff ? "Staff Admin" : isDoctor ? "MD / Specialist" : user?.role || "Patient"}
+                {isStaff ? "Staff Admin" : isDoctor ? "MD / Specialist" : "Patient"}
               </span>
             </div>
 
@@ -553,8 +553,8 @@ function Navbar({ onMenuClick }) {
           {profileDropdownOpen && (
             <div className="nav-dropdown-menu profile-dropdown" role="menu">
               <div className="profile-dropdown-user-header">
-                <strong>{user?.name || "Staff Admin"}</strong>
-                <span>{user?.email || "staff@carebridge.ai"}</span>
+                <strong>{user?.name || (isStaff ? "Staff Admin" : isDoctor ? "Doctor" : "Patient")}</strong>
+                <span>{user?.email || ""}</span>
               </div>
 
               <div className="profile-dropdown-links">

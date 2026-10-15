@@ -683,29 +683,273 @@
   color: var(--hr-text-primary);
 }
 
-.preset-btn.active {
+.preset-btn.active,
+.preset-btn.is-active {
   background: var(--hr-teal);
   color: #042f2e;
   font-weight: 700;
 }
 
-.custom-date-inputs {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--hr-bg-input);
-  border: 1px solid var(--hr-border);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--hr-radius-md);
+/* ============================================================
+   CUSTOM STYLED DATE-RANGE PICKER DROPDOWN CALENDAR
+   ============================================================ */
+.custom-date-range-picker {
+  position: relative;
+  display: inline-flex;
 }
 
-.custom-date-inputs input[type="date"] {
-  background: transparent;
-  border: none;
-  outline: none;
+.date-picker-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--hr-bg-input);
+  border: 1px solid var(--hr-border);
   color: var(--hr-text-primary);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--hr-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.date-picker-trigger:hover,
+.date-picker-trigger.is-open {
+  border-color: var(--hr-teal);
+  box-shadow: 0 0 0 2px var(--hr-teal-glow);
+}
+
+.date-picker-trigger.has-range {
+  background: rgba(20, 184, 166, 0.08);
+  border-color: var(--hr-teal);
+  color: #2dd4bf;
+}
+
+.picker-cal-icon {
+  color: var(--hr-teal);
+  flex-shrink: 0;
+}
+
+.picker-trigger-label {
   font-family: inherit;
+  letter-spacing: 0.01em;
+}
+
+.picker-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  border-radius: 50%;
+  color: var(--hr-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.picker-clear-btn:hover {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.15);
+}
+
+.picker-chevron-icon {
+  color: var(--hr-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.date-picker-trigger.is-open .picker-chevron-icon {
+  transform: rotate(180deg);
+}
+
+.date-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 320px;
+  max-width: 90vw;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: var(--hr-radius-lg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  animation: hrFadeIn 0.18s ease-out;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-month-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--hr-text-primary);
+}
+
+.cal-nav-btn {
+  background: transparent;
+  border: 1px solid #334155;
+  color: var(--hr-text-secondary);
+  border-radius: var(--hr-radius-sm);
+  padding: 3px 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.cal-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.calendar-instruction {
+  font-size: 0.72rem;
+  color: var(--hr-teal);
+  text-align: center;
+  background: rgba(20, 184, 166, 0.08);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--hr-radius-sm);
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--hr-text-muted);
+  text-transform: uppercase;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.cal-cell {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  border-radius: var(--hr-radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--hr-text-primary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.cal-cell-empty {
+  color: #475569;
+  cursor: default;
+}
+
+.cal-cell-day:hover {
+  background: rgba(20, 184, 166, 0.18);
+  color: #2dd4bf;
+}
+
+.cal-cell.is-start,
+.cal-cell.is-end {
+  background: var(--hr-teal) !important;
+  color: #042f2e !important;
+  font-weight: 700 !important;
+}
+
+.cal-cell.is-in-range {
+  background: rgba(20, 184, 166, 0.2);
+  color: #2dd4bf;
+  border-radius: 0;
+}
+
+.cal-cell.is-hover-range {
+  background: rgba(20, 184, 166, 0.12);
+  border-radius: 0;
+}
+
+.calendar-manual-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #1e293b;
+}
+
+.manual-input-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.manual-input-col label {
+  font-size: 0.68rem;
+  color: var(--hr-text-muted);
+  font-weight: 600;
+}
+
+.manual-input-col input[type="date"] {
+  background: var(--hr-bg-input);
+  border: 1px solid var(--hr-border);
+  color: var(--hr-text-primary);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: var(--hr-radius-sm);
+  outline: none;
+}
+
+.manual-input-col input[type="date"]:focus {
+  border-color: var(--hr-teal);
+}
+
+.calendar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid #1e293b;
+}
+
+.btn-cal-clear {
+  background: transparent;
+  border: 1px solid #334155;
+  color: var(--hr-text-secondary);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--hr-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-cal-clear:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.btn-cal-apply {
+  background: var(--hr-teal);
+  border: none;
+  color: #042f2e;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--hr-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-cal-apply:hover {
+  background: #2dd4bf;
 }
 
 .view-toggle {

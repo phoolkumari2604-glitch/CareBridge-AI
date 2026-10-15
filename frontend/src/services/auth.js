@@ -158,6 +158,16 @@ export const authAPI = {
     return response.data;
   },
 
+  removeFace: async () => {
+    const response = await api.delete("/auth/biometrics/face");
+    return response.data;
+  },
+
+  unlinkWebAuthn: async () => {
+    const response = await api.delete("/auth/biometrics/webauthn");
+    return response.data;
+  },
+
   deleteBiometrics: async () => {
     const response = await api.delete("/auth/biometrics");
     return response.data;

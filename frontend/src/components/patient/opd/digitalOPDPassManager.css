@@ -648,7 +648,8 @@
   text-transform: uppercase;
 }
 
-.status-badge-mini.active {
+.status-badge-mini.active,
+.status-badge-mini.valid {
   background: #dcfce7;
   color: #15803d;
 }
@@ -661,6 +662,11 @@
 .status-badge-mini.expired {
   background: #fee2e2;
   color: #b91c1c;
+}
+
+.status-badge-mini.cancelled {
+  background: #fef3c7;
+  color: #b45309;
 }
 
 .validation-grid {

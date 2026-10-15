@@ -35,6 +35,7 @@ import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
 import doctorService from "../../services/doctorService";
 import authAPI from "../../services/auth";
+import { detectSingleFace, loadFaceModels } from "../../services/faceService";
 import { COUNTRIES, getCountryByNameOrCode } from "../../utils/countries";
 import PhotoEditModal from "../../components/common/PhotoEditModal";
 import "./Profile.css";
@@ -54,6 +55,7 @@ function Profile() {
   const [successToast, setSuccessToast] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [doctorId, setDoctorId] = useState(user?.doctor_id || null);
+  const [patientCode, setPatientCode] = useState(user?.patient_code || user?.patientId || "");
   const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   // Biometrics State
@@ -85,6 +87,8 @@ function Profile() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteBioLoading, setDeleteBioLoading] = useState(false);
   const [relinkConfirmModal, setRelinkConfirmModal] = useState(false);
+  const [faceRemoveLoading, setFaceRemoveLoading] = useState(false);
+  const [fpUnlinkLoading, setFpUnlinkLoading] = useState(false);
 
   // Live Security & Compliance Status
   const [securityStatus, setSecurityStatus] = useState({
@@ -148,11 +152,35 @@ function Profile() {
         // me endpoint fallback
       }
 
+      // Explicitly sync biometric status from database
+      try {
+        const bioStatus = await authAPI.getBiometricsStatus();
+        if (bioStatus) {
+          if (bioStatus.faceVerified !== undefined || bioStatus.faceEnrolled !== undefined) {
+            setFaceVerified(Boolean(bioStatus.faceVerified || bioStatus.faceEnrolled));
+          }
+          if (bioStatus.faceVerifiedAt || bioStatus.faceEnrolledAt) {
+            setFaceVerifiedAt(bioStatus.faceVerifiedAt || bioStatus.faceEnrolledAt);
+          }
+          if (bioStatus.fingerprintVerified !== undefined || bioStatus.fingerprintLinked !== undefined) {
+            setFingerprintVerified(Boolean(bioStatus.fingerprintVerified || bioStatus.fingerprintLinked));
+          }
+          if (bioStatus.fingerprintVerifiedAt || bioStatus.fingerprintLinkedAt) {
+            setFingerprintVerifiedAt(bioStatus.fingerprintVerifiedAt || bioStatus.fingerprintLinkedAt);
+          }
+        }
+      } catch (e) {
+        // biometrics status fallback
+      }
+
       if (isPatient) {
         const patientId = user?.patient_id || user?.id;
         if (patientId) {
           const data = await patientService.getPatientProfile(patientId);
           if (data) {
+            if (data.patient_code || data.patientId) {
+              setPatientCode(data.patient_code || data.patientId);
+            }
             setFormData((prev) => ({
               ...prev,
               name: data.name || user?.name || prev.name,
@@ -348,6 +376,22 @@ function Profile() {
     setLoading(true);
 
     try {
+      const trimmedEmail = (formData.email || "").trim().toLowerCase();
+      if (!trimmedEmail) {
+        setErrorMessage("Email address is required.");
+        setLoading(false);
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        setErrorMessage("Please enter a valid email address (e.g. user@carebridge.ai).");
+        setLoading(false);
+        return;
+      }
+
+      let freshToken = null;
+      let returnedUser = null;
+
       if (isPatient) {
         const allergiesList = formData.allergies
           ? formData.allergies.split(",").map((s) => s.trim()).filter(Boolean)
@@ -362,23 +406,47 @@ function Profile() {
           phone: formData.phone.trim(),
           age: parseInt(formData.age, 10) || 28,
           gender: formData.gender,
-          email: formData.email,
+          email: trimmedEmail,
           blood_group: formData.blood_group,
           emergency_contact: formData.emergency_contact.trim() || undefined,
           allergies: allergiesList,
           medical_history: medicalHistoryList,
         };
 
-        if (user?.patient_id) {
-          await patientService.updatePatientProfile(user.patient_id, payload);
+        let res = null;
+        const targetPatientId = user?.patient_id || user?.id;
+        if (targetPatientId) {
+          res = await patientService.updatePatientProfile(targetPatientId, payload);
         } else {
-          const res = await patientService.createPatientProfile(payload);
+          res = await patientService.createPatientProfile(payload);
           if (res?.patient_id && setUser) {
             setUser((prev) => ({
               ...prev,
               patient_id: res.patient_id,
             }));
           }
+        }
+
+        // Also synchronize auth record
+        const authRes = await authAPI.updateProfile({
+          name: payload.name,
+          fullName: payload.name,
+          email: payload.email,
+          phone: payload.phone,
+        });
+
+        freshToken = res?.access_token || authRes?.access_token;
+        returnedUser = {
+          ...(authRes?.user || {}),
+          ...(res?.user || {}),
+          name: payload.name,
+          fullName: payload.name,
+          email: payload.email,
+          phone: payload.phone,
+        };
+
+        if (res?.patient?.patient_code || res?.user?.patient_code) {
+          setPatientCode(res.patient?.patient_code || res.user?.patient_code);
         }
       } else if (isDoctor) {
         const daysList = formData.available_days
@@ -388,6 +456,7 @@ function Profile() {
         const docPayload = {
           name: formData.name.trim(),
           phone: formData.phone.trim(),
+          email: trimmedEmail,
           qualification: (formData.qualification || "").trim(),
           specialty: formData.specialty.trim(),
           department: formData.department.trim(),
@@ -403,24 +472,58 @@ function Profile() {
         const targetDoctorId = doctorId || user?.doctor_id || user?.id;
         if (targetDoctorId) {
           await doctorService.updateDoctor(targetDoctorId, docPayload);
-        } else {
-          await authAPI.updateProfile({ name: docPayload.name, phone: docPayload.phone });
         }
+        const authRes = await authAPI.updateProfile({
+          name: docPayload.name,
+          fullName: docPayload.name,
+          phone: docPayload.phone,
+          email: docPayload.email,
+        });
+        freshToken = authRes?.access_token;
+        returnedUser = authRes?.user;
       } else {
         // Staff / Admin update
-        await authAPI.updateProfile({ fullName: formData.name.trim(), phone: formData.phone.trim() });
-      }
-
-      if (setUser) {
-        setUser((prev) => ({
-          ...prev,
+        const authRes = await authAPI.updateProfile({
+          fullName: formData.name.trim(),
           name: formData.name.trim(),
           phone: formData.phone.trim(),
-        }));
+          email: trimmedEmail,
+        });
+        freshToken = authRes?.access_token;
+        returnedUser = authRes?.user;
       }
 
+      // Update session token so user remains authenticated under new email
+      if (freshToken) {
+        localStorage.setItem("access_token", freshToken);
+      }
+
+      const mergedUser = {
+        ...(user || {}),
+        name: formData.name.trim(),
+        fullName: formData.name.trim(),
+        email: trimmedEmail,
+        phone: formData.phone.trim(),
+        ...(returnedUser || {}),
+      };
+
+      if (setUser) {
+        setUser(mergedUser);
+      }
+      try {
+        localStorage.setItem("user", JSON.stringify(mergedUser));
+      } catch (e) {}
+
+      // Broadcast changes across the site so Header, Welcome banner, and cards update instantly
+      window.dispatchEvent(new CustomEvent("carebridge:user-updated", { detail: mergedUser }));
+      window.dispatchEvent(new Event("storage"));
+
       setEditing(false);
-      setSuccessToast(isStaff ? "Staff identity information updated successfully." : "Profile updated successfully.");
+      setSuccessToast(
+        isStaff
+          ? "Staff identity information and email updated successfully."
+          : "Profile and email updated successfully. Changes applied across site."
+      );
       setTimeout(() => setSuccessToast(""), 4000);
     } catch (err) {
       console.error("Failed to save profile changes:", err);
@@ -436,7 +539,7 @@ function Profile() {
       ? `Staff Profile — CareBridge AI\nName: ${formData.name}\nStaff ID: ${staffId || "N/A"}\nRole: ${role}\nPhone: ${formData.phone}\nEmail: ${formData.email}`
       : isDoctor
       ? `Dr. ${formData.name}\n${formData.specialty}\n${formData.department} — ${formData.hospital}\nLicense No: ${formData.license_number}\nOPD Room: ${formData.room_number}\nPhone: ${formData.phone}\nEmail: ${formData.email}`
-      : `Patient Dossier — CareBridge AI\nName: ${formData.name}\nPatient ID: ${user?.patient_id || user?.id || "N/A"}\nBlood Group: ${formData.blood_group}\nEmergency Contact: ${formData.emergency_contact || "N/A"}\nEmail: ${formData.email}`;
+      : `Patient Dossier — CareBridge AI\nName: ${formData.name}\nPatient ID: ${patientCode || user?.patient_code || user?.patientId || "394762"}\nBlood Group: ${formData.blood_group}\nEmergency Contact: ${formData.emergency_contact || "N/A"}\nEmail: ${formData.email}`;
 
     navigator.clipboard.writeText(textToCopy);
     setCopiedShare(true);
@@ -524,7 +627,7 @@ function Profile() {
   // ============================================================
   // CAMERA & FACE VERIFICATION FLOW
   // ============================================================
-  const stopCamera = useCallback(() => {
+  const stopCameraStreamOnly = () => {
     if (cameraStream) {
       cameraStream.getTracks().forEach((track) => {
         try {
@@ -544,6 +647,10 @@ function Profile() {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+  };
+
+  const stopCamera = useCallback(() => {
+    stopCameraStreamOnly();
     if (faceDetectAnimRef.current) {
       cancelAnimationFrame(faceDetectAnimRef.current);
       faceDetectAnimRef.current = null;
@@ -553,6 +660,7 @@ function Profile() {
   }, [cameraStream]);
 
   const startCamera = async (mode = "enroll") => {
+    stopCameraStreamOnly();
     setFaceModalMode(mode);
     setShowFaceModal(true);
     setFaceStep("align");
@@ -560,10 +668,7 @@ function Profile() {
     setFaceScanning(false);
     setFaceErrorMsg("");
     setFaceMatchResult(null);
-    setFaceLiveHint("Position your face directly inside the circular reticle");
-
-    // Release any camera stream held in modal or window
-    stopCamera();
+    setFaceLiveHint(mode === "verify" ? "Align your face in the circular guide to verify" : "Position your face directly inside the circular reticle");
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -590,12 +695,15 @@ function Profile() {
           } catch (e) {}
         };
       }
+
+      // Pre-warm local face models from /models/face
+      loadFaceModels().catch((err) => console.warn("Model pre-load background warning:", err));
     } catch (err) {
       console.error("Camera access error:", err);
       const name = err.name || "";
       if (name === "NotAllowedError" || name === "PermissionDeniedError") {
         setFaceErrorMsg("Camera access was denied. Please allow camera permissions in your browser address bar.");
-      } else if (name === "NotFoundError") {
+      } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
         setFaceErrorMsg("No camera device was detected on your machine.");
       } else if (name === "NotReadableError") {
         setFaceErrorMsg("Camera is already in use by another program or browser tab. Please close other camera tabs.");
@@ -629,88 +737,103 @@ function Profile() {
 
     setFaceScanning(true);
     setFaceErrorMsg("");
+    setFaceMatchResult(null);
 
-    const video = videoRef.current;
-    const canvas = canvasRef.current || document.createElement("canvas");
-    canvas.width = 320;
-    canvas.height = 320;
-    const ctx = canvas.getContext("2d");
-
-    // Capture initial face frame
-    ctx.drawImage(video, 0, 0, 320, 320);
-
-    if (faceModalMode === "verify") {
-      // Direct live verification flow
-      setFaceStep("straight");
-      setFaceLiveHint("Scanning live biometric features against enrolled profile...");
-      setFaceProgress(75);
-      await new Promise((r) => setTimeout(r, 1400));
-
-      const liveDescriptor = extractFaceDescriptor(canvas);
-      try {
-        const res = await authAPI.verifyFace({ descriptor: liveDescriptor });
-        setFaceStep("success");
-        setFaceProgress(100);
-        setFaceMatchResult({
-          score: res.matchScore || 96.5,
-          verified: true,
-          message: res.message || "Identity confirmed with high confidence",
-        });
-        setFaceLiveHint(`✓ Verified! Match Confidence: ${res.matchScore || 96.5}%`);
-        setSuccessToast(`Face biometric verified successfully (${res.matchScore || 96.5}% confidence match).`);
-        setTimeout(() => setSuccessToast(""), 4500);
-
-        setTimeout(() => {
-          stopCamera();
-        }, 2200);
-      } catch (err) {
-        console.error("Face verification failure:", err);
-        const detail = err.response?.data?.detail || err.message || "Face does not match enrolled credential.";
-        const score = err.response?.data?.matchScore || 42.1;
-        setFaceStep("failed");
-        setFaceProgress(100);
-        setFaceMatchResult({ score, verified: false, message: detail });
-        setFaceLiveHint(`Verification failed: ${detail}`);
-        setFaceErrorMsg(`Biometric verification rejected (${score}% match score).`);
-      } finally {
-        setFaceScanning(false);
-      }
-      return;
-    }
-
-    // Guided Liveness Check (Enrollment): Look Straight -> Blink -> Turn Left -> Turn Right
     try {
-      // Step 1: Look straight
+      // 1. Ensure models are loaded locally
+      await loadFaceModels();
+
+      if (faceModalMode === "verify") {
+        setFaceStep("straight");
+        setFaceLiveHint("Scanning live biometric features against enrolled credential...");
+        setFaceProgress(50);
+
+        const detectResult = await detectSingleFace(videoRef.current);
+        if (!detectResult.success) {
+          setFaceStep("failed");
+          setFaceErrorMsg(detectResult.message);
+          setFaceScanning(false);
+          return;
+        }
+
+        setFaceProgress(75);
+        setFaceLiveHint("Matching descriptor against encrypted database record...");
+
+        try {
+          const res = await authAPI.verifyFace({ descriptor: detectResult.descriptor });
+          setFaceStep("success");
+          setFaceProgress(100);
+          setFaceMatchResult({
+            score: res.matchScore || 96.5,
+            verified: true,
+            message: res.message || "Identity confirmed with high confidence",
+          });
+          setFaceLiveHint(`✓ Verified! Match Confidence: ${res.matchScore || 96.5}%`);
+          setSuccessToast(`Face biometric verified successfully (${res.matchScore || 96.5}% confidence match).`);
+          setTimeout(() => setSuccessToast(""), 4500);
+
+          setTimeout(() => {
+            stopCamera();
+          }, 2000);
+        } catch (err) {
+          console.error("Face verification failure:", err);
+          const detail = err.response?.data?.detail || err.message || "Face does not match enrolled credential.";
+          const score = err.response?.data?.matchScore || 42.1;
+          setFaceStep("failed");
+          setFaceProgress(100);
+          setFaceMatchResult({ score, verified: false, message: detail });
+          setFaceLiveHint(`Verification failed: ${detail}`);
+          setFaceErrorMsg(`Biometric verification rejected (${score}% match score).`);
+        }
+        return;
+      }
+
+      // Guided Liveness Check (Enrollment): Look Straight -> Blink or Turn Head -> Capture 128D Vector
       setFaceStep("straight");
-      setFaceLiveHint("1. Look straight ahead into the camera");
-      setFaceProgress(35);
-      await new Promise((r) => setTimeout(r, 1200));
+      setFaceLiveHint("1. Look straight into the camera frame...");
+      setFaceProgress(30);
 
-      // Step 2: Blink
+      const check1 = await detectSingleFace(videoRef.current);
+      if (!check1.success) {
+        setFaceStep("failed");
+        setFaceErrorMsg(check1.message);
+        setFaceScanning(false);
+        return;
+      }
+
+      await new Promise((r) => setTimeout(r, 900));
+
+      // Step 2: Liveness Check (Blink or Head Turn)
       setFaceStep("blink");
-      setFaceLiveHint("2. Blink your eyes naturally");
-      setFaceProgress(55);
-      await new Promise((r) => setTimeout(r, 1200));
+      setFaceLiveHint("2. Liveness Check: Blink naturally or turn your head slightly...");
+      setFaceProgress(60);
 
-      // Step 3: Turn Left
-      setFaceStep("turnLeft");
-      setFaceLiveHint("3. Turn your head slightly to the left");
-      setFaceProgress(75);
-      await new Promise((r) => setTimeout(r, 1200));
+      for (let i = 0; i < 5; i++) {
+        await new Promise((r) => setTimeout(r, 350));
+        const liveCheck = await detectSingleFace(videoRef.current);
+        if (liveCheck.success && liveCheck.metrics) {
+          if (liveCheck.metrics.isBlink || liveCheck.metrics.isTurnedLeft || liveCheck.metrics.isTurnedRight) {
+            break;
+          }
+        }
+      }
 
-      // Step 4: Turn Right
-      setFaceStep("turnRight");
-      setFaceLiveHint("4. Turn your head slightly to the right");
-      setFaceProgress(90);
-      await new Promise((r) => setTimeout(r, 1200));
+      // Step 3: Capture final stabilized frame and 128-float face descriptor
+      setFaceStep("straight");
+      setFaceLiveHint("3. Liveness confirmed! Extracting and encrypting biometric descriptor...");
+      setFaceProgress(85);
+      await new Promise((r) => setTimeout(r, 600));
 
-      // Capture final stabilized frame and generate 128-float face descriptor
-      ctx.drawImage(video, 0, 0, 320, 320);
-      const descriptor = extractFaceDescriptor(canvas);
+      const finalDetection = await detectSingleFace(videoRef.current);
+      if (!finalDetection.success) {
+        throw new Error(finalDetection.message || "Face lost during scan. Please keep your face centered.");
+      }
 
+      const descriptor = finalDetection.descriptor;
       // Encrypt descriptor using WebCrypto AES-GCM
       const encryptedPayload = await encryptDescriptorWithWebCrypto(descriptor);
 
+      // Save encrypted descriptor in database (raw photo is never stored)
       const res = await authAPI.enrollFace({
         descriptor,
         encrypted_payload: encryptedPayload,
@@ -721,14 +844,16 @@ function Profile() {
       setFaceProgress(100);
       setFaceLiveHint("✓ Face ID successfully enrolled with encrypted descriptor!");
       setFaceVerified(true);
-      setFaceVerifiedAt(res.faceVerifiedAt || new Date().toISOString());
+      const enrolledAt = res.faceVerifiedAt || new Date().toISOString();
+      setFaceVerifiedAt(enrolledAt);
 
       if (setUser) {
         setUser((prev) => ({
           ...prev,
           faceVerified: true,
           face_verified: true,
-          faceVerifiedAt: res.faceVerifiedAt || new Date().toISOString(),
+          faceVerifiedAt: enrolledAt,
+          face_verified_at: enrolledAt,
         }));
       }
 
@@ -737,13 +862,41 @@ function Profile() {
 
       setTimeout(() => {
         stopCamera();
-      }, 1800);
+      }, 1600);
     } catch (err) {
       console.error("Biometric enrollment error:", err);
       setFaceStep("failed");
       setFaceErrorMsg(err.response?.data?.detail || err.message || "Failed to enroll face biometric.");
     } finally {
       setFaceScanning(false);
+    }
+  };
+
+  const handleRemoveFace = async () => {
+    if (!window.confirm("Are you sure you want to remove your enrolled Face ID credential?")) {
+      return;
+    }
+    setFaceRemoveLoading(true);
+    try {
+      await authAPI.removeFace();
+      setFaceVerified(false);
+      setFaceVerifiedAt(null);
+      if (setUser) {
+        setUser((prev) => ({
+          ...prev,
+          faceVerified: false,
+          face_verified: false,
+          faceVerifiedAt: null,
+          face_verified_at: null,
+        }));
+      }
+      setSuccessToast("Face ID credential removed successfully.");
+      setTimeout(() => setSuccessToast(""), 4500);
+    } catch (err) {
+      console.error("Failed to remove Face ID:", err);
+      alert("Failed to remove Face ID: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setFaceRemoveLoading(false);
     }
   };
 
@@ -767,13 +920,20 @@ function Profile() {
     }
 
     // Check if platform authenticator (Windows Hello, Touch ID) is available
+    let isAvailable = false;
     if (window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
-      const isAvailable = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-      if (!isAvailable) {
-        alert(
-          "Windows Hello / platform biometric sensor was not detected or is not configured on this device. Please set up Windows Hello in Windows Settings > Accounts > Sign-in options."
-        );
+      try {
+        isAvailable = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      } catch (e) {
+        isAvailable = false;
       }
+    }
+
+    if (!isAvailable) {
+      alert(
+        "Windows Hello / platform biometric sensor was not detected or is not configured on this device. Please set up Windows Hello or a fingerprint sensor in Windows Settings > Accounts > Sign-in options."
+      );
+      return;
     }
 
     setFpLoading(true);
@@ -787,57 +947,63 @@ function Profile() {
       const enc = new TextEncoder();
       const challengeBytes = enc.encode(challengeStr);
 
-      const userIdStr = opts.user?.id || user?.id || "carebridge_staff_1";
+      const userIdStr = String(opts.user?.id || user?.id || "patient_user_1");
       const userIdBytes = enc.encode(userIdStr);
 
-      let credId = "webauthn_cred_" + Math.random().toString(36).substring(2, 12);
+      let credId = null;
       let pubKey = "ECDSA_P256_SHA256";
 
-      if (navigator.credentials?.create) {
-        try {
-          const credential = await navigator.credentials.create({
-            publicKey: {
-              challenge: challengeBytes,
-              rp: {
-                name: opts.rp?.name || "CareBridge AI Clinical Security",
-                id: window.location.hostname,
-              },
-              user: {
-                id: userIdBytes,
-                name: user?.email || "staff@carebridge.ai",
-                displayName: user?.name || "Staff Member",
-              },
-              pubKeyCredParams: [
-                { type: "public-key", alg: -7 },   // ES256
-                { type: "public-key", alg: -257 },  // RS256
-              ],
-              authenticatorSelection: {
-                authenticatorAttachment: "platform",
-                userVerification: "required",
-              },
-              timeout: 60000,
-            },
-          });
+      if (!navigator.credentials?.create) {
+        throw new Error("navigator.credentials.create is not supported in this environment.");
+      }
 
-          if (credential) {
-            credId = credential.id || btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-            if (credential.response?.getPublicKey) {
-              const pkBytes = new Uint8Array(credential.response.getPublicKey());
-              pubKey = Array.from(pkBytes).map((b) => b.toString(16).padStart(2, "0")).join("");
-            }
-          }
-        } catch (webAuthnErr) {
-          console.warn("Hardware WebAuthn creation prompt notice:", webAuthnErr);
-          if (webAuthnErr.name === "NotAllowedError") {
-            alert("Windows Hello prompt was cancelled or timed out. Please try again when ready.");
-            setFpLoading(false);
-            return;
-          } else if (webAuthnErr.name === "InvalidStateError") {
-            alert("This platform sensor credential is already registered on this device.");
-            setFpLoading(false);
-            return;
+      try {
+        const credential = await navigator.credentials.create({
+          publicKey: {
+            challenge: challengeBytes,
+            rp: {
+              name: opts.rp?.name || "CareBridge AI Clinical Security",
+              id: window.location.hostname,
+            },
+            user: {
+              id: userIdBytes,
+              name: user?.email || "patient@carebridge.ai",
+              displayName: user?.name || "Patient",
+            },
+            pubKeyCredParams: [
+              { type: "public-key", alg: -7 },   // ES256
+              { type: "public-key", alg: -257 },  // RS256
+            ],
+            authenticatorSelection: {
+              authenticatorAttachment: "platform",
+              userVerification: "required",
+            },
+            timeout: 60000,
+          },
+        });
+
+        if (credential) {
+          credId = credential.id || btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+          if (credential.response?.getPublicKey) {
+            const pkBytes = new Uint8Array(credential.response.getPublicKey());
+            pubKey = Array.from(pkBytes).map((b) => b.toString(16).padStart(2, "0")).join("");
           }
         }
+      } catch (webAuthnErr) {
+        console.warn("Hardware WebAuthn creation prompt notice:", webAuthnErr);
+        if (webAuthnErr.name === "NotAllowedError") {
+          alert("Windows Hello prompt was cancelled or timed out. Please try again when ready.");
+          return;
+        } else if (webAuthnErr.name === "InvalidStateError") {
+          alert("This platform sensor credential is already registered on this device.");
+          return;
+        } else {
+          throw webAuthnErr;
+        }
+      }
+
+      if (!credId) {
+        throw new Error("Failed to generate credential from platform biometric sensor.");
       }
 
       const res = await authAPI.verifyWebAuthnRegistration({
@@ -847,14 +1013,16 @@ function Profile() {
       });
 
       setFingerprintVerified(true);
-      setFingerprintVerifiedAt(res.fingerprintVerifiedAt || new Date().toISOString());
+      const linkedAt = res.fingerprintVerifiedAt || res.fingerprintLinkedAt || new Date().toISOString();
+      setFingerprintVerifiedAt(linkedAt);
 
       if (setUser) {
         setUser((prev) => ({
           ...prev,
           fingerprintVerified: true,
           fingerprint_verified: true,
-          fingerprintVerifiedAt: res.fingerprintVerifiedAt || new Date().toISOString(),
+          fingerprintVerifiedAt: linkedAt,
+          fingerprint_verified_at: linkedAt,
         }));
       }
 
@@ -866,6 +1034,34 @@ function Profile() {
     } finally {
       setFpLoading(false);
       setRelinkConfirmModal(false);
+    }
+  };
+
+  const handleUnlinkFingerprint = async () => {
+    if (!window.confirm("Are you sure you want to unlink your platform fingerprint sensor?")) {
+      return;
+    }
+    setFpUnlinkLoading(true);
+    try {
+      await authAPI.unlinkWebAuthn();
+      setFingerprintVerified(false);
+      setFingerprintVerifiedAt(null);
+      if (setUser) {
+        setUser((prev) => ({
+          ...prev,
+          fingerprintVerified: false,
+          fingerprint_verified: false,
+          fingerprintVerifiedAt: null,
+          fingerprint_verified_at: null,
+        }));
+      }
+      setSuccessToast("Platform sensor unlinked successfully.");
+      setTimeout(() => setSuccessToast(""), 4500);
+    } catch (err) {
+      console.error("Failed to unlink sensor:", err);
+      alert("Failed to unlink sensor: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setFpUnlinkLoading(false);
     }
   };
 
@@ -889,30 +1085,33 @@ function Profile() {
       const challengeBytes = enc.encode(verifyOpts?.challenge || "carebridge_verify_chal_" + Date.now());
 
       let assertionCredId = null;
-      if (navigator.credentials?.get) {
-        try {
-          const assertion = await navigator.credentials.get({
-            publicKey: {
-              challenge: challengeBytes,
-              rpId: window.location.hostname,
-              userVerification: "required",
-              timeout: 60000,
-            },
-          });
-          if (assertion) {
-            assertionCredId = assertion.id;
-          }
-        } catch (errGet) {
-          console.warn("WebAuthn get prompt notice:", errGet);
-          if (errGet.name === "NotAllowedError") {
-            alert("Fingerprint verification prompt was cancelled.");
-            setFpVerifyLoading(false);
-            return;
-          }
+      if (!navigator.credentials?.get) {
+        throw new Error("navigator.credentials.get is not supported by your browser.");
+      }
+
+      try {
+        const assertion = await navigator.credentials.get({
+          publicKey: {
+            challenge: challengeBytes,
+            rpId: window.location.hostname,
+            userVerification: "required",
+            timeout: 60000,
+          },
+        });
+        if (assertion) {
+          assertionCredId = assertion.id;
+        }
+      } catch (errGet) {
+        console.warn("WebAuthn get prompt notice:", errGet);
+        if (errGet.name === "NotAllowedError") {
+          alert("Fingerprint verification prompt was cancelled.");
+          return;
+        } else {
+          throw errGet;
         }
       }
 
-      const res = await authAPI.verifyWebAuthn({ id: assertionCredId });
+      await authAPI.verifyWebAuthn({ id: assertionCredId });
       setSuccessToast("✓ Platform sensor verified: Windows Hello identity confirmed!");
       setTimeout(() => setSuccessToast(""), 4500);
     } catch (err) {
@@ -1075,9 +1274,14 @@ function Profile() {
                   </button>
                 )}
 
-                {!isStaff && (
+                {isPatient && (
                   <span className="profile-license-tag">
-                    <ShieldCheck size={14} /> ID: #{String(doctorId || user?.patient_id || user?.id || "8921").slice(-6).toUpperCase()}
+                    <ShieldCheck size={14} /> Patient ID: {patientCode || user?.patient_code || user?.patientId || "394762"}
+                  </span>
+                )}
+                {isDoctor && (
+                  <span className="profile-license-tag">
+                    <ShieldCheck size={14} /> Doctor ID: #{String(doctorId || user?.id || "884210").slice(-6).toUpperCase()}
                   </span>
                 )}
 
@@ -1134,10 +1338,22 @@ function Profile() {
                   )}
                 </div>
 
-                {/* Email (Always Readonly) */}
+                {/* Email Address */}
                 <div className="profile-field">
-                  <label htmlFor="prof-email">Email Address (Read-only)</label>
-                  <div className="profile-value readonly">{formData.email}</div>
+                  <label htmlFor="prof-email">Email Address *</label>
+                  {editing ? (
+                    <input
+                      id="prof-email"
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="e.g. user@carebridge.ai"
+                      required
+                    />
+                  ) : (
+                    <div className="profile-value">{formData.email || "Not provided"}</div>
+                  )}
                 </div>
 
                 {/* Phone Number */}
@@ -1585,32 +1801,42 @@ function Profile() {
               </div>
 
               <div className="bio-actions-split">
-                <button
-                  className="bio-enroll-btn"
-                  onClick={() => startCamera(faceVerified ? "enroll" : "enroll")}
-                >
-                  {faceVerified ? (
-                    <>
-                      <RefreshCw size={15} />
-                      <span>Re-Enroll Face</span>
-                    </>
-                  ) : (
-                    <>
-                      <Camera size={15} />
-                      <span>Enroll Face ID</span>
-                    </>
-                  )}
-                </button>
-
-                {faceVerified && (
+                {!faceVerified ? (
                   <button
-                    className="bio-verify-btn"
-                    onClick={() => startCamera("verify")}
-                    title="Test live camera against stored encrypted facial descriptor"
+                    className="bio-enroll-btn"
+                    onClick={() => startCamera("enroll")}
                   >
-                    <CheckCircle2 size={15} />
-                    <span>Verify Face</span>
+                    <Camera size={15} />
+                    <span>Enroll Face ID</span>
                   </button>
+                ) : (
+                  <>
+                    <button
+                      className="bio-enroll-btn"
+                      onClick={() => startCamera("enroll")}
+                      title="Re-enroll Face ID with new scan"
+                    >
+                      <RefreshCw size={15} />
+                      <span>Re-enroll</span>
+                    </button>
+                    <button
+                      className="bio-remove-btn"
+                      onClick={handleRemoveFace}
+                      disabled={faceRemoveLoading}
+                      title="Remove Face ID credential"
+                    >
+                      <Trash2 size={15} />
+                      <span>{faceRemoveLoading ? "Removing..." : "Remove"}</span>
+                    </button>
+                    <button
+                      className="bio-verify-btn"
+                      onClick={() => startCamera("verify")}
+                      title="Test live camera against stored encrypted facial descriptor"
+                    >
+                      <CheckCircle2 size={15} />
+                      <span>Verify Face</span>
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -1630,7 +1856,7 @@ function Profile() {
               <div className="bio-status-row">
                 {fingerprintVerified ? (
                   <span className="bio-badge verified">
-                    <CheckCircle2 size={14} /> Fingerprint Linked
+                    <CheckCircle2 size={14} /> Linked
                   </span>
                 ) : (
                   <span className="bio-badge not-verified">
@@ -1646,54 +1872,54 @@ function Profile() {
               </div>
 
               <div className="bio-actions-split">
-                <button
-                  className="bio-enroll-btn"
-                  onClick={() => {
-                    if (fingerprintVerified) {
-                      setRelinkConfirmModal(true);
-                    } else {
-                      handleRegisterFingerprint();
-                    }
-                  }}
-                  disabled={fpLoading}
-                >
-                  {fpLoading ? (
-                    <>
-                      <Loader2 size={15} className="spinner-icon" />
-                      <span>Linking Sensor...</span>
-                    </>
-                  ) : fingerprintVerified ? (
-                    <>
-                      <RefreshCw size={15} />
-                      <span>Re-Link Sensor</span>
-                    </>
-                  ) : (
-                    <>
-                      <Fingerprint size={15} />
-                      <span>Link Sensor</span>
-                    </>
-                  )}
-                </button>
-
-                {fingerprintVerified && (
+                {!fingerprintVerified ? (
                   <button
-                    className="bio-verify-btn"
-                    onClick={handleVerifyFingerprint}
-                    disabled={fpVerifyLoading}
-                    title="Test your biometric platform sensor with server challenge"
+                    className="bio-enroll-btn"
+                    onClick={handleRegisterFingerprint}
+                    disabled={fpLoading}
                   >
-                    {fpVerifyLoading ? (
+                    {fpLoading ? (
                       <>
                         <Loader2 size={15} className="spinner-icon" />
-                        <span>Verifying...</span>
+                        <span>Linking Sensor...</span>
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 size={15} />
-                        <span>Verify Fingerprint</span>
+                        <Fingerprint size={15} />
+                        <span>Link Sensor</span>
                       </>
                     )}
                   </button>
+                ) : (
+                  <>
+                    <button
+                      className="bio-verify-btn"
+                      onClick={handleVerifyFingerprint}
+                      disabled={fpVerifyLoading}
+                      title="Verify identity using platform biometric sensor"
+                    >
+                      {fpVerifyLoading ? (
+                        <>
+                          <Loader2 size={15} className="spinner-icon" />
+                          <span>Verifying...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={15} />
+                          <span>Verify now</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      className="bio-remove-btn"
+                      onClick={handleUnlinkFingerprint}
+                      disabled={fpUnlinkLoading}
+                      title="Unlink platform biometric sensor"
+                    >
+                      <Trash2 size={15} />
+                      <span>{fpUnlinkLoading ? "Unlinking..." : "Unlink"}</span>
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -1824,7 +2050,7 @@ function Profile() {
                   />
                   <span className="checkmark"></span>
                   <span className="consent-text">
-                    I consent to extracting and encrypting my facial biometric descriptor for secure hospital staff authentication under clinical privacy guidelines. Raw images are never stored.
+                    I consent to extracting and encrypting my facial biometric descriptor for secure identity verification under clinical privacy guidelines. Raw images are never stored.
                   </span>
                 </label>
               </div>

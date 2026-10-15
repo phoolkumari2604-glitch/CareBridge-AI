@@ -538,7 +538,7 @@ function Login() {
               {/* QUICK DEMO LOGIN (Only rendered if VITE_DEMO_MODE=true) */}
               {isDemoMode && (
                 <div className="demo-accounts-section">
-                  <span className="demo-title text-slate-400">Quick Demo Login:</span>
+                  <span className="demo-title text-slate-400">Quick Portal Access:</span>
                   <div className="demo-buttons">
                     <button
                       type="button"

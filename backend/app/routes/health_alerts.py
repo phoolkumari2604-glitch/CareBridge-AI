@@ -280,63 +280,124 @@ def evaluate_vitals_telemetry(vitals_list, patient_id_str):
     return alerts
 
 @health_alerts_bp.route("/<patient_id>", methods=["GET"], strict_slashes=False)
+@health_alerts_bp.route("/patient/<patient_id>", methods=["GET"], strict_slashes=False)
 @token_required
 def get_health_alerts(patient_id):
     db = get_database()
-    if not is_valid_object_id(patient_id):
-        return jsonify({"error": "Validation Error", "detail": "Invalid patient ID"}), 400
+    pid = None
+    if is_valid_object_id(patient_id):
+        pid = ObjectId(patient_id)
+    else:
+        pat = db.patients.find_one({"$or": [{"patient_code": str(patient_id)}, {"patient_id_code": str(patient_id)}]})
+        if pat:
+            pid = pat["_id"]
 
-    pid = ObjectId(patient_id)
+    if not pid:
+        return jsonify([]), 200
+
     vitals = list(db.vital_signs.find({"patient_id": pid}).sort("recorded_at", -1))
     
     # 1. Telemetry generated alerts
-    telemetry_alerts = evaluate_vitals_telemetry(vitals, patient_id)
+    telemetry_alerts = evaluate_vitals_telemetry(vitals, str(pid))
 
     # 2. Database persisted alerts
-    db_alerts_cursor = db.health_alerts.find({"patient_id": pid}).sort("created_at", -1)
+    db_alerts_cursor = db.health_alerts.find({"$or": [{"patient_id": pid}, {"patient_id": str(pid)}]}).sort("created_at", -1)
     db_alerts = []
     for doc in db_alerts_cursor:
         doc_serialized = serialize_doc(doc)
         db_alerts.append(doc_serialized)
 
-    # Merge or return telemetry alerts
-    return jsonify(telemetry_alerts + db_alerts), 200
+    # Deduplicate alerts
+    seen_keys = set()
+    merged_alerts = []
+
+    for doc in db_alerts:
+        v_id = str(doc.get("vital_id") or doc.get("_id") or "")
+        v_key = str(doc.get("vital_key") or doc.get("alert_key") or "")
+        key = f"{v_id}_{v_key}" if (v_id and v_key) else str(doc.get("_id") or doc.get("alert_id") or doc.get("message"))
+        if key not in seen_keys:
+            seen_keys.add(key)
+            merged_alerts.append(doc)
+
+    for t_alert in telemetry_alerts:
+        v_id = str(t_alert.get("vital_id") or "")
+        v_key = str(t_alert.get("vital_key") or "")
+        key = f"{v_id}_{v_key}" if (v_id and v_key) else str(t_alert.get("alert_id") or t_alert.get("message"))
+        if key not in seen_keys:
+            seen_keys.add(key)
+            merged_alerts.append(t_alert)
+
+    return jsonify(merged_alerts), 200
 
 @health_alerts_bp.route("/<patient_id>/summary", methods=["GET"], strict_slashes=False)
+@health_alerts_bp.route("/summary/<patient_id>", methods=["GET"], strict_slashes=False)
+@health_alerts_bp.route("/patient/<patient_id>/summary", methods=["GET"], strict_slashes=False)
 @token_required
 def get_health_alert_summary(patient_id):
     db = get_database()
-    if not is_valid_object_id(patient_id):
-        return jsonify({"error": "Validation Error", "detail": "Invalid patient ID"}), 400
+    pid = None
+    if is_valid_object_id(patient_id):
+        pid = ObjectId(patient_id)
+    else:
+        pat = db.patients.find_one({"$or": [{"patient_code": str(patient_id)}, {"patient_id_code": str(patient_id)}]})
+        if pat:
+            pid = pat["_id"]
 
-    pid = ObjectId(patient_id)
+    if not pid:
+        return jsonify({
+            "patient_id": patient_id,
+            "total_alerts": 0,
+            "high_alerts": 0,
+            "status": "NORMAL",
+            "message": "All vital signs are currently within safe adult physiological parameters.",
+            "abnormal_chips": []
+        }), 200
+
     vitals = list(db.vital_signs.find({"patient_id": pid}).sort("recorded_at", -1))
-    telemetry_alerts = evaluate_vitals_telemetry(vitals, patient_id)
+    telemetry_alerts = evaluate_vitals_telemetry(vitals, str(pid))
 
-    db_unack = list(db.health_alerts.find({
-        "patient_id": pid,
+    db_unack_cursor = db.health_alerts.find({
+        "$or": [{"patient_id": pid}, {"patient_id": str(pid)}],
         "is_acknowledged": {"$ne": True}
-    }))
+    })
+    db_unack = [serialize_doc(doc) for doc in db_unack_cursor]
 
-    total_alerts = len(telemetry_alerts) + len(db_unack)
-    high_alerts = sum(1 for a in telemetry_alerts if a.get("severity") in ["CRITICAL", "HIGH"]) +                   sum(1 for a in db_unack if str(a.get("severity", "")).upper() in ["CRITICAL", "HIGH"])
+    # Deduplicate for summary count
+    seen_keys = set()
+    active_alerts = []
+    for doc in db_unack:
+        v_id = str(doc.get("vital_id") or doc.get("_id") or "")
+        v_key = str(doc.get("vital_key") or doc.get("alert_key") or "")
+        key = f"{v_id}_{v_key}" if (v_id and v_key) else str(doc.get("_id") or doc.get("message"))
+        if key not in seen_keys:
+            seen_keys.add(key)
+            active_alerts.append(doc)
 
-    # Generate specific clinical reason summary
-    if telemetry_alerts:
-        specific_messages = [a["message"] for a in telemetry_alerts[:2]]
-        summary_message = " | ".join(specific_messages)
-    elif db_unack:
-        summary_message = db_unack[0].get("message", "Physiological anomaly flagged")
+    for t_alert in telemetry_alerts:
+        v_id = str(t_alert.get("vital_id") or "")
+        v_key = str(t_alert.get("vital_key") or "")
+        key = f"{v_id}_{v_key}" if (v_id and v_key) else str(t_alert.get("alert_id") or t_alert.get("message"))
+        if key not in seen_keys:
+            seen_keys.add(key)
+            active_alerts.append(t_alert)
+
+    total_alerts = len(active_alerts)
+    high_alerts = sum(1 for a in active_alerts if str(a.get("severity", "")).upper() in ["CRITICAL", "HIGH"])
+
+    if active_alerts:
+        specific_messages = [a.get("message", "") for a in active_alerts[:2] if a.get("message")]
+        summary_message = " | ".join(specific_messages) if specific_messages else "Physiological anomalies detected."
     else:
         summary_message = "All vital signs are currently within safe adult physiological parameters."
 
     return jsonify({
-        "patient_id": patient_id,
+        "patient_id": str(pid),
         "total_alerts": total_alerts,
+        "active_alerts": total_alerts,
         "high_alerts": high_alerts,
         "status": "ALERT" if total_alerts > 0 else "NORMAL",
         "message": summary_message,
-        "abnormal_chips": telemetry_alerts[:4]
+        "abnormal_chips": active_alerts[:4]
     }), 200
 
 @health_alerts_bp.route("/<alert_id>/acknowledge", methods=["POST"], strict_slashes=False)

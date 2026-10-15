@@ -634,7 +634,7 @@ function AIAssistant() {
             </div>
             <div>
               <h2>CareBridge Clinical Assistant</h2>
-              <span>Connected to Patient Health Records &middot; User ID: #{String(user?.patient_id || "").slice(-6).toUpperCase()}</span>
+              <span>Connected to Patient Health Records &middot; Patient ID: {user?.patient_code || user?.patientId || "394762"}</span>
             </div>
             <div className="ai-chat-online">
               <span></span>

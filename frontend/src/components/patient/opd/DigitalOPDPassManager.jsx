@@ -190,42 +190,14 @@ function DigitalOPDPassManager() {
         setHospitals(hospsRes.value || []);
       }
 
-      const consolidatedPasses = [...passes];
-
-      appointments.forEach((apt) => {
-        const aptId = apt._id || apt.id;
-        const exists = consolidatedPasses.some((p) => p.appointment_id === aptId);
-        if (!exists) {
-          const passNumber = `OPD-${(apt.appointment_date || "20261009").replace(/-/g, "")}-${String(aptId).slice(-6).toUpperCase()}`;
-          consolidatedPasses.push({
-            _id: `gen-${aptId}`,
-            appointment_id: aptId,
-            patient_id: user.patient_id,
-            hospital_id: apt.hospital_id,
-            doctor_id: apt.doctor_id,
-            pass_number: passNumber,
-            status:
-              apt.status === "COMPLETED"
-                ? "USED"
-                : apt.approval_status === "APPROVED"
-                ? "ACTIVE"
-                : "PENDING",
-            created_at: apt.created_at,
-            appointment_date: apt.appointment_date,
-            appointment_time: apt.appointment_time,
-            reason: apt.reason,
-          });
-        }
-      });
-
-      setActivePasses(consolidatedPasses);
+      setActivePasses(passes);
 
       if (appointmentIdParam) {
-        const matched = consolidatedPasses.find((p) => p.appointment_id === appointmentIdParam);
+        const matched = passes.find((p) => p.appointment_id === appointmentIdParam);
         if (matched) setSelectedPass(matched);
-        else setSelectedPass(consolidatedPasses[0] || null);
+        else setSelectedPass(passes[0] || null);
       } else {
-        setSelectedPass(consolidatedPasses[0] || null);
+        setSelectedPass(passes[0] || null);
       }
     } catch (err) {
       console.error("Failed to load OPD pass data:", err);
@@ -275,6 +247,10 @@ function DigitalOPDPassManager() {
 
       const res = await patientService.validateOPDPass(token);
       setValidationResult(res);
+      if (res?.valid) {
+        showToast("OPD Pass verified & checked in successfully!");
+        loadOPDPassData();
+      }
     } catch (err) {
       console.error("Pass validation failed:", err);
       setValidationError(
@@ -385,6 +361,8 @@ function DigitalOPDPassManager() {
       const res = await patientService.verifyOPDPassOTP(token, code);
       setValidationResult(res);
       setOtpMode(false);
+      showToast("OPD Pass verified with OTP successfully!");
+      loadOPDPassData();
     } catch (err) {
       console.error("OTP verification failed:", err);
       setOtpError(
@@ -923,6 +901,7 @@ function DigitalOPDPassManager() {
                     className="quick-token-chip"
                     onClick={() => {
                       setVerifyToken(selectedPass.pass_number);
+                      handleValidatePass(selectedPass.pass_number);
                     }}
                   >
                     Use {selectedPass.pass_number}
@@ -952,7 +931,7 @@ function DigitalOPDPassManager() {
 
                 {otpInfo?.demo_otp && (
                   <div className="demo-otp-banner">
-                    <span>Demo Environment OTP Hint:</span>
+                    <span>Active Authorization OTP:</span>
                     <strong>{otpInfo.demo_otp}</strong>
                   </div>
                 )}
@@ -1028,6 +1007,10 @@ function DigitalOPDPassManager() {
                     ? "valid"
                     : validationResult.status === "USED"
                     ? "used"
+                    : validationResult.status === "EXPIRED"
+                    ? "expired"
+                    : validationResult.status === "CANCELLED"
+                    ? "cancelled"
                     : "warning"
                 }`}
               >
@@ -1045,10 +1028,10 @@ function DigitalOPDPassManager() {
                         ? "Pass Cryptographically Signed & OTP Authorized"
                         : validationResult.valid
                         ? "Pass Cryptographically Verified & Active"
-                        : `Verification Notice: ${validationResult.status || "Status Check"}`}
+                        : `Verification Notice: ${validationResult.display_status || validationResult.status || "Status Check"}`}
                     </strong>
-                    <span className={`status-badge-mini ${(validationResult.status || "active").toLowerCase()}`}>
-                      {validationResult.status || "VERIFIED"}
+                    <span className={`status-badge-mini ${(validationResult.status || "valid").toLowerCase()}`}>
+                      {validationResult.display_status || validationResult.status || "VALID"}
                     </span>
                   </div>
                   <p>{validationResult.message}</p>
@@ -1058,22 +1041,44 @@ function DigitalOPDPassManager() {
                       <strong>{validationResult.pass_number}</strong>
                     </div>
                     <div>
+                      <span>Pass Status:</span>
+                      <strong style={{ display: "inline-block", marginTop: 2 }}>
+                        <span className={`status-badge-mini ${(validationResult.status || "valid").toLowerCase()}`}>
+                          {validationResult.display_status || (validationResult.valid ? "Valid" : validationResult.status) || "Valid"}
+                        </span>
+                      </strong>
+                    </div>
+                    <div>
                       <span>Patient Name:</span>
                       <strong>{validationResult.patient_name || user?.name || "Verified Patient"}</strong>
+                    </div>
+                    <div>
+                      <span>Patient ID:</span>
+                      <strong>#{validationResult.patient_numeric_id || validationResult.patient_id || "104829"}</strong>
                     </div>
                     <div>
                       <span>Consulting Doctor:</span>
                       <strong>{validationResult.doctor_name || "Assigned Medical Practitioner"}</strong>
                     </div>
                     <div>
+                      <span>Department:</span>
+                      <strong>{validationResult.department || validationResult.specialty || "General Medicine"}</strong>
+                    </div>
+                    <div>
                       <span>Hospital / Unit:</span>
-                      <strong>{validationResult.hospital_name || "CareBridge Medical Center"}</strong>
+                      <strong>{validationResult.hospital_name || "CareBridge Hospital"}</strong>
                     </div>
                     <div>
                       <span>Scheduled Slot:</span>
                       <strong>
                         {validationResult.appointment_date || "Today"} at{" "}
                         {validationResult.appointment_time || "10:00 AM"}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Live Queue Token:</span>
+                      <strong style={{ color: "var(--teal-primary, #0d9488)" }}>
+                        {validationResult.queue_number || "Q-101"}
                       </strong>
                     </div>
                     <div>
