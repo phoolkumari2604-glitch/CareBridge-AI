@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   HeartPulse,
   Phone,
@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Stethoscope,
   Brain,
+  Bone,
   Smile,
   Baby,
   Users,
@@ -22,13 +23,181 @@ import {
   Mail,
   Menu,
   X,
-  Star,
   Check,
   Zap,
-  Award
+  Award,
+  Star
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import "./Landing.css";
+
+// Reusable Circular Progress Indicator Component
+function CircularStat({ percentage, displayValue, label, subtext }) {
+  const radius = 42;
+  const strokeWidth = 8;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className="cb-circle-stat-card">
+      <div className="cb-circle-gauge-wrap">
+        <svg className="cb-circle-svg" width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
+          <defs>
+            <linearGradient id="cbTealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#0d9488" />
+              <stop offset="100%" stopColor="#2dd4bf" />
+            </linearGradient>
+          </defs>
+          <circle
+            className="cb-circle-bg"
+            cx="56"
+            cy="56"
+            r={radius}
+            strokeWidth={strokeWidth}
+          />
+          <circle
+            className="cb-circle-fill"
+            cx="56"
+            cy="56"
+            r={radius}
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="cb-circle-inner-text">
+          <span className="cb-circle-val">{displayValue}</span>
+        </div>
+      </div>
+      <div className="cb-circle-meta">
+        <h4 className="cb-circle-title">{label}</h4>
+        {subtext && <p className="cb-circle-desc">{subtext}</p>}
+      </div>
+    </div>
+  );
+}
+
+// 4x2 Grid Specialties Data
+const specialtiesList = [
+  {
+    id: "cardiology",
+    name: "Cardiology",
+    desc: "Heart & Vascular",
+    icon: <HeartPulse size={26} strokeWidth={2.2} />
+  },
+  {
+    id: "neurology",
+    name: "Neurology",
+    desc: "Brain & Nervous",
+    icon: <Brain size={26} strokeWidth={2.2} />
+  },
+  {
+    id: "orthopedic",
+    name: "Orthopedic",
+    desc: "Joints & Bones",
+    icon: <Bone size={26} strokeWidth={2.2} />
+  },
+  {
+    id: "nephrology",
+    name: "Nephrology",
+    desc: "Kidney & Renal",
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M17.5 7A5.5 5.5 0 0 0 12 2C8.5 2 6 5 6 9c0 4 2.5 7 6 12 2-2.5 5.5-7 5.5-10.5 0-1-.5-2.5-1.5-3.5" />
+        <path d="M10.5 8.5C9.5 9.5 9.5 11 11 12.5" />
+      </svg>
+    )
+  },
+  {
+    id: "oncology",
+    name: "Oncology",
+    desc: "Targeted Cancer Care",
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 2 1.3 3.8 3 5.5L6 21h3.5l2.5-4 2.5 4H18l-4.5-9c1.7-1.7 3-3.5 3-5.5A4.5 4.5 0 0 0 12 2z" />
+      </svg>
+    )
+  },
+  {
+    id: "gastro",
+    name: "Gastro",
+    desc: "Digestive & Liver",
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M10 2v3c0 2-1 3.5-2.5 5C6 11.5 5 13.5 5 16c0 3.5 3 6 7 6s7-2.5 7-6c0-3-1.5-5-3-6.5-1-1-1.5-2-1.5-3.5V2" />
+        <path d="M9 14c1 1.5 3 2 5 1" />
+      </svg>
+    )
+  },
+  {
+    id: "urology",
+    name: "Urology",
+    desc: "Bladder & Urinary",
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+        <path d="M12 12v6" />
+        <path d="M9 15h6" />
+      </svg>
+    )
+  },
+  {
+    id: "surgery",
+    name: "Surgery",
+    desc: "Minimally Invasive",
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M6 19l4-4" />
+        <path d="M15 6l2.5-2.5a2.121 2.121 0 0 1 3 3L18 9" />
+        <path d="M13 13l-4 4" />
+        <circle cx="6" cy="19" r="2" />
+        <circle cx="9" cy="15" r="2" />
+        <path d="M14 4l6 6" />
+      </svg>
+    )
+  }
+];
+
+// Doctors Team Dataset
+const doctorsList = [
+  {
+    name: "Dr. Sarah Jenkins, MD",
+    title: "Chief of Cardiology",
+    qualification: "18+ Yrs Exp • Harvard Medical School",
+    rating: "4.96",
+    reviews: "540+ patients",
+    image: "https://images.unsplash.com/photo-1594824813583-05c06497fef2?auto=format&fit=crop&w=600&q=80",
+    specialtyBadge: "Cardiology"
+  },
+  {
+    name: "Dr. Marcus Vance, MD, PhD",
+    title: "Senior Consultant Neurologist",
+    qualification: "15+ Yrs Exp • Johns Hopkins Medicine",
+    rating: "4.94",
+    reviews: "480+ patients",
+    image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=600&q=80",
+    specialtyBadge: "Neurology"
+  },
+  {
+    name: "Dr. Priya Patel, MS",
+    title: "Head of Orthopedics & Joint Care",
+    qualification: "16+ Yrs Exp • AIIMS & Royal College",
+    rating: "4.98",
+    reviews: "620+ patients",
+    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=80",
+    specialtyBadge: "Orthopedics"
+  },
+  {
+    name: "Dr. David Chen, MD",
+    title: "Director of Surgical Oncology",
+    qualification: "14+ Yrs Exp • Stanford University Health",
+    rating: "4.95",
+    reviews: "390+ patients",
+    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=600&q=80",
+    specialtyBadge: "Oncology"
+  }
+];
 
 // Helper hook for smooth count-up animation
 function useCountUp(targetNumber, duration = 1600, startImmediately = false) {
@@ -63,15 +232,14 @@ function useCountUp(targetNumber, duration = 1600, startImmediately = false) {
 }
 
 const Landing = () => {
-  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
 
   // Animated counters
   const [yearsCount, triggerYears] = useCountUp(25, 1200);
   const [patientsCount, triggerPatients] = useCountUp(160, 1500);
-  const [successCount, triggerSuccess] = useCountUp(99, 1400, true);
   const [doctorsCount, triggerDoctors] = useCountUp(120, 1500);
 
   // References for scroll observer
@@ -171,13 +339,15 @@ const Landing = () => {
       <header className={`cb-header ${scrolled ? "cb-scrolled" : ""}`}>
         <div className="cb-container">
           <nav className="cb-nav-wrapper" aria-label="Main Navigation">
-            {/* Logo */}
+            {/* Logo: CareBridge AI and CLINICAL badge on one line beside heart icon */}
             <Link to="/" className="cb-brand" aria-label="CareBridge AI Homepage">
               <div className="cb-brand-icon">
                 <HeartPulse size={24} />
               </div>
               <div className="cb-brand-text">
-                CareBridge <span>AI</span>
+                <span className="cb-brand-title">
+                  CareBridge <span className="cb-brand-ai">AI</span>
+                </span>
                 <span className="cb-brand-badge">Clinical</span>
               </div>
             </Link>
@@ -190,13 +360,18 @@ const Landing = () => {
                 </a>
               </li>
               <li>
-                <a href="#services" className="cb-nav-link" onClick={(e) => scrollToSection(e, "services")}>
-                  Services
+                <a href="#specialties" className="cb-nav-link" onClick={(e) => scrollToSection(e, "specialties")}>
+                  Specialties
                 </a>
               </li>
               <li>
-                <a href="#specialties" className="cb-nav-link" onClick={(e) => scrollToSection(e, "specialties")}>
-                  Specialties
+                <a href="#why-us" className="cb-nav-link" onClick={(e) => scrollToSection(e, "why-us")}>
+                  Why Us
+                </a>
+              </li>
+              <li>
+                <a href="#services" className="cb-nav-link" onClick={(e) => scrollToSection(e, "services")}>
+                  Services
                 </a>
               </li>
               <li>
@@ -205,8 +380,13 @@ const Landing = () => {
                 </a>
               </li>
               <li>
-                <a href="#ai-platform" className="cb-nav-link" onClick={(e) => scrollToSection(e, "ai-platform")}>
+                <a href="#ai-platform" className="cb-nav-link cb-nav-link-ai" onClick={(e) => scrollToSection(e, "ai-platform")}>
                   AI Platform
+                </a>
+              </li>
+              <li>
+                <a href="#doctors" className="cb-nav-link" onClick={(e) => scrollToSection(e, "doctors")}>
+                  Doctors
                 </a>
               </li>
               <li>
@@ -261,13 +441,18 @@ const Landing = () => {
               </a>
             </li>
             <li>
-              <a href="#services" onClick={(e) => scrollToSection(e, "services")}>
-                Healthcare Services
+              <a href="#specialties" onClick={(e) => scrollToSection(e, "specialties")}>
+                Medical Specialties
               </a>
             </li>
             <li>
-              <a href="#specialties" onClick={(e) => scrollToSection(e, "specialties")}>
-                Medical Specialties
+              <a href="#why-us" onClick={(e) => scrollToSection(e, "why-us")}>
+                Why Patients Choose Us
+              </a>
+            </li>
+            <li>
+              <a href="#services" onClick={(e) => scrollToSection(e, "services")}>
+                Healthcare Services
               </a>
             </li>
             <li>
@@ -276,8 +461,13 @@ const Landing = () => {
               </a>
             </li>
             <li>
-              <a href="#ai-platform" onClick={(e) => scrollToSection(e, "ai-platform")}>
+              <a href="#ai-platform" style={{ whiteSpace: "nowrap" }} onClick={(e) => scrollToSection(e, "ai-platform")}>
                 CareBridge AI Platform
+              </a>
+            </li>
+            <li>
+              <a href="#doctors" onClick={(e) => scrollToSection(e, "doctors")}>
+                Our Doctors
               </a>
             </li>
             <li>
@@ -313,105 +503,144 @@ const Landing = () => {
 
       <main>
         {/* ============================================================
-            2. HERO SECTION
+            2. HERO SECTION — FULL-WIDTH PHOTO + SOFT LIGHT OVERLAY
            ============================================================ */}
-        <section id="hero" className="cb-hero-section">
+        <section id="hero" className="cb-hero-section" aria-label="Hero Section">
+          {/* Full-width background photo */}
+          <div className="cb-hero-full-bg" aria-hidden="true">
+            <img
+              src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=2000&q=80"
+              alt=""
+              className="cb-hero-bg-photo"
+              loading="eager"
+              fetchPriority="high"
+            />
+          </div>
+
+          {/* Soft light overlay */}
+          <div className="cb-hero-soft-overlay" aria-hidden="true" />
+
+          {/* Centered content */}
+          <div className="cb-container cb-hero-container">
+            <div className="cb-hero-center-content cb-reveal cb-visible">
+              <div className="cb-hero-pill-badge">
+                <Sparkles size={15} /> CareBridge Clinical Intelligence
+              </div>
+
+              <h1 className="cb-hero-heading">
+                Reliable healthcare at your fingertips
+              </h1>
+
+              <p className="cb-hero-description">
+                Advanced multi-disciplinary clinical care, verified specialists, and 24/7 continuous patient telemetry designed for modern proactive living.
+              </p>
+
+              <div className="cb-hero-btn-group">
+                <Link
+                  to={isAuthenticated ? getDashboardLink() : "/register"}
+                  className="cb-btn-hero-primary"
+                  aria-label="Book Appointment"
+                >
+                  <Calendar size={18} />
+                  <span>Book Appointment</span>
+                  <ArrowRight size={17} className="cb-btn-icon-shift" />
+                </Link>
+
+                <a
+                  href="#specialties"
+                  onClick={(e) => scrollToSection(e, "specialties")}
+                  className="cb-btn-hero-secondary"
+                  aria-label="Explore Specialties"
+                >
+                  <span>Explore Specialties</span>
+                  <ChevronRight size={18} />
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================
+            3. OVERLAPPING BOTTOM EDGE SECTION (TEAL CARD + 4x2 GRID)
+           ============================================================ */}
+        <section id="specialties" className="cb-overlap-section" aria-label="Quick Care & Specialties">
           <div className="cb-container">
-            <div className="cb-hero-grid">
-              {/* Content Left */}
-              <div className="cb-hero-content cb-reveal cb-visible">
-                <div className="cb-pill-badge">
-                  <ShieldCheck size={16} />
-                  <span>NABH & HIPAA Accredited Clinical Network</span>
+            <div className="cb-overlap-wrapper cb-reveal cb-visible">
+              {/* Left: Teal Card */}
+              <div className="cb-teal-promo-card">
+                <div className="cb-teal-card-deco-circle" aria-hidden="true" />
+
+                <div>
+                  <div className="cb-teal-card-tag">
+                    <Sparkles size={14} /> 24/7 Smart Health
+                  </div>
+
+                  <h3 className="cb-teal-card-title">
+                    Trusted AI-powered care
+                  </h3>
+
+                  <p className="cb-teal-card-text">
+                    Direct clinical triage, zero-wait digital OPD admission passes, and real-time vitals monitoring supervised by certified clinicians.
+                  </p>
+
+                  <div className="cb-teal-card-perks">
+                    <div className="cb-teal-perk-item">
+                      <CheckCircle2 size={16} />
+                      <span>&lt; 60s Triage Response</span>
+                    </div>
+                    <div className="cb-teal-perk-item">
+                      <CheckCircle2 size={16} />
+                      <span>Zero Hospital Queue Waiting</span>
+                    </div>
+                    <div className="cb-teal-perk-item">
+                      <CheckCircle2 size={16} />
+                      <span>Continuous Vitals Telemetry</span>
+                    </div>
+                  </div>
                 </div>
 
-                <h1 className="cb-hero-title">
-                  Reliable healthcare at <span>your fingertips</span>
-                </h1>
-
-                <p className="cb-hero-subtext">
-                  CareBridge AI connects you with verified specialists, instant clinical triage, and continuous vital telemetry. Experience modern healthcare built for your family's peace of mind.
-                </p>
-
-                <div className="cb-hero-cta-group">
-                  <Link to="/register" className="cb-btn-primary">
-                    Book Appointment <ArrowRight size={18} />
-                  </Link>
-
-                  <a href="#specialties" className="cb-btn-secondary" onClick={(e) => scrollToSection(e, "specialties")}>
-                    Explore Specialties
+                <div className="cb-teal-card-btn-box">
+                  <a
+                    href="#ai-platform"
+                    onClick={(e) => scrollToSection(e, "ai-platform")}
+                    className="cb-btn-teal-card"
+                  >
+                    <span>Explore AI Platform</span>
+                    <ArrowRight size={17} />
                   </a>
-                </div>
-
-                {/* Patient Proof Stack */}
-                <div className="cb-patient-proof">
-                  <div className="cb-avatar-stack">
-                    <img
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80"
-                      alt="Verified patient review"
-                      width="42"
-                      height="42"
-                      loading="eager"
-                    />
-                    <img
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80"
-                      alt="Verified patient review"
-                      width="42"
-                      height="42"
-                      loading="eager"
-                    />
-                    <img
-                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80"
-                      alt="Verified patient review"
-                      width="42"
-                      height="42"
-                      loading="eager"
-                    />
-                    <img
-                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80"
-                      alt="Verified patient review"
-                      width="42"
-                      height="42"
-                      loading="eager"
-                    />
-                  </div>
-
-                  <div className="cb-proof-text">
-                    <strong>160K+ happy patients</strong>
-                    <span>
-                      <Star size={13} fill="#f59e0b" className="cb-star-filled" />
-                      <Star size={13} fill="#f59e0b" className="cb-star-filled" />
-                      <Star size={13} fill="#f59e0b" className="cb-star-filled" />
-                      <Star size={13} fill="#f59e0b" className="cb-star-filled" />
-                      <Star size={13} fill="#f59e0b" className="cb-star-filled" />
-                      4.95 / 5 overall clinical satisfaction
-                    </span>
-                  </div>
                 </div>
               </div>
 
-              {/* Visual Right */}
-              <div className="cb-hero-visual cb-reveal cb-visible">
-                <div className="cb-hero-image-wrapper">
-                  <img
-                    src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=800&q=80"
-                    alt="Dr. Aris Thorne, Senior CareBridge AI Clinical Consultant"
-                    width="440"
-                    height="550"
-                    loading="eager"
-                    fetchpriority="high"
-                  />
+              {/* Right: White Panel with 4x2 Grid of Specialty Icon Tiles */}
+              <div className="cb-specialties-white-panel">
+                <div className="cb-panel-header">
+                  <div className="cb-panel-header-left">
+                    <h3 className="cb-panel-title">Medical Specialties</h3>
+                    <span className="cb-panel-subtitle">Immediate consultant access across 8 core departments</span>
+                  </div>
+                  <Link
+                    to={isAuthenticated ? "/patient/doctors" : "/register"}
+                    className="cb-panel-view-all"
+                  >
+                    View All (15+) →
+                  </Link>
                 </div>
 
-                {/* Floating Glassmorphism Success Rate Card */}
-                <div className="cb-float-success-card">
-                  <div className="cb-float-icon-box">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <div className="cb-float-info">
-                    <strong>99%</strong>
-                    <span>Treatment success rate</span>
-                  </div>
+                <div className="cb-specialties-4x2-grid">
+                  {specialtiesList.map((spec) => (
+                    <Link
+                      key={spec.id}
+                      to={isAuthenticated ? "/patient/appointments" : "/register"}
+                      className="cb-specialty-tile-item"
+                      aria-label={`${spec.name} specialty`}
+                    >
+                      <div className="cb-specialty-tile-icon-box" aria-hidden="true">
+                        {spec.icon}
+                      </div>
+                      <span className="cb-specialty-tile-name">{spec.name}</span>
+                      <span className="cb-specialty-tile-desc">{spec.desc}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
@@ -419,86 +648,109 @@ const Landing = () => {
         </section>
 
         {/* ============================================================
-            3. SPECIALTY STRIP
+            4. WHY PATIENTS CHOOSE US SECTION (TEXT LEFT + CIRCLES RIGHT)
            ============================================================ */}
-        <section id="specialties" className="cb-specialty-section">
+        <section id="why-us" className="cb-why-us-section" aria-label="Why Patients Choose CareBridge">
           <div className="cb-container">
-            <div className="cb-section-header cb-reveal">
-              <span className="cb-eyebrow">Medical Specialties</span>
-              <h2 className="cb-section-title">Expertise Across Key Disciplines</h2>
-              <p className="cb-section-subtext">
-                Direct access to top-tier certified consultants equipped with modern diagnostics and personalized treatment protocols.
-              </p>
-            </div>
+            <div className="cb-why-us-grid">
+              {/* Left Column: Copy & Checklist */}
+              <div className="cb-why-us-content cb-reveal">
+                <div className="cb-section-badge">
+                  <ShieldCheck size={16} /> Why Patients Choose Us
+                </div>
 
-            <div className="cb-specialty-grid">
-              {/* Card 1: Gynecology */}
-              <Link to="/register" className="cb-specialty-card cb-reveal">
-                <div>
-                  <div className="cb-specialty-icon-wrap">
-                    <Sparkles size={28} />
-                  </div>
-                  <h3>Gynecology & Obstetrics</h3>
-                  <p>
-                    Compassionate reproductive wellness, prenatal ultrasound screenings, and personalized hormonal health care.
-                  </p>
-                </div>
-                <div className="cb-card-link-text">
-                  <span>Consult Specialist</span>
-                  <ChevronRight size={16} />
-                </div>
-              </Link>
+                <h2 className="cb-why-us-heading">
+                  Exceptional Clinical Outcomes Built on Compassion & AI
+                </h2>
 
-              {/* Card 2: Dental Care */}
-              <Link to="/register" className="cb-specialty-card cb-reveal">
-                <div>
-                  <div className="cb-specialty-icon-wrap">
-                    <Smile size={28} />
-                  </div>
-                  <h3>Dental Care & Surgery</h3>
-                  <p>
-                    Preventive hygiene, advanced pain-free restorations, cosmetic dentistry, and pediatric dental diagnostics.
-                  </p>
-                </div>
-                <div className="cb-card-link-text">
-                  <span>Consult Specialist</span>
-                  <ChevronRight size={16} />
-                </div>
-              </Link>
+                <p className="cb-why-us-subtext">
+                  CareBridge AI redefines healthcare delivery by linking board-certified department heads directly with continuous patient telemetry. We eliminate diagnostic delays, prevent acute physiological escalations, and provide zero-wait clinical access for your entire family.
+                </p>
 
-              {/* Card 3: Cardiology */}
-              <Link to="/register" className="cb-specialty-card cb-reveal">
-                <div>
-                  <div className="cb-specialty-icon-wrap">
-                    <HeartPulse size={28} />
-                  </div>
-                  <h3>Cardiology & Heart Care</h3>
-                  <p>
-                    Real-time ECG telemetry analysis, blood pressure monitoring, and preventive cardiovascular disease therapies.
-                  </p>
-                </div>
-                <div className="cb-card-link-text">
-                  <span>Consult Specialist</span>
-                  <ChevronRight size={16} />
-                </div>
-              </Link>
+                <ul className="cb-why-us-checklist">
+                  <li className="cb-why-us-item">
+                    <span className="cb-why-check"><Check size={16} /></span>
+                    <div>
+                      <strong>Multi-Disciplinary Board of 120+ Specialists</strong>
+                      <p>Top medical school alumni collaborating on complex diagnostic cases and tumor boards.</p>
+                    </div>
+                  </li>
+                  <li className="cb-why-us-item">
+                    <span className="cb-why-check"><Check size={16} /></span>
+                    <div>
+                      <strong>24/7 Real-Time Telemetry & Instant Alerts</strong>
+                      <p>Continuous monitoring of blood pressure, SpO2, and cardiac rhythm with automated physician escalation.</p>
+                    </div>
+                  </li>
+                  <li className="cb-why-us-item">
+                    <span className="cb-why-check"><Check size={16} /></span>
+                    <div>
+                      <strong>Zero Hospital Waiting & Digital OPD Passes</strong>
+                      <p>Verified QR admission tokens that guarantee immediate chamber check-in and automated triage.</p>
+                    </div>
+                  </li>
+                </ul>
 
-              {/* Card 4: Neurology */}
-              <Link to="/register" className="cb-specialty-card cb-reveal">
-                <div>
-                  <div className="cb-specialty-icon-wrap">
-                    <Brain size={28} />
+                <div className="cb-why-us-actions">
+                  <Link
+                    to={isAuthenticated ? getDashboardLink() : "/register"}
+                    className="cb-btn-primary"
+                  >
+                    <span>Schedule an Appointment</span>
+                    <ArrowRight size={18} />
+                  </Link>
+
+                  <a
+                    href="#doctors"
+                    onClick={(e) => scrollToSection(e, "doctors")}
+                    className="cb-btn-secondary"
+                  >
+                    <span>Meet Our Doctors</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Right Column: Circular Progress Stats Grid */}
+              <div className="cb-why-us-stats-side cb-reveal">
+                <div className="cb-stats-card-shell">
+                  <div className="cb-stats-shell-header">
+                    <h4>Clinical Performance & Trust</h4>
+                    <span>Audited annual quality metrics</span>
                   </div>
-                  <h3>Neurology & Neuro-Health</h3>
-                  <p>
-                    Specialized therapeutic relief for chronic migraines, sleep disorders, neuropathies, and cognitive care.
-                  </p>
+
+                  <div className="cb-circular-stats-grid">
+                    <CircularStat
+                      percentage={99}
+                      displayValue="99%"
+                      label="Treatment Success"
+                      subtext="Documented clinical recovery"
+                    />
+                    <CircularStat
+                      percentage={99}
+                      displayValue="4.95"
+                      label="Patient Satisfaction"
+                      subtext="Across 160,000+ consults"
+                    />
+                    <CircularStat
+                      percentage={98}
+                      displayValue="98%"
+                      label="Diagnostic Accuracy"
+                      subtext="Early anomaly detection"
+                    />
+                    <CircularStat
+                      percentage={100}
+                      displayValue="24/7"
+                      label="Continuous Telemetry"
+                      subtext="Zero telemetry downtime"
+                    />
+                  </div>
+
+                  <div className="cb-stats-shell-footer">
+                    <CheckCircle2 size={16} className="text-teal" />
+                    <span>All metrics verified according to NABH & ISO clinical quality standards.</span>
+                  </div>
                 </div>
-                <div className="cb-card-link-text">
-                  <span>Consult Specialist</span>
-                  <ChevronRight size={16} />
-                </div>
-              </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -882,6 +1134,128 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================
+            8. TEAM OF DOCTORS IMAGE SECTION (BOTTOM SHOWCASE)
+           ============================================================ */}
+        <section id="doctors" className="cb-doctors-team-section" aria-label="Team of Doctors">
+          <div className="cb-container">
+            <div className="cb-section-header cb-reveal">
+              <span className="cb-eyebrow">Medical Leadership</span>
+              <h2 className="cb-section-title">
+                Our Team of Board-Certified Specialists
+              </h2>
+              <p className="cb-section-subtext">
+                World-class doctors, surgeons, and clinicians working collaboratively with AI telemetry to deliver holistic patient recovery.
+              </p>
+            </div>
+
+            {/* Team Showcase Banner with Photo and Highlight Badges */}
+            <div className="cb-team-photo-banner cb-reveal">
+              <div className="cb-team-photo-wrapper">
+                <img
+                  src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1600&q=80"
+                  alt="CareBridge AI Medical Team of Doctors and Specialists"
+                  className="cb-team-group-photo"
+                  loading="lazy"
+                />
+                <div className="cb-team-photo-overlay" />
+              </div>
+
+              {/* Overlaid Highlight Cards */}
+              <div className="cb-team-floating-stats">
+                <div className="cb-team-float-pill">
+                  <div className="cb-team-float-icon">
+                    <Stethoscope size={20} />
+                  </div>
+                  <div>
+                    <strong>120+ Doctors</strong>
+                    <span>Board Certified</span>
+                  </div>
+                </div>
+
+                <div className="cb-team-float-pill">
+                  <div className="cb-team-float-icon">
+                    <Award size={20} />
+                  </div>
+                  <div>
+                    <strong>15+ Specialties</strong>
+                    <span>Full Outpatient Care</span>
+                  </div>
+                </div>
+
+                <div className="cb-team-float-pill">
+                  <div className="cb-team-float-icon">
+                    <Users size={20} />
+                  </div>
+                  <div>
+                    <strong>160k+ Patients</strong>
+                    <span>Safely Treated</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Lead Specialists Cards */}
+            <div className="cb-doctors-grid">
+              {doctorsList.map((doc, idx) => (
+                <div key={idx} className="cb-doctor-card cb-reveal">
+                  <div className="cb-doctor-img-wrap">
+                    <img
+                      src={doc.image}
+                      alt={doc.name}
+                      className="cb-doctor-portrait"
+                      loading="lazy"
+                    />
+                    <span className="cb-doctor-dept-tag">{doc.specialtyBadge}</span>
+                  </div>
+
+                  <div className="cb-doctor-info">
+                    <div className="cb-doctor-rating-row">
+                      <div className="cb-star-pill">
+                        <Star size={13} fill="#f59e0b" color="#f59e0b" />
+                        <span>{doc.rating}</span>
+                      </div>
+                      <span className="cb-reviews-count">({doc.reviews})</span>
+                    </div>
+
+                    <h3 className="cb-doctor-name">{doc.name}</h3>
+                    <p className="cb-doctor-role">{doc.title}</p>
+                    <span className="cb-doctor-qual">{doc.qualification}</span>
+
+                    <div className="cb-doctor-cta-row">
+                      <Link
+                        to={isAuthenticated ? "/patient/appointments" : "/register"}
+                        className="cb-btn-consult-doctor"
+                      >
+                        <Calendar size={15} />
+                        <span>Consult Doctor</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom Invitation Bar */}
+            <div className="cb-doctors-action-bar cb-reveal">
+              <div className="cb-doctors-bar-text">
+                <Sparkles size={24} className="text-teal" />
+                <div>
+                  <strong>Need immediate consultation with a specific clinical department?</strong>
+                  <span>Our medical directors and on-call physicians are available 24/7.</span>
+                </div>
+              </div>
+              <Link
+                to={isAuthenticated ? "/patient/doctors" : "/register"}
+                className="cb-btn-primary"
+              >
+                <span>Browse All 120+ Doctors</span>
+                <ArrowRight size={17} />
+              </Link>
             </div>
           </div>
         </section>

@@ -19,6 +19,7 @@ import {
   Moon,
   Loader2,
   Sparkles,
+  HeartPulse,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -286,10 +287,11 @@ function Navbar({ onMenuClick }) {
 
         <Link to={brandLink} className="navbar-brand-link">
           <div className="navbar-brand-icon-box">
-            <Stethoscope size={19} />
+            <HeartPulse size={19} />
           </div>
           <span className="navbar-brand-title">
-            Care<span>Bridge AI</span>
+            CareBridge <span className="navbar-brand-ai">AI</span>
+            <span className="navbar-brand-badge">Clinical</span>
           </span>
         </Link>
 

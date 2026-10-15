@@ -54,11 +54,13 @@
 
 .navbar-brand-link {
   display: inline-flex;
+  flex-direction: row;
   align-items: center;
   gap: 10px;
   text-decoration: none;
   color: #0f172a;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .navbar-brand-icon-box {
@@ -69,21 +71,40 @@
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  background: linear-gradient(135deg, #0f766e 0%, #2563eb 100%);
-  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
   flex-shrink: 0;
 }
 
 .navbar-brand-title {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.4px;
   color: #0f172a;
   line-height: 1;
+  white-space: nowrap;
 }
 
-.navbar-brand-title span {
-  color: #2563eb;
+.navbar-brand-title .navbar-brand-ai {
+  color: #0d9488;
+}
+
+.navbar-brand-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: #ccfbf1;
+  color: #0f766e;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Page Indicator Divider & Current Page Name */

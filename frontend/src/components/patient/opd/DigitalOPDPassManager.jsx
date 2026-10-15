@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import QRCode from "qrcode";
-import { Html5Qrcode } from "html5-qrcode";
+import jsQR from "jsqr";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import {
@@ -397,91 +397,189 @@ function DigitalOPDPassManager() {
     }
   };
 
+  // Helper to extract clean OPD pass token from raw text, JSON, or URL
+  const extractOpdToken = (text) => {
+    if (!text) return "";
+    const trimmed = String(text).trim();
+
+    // Check if payload is serialized JSON (e.g. from generated CareBridge passes)
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (parsed && typeof parsed === "object") {
+          if (parsed.pass_number) return String(parsed.pass_number).trim();
+          if (parsed.token) return String(parsed.token).trim();
+          if (parsed.passNumber) return String(parsed.passNumber).trim();
+        }
+      } catch (_) {}
+    }
+
+    // Match OPD Pass pattern (e.g. OPD-20261017-453E5B)
+    const opdMatch = trimmed.match(/OPD-[A-Za-z0-9_-]+/i);
+    if (opdMatch) {
+      return opdMatch[0];
+    }
+
+    return trimmed;
+  };
+
   // -------------------------------------------------------------
   // CAMERA & QR SCANNER
   // -------------------------------------------------------------
-  const startCameraScanner = async () => {
-    setCameraError(null);
-    setCameraModalOpen(true);
-
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error("Camera API not supported on this device. Use file upload instead.");
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: cameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
-      });
-
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute("playsinline", "true");
-        await videoRef.current.play();
-        scanAnimationFrame();
-      }
-    } catch (err) {
-      console.error("Camera access error:", err);
-      setCameraError(err.message || "Camera access denied. Please grant permissions or upload a QR image.");
-    }
-  };
-
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     if (scanAnimationRef.current) {
       cancelAnimationFrame(scanAnimationRef.current);
+      scanAnimationRef.current = null;
     }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
-    setCameraModalOpen(false);
-  };
-
-  const switchCameraFacing = async () => {
-    stopCamera();
-    const nextFacing = cameraFacing === "environment" ? "user" : "environment";
-    setCameraFacing(nextFacing);
-    setTimeout(() => {
-      startCameraScanner();
-    }, 200);
-  };
-
-  const scanAnimationFrame = () => {
-    if (!videoRef.current || videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
-      scanAnimationRef.current = requestAnimationFrame(scanAnimationFrame);
-      return;
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
+    setCameraModalOpen(false);
+    setCameraError(null);
+  }, []);
 
-    const video = videoRef.current;
-    const canvas = canvasRef.current || document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const startCameraScanner = () => {
+    setCameraError(null);
+    setCameraModalOpen(true);
+  };
 
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-      inversionAttempts: "dontInvert",
-    });
+  const switchCameraFacing = () => {
+    setCameraFacing((prev) => (prev === "environment" ? "user" : "environment"));
+  };
 
-    if (code && code.data) {
-      const decodedText = code.data.trim();
-      // Extract OPD pass token if inside a JSON or URL
-      let passToken = decodedText;
-      if (decodedText.includes("OPD-")) {
-        const match = decodedText.match(/OPD-[\w-]+/i);
-        if (match) passToken = match[0];
+  // Live Camera Stream Lifecycle & RequestAnimationFrame Scanner Loop
+  useEffect(() => {
+    if (!cameraModalOpen) return;
+
+    let isMounted = true;
+
+    const startStream = async () => {
+      setCameraError(null);
+
+      if (!navigator?.mediaDevices?.getUserMedia) {
+        if (isMounted) {
+          setCameraError(
+            "Camera access is not supported on this device or browser. Please upload a QR image instead."
+          );
+        }
+        return;
       }
 
-      setVerifyToken(passToken);
-      stopCamera();
-      handleValidatePass(passToken);
-      return;
-    }
+      try {
+        // Stop any existing tracks before acquiring new stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+        if (scanAnimationRef.current) {
+          cancelAnimationFrame(scanAnimationRef.current);
+          scanAnimationRef.current = null;
+        }
 
-    scanAnimationRef.current = requestAnimationFrame(scanAnimationFrame);
-  };
+        let stream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: cameraFacing },
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          });
+        } catch (constraintErr) {
+          console.warn("Retrying camera with generic constraint:", constraintErr);
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+        }
+
+        if (!isMounted) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
+        streamRef.current = stream;
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.setAttribute("playsinline", "true");
+          await videoRef.current.play().catch((playErr) => {
+            console.warn("Video play error:", playErr);
+          });
+        }
+
+        const scanLoop = () => {
+          if (!isMounted || !streamRef.current) return;
+          const video = videoRef.current;
+
+          if (video && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+            const canvas = canvasRef.current || document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+              });
+
+              if (code && code.data) {
+                const token = extractOpdToken(code.data);
+                if (token) {
+                  stopCamera();
+                  setVerifyToken(token);
+                  setActiveTab("verify");
+                  handleValidatePass(token);
+                  return;
+                }
+              }
+            }
+          }
+
+          scanAnimationRef.current = requestAnimationFrame(scanLoop);
+        };
+
+        scanAnimationRef.current = requestAnimationFrame(scanLoop);
+      } catch (err) {
+        console.error("Camera access error:", err);
+        if (!isMounted) return;
+
+        let msg = "Camera access error. Please check permissions or upload a QR image.";
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+          msg = "Camera permission was denied. Please allow camera access in your browser settings, or upload a QR image.";
+        } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+          msg = "No camera found on this device. Please connect a camera or upload a QR image.";
+        } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+          msg = "Camera is currently in use by another application. Please close other apps or upload a QR image.";
+        } else if (err.name === "OverconstrainedError") {
+          msg = "Camera constraints could not be satisfied. Please switch cameras or upload a QR image.";
+        } else if (err.message) {
+          msg = err.message;
+        }
+        setCameraError(msg);
+      }
+    };
+
+    startStream();
+
+    return () => {
+      isMounted = false;
+      if (scanAnimationRef.current) {
+        cancelAnimationFrame(scanAnimationRef.current);
+        scanAnimationRef.current = null;
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+    };
+  }, [cameraModalOpen, cameraFacing, stopCamera]);
 
   // -------------------------------------------------------------
   // QR IMAGE UPLOAD & DECODE (Drag-and-Drop & Picker)
@@ -490,7 +588,8 @@ function DigitalOPDPassManager() {
     if (!file) return;
     setUploadError(null);
 
-    if (!["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.type)) {
+    const isImage = file.type?.startsWith("image/") || /\.(png|jpe?g|webp|bmp|gif)$/i.test(file.name);
+    if (!isImage) {
       setUploadError("Please upload a valid image file (PNG, JPG, or WEBP).");
       return;
     }
@@ -502,39 +601,73 @@ function DigitalOPDPassManager() {
 
     setDecodingUpload(true);
     const reader = new FileReader();
+
+    reader.onerror = () => {
+      setDecodingUpload(false);
+      setUploadError("Failed to read image file. Please try again.");
+    };
+
     reader.onload = (e) => {
       const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, img.width, img.height);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "attemptBoth",
-        });
-
-        setDecodingUpload(false);
-        if (code && code.data) {
-          let token = code.data.trim();
-          if (token.includes("OPD-")) {
-            const match = token.match(/OPD-[\w-]+/i);
-            if (match) token = match[0];
-          }
-          setVerifyToken(token);
-          handleValidatePass(token);
-        } else {
-          setUploadError("Could not detect a valid QR code in the uploaded image. Please try another photo.");
-        }
-      };
       img.onerror = () => {
         setDecodingUpload(false);
-        setUploadError("Failed to parse image file.");
+        setUploadError("Failed to parse image file. Please try another photo.");
       };
+
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          let width = img.naturalWidth || img.width;
+          let height = img.naturalHeight || img.height;
+          const MAX_DIM = 1600;
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+          if (!ctx) {
+            throw new Error("Unable to initialize canvas context");
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const imageData = ctx.getImageData(0, 0, width, height);
+
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          });
+
+          if (code && code.data) {
+            const token = extractOpdToken(code.data);
+            if (token) {
+              setVerifyToken(token);
+              setActiveTab("verify");
+              handleValidatePass(token);
+            } else {
+              setUploadError("No QR code found in this image. Please try another photo.");
+            }
+          } else {
+            setUploadError("No QR code found in this image. Please try another photo.");
+          }
+        } catch (err) {
+          console.error("QR decoding exception:", err);
+          setUploadError("Failed to decode QR code. Please try another image.");
+        } finally {
+          setDecodingUpload(false);
+        }
+      };
+
       img.src = e.target.result;
     };
+
     reader.readAsDataURL(file);
   };
 
@@ -704,6 +837,7 @@ function DigitalOPDPassManager() {
                 style={{ display: "none" }}
                 onChange={(e) => {
                   if (e.target.files?.[0]) handleQrImageFile(e.target.files[0]);
+                  e.target.value = "";
                 }}
               />
             </div>
