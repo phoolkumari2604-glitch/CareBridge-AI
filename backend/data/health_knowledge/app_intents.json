@@ -1,0 +1,434 @@
+[
+  {
+    "id": "app_book_appointment_001",
+    "topic": "CareBridge Feature: Book Doctor Appointment",
+    "category": "app_intents",
+    "keywords": [
+      "book appointment",
+      "doctor appointment",
+      "schedule consultation",
+      "see a doctor",
+      "appointment booking",
+      "doctor time"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "To book a doctor's appointment in CareBridge AI:",
+      "1. Tap 'Book Appointment' from the dashboard or side navigation menu.",
+      "2. Select your desired medical department (e.g., Cardiology, Pediatrics, General Medicine).",
+      "3. Choose your preferred doctor, consult type (In-Person Clinic or Video Consultation), date, and available time slot.",
+      "4. Confirm your appointment details. You will receive an instant confirmation SMS and in-app reminder.",
+      "Need assistance? Our hospital helpdesk can also schedule your visit over the phone at 1800-CARE-BRIDGE."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Book Doctor Appointment.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_view_vitals_records_002",
+    "topic": "CareBridge Feature: View Vitals & Health Records",
+    "category": "app_intents",
+    "keywords": [
+      "view vitals",
+      "check health records",
+      "see my bp sugar",
+      "my vitals",
+      "patient records",
+      "ehr records"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "To view your recorded vitals and health records:",
+      "1. Navigate to the 'Health Records / EHR' section from your patient dashboard.",
+      "2. View historical trends for your Blood Pressure, Heart Rate, Blood Sugar, SpO2, and Weight.",
+      "3. Note: In development mode, simulated sample vitals may be displayed for testing and demonstration.",
+      "4. You can log new vitals anytime by tapping 'Record New Vital' and typing in your readings."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: View Vitals & Health Records.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_find_doctor_003",
+    "topic": "CareBridge Feature: Find Doctor or Medical Specialist",
+    "category": "app_intents",
+    "keywords": [
+      "find doctor",
+      "search doctor",
+      "doctor list",
+      "specialist directory",
+      "find specialist"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "To search for doctors and specialists across CareBridge hospital network:",
+      "1. Open the 'Doctors Directory' page.",
+      "2. Filter by specialty (Cardiology, Orthopedics, Gynecology, ENT, etc.), doctor gender, languages spoken, or earliest availability.",
+      "3. View doctor qualifications, clinical experience, consultation fees, and patient reviews before booking."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Find Doctor or Medical Specialist.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_emergency_sos_004",
+    "topic": "CareBridge Feature: Emergency Helpline & SOS Assistance",
+    "category": "app_intents",
+    "keywords": [
+      "emergency",
+      "sos",
+      "ambulance",
+      "hospital emergency contact",
+      "emergency number",
+      "call ambulance"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "CAREBRIDGE EMERGENCY RESPONSE:",
+      "1. Dial 112 (National Unified Emergency Services in India) or 108 (State Emergency Ambulance) immediately for life-threatening emergencies.",
+      "2. For CareBridge Emergency Casualty & Trauma Triage: Tap the red SOS button on your screen or call our 24/7 Casualty Hotline: +91-11-2659-8700.",
+      "3. Keep calm, stay on the line, and provide your exact location and key symptoms to the emergency dispatcher."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Emergency Helpline & SOS Assistance.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_prescription_refill_005",
+    "topic": "CareBridge Feature: Prescription Renewal & Medication Refill",
+    "category": "app_intents",
+    "keywords": [
+      "prescription refill",
+      "renew prescription",
+      "refill medicines",
+      "medicine refill",
+      "doctor prescription renew"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "To request a prescription refill for chronic maintenance medications:",
+      "1. Go to 'My Prescriptions' in the patient menu.",
+      "2. Select the active medication needing a refill.",
+      "3. Tap 'Request Refill'. Your consulting physician will review your recent lab tests and approve the refill within 24 to 48 hours.",
+      "4. Note: Controlled substances (such as sleeping pills or strong opioids) require an in-person or live video clinical consultation and cannot be renewed automatically."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Prescription Renewal & Medication Refill.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_lab_booking_reports_006",
+    "topic": "CareBridge Feature: Book Lab Tests & View Reports",
+    "category": "app_intents",
+    "keywords": [
+      "book lab test",
+      "download lab report",
+      "blood test booking",
+      "pathology reports",
+      "view blood test"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "To book diagnostic lab tests or download reports:",
+      "1. Tap 'Lab Tests' from the main dashboard.",
+      "2. Choose from individual tests (CBC, HbA1c, Lipid Profile, Thyroid) or comprehensive health checkup packages.",
+      "3. Select Home Blood Collection or Walk-in Hospital Sample Collection.",
+      "4. Your verified digital pathology reports with reference ranges will appear under 'My Reports' as soon as authorized by the pathologist."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Book Lab Tests & View Reports.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_billing_insurance_007",
+    "topic": "CareBridge Feature: Hospital Billing & Insurance Claims",
+    "category": "app_intents",
+    "keywords": [
+      "billing",
+      "hospital bill",
+      "insurance claim",
+      "cashless insurance",
+      "ayushman bharat",
+      "download invoice"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "For hospital billing, insurance, and cashless claims:",
+      "1. Tap 'Billing & Payments' to view itemized bills, advance receipts, and outstanding balances.",
+      "2. CareBridge supports Cashless TPA Health Insurance and Ayushman Bharat PM-JAY.",
+      "3. Upload your Health Insurance E-card or PM-JAY Ayushman Card under the Insurance section to initiate cashless pre-authorization.",
+      "4. Download GST-compliant tax invoices and medical reimbursement receipts directly as PDF."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Hospital Billing & Insurance Claims.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_teleconsultation_008",
+    "topic": "CareBridge Feature: Teleconsultation & Video Visit Connect",
+    "category": "app_intents",
+    "keywords": [
+      "video call doctor",
+      "teleconsultation",
+      "online doctor consult",
+      "start video call",
+      "virtual visit"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "To join your scheduled teleconsultation video visit:",
+      "1. Open 'My Appointments' 10 minutes prior to your scheduled consultation time.",
+      "2. Tap 'Join Video Room'. Ensure your browser or app has camera and microphone permissions enabled.",
+      "3. Test your internet connection and sit in a quiet, well-lit room.",
+      "4. Your digital e-prescription signed by your doctor will be available immediately in your app after the video call ends."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Teleconsultation & Video Visit Connect.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_profile_face_id_009",
+    "topic": "CareBridge Feature: Profile Settings & Biometric Face ID Enrollment",
+    "category": "app_intents",
+    "keywords": [
+      "face id enrollment",
+      "biometric setup",
+      "profile settings",
+      "face verification",
+      "biometric enrollment"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "To manage your profile or enroll biometric Face ID:",
+      "1. Open 'Profile' from the top right user menu.",
+      "2. Under 'Biometric Security & Identity Verification', click 'Enroll Face ID'.",
+      "3. Allow camera access (ensure you are on https:// or http://localhost:5173).",
+      "4. Follow the live on-screen liveness prompt (e.g. smile, blink, or slight turn) in good lighting.",
+      "5. Only encrypted mathematical descriptor vectors are securely saved on the backend; raw video frames are never stored."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Profile Settings & Biometric Face ID Enrollment.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  },
+  {
+    "id": "app_download_health_summary_010",
+    "topic": "CareBridge Feature: Download Medical Summary & Export Records",
+    "category": "app_intents",
+    "keywords": [
+      "download medical summary",
+      "export health record",
+      "download pdf report",
+      "discharge summary download"
+    ],
+    "intent": "appointment_or_navigation",
+    "patient_answer": [
+      "To download your consolidated medical records:",
+      "1. Navigate to 'Health Records' > 'Export Summary'.",
+      "2. Choose date range or specific episodes (Inpatient Admissions, Outpatient Consultations, Lab Trends).",
+      "3. Tap 'Export PDF'. Your consolidated CareBridge Clinical Summary is generated according to ABDM (Ayushman Bharat Digital Mission) FHIR standards for easy sharing with any doctor."
+    ],
+    "doctor_answer": {
+      "assessment": "CareBridge Navigation / Administrative Protocol: Download Medical Summary & Export Records.",
+      "investigations": "Verify patient identity, ABHA ID, and authorization.",
+      "management": "Guide patient through appropriate portal workflow or refer to hospital patient relationship desk.",
+      "references": [
+        "CareBridge Health Portal Administration Guide"
+      ]
+    },
+    "staff_answer": "Assist patient with navigation, appointment booking, or billing query. Escalate to IT helpdesk if technical error.",
+    "red_flags": [
+      "Medical emergency presenting as administrative query (Immediate Triage Red)",
+      "Unauthorized access request to another patient's medical records"
+    ],
+    "follow_up_questions": [
+      "Which specific feature or appointment would you like assistance with?",
+      "Are you facing any technical difficulty in the portal?"
+    ],
+    "avoid": [
+      "Do NOT share patient credentials or another individual's protected health records"
+    ],
+    "source": "CareBridge Health System Administrative Protocols (https://carebridge.ai/portal)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Medical Administration)"
+  }
+]

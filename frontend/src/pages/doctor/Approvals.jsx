@@ -32,7 +32,11 @@ function Approvals() {
 
   // Confirmation modal state
   const [confirmAction, setConfirmAction] = useState(null); // { approvalId, patientName, action: 'APPROVED' | 'REJECTED' }
+  const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // View details modal state
+  const [selectedRequestDetails, setSelectedRequestDetails] = useState(null);
 
   const loadApprovalsData = useCallback(async () => {
     try {
@@ -92,7 +96,7 @@ function Approvals() {
     const { approvalId, action, patientName } = confirmAction;
 
     try {
-      await doctorService.updateApproval(approvalId, action);
+      await doctorService.updateApproval(approvalId, action, rejectionReason.trim());
       const label = action === "APPROVED" ? "approved" : "rejected";
       setToastMessage(`Consultation request for ${patientName} has been ${label}.`);
       setTimeout(() => setToastMessage(""), 4000);
@@ -100,12 +104,13 @@ function Approvals() {
       setApprovals((prev) =>
         prev.map((app) =>
           (app._id || app.id) === approvalId
-            ? { ...app, status: action, updated_at: new Date().toISOString() }
+            ? { ...app, status: action, rejection_reason: rejectionReason, updated_at: new Date().toISOString() }
             : app
         )
       );
 
       setConfirmAction(null);
+      setRejectionReason("");
     } catch (err) {
       console.error("Approval decision failed:", err);
       alert(err.response?.data?.detail || "Failed to submit approval decision.");
@@ -263,8 +268,8 @@ function Approvals() {
         <div className="approval-search">
           <Search size={19} />
           <input
-            type="search"
-            placeholder="Search patient name, ID, or clinical reason..."
+            type="text"
+            placeholder="Search patient name, ID, phone, or clinical reason..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search approval requests"
@@ -326,8 +331,12 @@ function Approvals() {
             {filteredApprovals.length === 0 ? (
               <div className="empty-approvals-box">
                 <ClipboardCheck size={40} />
-                <h3>No approval requests in this view</h3>
-                <p>All clinical consultation requests have been triaged or none match your filter.</p>
+                <h3>{searchQuery ? "No matching requests" : "No approval requests in this view"}</h3>
+                <p>
+                  {searchQuery
+                    ? `No clinical requests matched "${searchQuery}". Try adjusting your keywords or clearing the filter.`
+                    : "All clinical consultation requests have been triaged or none match your filter."}
+                </p>
               </div>
             ) : (
               filteredApprovals.map((request) => {
@@ -336,6 +345,14 @@ function Approvals() {
                 const patientName = request.patient_name || patient?.name || "Patient Record";
                 const pCode = request.patient_code || patient?.patient_code || String(patient?.patientId || "").replace("PT-", "") || String(request.patient_id || "").slice(-6);
                 const statusUpper = (request.status || "PENDING").toUpperCase();
+
+                const age = request.age || patient?.age;
+                const gender = request.gender || patient?.gender;
+                const bloodGroup = request.blood_group || patient?.blood_group;
+                const phone = request.patient_phone || patient?.phone;
+                const requestedDate = request.appointment_date || appointment?.appointment_date || "Date Pending";
+                const requestedTime = request.appointment_time || appointment?.appointment_time || "Time Pending";
+                const reason = request.reason || appointment?.reason || "Patient requested scheduled consultation slot.";
 
                 return (
                   <article className="approval-request" key={request._id || request.id}>
@@ -347,10 +364,20 @@ function Approvals() {
 
                       <div>
                         <h3>{patientName}</h3>
-                        <span className="patient-code-tag">ID: {pCode}</span>
-                        {(request.patient_phone || patient?.phone) && (
-                          <small className="phone-line">{request.patient_phone || patient?.phone}</small>
-                        )}
+                        <div className="patient-demographics-row">
+                          <span className="patient-code-tag">ID: {pCode}</span>
+                          {bloodGroup && <span className="blood-chip">{bloodGroup}</span>}
+                        </div>
+                        <div className="patient-sub-details">
+                          {age && gender && (
+                            <span className="age-gender-text">
+                              {age} yrs • {gender}
+                            </span>
+                          )}
+                          {phone && (
+                            <small className="phone-line">{phone}</small>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -359,22 +386,20 @@ function Approvals() {
                       <div className="request-type">
                         <strong>Consultation Approval</strong>
                         <span className="department">
-                          {appointment?.appointment_time ? `Slot: ${appointment.appointment_time}` : "Clinical Slot"}
+                          {requestedTime !== "Time Pending" ? `Slot: ${requestedTime}` : "Clinical Slot"}
                         </span>
                       </div>
 
-                      <p className="request-reason-text">
-                        {appointment?.reason || "Patient requested scheduled consultation slot."}
-                      </p>
+                      <p className="request-reason-text">{reason}</p>
 
                       <div className="request-meta">
                         <span>
                           <CalendarDays size={14} />
-                          {appointment?.appointment_date || "Date Pending"}
+                          {requestedDate}
                         </span>
                         <span>
                           <Clock3 size={14} />
-                          {appointment?.appointment_time || "Time Pending"}
+                          {requestedTime}
                         </span>
                       </div>
                     </div>
@@ -388,17 +413,28 @@ function Approvals() {
 
                     {/* ACTIONS */}
                     <div className="request-actions">
+                      <button
+                        type="button"
+                        className="approval-action view-details-btn"
+                        onClick={() => setSelectedRequestDetails({ ...request, patient, appointment })}
+                        title="View patient history and vitals"
+                      >
+                        <FileText size={15} />
+                        View Details
+                      </button>
+
                       {statusUpper === "PENDING" ? (
                         <>
                           <button
                             className="approval-action approve"
-                            onClick={() =>
+                            onClick={() => {
                               setConfirmAction({
                                 approvalId: request._id || request.id,
                                 patientName,
                                 action: "APPROVED",
-                              })
-                            }
+                              });
+                              setRejectionReason("");
+                            }}
                           >
                             <Check size={16} />
                             Approve
@@ -406,13 +442,14 @@ function Approvals() {
 
                           <button
                             className="approval-action reject"
-                            onClick={() =>
+                            onClick={() => {
                               setConfirmAction({
                                 approvalId: request._id || request.id,
                                 patientName,
                                 action: "REJECTED",
-                              })
-                            }
+                              });
+                              setRejectionReason("");
+                            }}
                           >
                             <X size={16} />
                             Reject
@@ -431,6 +468,123 @@ function Approvals() {
           </div>
         )}
       </section>
+
+      {/* VIEW DETAILS MODAL */}
+      {selectedRequestDetails && (
+        <div className="approval-modal-overlay" onClick={() => setSelectedRequestDetails(null)}>
+          <div className="approval-modal-box details-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="flex items-center gap-2">
+                <FileText size={20} className="text-teal-600" />
+                <h3>Patient Clinical Profile & Consultation</h3>
+              </div>
+              <button className="modal-close-btn" onClick={() => setSelectedRequestDetails(null)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="modal-body details-modal-body">
+              <div className="details-patient-banner">
+                <div className="patient-avatar large">
+                  <UserRound size={26} />
+                </div>
+                <div>
+                  <h4>{selectedRequestDetails.patient_name || selectedRequestDetails.patient?.name || "Patient Record"}</h4>
+                  <p className="details-subtext">
+                    ID: {selectedRequestDetails.patient_code || selectedRequestDetails.patient?.patient_code || "—"} •{" "}
+                    {selectedRequestDetails.age || selectedRequestDetails.patient?.age || 45} yrs •{" "}
+                    {selectedRequestDetails.gender || selectedRequestDetails.patient?.gender || "Other"} • Blood Group:{" "}
+                    <strong className="text-teal-700">{selectedRequestDetails.blood_group || selectedRequestDetails.patient?.blood_group || "O+"}</strong>
+                  </p>
+                  <p className="details-contact">
+                    Phone: {selectedRequestDetails.patient_phone || selectedRequestDetails.patient?.phone || "—"} • Email:{" "}
+                    {selectedRequestDetails.patient_email || selectedRequestDetails.patient?.email || "—"}
+                  </p>
+                </div>
+              </div>
+
+              {/* CONSULTATION REASON */}
+              <div className="details-section">
+                <h5>Requested Consultation Reason</h5>
+                <p className="reason-box">
+                  {selectedRequestDetails.reason || selectedRequestDetails.appointment?.reason || "General Consultation Review"}
+                </p>
+              </div>
+
+              {/* ALLERGIES */}
+              <div className="details-section">
+                <h5>Known Allergies</h5>
+                {((selectedRequestDetails.allergies && selectedRequestDetails.allergies.length > 0) ||
+                  (selectedRequestDetails.patient?.allergies && selectedRequestDetails.patient.allergies.length > 0)) ? (
+                  <div className="allergies-tag-list">
+                    {(selectedRequestDetails.allergies || selectedRequestDetails.patient?.allergies || []).map((alg, i) => (
+                      <span key={i} className="allergy-tag">
+                        ⚠️ {alg}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="details-empty-note">No active allergies documented.</p>
+                )}
+              </div>
+
+              {/* MEDICAL HISTORY */}
+              <div className="details-section">
+                <h5>Medical History & Chronic Conditions</h5>
+                {((selectedRequestDetails.medical_history && selectedRequestDetails.medical_history.length > 0) ||
+                  (selectedRequestDetails.patient?.medical_history && selectedRequestDetails.patient.medical_history.length > 0)) ? (
+                  <ul className="history-bullets">
+                    {(selectedRequestDetails.medical_history || selectedRequestDetails.patient?.medical_history || []).map((med, i) => (
+                      <li key={i}>{med}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="details-empty-note">No chronic medical history on file.</p>
+                )}
+              </div>
+
+              {/* RECENT VITALS */}
+              <div className="details-section">
+                <h5>Recent Vitals Telemetry</h5>
+                {selectedRequestDetails.latest_vitals ? (
+                  <div className="vitals-quick-grid">
+                    <div className="vital-item">
+                      <span className="vital-label">Heart Rate</span>
+                      <strong className="vital-val">{selectedRequestDetails.latest_vitals.heart_rate || "--"} bpm</strong>
+                    </div>
+                    <div className="vital-item">
+                      <span className="vital-label">Blood Pressure</span>
+                      <strong className="vital-val">
+                        {selectedRequestDetails.latest_vitals.systolic_bp || "--"}/{selectedRequestDetails.latest_vitals.diastolic_bp || "--"} mmHg
+                      </strong>
+                    </div>
+                    <div className="vital-item">
+                      <span className="vital-label">SpO2</span>
+                      <strong className="vital-val">{selectedRequestDetails.latest_vitals.spo2 || "--"}%</strong>
+                    </div>
+                    <div className="vital-item">
+                      <span className="vital-label">Temperature</span>
+                      <strong className="vital-val">{selectedRequestDetails.latest_vitals.temperature || "--"} °C</strong>
+                    </div>
+                    <div className="vital-item">
+                      <span className="vital-label">Blood Sugar</span>
+                      <strong className="vital-val">{selectedRequestDetails.latest_vitals.blood_sugar || "--"} mg/dL</strong>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="details-empty-note">No recent vitals logged yet for this patient.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-modal-cancel" onClick={() => setSelectedRequestDetails(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DECISION CONFIRMATION MODAL */}
       {confirmAction && (
@@ -452,8 +606,24 @@ function Approvals() {
                 the consultation request for <strong>{confirmAction.patientName}</strong>?
               </p>
               <p className="modal-subtext">
-                This will automatically update the patient's appointment and sync the schedule with the backend.
+                This will automatically update the patient's appointment and notify the patient.
               </p>
+
+              {confirmAction.action === "REJECTED" && (
+                <div className="rejection-reason-block">
+                  <label htmlFor="rejection-reason" className="rejection-label">
+                    Reason for Rejection (Optional):
+                  </label>
+                  <textarea
+                    id="rejection-reason"
+                    rows={3}
+                    placeholder="Enter clinical rationale or alternative instructions for patient..."
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    className="rejection-textarea"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="modal-footer">

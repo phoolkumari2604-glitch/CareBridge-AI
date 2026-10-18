@@ -1,0 +1,46 @@
+[
+  {
+    "id": "who_eml_amoxicillin_sample_002",
+    "topic": "Amoxicillin (Access Antibiotic Group)",
+    "category": "medicines",
+    "keywords": [
+      "amoxicillin",
+      "amox",
+      "mox",
+      "broad spectrum penicillin",
+      "amoxicillin capsule"
+    ],
+    "intent": "medicine_information",
+    "patient_answer": [
+      "Amoxicillin is an antibacterial prescription medicine used to treat common bacterial infections (such as throat, ear, or chest infections).",
+      "Take with or after food with a full glass of water at evenly spaced intervals as prescribed.",
+      "Finish the ENTIRE course prescribed by your physician, even if you feel better after a few days, to prevent antibiotic resistance.",
+      "Inform your doctor immediately if you develop skin rash, itching, lip swelling, or difficulty breathing (signs of penicillin allergy)."
+    ],
+    "doctor_answer": {
+      "assessment": "Moderate-spectrum bactericidal aminopenicillin (WHO AWaRe 'Access' Group). Inhibits bacterial cell wall synthesis.",
+      "investigations": "Verify absence of penicillin or beta-lactam hypersensitivity. Culture & sensitivity testing when indicated.",
+      "management": "Adult dosage: 500 mg PO TID or 875-1000 mg PO BID depending on severity. Pediatric: 25-50 mg/kg/day in divided doses. Dose reduce in severe renal insufficiency (eGFR <30 mL/min).",
+      "references": [
+        "WHO Model List of Essential Medicines (23rd List, 2023)",
+        "WHO AWaRe Antibiotic Categorization"
+      ]
+    },
+    "staff_answer": "Confirm patient allergy history for penicillins before administration. Observe for 30 minutes following first dose for hypersensitivity.",
+    "red_flags": [
+      "Severe anaphylactic shock (angioedema, stridor, hypotension)",
+      "Severe watery diarrhea containing blood or mucus (Clostridioides difficile colitis)"
+    ],
+    "follow_up_questions": [
+      "Have you ever had an allergic reaction to penicillin or augmentin?",
+      "Are you currently pregnant or nursing?"
+    ],
+    "avoid": [
+      "Do NOT use for viral colds, flu, or simple viral coughs",
+      "Do NOT discontinue early when symptoms ease"
+    ],
+    "source": "WHO Model List of Essential Medicines (WHO EML) & AWaRe Classification",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

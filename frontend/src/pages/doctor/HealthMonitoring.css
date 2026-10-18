@@ -3,16 +3,16 @@
 ========================================================= */
 
 .hm {
-  --hm-bg: #07111f;
-  --hm-card: #0d1b2e;
-  --hm-tx: #f8fafc;
-  --hm-mut: #94a3b8;
-  --hm-bd: #1e293b;
-  --hm-ac: #0284c7;
-  --hm-ac-glow: rgba(2, 132, 199, 0.25);
-  --hm-ok: #10b981;
-  --hm-bad: #ef4444;
-  --hm-warn: #f59e0b;
+  --hm-bg: #0B1426;
+  --hm-card: #111D35;
+  --hm-tx: #FFFFFF;
+  --hm-mut: #94A3B8;
+  --hm-bd: #1F2D4A;
+  --hm-ac: #0284C7;
+  --hm-ac-glow: rgba(56, 189, 248, 0.25);
+  --hm-ok: #10B981;
+  --hm-bad: #F87171;
+  --hm-warn: #FBBF24;
   color: var(--hm-tx);
   min-height: 100vh;
   padding-bottom: 40px;
@@ -20,16 +20,16 @@
 
 [data-theme="light"] .hm,
 .light .hm {
-  --hm-bg: #f1f5f9;
-  --hm-card: #ffffff;
-  --hm-tx: #0f172a;
-  --hm-mut: #64748b;
-  --hm-bd: #e2e8f0;
-  --hm-ac: #0284c7;
-  --hm-ac-glow: rgba(2, 132, 199, 0.12);
-  --hm-ok: #059669;
-  --hm-bad: #dc2626;
-  --hm-warn: #d97706;
+  --hm-bg: #0B1426;
+  --hm-card: #111D35;
+  --hm-tx: #FFFFFF;
+  --hm-mut: #94A3B8;
+  --hm-bd: #1F2D4A;
+  --hm-ac: #0284C7;
+  --hm-ac-glow: rgba(56, 189, 248, 0.25);
+  --hm-ok: #10B981;
+  --hm-bad: #F87171;
+  --hm-warn: #FBBF24;
 }
 
 .hm * {
@@ -150,8 +150,9 @@
   width: 100%;
   height: 310px;
   border-radius: 16px;
-  background: radial-gradient(circle at 50% 50%, #1e1124 0%, #080c16 80%);
-  border: 1px solid rgba(244, 63, 94, 0.25);
+  background: radial-gradient(circle at 50% 50%, rgba(225, 29, 72, 0.14) 0%, #05070d 75%, #000000 100%);
+  border: 1px solid rgba(244, 63, 94, 0.28);
+  box-shadow: 0 0 35px rgba(225, 29, 72, 0.12), inset 0 0 25px rgba(0, 0, 0, 0.85);
   cursor: grab;
   touch-action: pan-y;
   position: relative;
@@ -692,3 +693,1466 @@
     flex-direction: column;
   }
 }
+
+/* =========================================================
+   LIVE TELEMETRY STREAM CONTROLS & CRITICAL ALERTS
+   ========================================================= */
+.hm-live-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hm-pause-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hm-pause-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.hm-pause-btn.paused {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.hm-live-tag.paused {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.hm-live-dot.paused {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: none;
+}
+
+.hm-critical-alert-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  padding: 12px 18px;
+  color: #fca5a5;
+  font-size: 13.5px;
+  font-weight: 600;
+  animation: hmAlertPulse 1.8s infinite;
+}
+
+.hm-critical-alert-bar strong {
+  color: #ffffff;
+}
+
+.hm-alert-dismiss {
+  background: transparent;
+  border: none;
+  color: #fca5a5;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.hm-alert-dismiss:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ffffff;
+}
+
+/* =========================================================
+   SVG CHART TOOLTIP & GUIDE LINE
+   ========================================================= */
+.hm-chart-container {
+  position: relative;
+  width: 100%;
+}
+
+.hm-svg-chart {
+  cursor: crosshair;
+}
+
+.hm-tooltip-overlay {
+  position: absolute;
+  pointer-events: none;
+  background: var(--hm-card);
+  color: var(--hm-tx);
+  border: 1px solid var(--hm-bd);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 20;
+  transform: translate(-50%, -115%);
+  transition: opacity 0.1s ease;
+  white-space: nowrap;
+}
+
+.hm-tooltip-time {
+  font-size: 10.5px;
+  color: var(--hm-mut);
+  margin-bottom: 2px;
+}
+
+.hm-tooltip-val {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--hm-tx);
+}
+
+.hm-tooltip-status {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.hm-tooltip-status.normal {
+  color: var(--hm-ok);
+}
+
+.hm-tooltip-status.abnormal {
+  color: var(--hm-bad);
+}
+
+/* =========================================================
+   AI TELEMETRY CHAT STYLES
+   ========================================================= */
+.hm-ai-chat-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid var(--hm-bd);
+  border-radius: 16px;
+  background: var(--hm-card);
+}
+
+.hm-ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--hm-bd);
+  padding-bottom: 14px;
+}
+
+.hm-ai-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hm-ai-icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(2, 132, 199, 0.15);
+  color: var(--hm-ac);
+  display: grid;
+  place-items: center;
+}
+
+.hm-ai-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--hm-tx);
+}
+
+.hm-ai-header p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--hm-mut);
+}
+
+.hm-ai-vitals-context-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 99px;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  color: var(--hm-mut);
+}
+
+.hm-ai-vitals-context-pill strong {
+  color: var(--hm-tx);
+}
+
+.hm-ai-vitals-context-pill .pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--hm-ok);
+  box-shadow: 0 0 6px var(--hm-ok);
+}
+
+/* Presets bar */
+.hm-ai-presets-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.hm-ai-presets-row::-webkit-scrollbar {
+  display: none;
+}
+
+.hm-ai-preset-chip {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hm-tx);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.hm-ai-preset-chip:hover:not(:disabled) {
+  border-color: var(--hm-ac);
+  background: rgba(2, 132, 199, 0.08);
+  transform: translateY(-1px);
+}
+
+.hm-ai-preset-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Messages area */
+.hm-ai-messages-box {
+  min-height: 240px;
+  max-height: 460px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 10px 4px;
+}
+
+.hm-ai-messages-box::-webkit-scrollbar {
+  width: 5px;
+}
+
+.hm-ai-messages-box::-webkit-scrollbar-thumb {
+  background: var(--hm-bd);
+  border-radius: 4px;
+}
+
+.hm-ai-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 92%;
+}
+
+.hm-ai-msg.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.hm-ai-msg.assistant {
+  align-self: flex-start;
+}
+
+.hm-ai-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.hm-ai-msg.user .hm-ai-avatar {
+  background: var(--hm-ac);
+  color: #ffffff;
+}
+
+.hm-ai-msg.assistant .hm-ai-avatar {
+  background: rgba(2, 132, 199, 0.15);
+  color: var(--hm-ac);
+  border: 1px solid var(--hm-ac-glow);
+}
+
+.hm-ai-bubble-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hm-ai-bubble {
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.hm-ai-msg.user .hm-ai-bubble {
+  background: var(--hm-ac);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.hm-ai-msg.assistant .hm-ai-bubble {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-tx);
+  border-bottom-left-radius: 4px;
+}
+
+.hm-ai-bubble h3,
+.hm-ai-bubble h4 {
+  margin: 8px 0 4px;
+  color: var(--hm-tx);
+  font-weight: 700;
+}
+
+.hm-ai-msg.user .hm-ai-bubble h3,
+.hm-ai-msg.user .hm-ai-bubble h4 {
+  color: #ffffff;
+}
+
+.hm-ai-bubble ul,
+.hm-ai-bubble ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.hm-ai-bubble li {
+  margin-bottom: 4px;
+}
+
+.hm-ai-bubble p {
+  margin: 0 0 6px;
+}
+
+.hm-ai-bubble p:last-child {
+  margin-bottom: 0;
+}
+
+.hm-ai-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--hm-mut);
+  padding: 0 4px;
+}
+
+.hm-ai-copy-btn {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  padding: 0;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.hm-ai-copy-btn:hover {
+  color: var(--hm-tx);
+}
+
+/* Input Bar */
+.hm-ai-input-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid var(--hm-bd);
+  padding-top: 14px;
+}
+
+.hm-ai-input {
+  flex: 1;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: var(--hm-tx);
+  outline: none;
+}
+
+.hm-ai-input:focus {
+  border-color: var(--hm-ac);
+  box-shadow: 0 0 0 2px var(--hm-ac-glow);
+}
+
+.hm-ai-send-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hm-ac);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hm-ai-send-btn:hover:not(:disabled) {
+  background: #0274b0;
+}
+
+.hm-ai-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hm-ai-clear-btn {
+  background: transparent;
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-mut);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.hm-ai-clear-btn:hover:not(:disabled) {
+  color: var(--hm-tx);
+  border-color: var(--hm-tx);
+}
+
+/* SKELETON / LOADING */
+.hm-loading-center {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--hm-mut);
+}
+
+/* =========================================================
+   PULSEVIEW CALENDAR, LIVE PULSE INDICATOR & LOG TABLE
+========================================================= */
+
+/* Calendar Date Picker Bar */
+.hm-tabs-and-calendar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hm-calendar-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--hm-bg);
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--hm-bd);
+  flex-wrap: wrap;
+}
+
+.hm-date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hm-date-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hm-card);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--hm-bd);
+}
+
+.hm-cal-icon {
+  color: var(--hm-ac);
+  opacity: 0.8;
+}
+
+.hm-date-input {
+  background: transparent;
+  border: none;
+  color: var(--hm-tx);
+  font-size: 12px;
+  font-weight: 500;
+  outline: none;
+  font-family: inherit;
+  color-scheme: dark;
+}
+
+[data-theme="light"] .hm-date-input,
+.light .hm-date-input {
+  color-scheme: light;
+}
+
+.hm-date-sep {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hm-mut);
+  text-transform: uppercase;
+}
+
+.hm-cal-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hm-cal-btn {
+  background: var(--hm-card);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-tx);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hm-cal-btn:hover {
+  background: var(--hm-ac);
+  color: #ffffff;
+  border-color: var(--hm-ac);
+}
+
+.hm-cal-btn.clear {
+  color: var(--hm-bad);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.hm-cal-btn.clear:hover {
+  background: var(--hm-bad);
+  color: #ffffff;
+}
+
+/* Live Pulse Indicator in Chart Title */
+.hm-chart-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.hm-chart-title-row h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hm-chart-pulse-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hm-chart-beating-heart {
+  color: #ef4444;
+  animation: hmPulseHeart 1.1s infinite;
+}
+
+.hm-chart-beating-heart.paused {
+  animation: none;
+  opacity: 0.5;
+}
+
+@keyframes hmPulseHeart {
+  0% { transform: scale(1); }
+  18% { transform: scale(1.3); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.22); }
+  56% { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+/* Historical Log Header & Search Bar */
+.hm-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.hm-log-header h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hm-log-search-bar {
+  margin-bottom: 14px;
+}
+
+.hm-log-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 10px;
+  padding: 0 12px;
+  transition: border-color 0.18s ease;
+}
+
+.hm-log-search-wrap:focus-within {
+  border-color: var(--hm-ac);
+  box-shadow: 0 0 0 2px var(--hm-ac-glow);
+}
+
+.hm-search-icon {
+  color: var(--hm-mut);
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.hm-log-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 9px 0;
+  color: var(--hm-tx);
+  font-size: 13px;
+  outline: none;
+}
+
+.hm-search-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+}
+
+.hm-search-clear-btn:hover {
+  color: var(--hm-tx);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Sortable Headers */
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.sortable-th:hover {
+  color: var(--hm-ac);
+}
+
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sort-active {
+  color: var(--hm-ac);
+}
+
+/* Table Critical Row & Cell Highlights */
+.hm-row-critical {
+  background: rgba(239, 68, 68, 0.09) !important;
+  border-left: 3px solid #ef4444;
+}
+
+.hm-table td.crit {
+  color: #ef4444 !important;
+  font-weight: 800;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.hm-row-notes-preview {
+  font-size: 11.5px;
+  color: var(--hm-mut);
+  font-style: italic;
+}
+
+/* Table Pagination */
+.hm-log-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hm-bd);
+}
+
+.hm-log-page-info {
+  font-size: 12.5px;
+  color: var(--hm-mut);
+}
+
+.hm-log-page-info strong {
+  color: var(--hm-tx);
+}
+
+.hm-log-page-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hm-page-btn {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-tx);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hm-page-btn:hover:not(:disabled) {
+  background: var(--hm-card);
+  border-color: var(--hm-ac);
+  color: var(--hm-ac);
+}
+
+.hm-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hm-page-btn.num {
+  min-width: 32px;
+  justify-content: center;
+}
+
+.hm-page-btn.num.active {
+  background: var(--hm-ac);
+  color: #ffffff;
+  border-color: var(--hm-ac);
+}
+
+.hm-page-ellipsis {
+  padding: 0 4px;
+  color: var(--hm-mut);
+  font-size: 12px;
+}
+
+/* Rows per page selector */
+.hm-log-page-info-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hm-log-page-size-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--hm-mut);
+}
+
+.hm-select-compact {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 6px;
+  color: var(--hm-tx);
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.hm-empty-search-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--hm-mut);
+}
+
+/* Search match highlighting */
+.hm-search-highlight {
+  background: rgba(234, 179, 8, 0.35);
+  color: inherit;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   AI TELEMETRY CDS PANEL UPGRADES
+   ========================================================= */
+
+.hm-ai-chat-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hm-ai-drag-over {
+  border-color: var(--hm-ac) !important;
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.25);
+}
+
+/* 1. Patient Summary Banner */
+.hm-ai-patient-summary-banner {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.hm-ai-patient-main-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hm-ai-avatar-thumb {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(2, 132, 199, 0.15);
+  border: 1px solid var(--hm-bd);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.hm-ai-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hm-ai-initials-badge {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--hm-ac);
+}
+
+.hm-ai-avatar-status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--hm-bg);
+  background: var(--hm-ok);
+}
+
+.hm-ai-avatar-status-dot.critical {
+  background: var(--hm-bad);
+}
+
+.hm-ai-avatar-status-dot.warning,
+.hm-ai-avatar-status-dot.attention {
+  background: var(--hm-warn);
+}
+
+.hm-ai-patient-meta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.hm-ai-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hm-ai-name-line h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--hm-tx);
+}
+
+.hm-ai-code-pill {
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--hm-bd);
+  padding: 1px 6px;
+  border-radius: 5px;
+  color: var(--hm-mut);
+}
+
+.hm-ai-status-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.hm-ai-status-pill.stable {
+  color: var(--hm-ok);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.hm-ai-status-pill.critical {
+  color: var(--hm-bad);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.hm-ai-status-pill.warning,
+.hm-ai-status-pill.attention {
+  color: var(--hm-warn);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.hm-ai-demographics-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--hm-mut);
+}
+
+.hm-ai-demographics-tags strong {
+  color: var(--hm-tx);
+}
+
+/* Live Vitals Summary Strip */
+.hm-ai-live-vitals-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px dashed var(--hm-bd);
+}
+
+.hm-ai-live-vital-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--hm-card);
+  border: 1px solid var(--hm-bd);
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  color: var(--hm-tx);
+}
+
+.hm-ai-live-vital-chip strong {
+  color: var(--hm-tx);
+}
+
+/* Allergies and conditions row */
+.hm-ai-patient-tags-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+  font-size: 11.5px;
+}
+
+.hm-ai-tag-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.hm-ai-tag-label {
+  font-weight: 700;
+  color: var(--hm-mut);
+  font-size: 11px;
+}
+
+.hm-ai-alert-tag {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.hm-ai-condition-tag {
+  background: rgba(2, 132, 199, 0.12);
+  color: var(--hm-ac);
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 11px;
+}
+
+/* 2. Controls Toolbar & Search Bar */
+.hm-ai-controls-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.hm-ai-search-box {
+  display: flex;
+  align-items: center;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 8px;
+  padding: 0 8px;
+  flex: 1;
+  min-width: 180px;
+  max-width: 320px;
+}
+
+.hm-ai-search-box:focus-within {
+  border-color: var(--hm-ac);
+}
+
+.hm-ai-search-icon {
+  color: var(--hm-mut);
+  margin-right: 6px;
+}
+
+.hm-ai-search-input {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  color: var(--hm-tx);
+  padding: 6px 0;
+  outline: none;
+  width: 100%;
+}
+
+.hm-ai-search-clear {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.hm-ai-audio-toggles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hm-ai-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--hm-mut);
+  cursor: pointer;
+  user-select: none;
+}
+
+.hm-ai-mute-btn,
+.hm-ai-tool-btn {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-mut);
+  border-radius: 7px;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hm-ai-mute-btn:hover,
+.hm-ai-tool-btn:hover {
+  color: var(--hm-tx);
+  border-color: var(--hm-ac);
+}
+
+.hm-ai-mute-btn.muted {
+  color: var(--hm-bad);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* 3. Preset chips scrolling / wrapping */
+.hm-ai-presets-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex-wrap: wrap;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+/* 4. Message Actions & Audio Controls */
+.hm-ai-msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.hm-ai-audio-action-btn,
+.hm-ai-save-note-btn {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: color 0.15s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.hm-ai-audio-action-btn:hover,
+.hm-ai-save-note-btn:hover {
+  color: var(--hm-tx);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hm-ai-audio-action-btn.active {
+  color: var(--hm-ac);
+}
+
+.hm-ai-audio-action-btn.stop {
+  color: var(--hm-bad);
+}
+
+.hm-ai-msg-attachments-strip {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.hm-ai-msg-att-preview {
+  max-width: 140px;
+}
+
+.hm-ai-att-img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--hm-bd);
+}
+
+.hm-ai-att-file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+}
+
+.hm-ai-empty-search {
+  padding: 30px;
+  text-align: center;
+  color: var(--hm-mut);
+  font-size: 13px;
+}
+
+/* 5. Pre-send Attachments Tray */
+.hm-ai-attachments-tray {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 10px;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.hm-ai-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hm-card);
+  border: 1px solid var(--hm-bd);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: var(--hm-tx);
+  flex-shrink: 0;
+}
+
+.hm-ai-chip-preview {
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.hm-ai-chip-name {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hm-ai-chip-size {
+  color: var(--hm-mut);
+  font-size: 10.5px;
+}
+
+.hm-ai-chip-remove {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.hm-ai-chip-remove:hover {
+  color: var(--hm-bad);
+}
+
+/* 6. Camera Modal */
+.hm-ai-camera-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: grid;
+  place-items: center;
+  z-index: 1500;
+  padding: 16px;
+}
+
+.hm-ai-camera-modal {
+  background: var(--hm-card);
+  border: 1px solid var(--hm-bd);
+  border-radius: 16px;
+  padding: 18px;
+  width: min(520px, 100%);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hm-ai-camera-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hm-ai-camera-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.hm-ai-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--hm-mut);
+  cursor: pointer;
+}
+
+.hm-ai-video-stream-wrap,
+.hm-ai-photo-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.hm-ai-video,
+.hm-ai-photo-preview {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--hm-bd);
+  background: #000;
+}
+
+.hm-ai-video-actions,
+.hm-ai-photo-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.hm-ai-camera-error {
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--hm-mut);
+}
+
+/* 7. Sticky Bottom Input & Voice Indicator */
+.hm-ai-input-sticky-container {
+  position: sticky;
+  bottom: 0;
+  background: var(--hm-card);
+  border-top: 1px solid var(--hm-bd);
+  padding-top: 10px;
+  margin-top: auto;
+  z-index: 5;
+}
+
+.hm-ai-listening-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  color: #ef4444;
+  margin-bottom: 8px;
+  animation: hmListenPulse 1.2s infinite;
+}
+
+.hm-ai-listening-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+@keyframes hmListenPulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.hm-ai-input-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hm-ai-action-icon-btn {
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  color: var(--hm-mut);
+  border-radius: 9px;
+  padding: 9px 10px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.hm-ai-action-icon-btn:hover:not(:disabled) {
+  color: var(--hm-tx);
+  border-color: var(--hm-ac);
+}
+
+.hm-ai-action-icon-btn.listening {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.hm-ai-textarea {
+  flex: 1;
+  background: var(--hm-bg);
+  border: 1px solid var(--hm-bd);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--hm-tx);
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.hm-ai-textarea:focus {
+  border-color: var(--hm-ac);
+  box-shadow: 0 0 0 2px var(--hm-ac-glow);
+}
+
+.hm-ai-clinical-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--hm-mut);
+  padding: 6px 2px 0;
+  opacity: 0.75;
+}
+
+

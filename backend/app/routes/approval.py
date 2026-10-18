@@ -180,12 +180,37 @@ def get_approvals():
             app["booking_id"] = f"APP-{str(app['_id'])[-6:].upper()}"
             
         if app.get("patient_id"):
-            pat = db.patients.find_one({"_id": app["patient_id"]})
+            pid = app["patient_id"]
+            pat = None
+            if is_valid_object_id(pid):
+                pat = db.patients.find_one({"_id": ObjectId(pid)})
+            if not pat:
+                pat = db.patients.find_one({"_id": pid})
             if pat:
+                app["patient_name"] = pat.get("name", app.get("patient_name", "Patient"))
                 app["patient_phone"] = pat.get("phone", "—")
                 app["patient_email"] = pat.get("email", "—")
-                app["patient_id_code"] = pat.get("patient_id_code", f"PT-{str(pat['_id'])[-6:].upper()}")
-                
+                app["patient_id_code"] = pat.get("patient_code", pat.get("patient_id_code", f"PT-{str(pat['_id'])[-6:].upper()}"))
+                app["patient_code"] = pat.get("patient_code", str(pat.get("patient_id_code", "")).replace("PT-", "") or str(pat["_id"])[-6:])
+                app["age"] = pat.get("age", 45)
+                app["gender"] = pat.get("gender", "Other")
+                app["blood_group"] = pat.get("blood_group", "O+")
+                app["allergies"] = pat.get("allergies", [])
+                app["medical_history"] = pat.get("medical_history", [])
+                # Get latest vitals for patient
+                pat_oid = pat["_id"]
+                latest_v = db.vital_signs.find_one({"$or": [{"patient_id": pat_oid}, {"patient_id": str(pat_oid)}]}, sort=[("recorded_at", -1)])
+                if latest_v:
+                    app["latest_vitals"] = {
+                        "heart_rate": latest_v.get("heart_rate"),
+                        "systolic_bp": latest_v.get("systolic_bp"),
+                        "diastolic_bp": latest_v.get("diastolic_bp"),
+                        "spo2": latest_v.get("spo2"),
+                        "temperature": latest_v.get("temperature"),
+                        "blood_sugar": latest_v.get("blood_sugar"),
+                        "recorded_at": latest_v.get("recorded_at")
+                    }
+
     serialized = serialize_doc(approvals)
     return jsonify({
         "approvals": serialized,
@@ -221,6 +246,37 @@ def get_approval(approval_id):
             approval["appointment_date"] = appt.get("appointment_date")
             approval["appointment_time"] = appt.get("appointment_time")
             approval["reason"] = appt.get("reason")
+            
+    if approval.get("patient_id"):
+        pid = approval["patient_id"]
+        pat = None
+        if is_valid_object_id(pid):
+            pat = db.patients.find_one({"_id": ObjectId(pid)})
+        if not pat:
+            pat = db.patients.find_one({"_id": pid})
+        if pat:
+            approval["patient_name"] = pat.get("name", approval.get("patient_name", "Patient"))
+            approval["patient_phone"] = pat.get("phone", "—")
+            approval["patient_email"] = pat.get("email", "—")
+            approval["patient_id_code"] = pat.get("patient_code", pat.get("patient_id_code", f"PT-{str(pat['_id'])[-6:].upper()}"))
+            approval["patient_code"] = pat.get("patient_code", str(pat.get("patient_id_code", "")).replace("PT-", "") or str(pat["_id"])[-6:])
+            approval["age"] = pat.get("age", 45)
+            approval["gender"] = pat.get("gender", "Other")
+            approval["blood_group"] = pat.get("blood_group", "O+")
+            approval["allergies"] = pat.get("allergies", [])
+            approval["medical_history"] = pat.get("medical_history", [])
+            pat_oid = pat["_id"]
+            latest_v = db.vital_signs.find_one({"$or": [{"patient_id": pat_oid}, {"patient_id": str(pat_oid)}]}, sort=[("recorded_at", -1)])
+            if latest_v:
+                approval["latest_vitals"] = {
+                    "heart_rate": latest_v.get("heart_rate"),
+                    "systolic_bp": latest_v.get("systolic_bp"),
+                    "diastolic_bp": latest_v.get("diastolic_bp"),
+                    "spo2": latest_v.get("spo2"),
+                    "temperature": latest_v.get("temperature"),
+                    "blood_sugar": latest_v.get("blood_sugar"),
+                    "recorded_at": latest_v.get("recorded_at")
+                }
             
     return jsonify(serialize_doc(approval)), 200
 
@@ -264,6 +320,27 @@ def update_approval(approval_id):
             {"_id": approval["appointment_id"]},
             {"$set": {"approval_status": status, "status": appt_status, "updated_at": now}}
         )
+
+    # Create patient notification
+    try:
+        pat_id = approval.get("patient_id")
+        doc_name = g.current_user.get("name", "Attending Doctor")
+        notif_msg = (
+            f"Your clinical consultation request has been APPROVED by {doc_name}."
+            if status == "APPROVED"
+            else f"Your clinical consultation request was REJECTED by {doc_name}." + (f" Reason: {reason}" if reason else "")
+        )
+        db.notifications.insert_one({
+            "user_id": str(pat_id) if pat_id else None,
+            "patient_id": pat_id,
+            "type": "APPOINTMENT_APPROVAL",
+            "title": f"Consultation Request {status}",
+            "message": notif_msg,
+            "is_read": False,
+            "created_at": now,
+        })
+    except Exception as ex:
+        print("Notification creation error (non-fatal):", ex)
         
     return jsonify({
         "message": f"Approval {status.lower()} successfully",

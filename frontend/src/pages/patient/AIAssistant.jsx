@@ -27,10 +27,10 @@ import {
   X,
   RotateCw,
   Maximize2,
-  Download,
-  AlertTriangle,
-  PlusCircle,
   RotateCcw,
+  ThumbsUp,
+  ThumbsDown,
+  Flag,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
@@ -58,6 +58,8 @@ function AIAssistant() {
   const [cameraFacingMode, setCameraFacingMode] = useState("environment"); // "user" | "environment"
   const [capturedPhotoUrl, setCapturedPhotoUrl] = useState(null);
   const [cameraError, setCameraError] = useState(null);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [feedbackState, setFeedbackState] = useState({}); // { [msgId]: { rating, report_wrong } }
   const videoRef = useRef(null);
   const mediaStreamRef = useRef(null);
 
@@ -109,6 +111,71 @@ function AIAssistant() {
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
+
+  // Check One-Time Patient Consent Compliance
+  useEffect(() => {
+    const hasConsented = localStorage.getItem("carebridge_ai_consent");
+    if (hasConsented !== "true") {
+      setShowConsentModal(true);
+    }
+  }, []);
+
+  const handleAcceptConsent = () => {
+    localStorage.setItem("carebridge_ai_consent", "true");
+    setShowConsentModal(false);
+  };
+
+  const handleClearSession = async () => {
+    if (window.confirm("Are you sure you want to clear your current conversation and session memory?")) {
+      try {
+        const patientId = user?.patient_id || user?.id;
+        await patientService.clearAISession(patientId);
+        await patientService.clearAIHistory(patientId);
+      } catch (err) {
+        console.warn("Clear session warning:", err);
+      }
+      setMessages([initialWelcomeMessage]);
+      setSelectedImages([]);
+      setInlineError(null);
+      setLastFailedPrompt(null);
+    }
+  };
+
+  const handleFeedback = async (msgId, entryId, question, rating) => {
+    try {
+      setFeedbackState((prev) => ({
+        ...prev,
+        [msgId]: { rating, report_wrong: false },
+      }));
+      await patientService.submitAIFeedback({
+        entry_id: entryId,
+        question: question,
+        rating: rating,
+        report_wrong: false,
+      });
+    } catch (e) {
+      console.warn("Feedback error:", e);
+    }
+  };
+
+  const handleReportWrong = async (msgId, entryId, question) => {
+    const reason = window.prompt("Please describe what was inaccurate in this answer (optional):");
+    try {
+      setFeedbackState((prev) => ({
+        ...prev,
+        [msgId]: { rating: -1, report_wrong: true },
+      }));
+      await patientService.submitAIFeedback({
+        entry_id: entryId,
+        question: question,
+        rating: -1,
+        report_wrong: true,
+        comments: reason || "",
+      });
+    } catch (e) {
+      console.warn("Report error:", e);
+    }
+  };
 
   // Web Speech API Voice Recognition Setup
   useEffect(() => {
@@ -372,6 +439,9 @@ function AIAssistant() {
         sender: "ai",
         text: res.response || "I have analyzed your query and clinical data.",
         disclaimer: res.disclaimer,
+        entry_id: res.entry_id || null,
+        clarification_options: res.clarification_options || [],
+        has_vitals_alert: res.has_vitals_alert || false,
         attachments: res.attachments || [],
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
@@ -634,11 +704,34 @@ function AIAssistant() {
             </div>
             <div>
               <h2>CareBridge Clinical Assistant</h2>
-              <span>Connected to Patient Health Records &middot; User ID: #{String(user?.patient_id || "").slice(-6).toUpperCase()}</span>
+              <span>Connected to Patient Health Records &middot; Patient ID: {user?.patient_code || user?.patientId || "394762"}</span>
             </div>
-            <div className="ai-chat-online">
-              <span></span>
-              Active
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button
+                type="button"
+                onClick={handleClearSession}
+                title="Clear conversation and reset session memory"
+                style={{
+                  background: "rgba(239, 68, 68, 0.1)",
+                  border: "1px solid rgba(239, 68, 68, 0.25)",
+                  color: "#f87171",
+                  borderRadius: "8px",
+                  padding: "5px 10px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                }}
+              >
+                <Trash2 size={13} />
+                <span>Clear Memory</span>
+              </button>
+              <div className="ai-chat-online">
+                <span></span>
+                Active
+              </div>
             </div>
           </div>
 
@@ -689,6 +782,22 @@ function AIAssistant() {
 
                     <p className="bubble-text">{item.text}</p>
 
+                    {/* Ambiguity Clarification Pills */}
+                    {item.clarification_options && item.clarification_options.length > 0 && (
+                      <div className="clarification-pills-row">
+                        {item.clarification_options.map((opt, oIdx) => (
+                          <button
+                            key={oIdx}
+                            type="button"
+                            className="clarification-pill-btn"
+                            onClick={() => handleSendMessage(opt.topic)}
+                          >
+                            {opt.topic}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     {item.disclaimer && (
                       <div className="ai-message-disclaimer">
                         <Info size={12} />
@@ -706,6 +815,38 @@ function AIAssistant() {
                     >
                       {copiedId === item.id ? <Check size={12} className="text-green" /> : <Copy size={12} />}
                     </button>
+
+                    {item.sender === "ai" && !item.isError && (
+                      <div className="ai-feedback-actions">
+                        <button
+                          type="button"
+                          className={`msg-feedback-btn ${feedbackState[item.id]?.rating === 1 ? "active-up" : ""}`}
+                          onClick={() => handleFeedback(item.id, item.entry_id, item.text, 1)}
+                          title="Accurate and helpful"
+                        >
+                          <ThumbsUp size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          className={`msg-feedback-btn ${feedbackState[item.id]?.rating === -1 && !feedbackState[item.id]?.report_wrong ? "active-down" : ""}`}
+                          onClick={() => handleFeedback(item.id, item.entry_id, item.text, -1)}
+                          title="Not helpful"
+                        >
+                          <ThumbsDown size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          className={`msg-feedback-btn ${feedbackState[item.id]?.report_wrong ? "active-report" : ""}`}
+                          onClick={() => handleReportWrong(item.id, item.entry_id, item.text)}
+                          title="Report wrong answer"
+                        >
+                          <Flag size={12} />
+                        </button>
+                        {feedbackState[item.id] && (
+                          <span className="feedback-ack-badge">Thanks!</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -781,6 +922,10 @@ function AIAssistant() {
             {/* ATTACHMENT TRAY */}
             {selectedImages.length > 0 && (
               <div className="ai-attachment-tray">
+                <div className="observation-notice-banner">
+                  <ShieldCheck size={14} />
+                  <span>AI observation only, not a diagnosis</span>
+                </div>
                 <div className="tray-heading">
                   <span>Attached Images ({selectedImages.length}/{MAX_IMAGES})</span>
                 </div>
@@ -892,6 +1037,50 @@ function AIAssistant() {
           </div>
         </section>
       </section>
+      {/* ONE-TIME PATIENT CONSENT COMPLIANCE MODAL */}
+      {showConsentModal && (
+        <div className="ai-consent-modal-overlay">
+          <div className="ai-consent-modal" role="dialog" aria-modal="true">
+            <div className="ai-consent-header">
+              <div className="ai-consent-icon">
+                <ShieldCheck size={22} />
+              </div>
+              <div>
+                <h3>Clinical AI Safety & Patient Consent</h3>
+                <span style={{ fontSize: "12px", color: "#64748b" }}>CareBridge AI Health Assistant</span>
+              </div>
+            </div>
+
+            <div className="ai-consent-body">
+              <p>
+                Welcome to <strong>CareBridge MedAI</strong>. Before continuing, please review our clinical safety terms:
+              </p>
+              <ul className="ai-consent-list">
+                <li>
+                  <strong>Educational & First-Aid Decision Support:</strong> Guidance is synthesized from accredited medical literature (WHO, ICMR, MoHFW, NICE) for health awareness.
+                </li>
+                <li>
+                  <strong>Not a Bedside Diagnosis:</strong> MedAI provides informational triage and first-aid recommendations. It is not an in-person doctor examination or prescription.
+                </li>
+                <li>
+                  <strong>Emergency Situations:</strong> If you or someone around you experiences severe chest pain, inability to breathe, slurred speech, active seizure, or heavy bleeding, dial <strong>112 / 108</strong> immediately.
+                </li>
+              </ul>
+              <p style={{ fontSize: "12px", color: "#94a3b8" }}>
+                By clicking below, you acknowledge and agree to these health safety guidelines.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="ai-consent-btn"
+              onClick={handleAcceptConsent}
+            >
+              I Understand &amp; Agree
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

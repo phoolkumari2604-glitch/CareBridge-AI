@@ -1,0 +1,893 @@
+[
+  {
+    "id": "faq_ayushman_bharat_pmjay_001",
+    "topic": "Ayushman Bharat (PM-JAY) Eligibility & Claims Process",
+    "category": "hospital_faq",
+    "keywords": [
+      "ayushman bharat",
+      "pmjay",
+      "ayushman card",
+      "pm jay eligibility",
+      "ayushman cashless treatment",
+      "golden card free treatment"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Ayushman Bharat PM-JAY provides health insurance coverage up to ₹5,00,000 per eligible family per year for secondary and tertiary care hospitalization across India.",
+      "To verify eligibility: Visit the hospital's dedicated 'Ayushman Mitra' kiosk with your Aadhaar Card, Ration Card, or PM-JAY letter, or check online at mera.pmjay.gov.in.",
+      "The scheme is completely cashless and paperless at all empaneled public and private hospitals.",
+      "Coverage includes 3 days of pre-hospitalization care, diagnostics, medicines, ICU/bed charges, surgery, and 15 days of post-hospitalization medications and follow-up.",
+      "No registration fee or out-of-pocket premium is charged to eligible beneficiaries. If any empaneled hospital asks for cash, report immediately to the Ayushman toll-free helpline: 14555."
+    ],
+    "doctor_answer": {
+      "assessment": "PM-JAY benefit verification and package booking for secondary/tertiary inpatient care.",
+      "investigations": "Biometric Aadhaar authentication (TMS portal) and pre-authorization request.",
+      "management": "Ayushman Mitra desk initiates TMS pre-auth with clinical summary, diagnostic reports, and proposed package code within 24h of admission.",
+      "references": [
+        "National Health Authority (NHA) PM-JAY Operational Guidelines",
+        "MoHFW Government of India"
+      ]
+    },
+    "staff_answer": "Direct beneficiary to Ground Floor Ayushman Mitra helpdesk. Collect Aadhaar and ration card for biometric verification on the PMJAY TMS portal.",
+    "red_flags": [
+      "Refusal of emergency care to an eligible PM-JAY patient in an empaneled hospital (statutory violation under NHA rules)"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT pay cash for pre-authorized package items or medicines",
+      "Do NOT pay unauthorized agents for Ayushman card generation"
+    ],
+    "source": "National Health Authority (NHA) & MoHFW PM-JAY Guidelines (https://pmjay.gov.in)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_cashless_tpa_insurance_002",
+    "topic": "Cashless Health Insurance Claims & TPA Approval Process",
+    "category": "hospital_faq",
+    "keywords": [
+      "cashless insurance",
+      "tpa approval",
+      "mediclaim cashless",
+      "health insurance claim hospital",
+      "pre authorization insurance"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Visit the hospital's Third Party Administrator (TPA) / Insurance Desk at least 48 to 72 hours before planned admissions, or within 24 hours of an emergency admission.",
+      "Submit required documents: Health Insurance E-card/policy copy, patient's photo ID (Aadhaar/PAN/Passport), and the treating doctor's initial consultation paper and admission note.",
+      "The hospital TPA desk will fill and transmit the Pre-Authorization Request form to your insurance company or TPA.",
+      "Initial approval (query response or initial sanction) typically takes 2 to 4 hours from the insurance company.",
+      "At discharge, the final itemized bill and discharge summary are sent to the TPA for final sanction, which can take 3 to 5 hours depending on insurance response times.",
+      "Non-medical expenses (registration fees, gloves, sanitizers, attendant food, phone calls) are not covered by insurance and must be settled by the patient directly."
+    ],
+    "doctor_answer": {
+      "assessment": "Medical necessity documentation and pre-authorization processing for commercial health insurance.",
+      "investigations": "Diagnostic reports validating admission indication.",
+      "management": "Provide accurate ICD-10 diagnostic coding, clinical timeline, and active medical justification on the pre-auth and discharge summary.",
+      "references": [
+        "Insurance Regulatory and Development Authority of India (IRDAI) Master Circular on Health Insurance",
+        "General Insurance Council (GIC) Cashless Everywhere Guidelines"
+      ]
+    },
+    "staff_answer": "Collect insurance card, Aadhaar, and doctor's admission advice. Transmit initial pre-authorization form within 2 hours of admission. Inform patient of co-pay/deductible terms.",
+    "red_flags": [
+      "Delaying emergent life-saving clinical interventions while waiting for insurance pre-authorization"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT leave the hospital before final TPA settlement is complete",
+      "Do NOT submit falsified symptom timelines on insurance forms"
+    ],
+    "source": "IRDAI Health Insurance Regulations & General Insurance Council (https://irdai.gov.in)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_opd_registration_queue_003",
+    "topic": "OPD Registration, Passes, and Queue Booking",
+    "category": "hospital_faq",
+    "keywords": [
+      "opd registration",
+      "doctor appointment booking",
+      "opd slip",
+      "opd pass",
+      "hospital queue token"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Online Booking: Book doctor appointments in advance via the hospital portal or mobile app to choose your preferred time slot and skip the physical registration queue.",
+      "On-Arrival Counter: If registering in person, visit the central OPD Registration counter with a valid government photo ID card.",
+      "You will receive an OPD slip containing your unique Hospital Identification Number (UHID), consultant doctor name, room number, and queue token number.",
+      "Keep your UHID safe; all your future lab tests, prescriptions, and follow-up visits will be permanently linked to this number.",
+      "Check the digital OPD waiting displays outside the consultation rooms for your live token number.",
+      "Senior citizens, pregnant mothers, and wheelchair users can request priority queues or fast-track tokens at the help desk."
+    ],
+    "doctor_answer": {
+      "assessment": "Ambulatory care triage and clinic scheduling.",
+      "investigations": "Routine vital signs check at OPD nursing station prior to consultation.",
+      "management": "Direct patients to appropriate specialty based on primary complaint. Triage out urgent vitals to the acute emergency room.",
+      "references": [
+        "NABH Standards for Hospitals (5th Edition): Access, Assessment and Continuity of Care (AAC)"
+      ]
+    },
+    "staff_answer": "Issue UHID, collect demographic data, stamp OPD consultation slip, and direct patient to the specialty wing and room number.",
+    "red_flags": [
+      "Patient presenting with acute chest pain, altered consciousness, or severe dyspnea at OPD counter (transfer to ER immediately)"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT register under multiple UHIDs (causes fragmentation of medical history)"
+    ],
+    "source": "NABH Patient Registration Guidelines & Hospital Operating Procedures",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_appointment_rescheduling_cancellation_004",
+    "topic": "Appointment Rescheduling & Cancellation Policy",
+    "category": "hospital_faq",
+    "keywords": [
+      "cancel appointment",
+      "reschedule doctor visit",
+      "change appointment time",
+      "doctor fee refund"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "You can reschedule or cancel your appointment up to 2 hours before the scheduled consultation time without any cancellation fees.",
+      "Use the hospital mobile app, patient web portal, or call the central appointment helpline.",
+      "If you paid consultation fees online, refunds for eligible cancellations are credited back to your original payment method within 5 to 7 business days.",
+      "If a doctor is called away for emergency surgery or medical rounds, the hospital will send an SMS alert and offer you an immediate alternative doctor or priority rescheduling."
+    ],
+    "doctor_answer": {
+      "assessment": "Clinical scheduling management and patient access continuity.",
+      "investigations": "None.",
+      "management": "Maintain automated slot reassignment to optimize clinic throughput.",
+      "references": [
+        "NABH Hospital Quality Standards on Patient Care Services"
+      ]
+    },
+    "staff_answer": "Check appointment ID on system. Modify date/slot per patient preference and issue revised confirmation SMS.",
+    "red_flags": [
+      "None (administrative workflow)"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT miss appointments without prior cancellation (deprives another needy patient of a care slot)"
+    ],
+    "source": "Hospital Administration Patient Scheduling Standard Operating Procedures",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_ehr_medical_records_access_005",
+    "topic": "Medical Records (EHR) & Discharge Summary Access",
+    "category": "hospital_faq",
+    "keywords": [
+      "medical records access",
+      "how to get discharge summary",
+      "ehr patient portal",
+      "hospital case sheet copy",
+      "medical certificate request"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "All lab test results, imaging reports, prescriptions, and discharge summaries are automatically accessible 24/7 on your patient portal and mobile app using your registered UHID and mobile OTP.",
+      "To obtain a physical certified copy of your complete inpatient medical file / case sheet, submit a written request at the Medical Records Department (MRD) along with valid government photo ID.",
+      "Under healthcare regulations, hospitals provide certified medical records within 72 hours of receiving an authorized written request from the patient or legal guardian.",
+      "Medical certificates, fitness certificates, and sick leaves can be issued only by your treating doctor during or after an in-person clinical assessment."
+    ],
+    "doctor_answer": {
+      "assessment": "Health record privacy, patient access rights, and data portability.",
+      "investigations": "Identity verification of the requesting individual.",
+      "management": "Release records in compliance with national privacy guidelines (DISHA / NDHM / HIPAA standards).",
+      "references": [
+        "National Medical Commission (NMC) Regulations on Maintenance of Medical Records",
+        "Digital Information Security in Healthcare Act (DISHA)"
+      ]
+    },
+    "staff_answer": "Verify patient identity and written consent. Process MRD application within prescribed 72-hour turnaround time.",
+    "red_flags": [
+      "Unauthorized third-party requests for medical records without patient's written signed authorization"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT share patient medical information over phone without verified authorization",
+      "Do NOT falsify dates on medical certificates"
+    ],
+    "source": "National Medical Commission (NMC) Guidelines & Digital Health Standards",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_visiting_hours_attendant_passes_006",
+    "topic": "Hospital Visiting Hours & Attendant Pass Policy",
+    "category": "hospital_faq",
+    "keywords": [
+      "hospital visiting hours",
+      "attendant pass",
+      "visitor pass hospital",
+      "icu visiting time",
+      "how many attendants allowed"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "General Wards: Visiting hours are typically 4:00 PM to 7:00 PM on weekdays, and 10:00 AM to 12:00 PM & 4:00 PM to 7:00 PM on Sundays/Holidays.",
+      "One primary attendant pass is issued at admission, allowing 24-hour presence with the patient in single/private rooms, or 1 attendant per patient in general wards.",
+      "ICU / CCU Visitation: Strictly restricted to one visitor per patient during designated hours (usually 11:00 AM to 12:00 PM and 5:00 PM to 6:00 PM) for 5 to 10 minutes only, to prevent lethal infections.",
+      "Children under 12 years of age are not permitted into inpatient wards or ICUs for their own infection safety.",
+      "Visitors must sanitize their hands before and after entering patient rooms and wear masks where required."
+    ],
+    "doctor_answer": {
+      "assessment": "Hospital infection control and inpatient safety management.",
+      "investigations": "None.",
+      "management": "Enforce strict barrier precautions in critical care zones to reduce hospital-acquired infection (HAI) rates.",
+      "references": [
+        "CDC Guidelines for Infection Control in Healthcare Personnel",
+        "NABH Infection Control Standards"
+      ]
+    },
+    "staff_answer": "Issue color-coded attendant pass at admission. Direct visitors to hand hygiene stations before entering ward corridors.",
+    "red_flags": [
+      "Crowding in ICUs or isolation rooms with active airborne pathogens"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT bring children under 12 into intensive care units",
+      "Do NOT enter hospital wards if you currently have a fever, cough, or cold"
+    ],
+    "source": "Hospital Infection Control Committee (HICC) & NABH Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_emergency_triage_admission_007",
+    "topic": "Emergency Room (ER) Triage & Admission Procedure",
+    "category": "hospital_faq",
+    "keywords": [
+      "emergency triage",
+      "how er works",
+      "emergency room admission",
+      "casualty admission",
+      "triage red yellow green"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Emergency rooms operate strictly on clinical urgency (triage), NOT on a first-come, first-served basis.",
+      "Upon arrival, a triage nurse immediately assesses airway, breathing, circulation, consciousness, and vital signs.",
+      "Patients are categorized into standard triage colors: Red (immediate life threat - heart attack, trauma, severe breathlessness, treated immediately), Yellow (urgent - high fever, fractures, severe pain, seen within 15-30 min), Green (non-urgent - minor wounds, cold, mild symptoms, safely seen after urgent cases).",
+      "Emergency care and resuscitation are initiated immediately without waiting for financial deposits or paperwork.",
+      "If inpatient admission is needed, the ER team stabilizes the patient and transfers them to the ICU, emergency ward, or specialty bed."
+    ],
+    "doctor_answer": {
+      "assessment": "Emergency Severity Index (ESI) 5-tier or 3-tier triage assessment.",
+      "investigations": "Point-of-care capillary blood glucose, 12-lead ECG (within 10 minutes of arrival for chest pain), rapid blood gas.",
+      "management": "Immediate resuscitation according to ATLS / ACLS protocols. Zero delay for registration in category Red/1 cases.",
+      "references": [
+        "Emergency Nurses Association (ENA) Emergency Severity Index (ESI) Handbook",
+        "WHO Emergency Care Systems Framework"
+      ]
+    },
+    "staff_answer": "Initiate triage within 3 minutes of ER arrival. Assign triage tag, record core vitals, and alert emergency physician immediately for Red category.",
+    "red_flags": [
+      "Delaying triage assessment or withholding emergency care pending police NOC or billing clearance (illegal under Supreme Court rulings)"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT argue over queue order in the ER (critically ill patients must be seen first)"
+    ],
+    "source": "Emergency Nurses Association (ESI) & WHO Guidelines for Emergency Care",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_patient_rights_responsibilities_008",
+    "topic": "Patient Rights & Responsibilities in Healthcare",
+    "category": "hospital_faq",
+    "keywords": [
+      "patient rights",
+      "charter of patient rights",
+      "informed consent rights",
+      "patient responsibility",
+      "refuse treatment rights"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Right to Respect and Dignity: You have the right to receive compassionate care without discrimination based on caste, religion, gender, age, or financial status.",
+      "Right to Information: You are entitled to clear, understandable explanations regarding your diagnosis, treatment options, risks, expected costs, and expected outcomes in your preferred language.",
+      "Right to Informed Consent: No major surgery, anesthesia, or invasive procedure can be performed without your or your legal representative's informed, voluntary written consent.",
+      "Right to Second Opinion: You have the complete right to seek a second medical opinion from any specialist of your choice.",
+      "Right to Privacy and Confidentiality: Your medical records, photos, and clinical discussions must be kept strictly confidential.",
+      "Patient Responsibilities: Provide honest and complete medical history, follow agreed medical advice, treat healthcare staff with respect, and respect hospital non-smoking and safety rules."
+    ],
+    "doctor_answer": {
+      "assessment": "Bioethical principles: Autonomy, Beneficence, Non-maleficence, and Justice.",
+      "investigations": "Document informed consent process.",
+      "management": "Obtain comprehensive informed consent detailing benefits, risks, alternatives, and consequences of refusal.",
+      "references": [
+        "Charter of Patient Rights (National Human Rights Commission - NHRC / MoHFW India)",
+        "World Medical Association (WMA) Declaration of Lisbon on the Rights of the Patient"
+      ]
+    },
+    "staff_answer": "Provide patient rights booklet in local language at admission. Ensure informed consent forms are signed and witnessed prior to procedures.",
+    "red_flags": [
+      "Coercion or performing invasive procedures without valid documented informed consent"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT conceal herbal medications, recreational substances, or previous adverse drug reactions from your doctor"
+    ],
+    "source": "NHRC Charter of Patient Rights & World Medical Association Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_billing_dispute_itemized_bill_009",
+    "topic": "Billing Transparency, Itemized Bills & Dispute Resolution",
+    "category": "hospital_faq",
+    "keywords": [
+      "billing dispute",
+      "itemized bill request",
+      "hospital bill breakup",
+      "overcharging complaint",
+      "billing grievance"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "You are entitled to a complete itemized bill showing the breakdown of bed charges, doctor fees, nursing charges, diagnostics, medications, consumables, and GST.",
+      "For any questions regarding billing line items, visit the Central Inpatient Billing Desk or request a billing counselor visit to your room.",
+      "Medication and consumable prices in accredited hospitals must adhere to National Pharmaceutical Pricing Authority (NPPA) ceiling caps on scheduled drugs and coronary stents.",
+      "If you suspect an error or unexplained charge, raise a formal dispute at the Billing Grievance Desk or patient relations department before final discharge settlement.",
+      "All disputes are investigated against the physical nursing medication administration sheets and procedure logs."
+    ],
+    "doctor_answer": {
+      "assessment": "Healthcare financial transparency and billing compliance.",
+      "investigations": "Audit medication administration record (MAR) and central store dispense logs.",
+      "management": "Ensure electronic charge capture aligns with clinical orders and administered doses.",
+      "references": [
+        "Clinical Establishments (Registration and Regulation) Act, Government of India",
+        "Consumer Protection Act 2019"
+      ]
+    },
+    "staff_answer": "Provide comprehensive printout of provisional itemized bill upon request. Arrange patient relations officer conference for billing disputes.",
+    "red_flags": [
+      "Retaining a deceased body or holding a patient hostage over unpaid medical bills (strictly prohibited by court directives)"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT leave hospital without verified discharge clearance and signed bill summary"
+    ],
+    "source": "Clinical Establishments Act & National Consumer Commission Directives",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_pharmacy_generic_formulary_010",
+    "topic": "Hospital Pharmacy, Generic Medicines & Formulary",
+    "category": "hospital_faq",
+    "keywords": [
+      "hospital pharmacy",
+      "generic medicine",
+      "jan aushadhi hospital",
+      "outside medicine allowed",
+      "return medicine hospital"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Hospital pharmacies operate 24/7 to provide quality-controlled, authentic medications and sterile consumables.",
+      "You have the right to request affordable generic equivalents for your prescriptions; the hospital formulary includes WHO-essential and NLEM-listed generic molecules.",
+      "Purchasing from Outside: Inpatients and outpatients have full liberty to buy prescribed medicines from external pharmacies or government Jan Aushadhi Kendras, provided medications are in their original tamper-evident packaging.",
+      "Unused, unopened sealed medication strips and consumables purchased from the hospital pharmacy during admission can be returned for a billing refund before final discharge, accompanied by the purchase invoice.",
+      "Temperature-sensitive cold-chain items (insulin, vaccines) cannot be returned once handed over, for safety reasons."
+    ],
+    "doctor_answer": {
+      "assessment": "Pharmacy and Therapeutics (P&T) committee hospital formulary governance.",
+      "investigations": "Review prescription against National List of Essential Medicines (NLEM).",
+      "management": "Prescribe generic drug names with clear dosage, route, and frequency.",
+      "references": [
+        "National List of Essential Medicines (NLEM) India",
+        "WHO Guidelines on Hospital Pharmacy Standards"
+      ]
+    },
+    "staff_answer": "Accept sealed returned medications with original bill before finalizing discharge bill. Verify cold-chain exclusion rules.",
+    "red_flags": [
+      "Dispensing unverified look-alike/sound-alike (LASA) medications"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT purchase opened or damaged medicine packs",
+      "Do NOT attempt to return opened liquid bottles or temperature-sensitive vaccines"
+    ],
+    "source": "National Pharmaceutical Pricing Authority (NPPA) & NABH Pharmacy Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_diagnostic_reports_digital_download_011",
+    "topic": "Diagnostic Reports Delivery Timelines & Digital Download",
+    "category": "hospital_faq",
+    "keywords": [
+      "test report time",
+      "blood report download online",
+      "download xray report",
+      "lab result sms",
+      "how to get test report"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Routine Blood Tests (CBC, Glucose, Liver/Kidney Function): Results are typically ready in 2 to 4 hours from sample collection.",
+      "Specialized Tests (Thyroid, Hormones, Vitamin D/B12, Viral Markers): Results are ready in 6 to 12 hours.",
+      "Microbiology & Blood Cultures: Preliminary report in 24 to 48 hours; final antibiotic sensitivity report takes 48 to 72 hours for bacterial growth.",
+      "Histopathology / Biopsy: Detailed tissue analysis takes 3 to 5 business days.",
+      "Imaging (X-ray, Ultrasound): Reports available within 2 to 4 hours. CT and MRI reports by consultant radiologists are finalized within 6 to 12 hours (urgent trauma scans read immediately).",
+      "Digital Download: You will receive an SMS with a secure link when reports are verified. Log into the patient portal with your mobile number to view and download PDF reports directly."
+    ],
+    "doctor_answer": {
+      "assessment": "Laboratory Total Testing Process (TTP) and turnaround time (TAT) monitoring.",
+      "investigations": "Internal and external quality control (NABL / CAP standards).",
+      "management": "Automate critical panic value reporting (e.g., Potassium <2.5 or >6.0 mmol/L, Platelets <20,000) to the treating clinician within 15 minutes of verification.",
+      "references": [
+        "NABL 112: Specific Criteria for Accreditation of Medical Laboratories",
+        "ISO 15189 Medical Laboratories Standards"
+      ]
+    },
+    "staff_answer": "Track sample barcodes via LIS. Dispatch automatic SMS upon medical biochemist/pathologist sign-off. Flag panic values to primary nurse immediately.",
+    "red_flags": [
+      "Critical panic lab values uncommunicated to the attending clinician (major patient safety risk)"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT collect reports under wrong UHID",
+      "Do NOT panic over isolated minor borderline test deviations before doctor review"
+    ],
+    "source": "National Accreditation Board for Testing and Calibration Laboratories (NABL) & ISO 15189",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_bed_booking_room_categories_012",
+    "topic": "Bed Booking & Room Category Upgrades / Downgrades",
+    "category": "hospital_faq",
+    "keywords": [
+      "bed booking",
+      "room category upgrade",
+      "private room vs general ward",
+      "icu bed availability",
+      "hospital room rates"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Room Categories: Hospitals typically offer General Ward, Twin Sharing (Semi-Private), Single Private Room, Deluxe Suite, and Intensive Care Units (ICU/HDU).",
+      "Bed allocation depends on medical priority, attending doctor recommendation, and bed availability.",
+      "Room Upgrades/Downgrades: You can submit a room transfer request at the Inpatient Admission Desk. Transfers are processed as soon as the requested category bed is vacant and sanitized.",
+      "Important Billing Note: In many hospital setups and insurance policies, doctor consultation fees, nursing fees, and procedure charges scale with the room category chosen. Check the room tariff schedule carefully before upgrading.",
+      "If admitted via insurance, ensure your policy covers the chosen room category without room-rent capping penalties."
+    ],
+    "doctor_answer": {
+      "assessment": "Inpatient bed management and level of care transitions (step-down from ICU to ward).",
+      "investigations": "None.",
+      "management": "Clinical condition dictates level of care (ICU vs telemetry vs floor). Financial room tier is patient preference.",
+      "references": [
+        "NABH Standards for Hospital Administration and Bed Management"
+      ]
+    },
+    "staff_answer": "Log bed transfer request on Hospital Information System (HIS). Notify housekeeping for terminal bed cleaning upon patient transfer.",
+    "red_flags": [
+      "Premature step-down of hemodynamically unstable patients from ICU to general floor"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT upgrade room category without checking insurance room-rent sub-limits (may trigger proportional deductions)"
+    ],
+    "source": "Hospital Administration Operations Manual & NABH Standards",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_ambulance_dispatch_emergency_transport_013",
+    "topic": "Ambulance Dispatch & Emergency Transport Services",
+    "category": "hospital_faq",
+    "keywords": [
+      "ambulance number",
+      "call hospital ambulance",
+      "icu ambulance with ventilator",
+      "emergency transport",
+      "108 ambulance vs hospital ambulance"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Hospital Emergency Ambulance Hotline: Call the 24/7 dedicated ambulance desk or dial emergency services (108 / 112 in India).",
+      "Basic Life Support (BLS) Ambulances: Equipped with oxygen cylinders, basic first aid, stretcher, and trained emergency medical technicians (EMTs) for stable patients.",
+      "Advanced Life Support (ALS) Ambulances: Equipped with cardiac monitors, transport ventilators, defibrillators, infusion pumps, suction units, and an emergency doctor or trained paramedic for critical patients (heart attacks, strokes, severe trauma).",
+      "When Calling for an Ambulance: Clearly state: exact location/landmark, patient's age and gender, chief complaint (chest pain, unconscious, breathing difficulty), and whether CPR is in progress.",
+      "Keep the caller's phone line clear so the ambulance dispatch driver can reach you for navigation."
+    ],
+    "doctor_answer": {
+      "assessment": "Pre-hospital emergency triage and medical direction.",
+      "investigations": "Pre-hospital 12-lead ECG and telemetry transmission where available.",
+      "management": "Dispatch appropriate ambulance category (ALS vs BLS) within 3 minutes of call receipt. Paramedic initiates online medical direction protocol.",
+      "references": [
+        "National Health Mission (NHM) National Ambulance Service (NAS) Guidelines",
+        "American College of Emergency Physicians (ACEP) EMS Protocols"
+      ]
+    },
+    "staff_answer": "Gather caller details, GPS location, and dispatch nearest appropriate ALS/BLS unit. Alert ER trauma team for incoming ETA.",
+    "red_flags": [
+      "Delaying ambulance dispatch while asking unnecessary administrative or billing questions"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT hang up before dispatcher confirms location",
+      "Do NOT transport unstable trauma patients in private cars if an ALS ambulance is accessible"
+    ],
+    "source": "National Ambulance Service (NAS) Guidelines, MoHFW Government of India",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_blood_bank_donor_criteria_014",
+    "topic": "Blood Bank Services, Donation Criteria & Emergency Requisitions",
+    "category": "hospital_faq",
+    "keywords": [
+      "blood bank",
+      "blood donor criteria",
+      "emergency blood requirement",
+      "blood transfusion hospital",
+      "who can donate blood"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Voluntary Donor Eligibility: Healthy adults aged 18 to 65 years, weight >=45 kg, hemoglobin >=12.5 g/dL, normal pulse and blood pressure.",
+      "Donor Exclusions: Pregnancy/breastfeeding, recent surgery or tattoo/piercing within 6-12 months, active infection, or history of hepatitis B/C, HIV, or heart disease.",
+      "Hospital Blood Bank Operations: Licensed blood banks provide 24/7 cross-matched whole blood and separated components (Packed Red Blood Cells - PRBC, Fresh Frozen Plasma - FFP, Platelet Concentrates, Cryoprecipitate).",
+      "Routine Cross-Matching: Takes approximately 45 to 60 minutes for ABO/Rh typing and antibody screening to ensure absolute recipient safety.",
+      "Emergency 'Uncrossed' Blood: In catastrophic life-threatening hemorrhage (severe trauma, massive obstetric bleeding), O-negative (or O-positive for males/post-menopausal females) uncrossed PRBCs can be released immediately upon the treating doctor's signed emergency requisition."
+    ],
+    "doctor_answer": {
+      "assessment": "Transfusion safety, massive transfusion protocols (MTP), and hemovigilance.",
+      "investigations": "ABO/Rh forward and reverse grouping, unexpected antibody screen, infectious disease serology (HIV, HBV, HCV, Syphilis, Malaria).",
+      "management": "Enforce strict patient bedside double-identification before spiking blood bag. Initiate transfusion within 30 minutes of release from blood bank. Monitor vitals at 0, 15, and 30 minutes.",
+      "references": [
+        "National Blood Transfusion Council (NBTC) Guidelines, NACO / MoHFW India",
+        "AABB Standards for Blood Banks and Transfusion Services"
+      ]
+    },
+    "staff_answer": "Verify patient wristband and requisition slip labels match perfectly with blood bag label. Two nurses must verify cross-match unit number at bedside.",
+    "red_flags": [
+      "Acute hemolytic transfusion reaction (fever, chills, back pain, dark urine, hypotension) - stop transfusion IMMEDIATELY and disconnect line"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT infuse blood without two-person bedside verification",
+      "Do NOT add IV medications directly into the blood transfusion line"
+    ],
+    "source": "National Blood Transfusion Council (NBTC) & Drugs and Cosmetics Act (Blood Rules)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_discharge_process_timelines_015",
+    "topic": "Hospital Discharge Process & Expected Turnaround Time",
+    "category": "hospital_faq",
+    "keywords": [
+      "discharge process",
+      "how long hospital discharge takes",
+      "discharge summary steps",
+      "leaving hospital steps",
+      "discharge medication counseling"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Morning Doctor Clearance: During morning rounds, your treating consultant examines you and formally signs the 'Planned for Discharge' order.",
+      "Discharge Summary Preparation: The medical team writes your comprehensive clinical summary, documenting treatment received, diagnostic summaries, follow-up dates, and home medications (takes 1 to 2 hours).",
+      "Pharmacy & Consumables Clearance: Pharmacy verifies returns of unused sealed medications and prepares your take-home medication kit with instructions.",
+      "Billing Clearance: For cash patients, billing finalizes charges within 1 to 2 hours. For insurance (cashless) patients, the hospital must transmit the final bill and discharge summary to the TPA for final approval, which typically takes 2 to 4 hours.",
+      "Nursing & Medication Counseling: The floor nurse explains your medication schedule, wound dressing care, activity restrictions, and emergency contact numbers, and removes IV lines.",
+      "Total expected duration from doctor's verbal clearance to walking out is typically 3 to 5 hours for cashless insurance cases, and 2 to 3 hours for self-paying patients."
+    ],
+    "doctor_answer": {
+      "assessment": "Safe transition of care and post-discharge continuity.",
+      "investigations": "Verification of vital signs stability prior to sign-off.",
+      "management": "Structured discharge education (medication reconciliation, diet, red flag symptoms requiring immediate return). Ensure follow-up consultation is scheduled.",
+      "references": [
+        "The Joint Commission (TJC) Care Transitions Guidelines",
+        "NABH Patient Care Standards: Discharge Planning"
+      ]
+    },
+    "staff_answer": "Verify IV cannula is removed safely after final settlement. Hand over discharge folder containing original reports, discharge summary, and pharmacy kit.",
+    "red_flags": [
+      "Discharging a patient with unstable vitals, uncontrolled pain, or unaddressed red flag symptoms"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT leave until your nurse reviews home medication dosages with you",
+      "Do NOT discard your discharge summary (vital for future care)"
+    ],
+    "source": "NABH Patient Continuity of Care Standards & TJC Care Transitions Protocols",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_teleconsultation_setup_016",
+    "topic": "Teleconsultation Booking & Video Call Setup",
+    "category": "hospital_faq",
+    "keywords": [
+      "teleconsultation",
+      "video doctor call",
+      "online doctor consult",
+      "how to join video call hospital",
+      "online prescription validity"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Booking: Choose your doctor and schedule a teleconsultation slot via the patient portal or mobile app. Pay consultation fees online.",
+      "Preparation: Write down your symptoms, questions, and current medication list before the call. Keep recent lab reports, discharge papers, or photos of rashes/swelling ready.",
+      "Joining the Call: You will receive an SMS and email with a secure video consultation link 15 minutes before your slot. Click the link to enter the virtual waiting room from your smartphone, tablet, or laptop (ensure camera and microphone permissions are enabled).",
+      "Doctor Video Session: The doctor reviews your history, discusses your symptoms, and explains the clinical assessment.",
+      "Digital Prescription: Immediately after the session, a legally valid digital prescription (e-prescription) signed with the doctor's registration number is generated and available to download from your app or received via SMS/WhatsApp.",
+      "Telemedicine is ideal for follow-ups, report reviews, and non-emergency health concerns; if you have acute emergency symptoms, proceed to the nearest hospital ER instead."
+    ],
+    "doctor_answer": {
+      "assessment": "Telemedicine appropriateness screening and virtual clinical evaluation.",
+      "investigations": "Digital review of patient-uploaded investigation reports.",
+      "management": "Prescribe within Schedule O / List A medications per Telemedicine Practice Guidelines. If condition requires physical palpation or emergency care, advise immediate in-person hospital visit.",
+      "references": [
+        "Telemedicine Practice Guidelines (Board of Governors, in supersession of Medical Council of India / MoHFW India)"
+      ]
+    },
+    "staff_answer": "Test audio/video link in virtual waiting room. Remind patient to ensure stable internet and adequate lighting for video assessment.",
+    "red_flags": [
+      "Attempting to treat acute emergencies (chest pain, stroke symptoms, respiratory distress) via teleconsultation"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT join from noisy, poorly lit environments",
+      "Do NOT use telemedicine for controlled substance refills"
+    ],
+    "source": "Telemedicine Practice Guidelines, MoHFW Government of India (https://www.mohfw.gov.in)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_grievance_ombudsman_feedback_017",
+    "topic": "Patient Grievance Redressal, Ombudsman & Feedback",
+    "category": "hospital_faq",
+    "keywords": [
+      "patient complaint",
+      "complaint against doctor",
+      "hospital grievance",
+      "patient relations officer",
+      "hospital feedback"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Immediate Concern Resolution: Speak directly with the Ward In-Charge Nurse or the Floor Patient Care Executive for real-time resolution of housekeeping, food, or nursing concerns.",
+      "Patient Relations Officer (PRO): If an issue is unresolved, request a visit from the PRO or visit the Patient Relations Office in the main lobby.",
+      "Formal Written Grievance: Submit a formal complaint through the hospital website, mobile app, feedback kiosk, or by emailing the hospital Grievance Redressal Committee.",
+      "Every formal complaint is logged with a unique tracking number, investigated by the Medical Superintendent / Quality Council, and responded to in writing within 5 to 7 working days.",
+      "Anonymous Feedback: You can also drop feedback in the suggestion boxes installed throughout all OPD waiting areas and wards."
+    ],
+    "doctor_answer": {
+      "assessment": "Patient satisfaction index and clinical quality improvement.",
+      "investigations": "Root Cause Analysis (RCA) of reported incident/complaint.",
+      "management": "Corrective and Preventive Action (CAPA) implementation by Hospital Quality Steering Committee.",
+      "references": [
+        "NABH Continuous Quality Improvement (CQI) Standards",
+        "Consumer Protection Act 2019"
+      ]
+    },
+    "staff_answer": "Log complaint in Hospital Grievance Portal. Provide grievance registration token to complainant and notify head of department.",
+    "red_flags": [
+      "Physical violence or verbal harassment against hospital healthcare workers (punishable under Healthcare Protection Acts)"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT hesitate to report safety incidents or medication discrepancies to the quality desk"
+    ],
+    "source": "NABH Quality Standards & Hospital Patient Redressal Operating Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_wheelchair_stretcher_assistance_018",
+    "topic": "Wheelchair & Stretcher Mobility Assistance",
+    "category": "hospital_faq",
+    "keywords": [
+      "wheelchair assistance",
+      "stretcher help hospital",
+      "disabled patient assistance hospital",
+      "elderly walking support hospital"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Wheelchairs and stretchers with dedicated patient care attendants are stationed 24/7 at the Main Hospital Porch, Emergency Entrance, and OPD Drop-off.",
+      "If you or your family member has difficulty walking, pull your car to the designated drop-off zone and inform the security or transport marshal.",
+      "An attendant will assist the patient safely onto a wheelchair or transfer trolley and escort them directly to the ER triage, OPD registration, or ward.",
+      "All hospital buildings feature barrier-free accessibility, including gently sloped ramps, braille and wide-door elevators, and wheelchair-accessible restrooms on every floor.",
+      "Wheelchair assistance is completely complimentary and provided free of cost."
+    ],
+    "doctor_answer": {
+      "assessment": "Fall risk assessment and safe patient handling.",
+      "investigations": "Morse Fall Scale assessment on admission.",
+      "management": "Ensure wheelchair footrests and wheel brakes are engaged during patient transfers. Apply safety belts for disoriented patients.",
+      "references": [
+        "NABH Patient Safety Guidelines: Prevention of Inpatient Falls",
+        "Rights of Persons with Disabilities Act 2016"
+      ]
+    },
+    "staff_answer": "Maintain ready fleet of sanitized wheelchairs at main entrance. Assist patients safely into chairs and engage brake locks.",
+    "red_flags": [
+      "Patient sliding or falling during unassisted wheelchair transfers"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT stand on wheelchair footrests while getting up (causes chair to tip forward)"
+    ],
+    "source": "NABH Patient Safety Guidelines & Hospital Operations Manual",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_dietary_service_outside_food_019",
+    "topic": "Inpatient Dietary Services & Outside Food Policy",
+    "category": "hospital_faq",
+    "keywords": [
+      "hospital food policy",
+      "can i bring outside food to hospital",
+      "patient diet hospital",
+      "therapeutic diet hospital",
+      "canteen food patient"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Personalized Therapeutic Diet: Every inpatient's meal plan is customized by clinical dietitians based on their diagnosis, doctor's orders, allergies, and metabolic needs (e.g., Diabetic Diet, Low-Sodium Cardiac Diet, Renal Diet, High-Protein Diet, Soft/Liquid Diet).",
+      "Meals Provided: Inpatient care includes breakfast, mid-morning snack, lunch, evening tea with snack, and dinner, prepared in an ISO-accredited hospital kitchen.",
+      "Outside Food Policy: Outside home-cooked or restaurant food is strictly prohibited for patients in intensive care units and discouraged in general wards.",
+      "Why Outside Food is Restricted: Unmonitored food can introduce bacterial infections (food poisoning) in vulnerable recovering patients, or contain forbidden high salt, sugar, potassium, or fat that compromises recovery.",
+      "Attendant Meals: Patient attendants and family members can eat at the hospital's public cafeteria or restaurant located on the campus."
+    ],
+    "doctor_answer": {
+      "assessment": "Clinical nutritional assessment and medical nutrition therapy (MNT).",
+      "investigations": "Nutritional risk screening (NRS-2002), serum albumin, electrolyte levels.",
+      "management": "Prescribe condition-specific therapeutic diet. Educate family on why strict adherence to clinical diet is essential for recovery.",
+      "references": [
+        "Indian Dietetic Association (IDA) Guidelines",
+        "ESPEN Guidelines on Clinical Nutrition in Hospitalized Patients"
+      ]
+    },
+    "staff_answer": "Review patient dietary restriction tag. Ensure tray delivery matches dietary order (e.g., strictly salt-restricted or diabetic sugar-free).",
+    "red_flags": [
+      "Aspiration in patients on dysphagia/pureed diet receiving unauthorized solid foods from attendants"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT feed sweets to diabetic patients or high-salt foods to heart failure/hypertension patients in the hospital"
+    ],
+    "source": "Food Safety and Standards Authority of India (FSSAI) & ESPEN Hospital Nutrition Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "faq_infection_control_rules_020",
+    "topic": "Hospital Infection Control Rules & Safety Protocols",
+    "category": "hospital_faq",
+    "keywords": [
+      "hospital infection control",
+      "hand hygiene hospital",
+      "mask rules hospital",
+      "isolation precautions hospital",
+      "prevent infections in hospital"
+    ],
+    "intent": "hospital_information",
+    "patient_answer": [
+      "Hand Hygiene: Clean your hands thoroughly with alcohol-based hand rub or soap and water before entering patient rooms, after using restrooms, and before eating.",
+      "Mask Etiquette: Wear a surgical or N95 mask in high-risk zones, such as the emergency department, chemotherapy day care, bone marrow transplant unit, and intensive care areas.",
+      "Isolation Precautions: If a patient is placed in 'Contact', 'Droplet', or 'Airborne' isolation (indicated by door signs), all visitors and staff MUST wear the required PPE (gloves, yellow gown, mask) before entering.",
+      "Do not sit on the patient's hospital bed or place your bags, street clothes, or food on the bed.",
+      "Do not touch IV lines, urinary catheters, surgical wound dressings, or monitor wires.",
+      "Dispose of biohazard waste (bloody tissues, dressings) only in yellow bins, never in general garbage bins."
+    ],
+    "doctor_answer": {
+      "assessment": "Prevention of Healthcare-Associated Infections (HAIs: CLABSI, CAUTI, VAP, SSI).",
+      "investigations": "Hospital infection control surveillance cultures.",
+      "management": "Strict adherence to WHO 5 Moments for Hand Hygiene, aseptic technique for invasive lines, and appropriate isolation protocol deployment.",
+      "references": [
+        "WHO Guidelines on Hand Hygiene in Health Care",
+        "CDC Guidelines for Isolation Precautions in Hospitals"
+      ]
+    },
+    "staff_answer": "Ensure hand sanitizer dispensers at room entrances are full. Educate visitors on required PPE before entering isolation rooms.",
+    "red_flags": [
+      "Breaching airborne isolation precautions for active open pulmonary tuberculosis or novel respiratory viruses"
+    ],
+    "follow_up_questions": [
+      "Do you need help with appointment booking, billing, or insurance?",
+      "Which department or doctor are you planning to visit?",
+      "Do you have an existing UHID (patient ID) with our hospital?"
+    ],
+    "avoid": [
+      "Do NOT touch surgical dressings or IV cannula sites with unwashed hands",
+      "Do NOT enter isolation rooms without required protective gear"
+    ],
+    "source": "WHO Hand Hygiene Guidelines & CDC Infection Control Standards (https://www.who.int)",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

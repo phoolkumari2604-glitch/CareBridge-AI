@@ -246,7 +246,15 @@ function Sidebar({ open, isOpen, onClose }) {
             }
             onClick={onClose}
           >
-            <UserCircle size={19} />
+            {user?.avatar || user?.photo ? (
+              <img
+                src={user?.avatar || user?.photo}
+                alt={user?.name || "Profile"}
+                style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+              />
+            ) : (
+              <UserCircle size={19} />
+            )}
             <span>Profile</span>
           </NavLink>
 

@@ -114,9 +114,9 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #F87171;
   padding: 0.85rem 1rem;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -125,7 +125,7 @@
 .notifications-error button {
   margin-left: auto;
   background: #dc2626;
-  color: #ffffff;
+  color: #FFFFFF;
   border: none;
   padding: 0.35rem 0.75rem;
   border-radius: 4px;
@@ -134,11 +134,11 @@
 
 /* PROMINENT EMERGENCY SECTION */
 .prominent-emergency-section {
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.35);
   border-radius: 16px;
   padding: 1.25rem 1.5rem;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .emergency-banner-title {
@@ -149,7 +149,7 @@
 }
 
 .emergency-flash {
-  color: #e11d48;
+  color: #F87171;
   animation: pulseEmerg 1.5s infinite;
 }
 
@@ -161,13 +161,13 @@
 .emergency-banner-title h3 {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #9f1239;
+  color: #FFFFFF;
   margin: 0;
 }
 
 .emergency-banner-title p {
   font-size: 0.78rem;
-  color: #be123c;
+  color: #F87171;
   margin: 0.1rem 0 0 0;
 }
 
@@ -178,9 +178,9 @@
 }
 
 .emergency-alert-card {
-  background: #ffffff;
-  border: 1px solid #ffe4e6;
-  border-left: 4px solid #e11d48;
+  background: #111D35;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-left: 4px solid #F87171;
   border-radius: 10px;
   padding: 1rem 1.25rem;
   display: flex;
@@ -197,8 +197,8 @@
 .emergency-tag {
   font-size: 0.65rem;
   font-weight: 800;
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(248, 113, 113, 0.15);
+  color: #F87171;
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
   display: inline-block;
@@ -208,13 +208,13 @@
 .card-left strong {
   display: block;
   font-size: 0.92rem;
-  color: #0f172a;
+  color: #FFFFFF;
   margin-bottom: 0.2rem;
 }
 
 .card-left p {
   font-size: 0.82rem;
-  color: #475569;
+  color: #94A3B8;
   margin: 0 0 0.4rem 0;
 }
 
@@ -223,16 +223,16 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: #64748B;
 }
 
 .ack-alert-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: #f1f5f9;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+  background: #16233F;
+  color: #FFFFFF;
+  border: 1px solid #1F2D4A;
   padding: 0.45rem 0.85rem;
   border-radius: 6px;
   font-size: 0.78rem;
@@ -242,56 +242,59 @@
 }
 
 .ack-alert-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38BDF8;
+  color: #FFFFFF;
 }
 
 /* CATEGORIES BAR */
 .notification-categories-bar {
   display: flex;
   gap: 0.45rem;
-  background: #ffffff;
+  background: #111D35;
   padding: 0.75rem 1rem;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #1F2D4A;
   overflow-x: auto;
 }
 
 .category-pill {
-  border: none;
-  background: #f1f5f9;
+  border: 1px solid #1F2D4A;
+  background: #16233F;
   padding: 0.45rem 0.95rem;
   border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #64748b;
+  color: #94A3B8;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .category-pill:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: rgba(56, 189, 248, 0.12);
+  color: #FFFFFF;
 }
 
 .category-pill.active {
-  background: #0284c7;
-  color: #ffffff;
+  background: #0284C7;
+  border-color: #0284C7;
+  color: #FFFFFF;
 }
 
 .category-pill.emergency.active {
   background: #dc2626;
-  color: #ffffff;
+  border-color: #dc2626;
+  color: #FFFFFF;
 }
 
 /* NOTIFICATIONS LIST */
 .doctor-notification-section {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: #111D35;
+  border: 1px solid #1F2D4A;
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .doctor-section-heading {
@@ -301,13 +304,13 @@
 .doctor-section-heading h2 {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #FFFFFF;
   margin: 0 0 0.15rem 0;
 }
 
 .doctor-section-heading p {
   font-size: 0.8rem;
-  color: #64748b;
+  color: #94A3B8;
   margin: 0;
 }
 
@@ -317,7 +320,7 @@
   justify-content: center;
   gap: 0.75rem;
   padding: 3rem 1.5rem;
-  color: #64748b;
+  color: #94A3B8;
   font-size: 0.85rem;
 }
 
@@ -328,13 +331,13 @@
   justify-content: center;
   padding: 3.5rem 1.5rem;
   text-align: center;
-  color: #94a3b8;
+  color: #94A3B8;
   gap: 0.5rem;
 }
 
 .doctor-notification-empty h3 {
   font-size: 1.05rem;
-  color: #334155;
+  color: #FFFFFF;
   margin: 0.5rem 0 0 0;
 }
 
@@ -354,27 +357,27 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #16233F;
+  border: 1px solid #1F2D4A;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .doctor-notification-card:hover {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  background: #111D35;
+  border-color: #38BDF8;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .doctor-notification-card.unread {
-  background: #ffffff;
-  border-left: 4px solid #0284c7;
+  background: #16233F;
+  border-left: 4px solid #38BDF8;
 }
 
 .doctor-notification-card.emergency-card {
-  border-left: 4px solid #dc2626;
-  background: #fffafa;
+  border-left: 4px solid #F87171;
+  background: rgba(248, 113, 113, 0.08);
 }
 
 .doctor-notification-icon {
@@ -387,11 +390,11 @@
   flex-shrink: 0;
 }
 
-.doctor-notification-icon.emergency { background: #fee2e2; color: #dc2626; }
-.doctor-notification-icon.appointments, .doctor-notification-icon.appointment { background: #e0f2fe; color: #0284c7; }
-.doctor-notification-icon.approvals, .doctor-notification-icon.approval { background: #d1fae5; color: #059669; }
-.doctor-notification-icon.health { background: #ccfbf1; color: #0d9488; }
-.doctor-notification-icon.system { background: #fef3c7; color: #d97706; }
+.doctor-notification-icon.emergency { background: rgba(248, 113, 113, 0.15); color: #F87171; }
+.doctor-notification-icon.appointments, .doctor-notification-icon.appointment { background: rgba(56, 189, 248, 0.12); color: #38BDF8; }
+.doctor-notification-icon.approvals, .doctor-notification-icon.approval { background: rgba(16, 185, 129, 0.12); color: #10B981; }
+.doctor-notification-icon.health { background: rgba(16, 185, 129, 0.12); color: #10B981; }
+.doctor-notification-icon.system { background: rgba(251, 191, 36, 0.12); color: #FBBF24; }
 
 .doctor-notification-content {
   flex: 1;
@@ -406,20 +409,20 @@
 .doctor-notification-top h3 {
   font-size: 0.92rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #FFFFFF;
   margin: 0;
 }
 
 .doctor-unread-dot {
   width: 7px;
   height: 7px;
-  background: #0284c7;
+  background: #38BDF8;
   border-radius: 50%;
 }
 
 .doctor-notification-content p {
   font-size: 0.82rem;
-  color: #475569;
+  color: #94A3B8;
   margin: 0.25rem 0 0.4rem 0;
   line-height: 1.45;
 }
@@ -429,19 +432,19 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: #64748B;
 }
 
 .doctor-notification-close {
   background: none;
   border: none;
-  color: #cbd5e1;
+  color: #64748B;
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 4px;
 }
 
 .doctor-notification-close:hover {
-  color: #64748b;
-  background: #f1f5f9;
+  color: #FFFFFF;
+  background: #111D35;
 }

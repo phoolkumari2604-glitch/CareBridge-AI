@@ -1,0 +1,973 @@
+[
+  {
+    "id": "mh_anxiety_management_001",
+    "topic": "Mental Health: Generalized Anxiety & Worry Management",
+    "category": "mental_health",
+    "keywords": [
+      "anxiety",
+      "feeling anxious",
+      "worry all the time",
+      "nervousness",
+      "ghabrahat",
+      "anxiety attacks",
+      "restless mind"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Practice the '4-7-8 Breathing Technique' to activate your body's relaxation system: inhale quietly through your nose for 4 seconds, hold your breath for 7 seconds, and exhale completely through your mouth making a whoosh sound for 8 seconds. Repeat 4 times.",
+      "Grounding with the 5-4-3-2-1 technique: notice 5 things you can see around you, 4 things you can physically feel, 3 things you can hear, 2 things you can smell, and 1 thing you can taste.",
+      "Limit caffeine and energy drinks: high caffeine spikes adrenaline and physical jitteriness, triggering anxiety episodes.",
+      "Establish a designated 15-minute 'Worry Window' in the early evening: write down your worries and actionable steps, then close the notebook and move on.",
+      "Engage in daily brisk physical activity (walking, running, yoga) which burns off excess stress hormones.",
+      "If persistent anxiety interferes with your work, sleep, or relationships for over 6 months, a mental health professional can provide Cognitive Behavioral Therapy (CBT)."
+    ],
+    "doctor_answer": {
+      "assessment": "Generalized Anxiety Disorder (GAD-7 criteria). Screen for comorbid depression, panic disorder, substance use, and organic medical mimics (hyperthyroidism, pheochromocytoma, arrhythmia).",
+      "investigations": "GAD-7 screening scale, TSH, Serum Electrolytes, Fasting Glucose, 12-lead ECG if palpitations.",
+      "management": "First-line Psychotherapy: Cognitive Behavioral Therapy (CBT: cognitive restructuring, exposure therapy). First-line Pharmacotherapy: SSRIs (Escitalopram 10-20 mg daily or Sertraline 50-100 mg daily) or SNRIs (Venlafaxine/Duloxetine). Avoid long-term Benzodiazepines due to dependence and tolerance.",
+      "references": [
+        "NICE Guideline CG113: Generalised anxiety disorder and panic disorder in adults",
+        "APA Practice Guideline for the Treatment of Patients With Panic Disorder and GAD"
+      ]
+    },
+    "staff_answer": "Priority: Triage Green unless severe panic with chest pain (rule out ACS). Offer quiet, calming space.",
+    "red_flags": [
+      "Chest pain, severe palpitations, and shortness of breath (must rule out Acute Coronary Syndrome first)",
+      "Active suicidal ideation or self-harm thoughts"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT consume excessive caffeine or energy drinks",
+      "Do NOT use alcohol to self-medicate anxiety (triggers severe rebound anxiety)"
+    ],
+    "source": "National Institute for Health and Care Excellence (NICE) CG113 & APA Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_panic_attack_grounding_002",
+    "topic": "Mental Health: Panic Attack First Aid & Immediate Calming",
+    "category": "mental_health",
+    "keywords": [
+      "panic attack",
+      "sudden panic",
+      "heart racing panic",
+      "feeling like dying panic",
+      "panic attack help",
+      "hyperventilating panic"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "REMIND YOURSELF: 'This is a panic attack. It is terrifying, but it is NOT dangerous. My body is in a false alarm fight-or-flight mode. It will peak and pass within 10 to 15 minutes.'",
+      "Box Breathing: Inhale slowly through your nose for 4 counts, hold for 4 counts, exhale through your mouth for 4 counts, and hold empty for 4 counts.",
+      "Anchor yourself physically: plant both feet firmly flat on the floor, place one hand on your chest and one on your belly, and feel the solid ground beneath you.",
+      "Splash cold water on your face or hold an ice cube in your palm: the sudden cold triggers the 'Mammalian Dive Reflex', which instantly slows down your racing heart rate.",
+      "Do NOT breathe into a paper bag (can cause dangerous carbon dioxide buildup); focus on slow, long exhalations through pursed lips.",
+      "Stay where you are until the surge subsides; running away reinforces fear to the brain."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Panic Attack / Panic Disorder (discrete period of intense fear or discomfort peaking within minutes with >=4 symptoms: palpitations, sweating, trembling, dyspnea, choking sensation, chest pain, nausea, dizziness, derealization/depersonalization, fear of losing control or dying).",
+      "investigations": "Rule out acute medical emergencies: 12-lead ECG (arrhythmia/ACS), pulse oximetry, capillary glucose.",
+      "management": "Acute abortive: Compassionate reassurance, guided breathing retraining. Short-term low-dose Benzodiazepine (Lorazepam 0.5-1 mg sublingual) only for acute severe incapacitation. Long-term: CBT focused on interoceptive exposure + SSRIs (Sertraline, Paroxetine, Escitalopram).",
+      "references": [
+        "APA Practice Guideline for Panic Disorder",
+        "NICE Guideline CG113"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow. Check vitals and 12-lead ECG to rule out cardiac event. Guide patient through slow breathing.",
+    "red_flags": [
+      "First-time panic presentation with chest pain and breathlessness (must rule out acute myocardial infarction and pulmonary embolism)",
+      "Loss of consciousness"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT breathe into a paper bag (causes hypoxia and respiratory acidosis)",
+      "Do NOT tell the person 'it is all in your head' (the physical sensations are genuine)"
+    ],
+    "source": "American Psychiatric Association (APA) & NICE Guideline CG113",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_depression_support_003",
+    "topic": "Mental Health: Depression Support & Coping Guidance",
+    "category": "mental_health",
+    "keywords": [
+      "depression",
+      "feeling depressed",
+      "hopelessness",
+      "udasi",
+      "lack of interest",
+      "feeling empty",
+      "loss of motivation"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Depression is a genuine medical condition involving brain neurochemistry, not a personal flaw, laziness, or lack of willpower.",
+      "Take one tiny step at a time ('Micro-Goals'): when getting out of bed feels impossible, focus only on sitting up, drinking a glass of water, or washing your face. Small wins build momentum.",
+      "Behavioral Activation: Do NOT wait to feel motivated before doing things; motivation follows action. Engage in a brief 10-minute walk in natural morning sunlight, even when you do not feel like it.",
+      "Maintain human connection: reach out to one trusted friend, family member, or counselor, even with a short text message; isolation deepens depression.",
+      "Establish a consistent routine: wake up, eat meals, and go to bed at fixed hours every day.",
+      "Reach out to a psychiatrist or clinical psychologist: evidence-based psychotherapy and modern medications can help you feel like yourself again."
+    ],
+    "doctor_answer": {
+      "assessment": "Major Depressive Disorder (DSM-5 MDD: >=5 of 9 symptoms for >=2 weeks with functional impairment, including depressed mood or anhedonia). Stratify severity: Mild, Moderate, Severe with or without psychotic features.",
+      "investigations": "PHQ-9 screening score. Workup for organic mimics: TSH, Vitamin B12, 25-OH Vitamin D, CBC, Serum Electrolytes.",
+      "management": "Mild MDD: Psychotherapy (CBT, Behavioral Activation, Interpersonal Therapy) first-line. Moderate-to-Severe MDD: Combined Psychotherapy + Pharmacotherapy (First-line SSRI: Sertraline, Escitalopram, Fluoxetine; or SNRI: Venlafaxine, Duloxetine). Full therapeutic trial requires 4-8 weeks at therapeutic dosage.",
+      "references": [
+        "APA Practice Guideline for the Treatment of Patients With Major Depressive Disorder",
+        "NICE Guideline NG222: Depression in adults: treatment and management"
+      ]
+    },
+    "staff_answer": "Administer PHQ-9. Screen specifically for suicidal ideation (PHQ-9 item 9). Connect with support.",
+    "red_flags": [
+      "Expressed desire to end life, plans, or access to lethal means (Immediate Crisis Response / Tele-MANAS 14416)",
+      "Severe self-neglect, refusing fluids/food, or psychotic delusions"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT tell a depressed person to 'just cheer up' or 'be positive'",
+      "Do NOT stop prescribed antidepressants abruptly (triggers severe discontinuation syndrome)"
+    ],
+    "source": "American Psychiatric Association (APA) & NICE Guideline NG222",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_suicide_crisis_protocol_004",
+    "topic": "Mental Health: Crisis Response for Suicidal Thoughts & Self-Harm",
+    "category": "mental_health",
+    "keywords": [
+      "suicide",
+      "want to die",
+      "kill myself",
+      "end my life",
+      "suicidal thoughts",
+      "self harm",
+      "atmaghat",
+      "khudkushi",
+      "no reason to live"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "If you are feeling overwhelmed, in deep pain, or thinking of ending your life, PLEASE PAUSE. YOU ARE NOT ALONE, and help is available right now.",
+      "IMMEDIATE CRISIS HELPLINES (Free, Confidential, 24/7 in India):",
+      "  - Tele-MANAS (Government of India National Mental Health Helpline): Dial 14416 or 1800-891-4416.",
+      "  - Kiran Mental Health Helpline: 1800-599-0019.",
+      "  - National Emergency Services: Dial 112.",
+      "Reach out immediately to a trusted family member, close friend, or doctor, and tell them honestly how you are feeling right now.",
+      "Please do not stay alone in this moment; go to the nearest hospital emergency room where compassionate doctors and counselors are waiting to keep you safe.",
+      "Pain and despair can feel permanent, but crisis moments pass, and things can get better with the right support."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Suicidal Crisis / Imminent Self-Harm Risk. High emergency priority. Immediate evaluation of intent, plan, lethality, and access to means.",
+      "investigations": "Urgent risk assessment. Toxicology screen if ingestion suspected. Rule out severe psychiatric decompensation or acute substance intoxication.",
+      "management": "Ensure continuous 1:1 supervision in a secure, ligature-resistant environment. Remove all sharp objects, ropes, and medications. Establish empathetic therapeutic contact. Inpatient psychiatric admission for stabilization. Crisis safety planning. Pharmacotherapy: low-dose atypical antipsychotic or benzodiazepine for severe agitation.",
+      "references": [
+        "WHO Suicide Prevention Protocol",
+        "APA Practice Guideline for the Assessment and Treatment of Patients With Suicidal Behaviors"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red (Immediate Safety). Do NOT leave patient unattended under any circumstance. Assign 1:1 staff. Escort to safe room and notify psychiatrist immediately.",
+    "red_flags": [
+      "Explicit expressed plan and intent to end life",
+      "Current possession of or access to lethal means (pills, weapons, heights)",
+      "Recent severe self-harm or overdose attempt",
+      "Severe agitation, despair, and hopelessness"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "NEVER leave the person alone",
+      "NEVER promise to keep suicide plans a secret",
+      "Do NOT dismiss or minimize suicidal statements"
+    ],
+    "source": "Tele-MANAS (MoHFW India) & World Health Organization (WHO)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. P. Deshmukh (MD Psychiatry)"
+  },
+  {
+    "id": "mh_sleep_problems_insomnia_005",
+    "topic": "Mental Health: Sleep Hygiene & Non-Pharmacological Insomnia Care",
+    "category": "mental_health",
+    "keywords": [
+      "sleep problems",
+      "cannot sleep",
+      "insomnia help",
+      "neend ki samasya",
+      "sleep hygiene tips",
+      "tossing and turning bed"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Reserve your bed exclusively for sleep and intimacy; do not work on laptops, study, or watch television in bed (this trains your brain to associate bed with wakefulness).",
+      "Keep a fixed sleep schedule: wake up and go to sleep at the exact same time every day, including on weekends.",
+      "The 20-Minute Rule: If you cannot fall asleep after approximately 20 minutes, get out of bed, go to a dimly lit room, read a physical book or listen to calming music, and return to bed ONLY when genuinely sleepy.",
+      "Turn off all screens (smartphones, tablets, TV) at least 60 minutes before bedtime; blue screen light suppresses melatonin release.",
+      "Keep your bedroom cool, dark, and quiet; use blackout curtains or an eye mask if needed.",
+      "Avoid caffeine, heavy dinners, and alcohol within 4 to 6 hours of bedtime (alcohol disrupts deep REM sleep and causes midnight waking)."
+    ],
+    "doctor_answer": {
+      "assessment": "Chronic Insomnia Disorder (DSM-5 / ICSD-3: Difficulty initiating or maintaining sleep >=3 nights/week for >=3 months with daytime impairment).",
+      "investigations": "Two-week sleep diary. Screen for Obstructive Sleep Apnea (STOP-BANG score), Restless Legs Syndrome, and Depression.",
+      "management": "First-line Treatment of Choice: Cognitive Behavioral Therapy for Insomnia (CBT-I: stimulus control, sleep restriction, cognitive restructuring, sleep hygiene). CBT-I has superior long-term efficacy compared to hypnotics without adverse risks. Reserve short-term pharmacotherapy (Melatonin 2-3 mg or non-benzodiazepine hypnotics) strictly for acute distress (<2 weeks).",
+      "references": [
+        "AASM Clinical Practice Guideline for Chronic Insomnia in Adults",
+        "ACP Clinical Guideline on Management of Chronic Insomnia"
+      ]
+    },
+    "staff_answer": "Review 24h caffeine intake, screen usage in bed, and sleep diary. Screen for sleep apnea.",
+    "red_flags": [
+      "Severe daytime sleepiness leading to falling asleep while driving or operating machinery",
+      "Loud choking/gasping in sleep (Sleep Apnea)"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT stay in bed tossing and turning for hours (creates conditioned arousal)",
+      "Do NOT use alcohol as a nightcap sleep aid"
+    ],
+    "source": "American Academy of Sleep Medicine (AASM) & American College of Physicians",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_stress_burnout_coping_006",
+    "topic": "Mental Health: Workplace Stress, Burnout & Resilience",
+    "category": "mental_health",
+    "keywords": [
+      "stress",
+      "burnout",
+      "work stress",
+      "mental exhaustion",
+      "overwhelmed",
+      "tanav",
+      "chronic stress"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Burnout is a state of chronic physical, emotional, and mental exhaustion caused by prolonged, unmanaged workplace or caregiving stress.",
+      "Key signs: Feeling chronically depleted of energy, mental detachment or cynicism toward your job, and reduced professional effectiveness.",
+      "Set firm boundaries: establish clear work-life cutoff hours (turn off work emails and notifications after work hours) and take your allotted annual leaves.",
+      "Practice the 'Micro-Break' routine: take a 3 to 5 minute break every 90 minutes to stretch, drink water, look away from screens, and breathe deeply.",
+      "Prioritize non-negotiable recovery activities: regular exercise, hobbies, family meals, and uninterrupted sleep.",
+      "Learn to say 'no' to non-essential commitments; taking on too much without boundaries accelerates burnout.",
+      "Talk to a counselor or mental health therapist to develop cognitive stress management tools."
+    ],
+    "doctor_answer": {
+      "assessment": "Occupational Burnout (ICD-11 QD85: Syndrome conceptualized as resulting from chronic workplace stress that has not been successfully managed). Screen for secondary clinical depression or anxiety.",
+      "investigations": "Maslach Burnout Inventory (MBI) or Copenhagen Burnout Inventory. Screen for comorbid MDD with PHQ-9.",
+      "management": "Individual and organizational interventions: Cognitive behavioral stress inoculation, boundary-setting training, mindfulness-based stress reduction (MBSR), workload restructuring. Psychotherapeutic support.",
+      "references": [
+        "WHO ICD-11 Classification of Burnout",
+        "American Psychological Association (APA) Stress in America Report"
+      ]
+    },
+    "staff_answer": "Assess for physical symptoms of chronic stress (headaches, dyspepsia, hypertension). Inquire about work hours.",
+    "red_flags": [
+      "Burnout progressing to severe Major Depressive Disorder with suicidal ideation",
+      "Substance abuse (alcohol/prescription sedatives) to cope with stress"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT ignore chronic physical exhaustion and emotional numbness",
+      "Do NOT sacrifice sleep to work longer hours"
+    ],
+    "source": "World Health Organization (WHO) & American Psychological Association (APA)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_grief_bereavement_007",
+    "topic": "Mental Health: Grief, Loss & Bereavement Support",
+    "category": "mental_health",
+    "keywords": [
+      "grief",
+      "bereavement",
+      "loss of loved one",
+      "mourning",
+      "shok",
+      "crying over death",
+      "grief support"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Grief is a natural, deeply personal response to losing someone you love; there is no 'right' way to grieve and no fixed timeline.",
+      "Grief often comes in waves: intense pangs of sadness, anger, disbelief, guilt, numbness, or yearning can arise unexpectedly months after the loss.",
+      "Allow yourself to feel your emotions without judgment; crying and talking about the person who passed away is a vital part of emotional healing.",
+      "Take care of physical basics: ensure you eat regular meals, drink water, take prescribed medications, and get some rest even when sleep is fragmented.",
+      "Do not isolate yourself: spend time with supportive friends or family who listen without offering unsolicited advice or clichés.",
+      "Prolonged Grief Disorder: If intense, incapacitating grief, inability to function, or feeling that life is meaningless continues beyond 12 months, specialized grief counseling can provide gentle healing support."
+    ],
+    "doctor_answer": {
+      "assessment": "Normal Bereavement vs Prolonged Grief Disorder (DSM-5-TR / ICD-11: Intense yearning/preoccupation with deceased persisting > 12 months [>6 months in children], accompanied by functional impairment).",
+      "investigations": "Inventory of Complicated Grief (ICG). Screen for secondary Major Depression and suicide risk.",
+      "management": "Normal grief: Empathetic presence, bereavement support groups, psychoeducation. Prolonged Grief Disorder: Prolonged Grief Therapy (PGT / Complicated Grief Therapy: specialized 16-session manualized protocol). Antidepressant pharmacotherapy indicated if comorbid MDD diagnosed.",
+      "references": [
+        "APA Diagnostic and Statistical Manual of Mental Disorders (DSM-5-TR)",
+        "WHO ICD-11 Prolonged Grief Disorder Guidance"
+      ]
+    },
+    "staff_answer": "Provide compassionate, unhurried space. Screen for severe self-neglect or active suicidal thoughts.",
+    "red_flags": [
+      "Active suicidal ideation (desire to die to join the deceased)",
+      "Severe inability to care for oneself or dependent children"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT rush someone through their grief with phrases like 'you need to move on'",
+      "Do NOT make major life-altering decisions (selling house, moving) during the acute grief period"
+    ],
+    "source": "American Psychiatric Association (APA) & Center for Prolonged Grief",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_substance_addiction_support_008",
+    "topic": "Mental Health: Alcohol & Substance Use Support (De-addiction Basics)",
+    "category": "mental_health",
+    "keywords": [
+      "substance abuse",
+      "alcohol addiction",
+      "drug problem",
+      "deaddiction",
+      "sharab chhudana",
+      "alcohol withdrawal",
+      "nashe ki aadat"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Substance use disorder (addiction) is a treatable chronic medical brain disease, NOT a moral failure or lack of character.",
+      "Overcoming addiction requires a structured medical approach combining medically supervised detox, counseling, and long-term relapse prevention.",
+      "DANGER OF SUDDEN ALCOHOL STOPPING (Cold Turkey): If you drink heavily daily, abruptly stopping alcohol completely on your own can trigger life-threatening alcohol withdrawal (Delirium Tremens: severe shaking, hallucinations, high fever, and fatal seizures).",
+      "Medical detox must be supervised by a doctor: safe medications (like Chlordiazepoxide or Diazepam) prevent dangerous withdrawal seizures.",
+      "SUPPORT HELPLINES (Free & Confidential in India):",
+      "  - National Toll-Free Drug De-Addiction Helpline (KIRAN): 1800-11-0031.",
+      "  - Tele-MANAS Mental Health Helpline: 14416.",
+      "Join local peer support groups like Alcoholics Anonymous (AA) or Narcotics Anonymous (NA); sharing recovery with peers who understand is one of the most powerful tools for lifelong sobriety."
+    ],
+    "doctor_answer": {
+      "assessment": "Substance Use Disorder (DSM-5 criteria: Mild, Moderate, Severe). Stratify alcohol withdrawal risk using CIWA-Ar scale (Clinical Institute Withdrawal Assessment for Alcohol).",
+      "investigations": "CIWA-Ar score, LFTs (AST/ALT ratio > 2, GGT), CBC (MCV), PT/INR, Electrolytes, Blood Alcohol Level, Urine drug screen.",
+      "management": "Acute Alcohol Withdrawal: Medically supervised detox with Benzodiazepines (Diazepam or Chlordiazepoxide symptom-triggered protocol). IV Thiamine (100-500 mg) BEFORE any IV glucose to prevent Wernicke-Korsakoff Encephalopathy. Relapse Prevention Pharmacotherapy: Disulfiram, Acamprosate, or Naltrexone. Motivational Interviewing (MI), CBT, and 12-Step facilitation.",
+      "references": [
+        "WHO Guidelines for the Psychosocially Assisted Pharmacological Treatment of Opioid and Alcohol Dependence",
+        "ASAM Clinical Practice Guideline on Alcohol Withdrawal Management"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange/Red if active alcohol withdrawal tremors, tachycardia, or hallucinations. Administer Thiamine before glucose.",
+    "red_flags": [
+      "Severe alcohol withdrawal: coarse hand tremors, auditory/visual hallucinations, fever, or seizures (Delirium Tremens - Medical Emergency)",
+      "Opioid overdose: pinpoint pupils, unconsciousness, and respiratory depression (STAT IV Naloxone)"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "NEVER abruptly stop heavy daily alcohol without medical supervision (severe withdrawal can be fatal)",
+      "NEVER give glucose fluids to an alcoholic without administering Thiamine first (precipitates Wernicke's encephalopathy)"
+    ],
+    "source": "World Health Organization (WHO) & American Society of Addiction Medicine (ASAM)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_ocd_intrusive_thoughts_009",
+    "topic": "Mental Health: Obsessive-Compulsive Disorder (OCD) & Intrusive Thoughts",
+    "category": "mental_health",
+    "keywords": [
+      "ocd",
+      "intrusive thoughts",
+      "obsessive compulsive",
+      "repeated checking",
+      "washing hands repeatedly",
+      "bar bar hath dhona"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "OCD involves two components: Obsessions (distressing, unwanted intrusive thoughts, images, or urges that pop into the head) and Compulsions (repetitive behaviors or mental rituals done to reduce the anxiety caused by the obsession).",
+      "Common patterns: excessive handwashing or cleaning fear of contamination, repeatedly checking locks/stoves, counting or tapping rituals, symmetry/arranging, and terrifying intrusive thoughts of causing accidental harm.",
+      "Key insight: Compulsions only provide brief, temporary relief; performing the ritual actually feeds the obsession and makes it stronger over time.",
+      "First-line gold standard therapy is Exposure and Response Prevention (ERP): a specialized form of therapy where you gradually face the anxiety trigger without performing the compulsive ritual.",
+      "Consult a psychiatrist: High-dose SSRI medications combined with ERP therapy can significantly decrease the intensity and frequency of intrusive thoughts."
+    ],
+    "doctor_answer": {
+      "assessment": "Obsessive-Compulsive Disorder (DSM-5 criteria). Quantify severity using Yale-Brown Obsessive Compulsive Scale (Y-BOCS: 0-7 subclinical, 8-15 mild, 16-23 moderate, 24-31 severe, 32-40 extreme).",
+      "investigations": "Y-BOCS assessment scale. Screen for comorbid depression, tic disorders, and body dysmorphic disorder.",
+      "management": "First-line Psychological: Exposure and Response Prevention (ERP) behavioral therapy. First-line Pharmacological: High-dose SSRIs (Fluoxetine 40-80 mg, Sertraline 150-200 mg, Fluvoxamine 150-300 mg daily) requiring longer trials (10-12 weeks for clinical response). Second-line: Clomipramine or augmentation with atypical antipsychotics (Aripiprazole / Risperidone).",
+      "references": [
+        "APA Practice Guideline for the Treatment of Patients With Obsessive-Compulsive Disorder",
+        "NICE Guideline CG31: Obsessive-compulsive disorder and body dysmorphic disorder"
+      ]
+    },
+    "staff_answer": "Administer Y-BOCS. Inquire about time consumed by compulsions daily (>1 hour indicates functional impairment).",
+    "red_flags": [
+      "Severe OCD with raw bleeding skin from continuous handwashing",
+      "Severe comorbid depression with active suicidal thoughts"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT participate in or endlessly reassure a loved one's compulsive rituals (reassurance feeds the OCD cycle)",
+      "Do NOT stop ERP homework exercises"
+    ],
+    "source": "American Psychiatric Association (APA) & NICE Guideline CG31",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_ptsd_trauma_care_010",
+    "topic": "Mental Health: Post-Traumatic Stress Disorder (PTSD) & Trauma Recovery",
+    "category": "mental_health",
+    "keywords": [
+      "ptsd",
+      "trauma",
+      "flashbacks",
+      "post traumatic stress",
+      "bad memories accident",
+      "trauma triggers"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "PTSD can develop after experiencing or witnessing a terrifying, life-threatening event (serious road accident, violent assault, natural disaster, abuse, or war combat).",
+      "Key symptoms:",
+      "  - Re-experiencing: Intrusive memories, recurrent nightmares, or sudden vivid flashbacks where you feel the event is happening all over again.",
+      "  - Avoidance: Staying away from places, people, conversations, or thoughts that trigger memories of the trauma.",
+      "  - Hyperarousal: Feeling constantly on edge, exaggerated startle reaction (jumping at loud noises), irritability, and hypervigilance.",
+      "  - Negative changes in thoughts: Feeling detached from loved ones, memory gaps regarding the trauma, or intense guilt and shame.",
+      "Trauma recovery is possible: Trauma-focused Cognitive Behavioral Therapy (TF-CBT) and Eye Movement Desensitization and Reprocessing (EMDR) help your brain safely reprocess and store the traumatic memory so it no longer triggers physical panic."
+    ],
+    "doctor_answer": {
+      "assessment": "Post-Traumatic Stress Disorder (DSM-5 criteria: Exposure to actual or threatened death, serious injury, or sexual violence, with intrusion, avoidance, negative alterations in cognition/mood, and hyperarousal persisting > 1 month).",
+      "investigations": "PCL-5 (PTSD Checklist for DSM-5). Screen for comorbid depression, traumatic brain injury (TBI), and substance abuse.",
+      "management": "First-line Evidence-Based Psychotherapy: Trauma-Focused CBT (TF-CBT), Prolonged Exposure (PE), or Eye Movement Desensitization and Reprocessing (EMDR). First-line Pharmacotherapy: SSRIs (Sertraline, Paroxetine) or SNRI (Venlafaxine). Prazosin (alpha-1 blocker 1-10 mg bedtime) for severe trauma-related nightmares. Avoid Benzodiazepines (worsens PTSD recovery).",
+      "references": [
+        "VA/DoD Clinical Practice Guideline for the Management of Posttraumatic Stress Disorder",
+        "APA Practice Guideline for the Treatment of PTSD"
+      ]
+    },
+    "staff_answer": "Administer PCL-5 checklist. Provide calm, trauma-informed care. Screen for nightmares.",
+    "red_flags": [
+      "Acute trauma flashbacks with extreme dissociative state or self-harm",
+      "Severe active suicidal ideation in PTSD patients"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT use Benzodiazepines (Alprazolam, Clonazepam) for PTSD (blocks therapeutic extinction and worsens trauma outcomes)",
+      "Do NOT force someone to recount traumatic details before they feel emotionally safe"
+    ],
+    "source": "Veterans Affairs / Department of Defense (VA/DoD) & APA Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_adhd_adult_child_011",
+    "topic": "Mental Health: ADHD Symptoms & Executive Function Support",
+    "category": "mental_health",
+    "keywords": [
+      "adhd",
+      "attention deficit",
+      "cannot focus",
+      "hyperactivity child",
+      "adult adhd",
+      "distracted mind"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Attention-Deficit/Hyperactivity Disorder (ADHD) is a neurodevelopmental condition involving differences in brain dopamine and executive function circuits.",
+      "Core presentations:",
+      "  - Inattentive: Difficulty sustaining attention, making careless mistakes, losing daily items (keys, wallet, phone), disorganization, and constant daydreaming.",
+      "  - Hyperactive-Impulsive: Inability to sit still, constant fidgeting, restlessness, interrupting conversations, and impulsive decision-making.",
+      "Practical executive function strategies:",
+      "  - Externalize your memory: Use digital phone reminders, alarms, visual sticky notes, and a single master to-do list.",
+      "  - The 'Body Doubling' technique: Working on boring or difficult tasks in the physical or virtual presence of another focused person.",
+      "  - Break large tasks into tiny 15-minute chunks with a visible timer (Pomodoro technique).",
+      "Comprehensive clinical evaluation by a psychiatrist or psychologist can determine if ADHD coaching and medical treatments (stimulants or non-stimulants) are appropriate."
+    ],
+    "doctor_answer": {
+      "assessment": "Attention-Deficit/Hyperactivity Disorder (DSM-5: >=6 symptoms of inattention and/or hyperactivity-impulsivity in children, >=5 in adults, present across >=2 settings, onset before age 12). Subtypes: Combined, Predominantly Inattentive, Predominantly Hyperactive-Impulsive.",
+      "investigations": "Standardized rating scales (Vanderbilt Assessment Scales for children; ASRS-v1.1 for adults) completed by patient, parents, and teachers. Rule out sensory deficits (audiometry, vision).",
+      "management": "Children <6y: Parent Training in Behavior Management (PTBM) first-line. Children >=6y and Adults: Multimodal therapy combining Behavioral therapy/Coaching + Pharmacotherapy (First-line stimulants: Methylphenidate; Non-stimulants: Atomoxetine, Clonidine, Guanfacine).",
+      "references": [
+        "AAP Clinical Practice Guideline for the Diagnosis, Evaluation, and Treatment of ADHD",
+        "NICE Guideline NG87: Attention deficit hyperactivity disorder"
+      ]
+    },
+    "staff_answer": "Collect rating scales from both home and school/work settings. Screen for comorbid learning disabilities or anxiety.",
+    "red_flags": [
+      "Severe impulsive behaviors causing severe physical injury or reckless driving",
+      "Marked emotional dysregulation with aggressive outbursts"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT dismiss ADHD as 'bad parenting' or 'laziness'",
+      "Do NOT start stimulant medications without baseline cardiovascular screening (BP, pulse, family history of sudden cardiac death)"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & NICE Guideline NG87",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_bipolar_mood_swings_012",
+    "topic": "Mental Health: Bipolar Disorder & Managing Extreme Mood Swings",
+    "category": "mental_health",
+    "keywords": [
+      "bipolar",
+      "mood swings extreme",
+      "mania",
+      "bipolar depression",
+      "bipolar mood disorder"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Bipolar disorder involves dramatic, distinct shifts in mood, energy, and activity levels, alternating between manic (or hypomanic) highs and depressive lows.",
+      "Manic Episode features: Abnormally elevated, euphoric, or irritable mood, grand plans, racing thoughts, talking very rapidly, needing very little sleep (feeling energized after 2 hours), and impulsive risky behaviors (excessive spending, reckless driving).",
+      "Depressive Episode features: Extreme sadness, total lack of energy, inability to enjoy anything, and feelings of worthlessness.",
+      "Key routine for stability: Maintain strict social rhythm stability: wake up, eat meals, and go to bed at the exact same hours every single day; disrupted sleep cycles are a major trigger for manic relapses.",
+      "Never stop mood-stabilizing medications (such as Lithium, Valproate, or Quetiapine) without consulting your psychiatrist; stopping pills during a stable period frequently precipitates severe manic episodes."
+    ],
+    "doctor_answer": {
+      "assessment": "Bipolar I Disorder (at least one manic episode) vs Bipolar II Disorder (hypomanic episode and major depressive episode, no full mania) vs Cyclothymic Disorder.",
+      "investigations": "Mood charting. Rule out secondary medical mania: TSH, toxicology screen, brain MRI. Baseline Renal function, electrolytes, and thyroid panel (prior to Lithium); LFTs and platelets (prior to Valproate).",
+      "management": "Acute Mania: Mood stabilizer (Lithium, Divalproex Sodium) + Second-generation atypical antipsychotic (Quetiapine, Olanzapine, Aripiprazole). Bipolar Depression: Quetiapine, Lurasidone, or Olanzapine-Fluoxetine combination (avoid antidepressant monotherapy due to risk of manic switch). Maintenance: Lifelong mood stabilizer therapy + Interpersonal and Social Rhythm Therapy (IPSRT).",
+      "references": [
+        "CANMAT/ISBD Guidelines for the Management of Patients with Bipolar Disorder",
+        "APA Practice Guideline for the Treatment of Patients With Bipolar Disorder"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange/Red for acute mania with psychosis or high-risk reckless behavior. Check medication adherence.",
+    "red_flags": [
+      "Acute mania with psychotic delusions, extreme agitation, or severe financial/physical risk-taking",
+      "Severe depressive phase with high suicide risk"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "NEVER treat bipolar depression with antidepressant pills alone without a mood stabilizer (triggers rapid manic switch)",
+      "Do NOT stop mood stabilizers when feeling well"
+    ],
+    "source": "CANMAT & International Society for Bipolar Disorders (ISBD) Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_eating_disorders_basics_013",
+    "topic": "Mental Health: Eating Disorders (Anorexia, Bulimia & Binge Eating)",
+    "category": "mental_health",
+    "keywords": [
+      "eating disorder",
+      "anorexia",
+      "bulimia",
+      "binge eating",
+      "vomiting after eating",
+      "fear of gaining weight"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Eating disorders are complex, serious mental illnesses characterized by severe disturbances in eating behaviors and distressing thoughts and emotions related to food, weight, and body shape.",
+      "Anorexia Nervosa: Severe restriction of food intake, intense fear of gaining weight, and distorted body image leading to dangerous, life-threatening low body weight.",
+      "Bulimia Nervosa: Recurrent episodes of eating large amounts of food (bingeing) followed by compensatory behaviors (purging through self-induced vomiting, laxative abuse, or extreme exercise).",
+      "Binge Eating Disorder: Frequent episodes of eating uncontrollably in a short time to the point of painful fullness, accompanied by deep shame and distress, without purging.",
+      "Physical dangers include heart rhythm collapse, electrolyte imbalances, stomach tears, severe bone loss, and kidney failure.",
+      "Recovery requires a compassionate multidisciplinary team: medical stabilization, psychological therapy, and specialized nutritional rehabilitation."
+    ],
+    "doctor_answer": {
+      "assessment": "Eating Disorders (DSM-5: Anorexia Nervosa, Bulimia Nervosa, Binge Eating Disorder, ARFID). High mortality among all psychiatric conditions.",
+      "investigations": "Comprehensive metabolic panel, Serum Electrolytes (hypokalemia, hypochloremic metabolic alkalosis from vomiting), 12-lead ECG (QT prolongation, bradycardia, arrhythmias), CBC, Phosphorus (screen for refeeding syndrome), DEXA scan.",
+      "management": "Medical stabilization criteria: HR < 40 bpm, BP < 90/60, QTc > 460 ms, K+ < 3.0 mEq/L, BMI < 13-14 kg/m2 (requires inpatient admission). Nutritional rehabilitation: gradual caloric refeeding with close phosphate monitoring (prevent Refeeding Syndrome). Psychotherapy: Family-Based Treatment (FBT / Maudsley) for adolescents; Enhanced CBT (CBT-E) for adults. Fluoxetine for Bulimia; Lisdexamfetamine for Binge Eating.",
+      "references": [
+        "APA Practice Guideline for the Treatment of Patients With Eating Disorders (2023)",
+        "NICE Guideline NG69: Eating disorders: recognition and treatment"
+      ]
+    },
+    "staff_answer": "Check orthostatic vitals, core temperature, and 12-lead ECG. Inspect knuckles for Russell's sign (abrasions from self-induced vomiting).",
+    "red_flags": [
+      "Heart rate < 40 bpm, SBP < 80 mmHg, or temperature < 35.5°C",
+      "Serum Potassium < 2.5 mEq/L (Cardiac Arrest Risk)",
+      "Severe acute hematemesis (Mallory-Weiss esophageal tear)"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT rapidly refeed a severely malnourished individual without monitoring serum phosphate (fatal Refeeding Syndrome risk)",
+      "Do NOT comment negatively on body weight or appearance"
+    ],
+    "source": "American Psychiatric Association (APA) & NICE Guideline NG69",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_social_anxiety_shyness_014",
+    "topic": "Mental Health: Social Anxiety Disorder vs Shyness",
+    "category": "mental_health",
+    "keywords": [
+      "social anxiety",
+      "fear of talking in public",
+      "social phobia",
+      "shy anxiety",
+      "fear of embarrassment"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Shyness is a normal personality trait where someone feels slightly hesitant or quiet in new social situations, but it does not prevent them from living their life.",
+      "Social Anxiety Disorder is an intense, persistent, irrational fear of being watched, judged, scrutinized, or humiliated by others in everyday social or performance situations.",
+      "Physical symptoms: Blushing, profuse sweating, trembling hands or voice, racing heart, and nausea whenever required to speak, eat, or interact in front of others.",
+      "Avoidance trap: Avoiding social situations provides temporary relief, but it reinforces to your brain that social situations are dangerous, shrinking your world.",
+      "Graduated Exposure: Make a hierarchy list of social situations from easiest to hardest (e.g. saying 'hello' to a shopkeeper, then asking for directions, then speaking in a meeting); practice facing them step by step.",
+      "Cognitive Behavioral Therapy (CBT) and public speaking exposure groups are highly effective in building confident social comfort."
+    ],
+    "doctor_answer": {
+      "assessment": "Social Anxiety Disorder (Social Phobia, DSM-5: Marked fear or anxiety about one or more social situations in which the individual is exposed to possible scrutiny by others, lasting >= 6 months).",
+      "investigations": "Liebowitz Social Anxiety Scale (LSAS). Screen for comorbid depression and alcohol use disorder (common self-medication).",
+      "management": "First-line Psychological: Individual Cognitive Behavioral Therapy (CBT: Clark & Wells or Heimberg models focusing on video feedback, attention training, and in-vivo behavioral experiments). First-line Pharmacotherapy: SSRIs (Sertraline, Paroxetine, Escitalopram) or SNRIs (Venlafaxine). Beta-blockers (Propranolol 10-40 mg 1h prior) for performance-only social anxiety (e.g. public speaking).",
+      "references": [
+        "NICE Guideline CG159: Social anxiety disorder: recognition, assessment and treatment",
+        "APA Practice Guidelines for Social Anxiety"
+      ]
+    },
+    "staff_answer": "Administer Liebowitz Social Anxiety Scale (LSAS). Inquire about alcohol use to cope socially.",
+    "red_flags": [
+      "Severe social isolation leading to total home confinement (Agoraphobia)",
+      "Secondary Major Depression with suicidal thoughts"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT use alcohol to calm nerves before social events (rapidly leads to alcohol dependency)",
+      "Do NOT avoid social encounters entirely"
+    ],
+    "source": "NICE Clinical Guideline CG159 & American Psychiatric Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_mindfulness_meditation_stress_015",
+    "topic": "Mental Health: Mindfulness, Meditation & Relaxation Techniques",
+    "category": "mental_health",
+    "keywords": [
+      "mindfulness",
+      "meditation stress",
+      "deep breathing relaxation",
+      "dhyan lagana",
+      "stress relief exercises"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Mindfulness is the practice of paying attention to the present moment on purpose, without judgment, rather than getting lost in regrets about the past or worries about the future.",
+      "Progressive Muscle Relaxation (PMR): Systematically tense each muscle group in your body (feet, calves, thighs, abdomen, shoulders, face) tightly for 5 seconds, then consciously release and relax them for 15 seconds. Notice the sensation of physical tension melting away.",
+      "Mindful Daily Habits: Practice being fully present during simple everyday tasks: feel the warm water and smell of soap while washing dishes, or notice the flavors, textures, and aromas of each bite during meals.",
+      "Daily 10-minute meditation: Sit quietly, focus your attention on the physical sensation of your breath entering and leaving your nostrils. Whenever your mind wanders (which is completely normal), gently guide your attention back to your breath without frustration.",
+      "Scientific benefits: Regular mindfulness practice physically shrinks the amygdala (the brain's fear center) and strengthens prefrontal cortex emotional control."
+    ],
+    "doctor_answer": {
+      "assessment": "Mindfulness-Based Interventions (MBI: Mindfulness-Based Stress Reduction [MBSR] and Mindfulness-Based Cognitive Therapy [MBCT]).",
+      "investigations": "Perceived Stress Scale (PSS).",
+      "management": "Incorporate structured mindfulness training (8-week MBSR program), diaphragmatic breathing, and Progressive Muscle Relaxation (PMR) into comprehensive management for stress, mild-moderate anxiety, chronic pain, and prevention of depressive relapse (MBCT has efficacy equivalent to maintenance antidepressants).",
+      "references": [
+        "Kabat-Zinn Mindfulness-Based Interventions Evidence Review",
+        "NICE Guideline on Depression: MBCT Recommendations"
+      ]
+    },
+    "staff_answer": "Demonstrate diaphragmatic breathing and progressive muscle relaxation technique.",
+    "red_flags": [
+      "Patient experiencing acute psychosis, severe dissociative episode, or severe PTSD flashbacks during meditation (requires trauma-adapted grounding rather than open mindfulness)"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT expect your mind to become completely blank (the goal of meditation is noticing thoughts without judgment, not stopping thoughts)",
+      "Do NOT give up after a few days"
+    ],
+    "source": "NICE Clinical Guidelines & Harvard Health Publishing on Mindfulness",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_caregiver_stress_support_016",
+    "topic": "Mental Health: Family Caregiver Burnout & Respite Support",
+    "category": "mental_health",
+    "keywords": [
+      "caregiver burnout",
+      "caring for sick parent stress",
+      "caregiver exhaustion",
+      "looking after dementia parent stress"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Caring for a chronically ill, bedridden, or dementia-affected loved one is an immense emotional and physical commitment that frequently leads to caregiver burnout.",
+      "Signs of caregiver strain: Chronic exhaustion, feeling constantly irritable or resentful, sleep disturbances, withdrawing from friends, and feeling guilty whenever you take a break.",
+      "Remember the Airplane Oxygen Mask Rule: You MUST put on your own oxygen mask first before assisting others. You cannot care for someone else if you completely burn out.",
+      "Accept and ask for help: Create a specific list of tasks (picking up groceries, sitting with the patient for 2 hours, cooking a meal) that friends and relatives can take over.",
+      "Utilize Respite Care: Explore day-care centers, home nursing attendants, or short-term respite facilities so you can take a scheduled weekend break to rest and recharge.",
+      "Join a caregiver support group: Sharing practical tips and venting with other families facing the exact same challenges reduces isolation."
+    ],
+    "doctor_answer": {
+      "assessment": "Caregiver Burden Assessment in Chronic Illness / Dementia. Quantify burden using Zarit Burden Interview (ZBI score > 21 indicates significant caregiver burden).",
+      "investigations": "Zarit Burden Interview (ZBI), PHQ-9 and GAD-7 screening for caregiver.",
+      "management": "Multicomponent caregiver interventions: Psychoeducation on disease trajectory, problem-solving skills training, stress management, formal respite care linkage, support group participation. Treat caregiver depression/anxiety.",
+      "references": [
+        "Alzheimer's Association Caregiver Stress and Burnout Guidelines",
+        "WHO Global Action Plan on the Public Health Response to Dementia"
+      ]
+    },
+    "staff_answer": "Administer Zarit Burden Interview to family caregivers. Provide respite care contacts.",
+    "red_flags": [
+      "Caregiver expressing severe depressive hopelessness, suicidal thoughts, or signs of elder abuse/neglect from exhaustion"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT feel guilty for taking personal time away from caregiving",
+      "Do NOT attempt to handle 24/7 chronic care alone without assistance"
+    ],
+    "source": "Alzheimer's Association & World Health Organization (WHO)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_anger_management_017",
+    "topic": "Mental Health: Anger Management & Emotional Regulation",
+    "category": "mental_health",
+    "keywords": [
+      "anger management",
+      "gussa control",
+      "short tempered",
+      "rage outbursts",
+      "controlling temper"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Anger is a natural human emotion; however, uncontrollable outbursts, verbal rage, and physical aggression harm your heart health, relationships, and career.",
+      "Recognize early physical warning signs: clenched fists, tight jaw, grinding teeth, rapid heartbeat, sweating, and feeling hot in your face.",
+      "The 'Time-Out' Strategy: When you notice anger rising, say 'I need a 10-minute break before we continue this conversation', step away into another room, and let your adrenaline drop.",
+      "The 10-Second Count: Before responding or typing a heated reply, take a slow deep breath and count slowly from 1 to 10 in your head.",
+      "Use 'I' statements instead of 'You' statements: Say 'I feel overwhelmed when dishes are left in the sink' instead of 'You never do anything around here and you are lazy.'",
+      "Cognitive reframing: Ask yourself: 'Will this matter 5 years from now? Is shouting going to solve this problem?'",
+      "Consult a counselor for Cognitive Behavioral Anger Management if anger causes relationship breakdowns, workplace trouble, or physical aggression."
+    ],
+    "doctor_answer": {
+      "assessment": "Intermittent Explosive Disorder (DSM-5 criteria) vs Emotional Dysregulation secondary to ADHD, Bipolar Disorder, Borderline Personality, or chronic stress.",
+      "investigations": "Clinical psychiatric evaluation. Screen for substance abuse (alcohol disinhibition).",
+      "management": "Cognitive Behavioral Therapy for Anger (identifying cognitive distortions, physiological arousal awareness, assertion training, relaxation). Pharmacotherapy (SSRIs like Fluoxetine or mood stabilizers) if severe impulsive aggression / Intermittent Explosive Disorder.",
+      "references": [
+        "APA Practice Guidelines on Anger Management",
+        "NICE Guidelines on Antisocial Personality and Aggression"
+      ]
+    },
+    "staff_answer": "Assess for domestic violence risk, impulsivity, and substance use.",
+    "red_flags": [
+      "Physical violence, domestic abuse, or weapon brandishing",
+      "Severe rage accompanied by homicidal threats"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT punch walls or throw items to 'vent anger' (research shows physical venting actually reinforces aggressive neurological pathways)",
+      "Do NOT engage in arguments while under the influence of alcohol"
+    ],
+    "source": "American Psychological Association (APA) & NICE Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_seasonal_affective_disorder_018",
+    "topic": "Mental Health: Seasonal Affective Disorder (Winter Blues / SAD)",
+    "category": "mental_health",
+    "keywords": [
+      "sad",
+      "winter depression",
+      "seasonal affective disorder",
+      "winter blues",
+      "feeling down in winter"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Seasonal Affective Disorder (SAD) is a type of depression that follows a seasonal pattern, typically beginning in late autumn or winter when daylight hours become short and fading in spring.",
+      "Common signs: Low energy, persistent sadness, oversleeping and difficulty waking up in the morning, intense carbohydrate cravings (bread, sweets, pasta), and winter weight gain.",
+      "Maximized daylight exposure: Open all window blinds during the day, sit near bright windows, and take a 30-minute outdoor walk in the morning sunlight.",
+      "Light Therapy (Phototherapy): Sitting in front of a specialized 10,000-lux light box for 20 to 30 minutes every morning significantly resets circadian rhythms and relieves winter depression.",
+      "Engage in regular aerobic exercise and keep connected with friends and family during winter months.",
+      "Consult a doctor: Light therapy, counseling, and antidepressant medications can keep your mood and energy bright throughout winter."
+    ],
+    "doctor_answer": {
+      "assessment": "Major Depressive Disorder with Seasonal Pattern (Seasonal Affective Disorder - SAD). Melatonin phase-shift and circadian misalignment secondary to reduced photoperiod.",
+      "investigations": "PHQ-9 screening, TSH (rule out winter hypothyroidism), 25-OH Vitamin D.",
+      "management": "First-line Treatment: Bright Light Therapy (10,000 lux broad-spectrum white light box for 30 minutes every morning upon waking). Second-line / Adjunctive: CBT for SAD (CBT-SAD) and SSRIs (Bupropion XL or Sertraline). Vitamin D3 supplementation.",
+      "references": [
+        "American Psychiatric Association Practice Guidelines for Depression",
+        "CANMAT Guidelines on Seasonal Affective Disorder"
+      ]
+    },
+    "staff_answer": "Review timing of light therapy (early morning). Verify 10,000-lux UV-filtered light box specifications.",
+    "red_flags": [
+      "Severe seasonal depression with suicidal thoughts",
+      "Hypomanic switch triggered by bright light therapy in unsuspected bipolar disorder"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT use standard tanning beds for light therapy (dangerous UV radiation damages eyes and causes skin cancer)",
+      "Do NOT use light boxes late in the evening (causes insomnia)"
+    ],
+    "source": "American Psychiatric Association (APA) & CANMAT Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_body_dysmorphia_self_esteem_019",
+    "topic": "Mental Health: Body Dysmorphic Disorder (BDD) & Self-Esteem",
+    "category": "mental_health",
+    "keywords": [
+      "body dysmorphic disorder",
+      "bdd",
+      "obsessed with appearance",
+      "ugly complex",
+      "mirror checking obsession"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Body Dysmorphic Disorder (BDD) is a mental health condition where a person spends hours every day worrying about flaws in their appearance that are either unnoticeable or appear very minor to others.",
+      "Common obsessions: Skin blemishes, nose shape, hair thinning, facial symmetry, or body build.",
+      "Repetitive compulsive behaviors: Constantly checking mirrors (or completely avoiding mirrors), excessive grooming, picking at skin, seeking constant reassurance, or comparing appearance to others on social media.",
+      "Important insight: Undergoing repeated cosmetic surgeries or dermatological procedures does NOT cure BDD; the brain quickly transfers the obsession to another body part.",
+      "Reduce social media triggers: unfollow beauty accounts that trigger self-comparison and limit daily screen time.",
+      "Specialized treatment: Cognitive Behavioral Therapy (CBT) focused on perception restructuring and ERP is highly effective in freeing your mind from appearance obsessions."
+    ],
+    "doctor_answer": {
+      "assessment": "Body Dysmorphic Disorder (DSM-5: Preoccupation with one or more perceived defects or flaws in physical appearance that are not observable or appear slight to others, causing clinically significant distress/impairment). Differentiate from eating disorders.",
+      "investigations": "BDD Questionnaire (BDDQ) or Yale-Brown Obsessive Compulsive Scale Modified for BDD (BDD-YBOCS).",
+      "management": "First-line Psychological: Cognitive Behavioral Therapy tailored for BDD (perceptual retraining, mirror retraining, ERP). First-line Pharmacological: High-dose SSRIs (Fluoxetine, Sertraline, Escitalopram). Avoid referring for cosmetic surgery or aesthetic procedures (ineffective and associated with post-procedure dissatisfaction and litigation).",
+      "references": [
+        "NICE Guideline CG31: Body Dysmorphic Disorder",
+        "APA Practice Guidelines for OCD and BDD"
+      ]
+    },
+    "staff_answer": "Administer BDDQ screening. Warn against repeated aesthetic/cosmetic procedures.",
+    "red_flags": [
+      "Extremely high suicide risk associated with BDD (suicide ideation rate ~80%)",
+      "Severe skin picking causing open infected ulcerations"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT pursue cosmetic surgery for perceived flaws driven by BDD (it does not resolve the underlying brain obsession)",
+      "Do NOT spend hours comparing yourself to edited photos on social media"
+    ],
+    "source": "NICE Clinical Guideline CG31 & American Psychiatric Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "mh_tele_manas_mental_health_resources_020",
+    "topic": "Mental Health: National Mental Health Resources & Tele-MANAS (India)",
+    "category": "mental_health",
+    "keywords": [
+      "tele manas",
+      "kiran helpline",
+      "mental health helpline india",
+      "free counseling india",
+      "psychologist helpline"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Accessing professional mental health support in India is completely free, confidential, and available 24/7 across multiple regional languages.",
+      "KEY NATIONAL HELPLINES:",
+      "  - Tele-MANAS (Tele Mental Health Assistance and Networking Across States - MoHFW, Govt of India): Dial 14416 or 1800-891-4416 (Available in English, Hindi, and 20+ regional Indian languages).",
+      "  - KIRAN Mental Health Helpline (Ministry of Social Justice and Empowerment): Dial 1800-599-0019.",
+      "  - Vandrevala Foundation Helpline: +91 9999 666 555.",
+      "  - Childline (for children and adolescents): Dial 1098.",
+      "What happens when you call Tele-MANAS:",
+      "  - Your call is answered by a trained mental health counselor who listens without judgment.",
+      "  - They offer crisis de-escalation, emotional first aid, and can connect you with psychiatrists at district mental health centers (DMHP) or premier institutions like NIMHANS.",
+      "Taking the step to speak with someone is an act of courage; you never have to carry emotional burdens alone."
+    ],
+    "doctor_answer": {
+      "assessment": "Public mental health resource utilization and referral pathways under the National Mental Health Programme (NMHP) and Tele-MANAS initiative (NIMHANS nodal center).",
+      "investigations": "Tele-triage risk assessment and geographic district mental health program linkage.",
+      "management": "Direct linkage to 24/7 tele-counseling (14416), referral to District Mental Health Programme (DMHP) clinics, or specialized tertiary care (NIMHANS, CIP Ranchi, LGBRIMH Tezpur). Free psychotropic medication access under essential drug lists at primary health centers.",
+      "references": [
+        "Tele-MANAS Operational Guidelines, MoHFW Government of India",
+        "National Mental Health Act 2017"
+      ]
+    },
+    "staff_answer": "Provide 14416 Tele-MANAS number clearly. Confirm patient has saved emergency mental health contacts.",
+    "red_flags": [
+      "Acute active suicidal crisis or psychiatric emergency (Immediate EMS 112 / Emergency Department escort)"
+    ],
+    "follow_up_questions": [
+      "How long have you been feeling this way?",
+      "Is this affecting your sleep, appetite, or daily work?",
+      "Are you feeling completely safe right now?"
+    ],
+    "avoid": [
+      "Do NOT delay seeking help due to societal mental health stigma",
+      "Do NOT pay for unverified online therapy without credential checks"
+    ],
+    "source": "Ministry of Health and Family Welfare (MoHFW) India & NIMHANS",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

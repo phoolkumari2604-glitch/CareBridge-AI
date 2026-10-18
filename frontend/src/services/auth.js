@@ -13,13 +13,24 @@ export const authAPI = {
 
   // Login
   login: async (data, signal) => {
-    const response = await api.post("/auth/login", data, { signal });
+    const payload = {
+      ...data,
+      email: (data?.email || "").trim().toLowerCase(),
+    };
+    const response = await api.post("/auth/login", payload, {
+      signal,
+      withCredentials: true,
+    });
     return response.data;
   },
 
   // Admin 2FA OTP verification
   verify2FA: async ({ temp_token, otp }, signal) => {
-    const response = await api.post("/auth/login/2fa-verify", { temp_token, otp }, { signal });
+    const response = await api.post(
+      "/auth/login/2fa-verify",
+      { temp_token: (temp_token || "").trim(), otp: String(otp || "").trim() },
+      { signal, withCredentials: true }
+    );
     return response.data;
   },
 
@@ -120,11 +131,16 @@ export const authAPI = {
     return response.data;
   },
 
+  getAuditStats: async () => {
+    const response = await api.get("/audit-logs/stats");
+    return response.data;
+  },
+
   // ==================================================
   // BIOMETRICS
   // ==================================================
-  enrollFace: async ({ descriptor, consent = true }) => {
-    const response = await api.post("/auth/biometrics/face/enroll", { descriptor, consent });
+  enrollFace: async ({ descriptor, encrypted_payload, consent = true }) => {
+    const response = await api.post("/auth/biometrics/face/enroll", { descriptor, encrypted_payload, consent });
     return response.data;
   },
 
@@ -143,13 +159,33 @@ export const authAPI = {
     return response.data;
   },
 
+  getWebAuthnVerifyOptions: async () => {
+    const response = await api.post("/auth/biometrics/webauthn/verify-options");
+    return response.data;
+  },
+
   verifyWebAuthn: async (data = {}) => {
     const response = await api.post("/auth/biometrics/webauthn/verify", data);
     return response.data;
   },
 
+  removeFace: async () => {
+    const response = await api.delete("/auth/biometrics/face");
+    return response.data;
+  },
+
+  unlinkWebAuthn: async () => {
+    const response = await api.delete("/auth/biometrics/webauthn");
+    return response.data;
+  },
+
   deleteBiometrics: async () => {
     const response = await api.delete("/auth/biometrics");
+    return response.data;
+  },
+
+  getBiometricsStatus: async () => {
+    const response = await api.get("/auth/biometrics/status");
     return response.data;
   },
 };

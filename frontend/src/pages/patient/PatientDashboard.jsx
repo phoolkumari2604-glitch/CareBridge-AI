@@ -268,11 +268,10 @@ const PatientDashboard = () => {
             className={`dashboard-refresh-btn ${isRefreshing ? "refreshing" : ""}`}
             onClick={() => fetchDashboardData(true)}
             disabled={isRefreshing}
-            title="Refresh Dashboard Telemetry"
-            aria-label="Refresh Dashboard Telemetry"
+            title="Refresh"
+            aria-label="Refresh"
           >
-            <RefreshCw size={16} className={isRefreshing ? "spin-icon" : ""} />
-            <span>{isRefreshing ? "Syncing..." : "Refresh"}</span>
+            <RefreshCw size={18} className={isRefreshing ? "spin-icon" : ""} />
           </button>
           <button
             onClick={handleBookDoctor}

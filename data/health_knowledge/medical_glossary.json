@@ -1,0 +1,1868 @@
+[
+  {
+    "term": "ECG / EKG",
+    "full_form": "Electrocardiogram",
+    "definition": "A test that records the electrical signals of the heart to check for rhythm problems or heart attacks.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "ECHO",
+    "full_form": "Echocardiogram",
+    "definition": "An ultrasound of the heart that produces moving pictures of heart valves, chambers, and pumping strength.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "BP",
+    "full_form": "Blood Pressure",
+    "definition": "The pressure of circulating blood against the walls of blood vessels, recorded as systolic over diastolic (e.g. 120/80 mmHg).",
+    "category": "Cardiology"
+  },
+  {
+    "term": "HTN",
+    "full_form": "Hypertension",
+    "definition": "Persistently high blood pressure (consistently >= 140/90 mmHg).",
+    "category": "Cardiology"
+  },
+  {
+    "term": "CAD",
+    "full_form": "Coronary Artery Disease",
+    "definition": "Narrowing or blockage of coronary arteries usually caused by atherosclerosis (plaque buildup).",
+    "category": "Cardiology"
+  },
+  {
+    "term": "MI",
+    "full_form": "Myocardial Infarction",
+    "definition": "Heart attack; occurs when blood flow to part of the heart muscle is severely blocked, causing muscle damage.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "STEMI",
+    "full_form": "ST-Elevation Myocardial Infarction",
+    "definition": "A serious, classic heart attack where an artery is completely blocked, visible as ST elevation on ECG.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "NSTEMI",
+    "full_form": "Non-ST-Elevation Myocardial Infarction",
+    "definition": "A heart attack where the artery is partially blocked; detected by elevated cardiac enzymes without ST elevation.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "CHF / HF",
+    "full_form": "Congestive Heart Failure",
+    "definition": "Condition where the heart is unable to pump blood efficiently to meet the body's needs.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "EF",
+    "full_form": "Ejection Fraction",
+    "definition": "Percentage of blood leaving your heart's left ventricle each time it contracts (normal is 50% to 70%).",
+    "category": "Cardiology"
+  },
+  {
+    "term": "AFib",
+    "full_form": "Atrial Fibrillation",
+    "definition": "An irregular, often very rapid heart rhythm that can lead to blood clots, stroke, and heart failure.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "CABG",
+    "full_form": "Coronary Artery Bypass Grafting",
+    "definition": "Open heart bypass surgery to redirect blood around clogged arteries using healthy blood vessels from elsewhere in the body.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "PTCA / PCI",
+    "full_form": "Percutaneous Transluminal Coronary Angioplasty",
+    "definition": "Minimally invasive procedure (angioplasty) using a balloon and stent to open clogged heart arteries.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "Angina",
+    "full_form": "Angina Pectoris",
+    "definition": "Chest pain or pressure caused by reduced blood flow to heart muscle.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "Arrhythmia",
+    "full_form": "Cardiac Arrhythmia",
+    "definition": "Any abnormality or disturbance in the regular rhythm of the heartbeat.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "Bradycardia",
+    "full_form": "Bradycardia",
+    "definition": "Abnormally slow resting heart rate (typically below 60 beats per minute).",
+    "category": "Cardiology"
+  },
+  {
+    "term": "Tachycardia",
+    "full_form": "Tachycardia",
+    "definition": "Abnormally rapid resting heart rate (typically above 100 beats per minute).",
+    "category": "Cardiology"
+  },
+  {
+    "term": "Palpitations",
+    "full_form": "Palpitations",
+    "definition": "Sensations of a racing, pounding, fluttering, or skipping heartbeat.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "DVT",
+    "full_form": "Deep Vein Thrombosis",
+    "definition": "A blood clot that forms in a deep vein, most commonly in the legs or calves.",
+    "category": "Cardiology / Vascular"
+  },
+  {
+    "term": "PE",
+    "full_form": "Pulmonary Embolism",
+    "definition": "A life-threatening blockage in the pulmonary arteries of the lungs, often caused by a blood clot traveling from the legs.",
+    "category": "Pulmonology / Vascular"
+  },
+  {
+    "term": "Troponin",
+    "full_form": "Cardiac Troponin I or T",
+    "definition": "A protein released into the bloodstream when heart muscle is damaged, used to diagnose a heart attack.",
+    "category": "Cardiology / Labs"
+  },
+  {
+    "term": "BNP / NT-proBNP",
+    "full_form": "B-type Natriuretic Peptide",
+    "definition": "A hormone released by heart ventricles under stretch and strain, elevated in heart failure.",
+    "category": "Cardiology / Labs"
+  },
+  {
+    "term": "Holter Monitor",
+    "full_form": "Holter Monitor",
+    "definition": "A wearable portable ECG device that continuously records heart electrical activity for 24 to 48 hours.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "TMT",
+    "full_form": "Treadmill Test / Stress Test",
+    "definition": "An exercise ECG test monitoring heart activity while walking or running on a treadmill.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "Pacemaker",
+    "full_form": "Artificial Cardiac Pacemaker",
+    "definition": "A small surgically implanted electronic device that sends electrical pulses to keep the heart beating at a normal rate.",
+    "category": "Cardiology"
+  },
+  {
+    "term": "COPD",
+    "full_form": "Chronic Obstructive Pulmonary Disease",
+    "definition": "A progressive inflammatory lung disease that causes obstructed airflow from the lungs (includes emphysema and chronic bronchitis).",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Asthma",
+    "full_form": "Bronchial Asthma",
+    "definition": "A chronic inflammatory condition where airways narrow, swell, and produce extra mucus, causing wheezing and breathlessness.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "SpO2",
+    "full_form": "Peripheral Oxygen Saturation",
+    "definition": "The percentage of oxygen-saturated hemoglobin in the blood, measured with a pulse oximeter (normal 95-100%).",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "CXR",
+    "full_form": "Chest X-Ray",
+    "definition": "A quick projectional radiograph of the chest used to diagnose pneumonia, pneumothorax, and heart enlargement.",
+    "category": "Pulmonology / Radiology"
+  },
+  {
+    "term": "PFT",
+    "full_form": "Pulmonary Function Test",
+    "definition": "Breathing tests (spirometry) that measure how much air your lungs can hold and how quickly you can blow it out.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "ARDS",
+    "full_form": "Acute Respiratory Distress Syndrome",
+    "definition": "Severe, life-threatening inflammatory lung condition causing fluid buildup in alveoli and profound oxygen deficit.",
+    "category": "Pulmonology / Critical Care"
+  },
+  {
+    "term": "ABG",
+    "full_form": "Arterial Blood Gas",
+    "definition": "A blood test drawn from an artery measuring oxygen, carbon dioxide levels, and arterial blood pH balance.",
+    "category": "Pulmonology / Critical Care"
+  },
+  {
+    "term": "OSA",
+    "full_form": "Obstructive Sleep Apnea",
+    "definition": "A sleep disorder where throat muscles intermittently relax and block the airway during sleep, causing loud snoring and pauses in breathing.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Aspiration",
+    "full_form": "Pulmonary Aspiration",
+    "definition": "Inhalation of food, liquid, or stomach contents into the lungs, which can cause chemical pneumonitis or aspiration pneumonia.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Bronchitis",
+    "full_form": "Bronchitis",
+    "definition": "Inflammation of the lining of the bronchial tubes, which carry air to and from the lungs.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Pneumothorax",
+    "full_form": "Pneumothorax",
+    "definition": "A collapsed lung occurring when air leaks into the space between the lung and chest wall.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Pleural Effusion",
+    "full_form": "Pleural Effusion",
+    "definition": "Excess buildup of fluid between the layers of the pleura outside the lungs.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Hemoptysis",
+    "full_form": "Hemoptysis",
+    "definition": "Coughing up blood or blood-stained mucus from the respiratory tract.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Dyspnea",
+    "full_form": "Dyspnea",
+    "definition": "Difficult or labored breathing; shortness of breath.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Orthopnea",
+    "full_form": "Orthopnea",
+    "definition": "Difficulty breathing that worsens when lying flat, often relieved by propping up with pillows (classic sign of heart failure).",
+    "category": "Pulmonology / Cardiology"
+  },
+  {
+    "term": "Stridor",
+    "full_form": "Stridor",
+    "definition": "A high-pitched wheezing sound caused by disrupted airflow through a narrowed upper airway (larynx or trachea).",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "Wheezing",
+    "full_form": "Wheezing",
+    "definition": "A continuous, high-pitched whistling sound produced during breathing out through narrowed airways.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "BiPAP / CPAP",
+    "full_form": "Bilevel / Continuous Positive Airway Pressure",
+    "definition": "Non-invasive respiratory support devices that deliver pressurized air through a mask to keep airways open.",
+    "category": "Pulmonology"
+  },
+  {
+    "term": "CVA",
+    "full_form": "Cerebrovascular Accident",
+    "definition": "Stroke; damage to the brain from interrupted blood supply (ischemic) or ruptured blood vessel (hemorrhagic).",
+    "category": "Neurology"
+  },
+  {
+    "term": "TIA",
+    "full_form": "Transient Ischemic Attack",
+    "definition": "A temporary period of stroke-like symptoms that resolves within 24 hours without permanent damage ('mini-stroke').",
+    "category": "Neurology"
+  },
+  {
+    "term": "EEG",
+    "full_form": "Electroencephalogram",
+    "definition": "A test that detects and records electrical activity in your brain using small metal discs (electrodes) attached to the scalp.",
+    "category": "Neurology"
+  },
+  {
+    "term": "ICP",
+    "full_form": "Intracranial Pressure",
+    "definition": "The pressure exerted by fluids such as cerebrospinal fluid inside the skull and on the brain tissue.",
+    "category": "Neurology / Critical Care"
+  },
+  {
+    "term": "GCS",
+    "full_form": "Glasgow Coma Scale",
+    "definition": "A 15-point neurological scale used to assess a person's level of consciousness (eye, verbal, motor responses).",
+    "category": "Neurology / Critical Care"
+  },
+  {
+    "term": "MS",
+    "full_form": "Multiple Sclerosis",
+    "definition": "A chronic autoimmune disease where the immune system attacks the protective myelin sheath covering nerve fibers.",
+    "category": "Neurology"
+  },
+  {
+    "term": "ALS",
+    "full_form": "Amyotrophic Lateral Sclerosis",
+    "definition": "A progressive neurodegenerative disease affecting motor nerve cells in the brain and spinal cord (motor neuron disease).",
+    "category": "Neurology"
+  },
+  {
+    "term": "Parkinson's",
+    "full_form": "Parkinson's Disease",
+    "definition": "A progressive nervous system disorder affecting movement, causing resting tremors, muscle stiffness, and slowed motion.",
+    "category": "Neurology"
+  },
+  {
+    "term": "Epilepsy",
+    "full_form": "Epileptic Seizure Disorder",
+    "definition": "A central nervous system neurological disorder in which brain activity becomes abnormal, causing recurring seizures.",
+    "category": "Neurology"
+  },
+  {
+    "term": "Neuropathy",
+    "full_form": "Peripheral Neuropathy",
+    "definition": "Weakness, numbness, and burning pain from nerve damage, usually in the hands and feet (common in diabetes).",
+    "category": "Neurology"
+  },
+  {
+    "term": "Encephalopathy",
+    "full_form": "Encephalopathy",
+    "definition": "Any diffuse disease of the brain that alters brain function or mental state (e.g., hepatic or metabolic encephalopathy).",
+    "category": "Neurology"
+  },
+  {
+    "term": "Aphasia",
+    "full_form": "Aphasia",
+    "definition": "Inability or difficulty speaking, understanding speech, reading, or writing, usually following stroke or brain trauma.",
+    "category": "Neurology"
+  },
+  {
+    "term": "Ataxia",
+    "full_form": "Ataxia",
+    "definition": "Lack of voluntary coordination of muscle movements, leading to an unsteady, clumsy gait or clumsy speech.",
+    "category": "Neurology"
+  },
+  {
+    "term": "Syncope",
+    "full_form": "Syncope",
+    "definition": "Temporary loss of consciousness caused by a sudden fall in blood pressure to the brain; fainting.",
+    "category": "Neurology / Cardiology"
+  },
+  {
+    "term": "Vertigo",
+    "full_form": "Vertigo",
+    "definition": "A false sensation that you or your environment is spinning, spinning dizziness, often due to inner ear disturbances.",
+    "category": "Neurology / ENT"
+  },
+  {
+    "term": "Meningitis",
+    "full_form": "Meningitis",
+    "definition": "Inflammation of the protective membranes (meninges) covering the brain and spinal cord, typically caused by bacterial or viral infection.",
+    "category": "Neurology / Infectious"
+  },
+  {
+    "term": "Lumbar Puncture",
+    "full_form": "Lumbar Puncture / Spinal Tap",
+    "definition": "Procedure where a needle is inserted between two lower back vertebrae to sample cerebrospinal fluid (CSF).",
+    "category": "Neurology"
+  },
+  {
+    "term": "DM",
+    "full_form": "Diabetes Mellitus",
+    "definition": "A group of metabolic diseases characterized by elevated blood glucose levels resulting from defects in insulin secretion or action.",
+    "category": "Endocrinology"
+  },
+  {
+    "term": "T1D",
+    "full_form": "Type 1 Diabetes Mellitus",
+    "definition": "Autoimmune condition where pancreatic beta cells are destroyed, producing little or no insulin.",
+    "category": "Endocrinology"
+  },
+  {
+    "term": "T2D",
+    "full_form": "Type 2 Diabetes Mellitus",
+    "definition": "Chronic condition where the body becomes resistant to insulin or doesn't produce enough insulin.",
+    "category": "Endocrinology"
+  },
+  {
+    "term": "HbA1c",
+    "full_form": "Glycated Hemoglobin",
+    "definition": "A blood test showing average blood sugar levels over the past 2 to 3 months (normal <5.7%, diabetes >=6.5%).",
+    "category": "Endocrinology / Labs"
+  },
+  {
+    "term": "FBS",
+    "full_form": "Fasting Blood Sugar",
+    "definition": "Blood glucose level measured after an overnight fast of at least 8 hours (normal 70-99 mg/dL).",
+    "category": "Endocrinology / Labs"
+  },
+  {
+    "term": "PPBS",
+    "full_form": "Postprandial Blood Sugar",
+    "definition": "Blood glucose level measured exactly 2 hours after a meal (normal <140 mg/dL).",
+    "category": "Endocrinology / Labs"
+  },
+  {
+    "term": "RBS",
+    "full_form": "Random Blood Sugar",
+    "definition": "Blood sugar tested at any random time regardless of meals.",
+    "category": "Endocrinology / Labs"
+  },
+  {
+    "term": "DKA",
+    "full_form": "Diabetic Ketoacidosis",
+    "definition": "A life-threatening complication of diabetes where lack of insulin forces the body to burn fat for fuel, producing toxic acidic ketones.",
+    "category": "Endocrinology / Emergency"
+  },
+  {
+    "term": "HHS",
+    "full_form": "Hyperosmolar Hyperglycemic State",
+    "definition": "A severe metabolic complication of type 2 diabetes with extreme hyperglycemia (>600 mg/dL) and dehydration without prominent ketoacidosis.",
+    "category": "Endocrinology / Emergency"
+  },
+  {
+    "term": "Hypoglycemia",
+    "full_form": "Hypoglycemia",
+    "definition": "Abnormally low blood sugar level (<70 mg/dL), causing shaking, sweating, confusion, and dizziness.",
+    "category": "Endocrinology"
+  },
+  {
+    "term": "TSH",
+    "full_form": "Thyroid Stimulating Hormone",
+    "definition": "A pituitary hormone that regulates the thyroid gland; high TSH indicates underactive thyroid (hypothyroidism), low indicates hyperthyroidism.",
+    "category": "Endocrinology / Labs"
+  },
+  {
+    "term": "T3 / T4",
+    "full_form": "Triiodothyronine & Thyroxine",
+    "definition": "Primary hormones produced by the thyroid gland that regulate energy metabolism.",
+    "category": "Endocrinology / Labs"
+  },
+  {
+    "term": "Hypothyroidism",
+    "full_form": "Hypothyroidism",
+    "definition": "An underactive thyroid gland that does not produce enough thyroid hormones, causing fatigue, weight gain, and cold intolerance.",
+    "category": "Endocrinology"
+  },
+  {
+    "term": "Hyperthyroidism",
+    "full_form": "Hyperthyroidism",
+    "definition": "An overactive thyroid gland producing excess thyroid hormones, causing weight loss, rapid heartbeat, and anxiety.",
+    "category": "Endocrinology"
+  },
+  {
+    "term": "PCOS",
+    "full_form": "Polycystic Ovary Syndrome",
+    "definition": "A hormonal disorder causing enlarged ovaries with small cysts, irregular periods, excess androgen, and insulin resistance.",
+    "category": "Endocrinology / Gynecology"
+  },
+  {
+    "term": "Cushing's Syndrome",
+    "full_form": "Hypercortisolism",
+    "definition": "A condition caused by prolonged exposure to high levels of the hormone cortisol, leading to a round 'moon' face and abdominal weight gain.",
+    "category": "Endocrinology"
+  },
+  {
+    "term": "Addison's Disease",
+    "full_form": "Adrenal Insufficiency",
+    "definition": "A disorder where adrenal glands do not produce enough cortisol and aldosterone, causing low blood pressure, fatigue, and dark skin patches.",
+    "category": "Endocrinology"
+  },
+  {
+    "term": "AKI",
+    "full_form": "Acute Kidney Injury",
+    "definition": "A sudden episode of kidney failure or kidney damage that happens within a few hours or days.",
+    "category": "Nephrology"
+  },
+  {
+    "term": "CKD",
+    "full_form": "Chronic Kidney Disease",
+    "definition": "Long-term, gradual loss of kidney function over months or years.",
+    "category": "Nephrology"
+  },
+  {
+    "term": "eGFR",
+    "full_form": "Estimated Glomerular Filtration Rate",
+    "definition": "A calculation showing how efficiently the kidneys filter waste from blood (normal >=90 mL/min/1.73m2; <15 indicates kidney failure).",
+    "category": "Nephrology / Labs"
+  },
+  {
+    "term": "Cr / Creatinine",
+    "full_form": "Serum Creatinine",
+    "definition": "A waste product from muscle breakdown filtered exclusively by kidneys; elevated levels signal reduced kidney clearance.",
+    "category": "Nephrology / Labs"
+  },
+  {
+    "term": "BUN",
+    "full_form": "Blood Urea Nitrogen",
+    "definition": "A waste product from protein breakdown; high levels indicate decreased kidney filtration or dehydration.",
+    "category": "Nephrology / Labs"
+  },
+  {
+    "term": "UTI",
+    "full_form": "Urinary Tract Infection",
+    "definition": "Infection in any part of the urinary system (kidneys, ureters, bladder, or urethra).",
+    "category": "Nephrology / Urology"
+  },
+  {
+    "term": "Hematuria",
+    "full_form": "Hematuria",
+    "definition": "Presence of red blood cells in the urine (microscopic or visible red urine).",
+    "category": "Nephrology / Urology"
+  },
+  {
+    "term": "Proteinuria",
+    "full_form": "Proteinuria / Albuminuria",
+    "definition": "Abnormal leakage of proteins into urine, an early marker of kidney glomerulus damage.",
+    "category": "Nephrology / Labs"
+  },
+  {
+    "term": "ESRD",
+    "full_form": "End-Stage Renal Disease",
+    "definition": "Final stage of chronic kidney disease where kidneys have lost nearly all functioning capacity, requiring dialysis or kidney transplant.",
+    "category": "Nephrology"
+  },
+  {
+    "term": "HD",
+    "full_form": "Hemodialysis",
+    "definition": "A medical treatment where a machine filters waste, salts, and excess fluid from blood when kidneys fail.",
+    "category": "Nephrology"
+  },
+  {
+    "term": "PD",
+    "full_form": "Peritoneal Dialysis",
+    "definition": "A type of dialysis using the lining of your abdomen (peritoneal membrane) to filter blood inside the body.",
+    "category": "Nephrology"
+  },
+  {
+    "term": "Nephrolithiasis",
+    "full_form": "Kidney Stones / Renal Calculi",
+    "definition": "Hard mineral and salt deposits that form inside the kidneys and cause severe flank pain when passing through the ureter.",
+    "category": "Urology / Nephrology"
+  },
+  {
+    "term": "Dysuria",
+    "full_form": "Dysuria",
+    "definition": "Pain, discomfort, or burning sensation during urination.",
+    "category": "Urology"
+  },
+  {
+    "term": "Oliguria",
+    "full_form": "Oliguria",
+    "definition": "Abnormally low production of urine (<400 mL/day in adults).",
+    "category": "Nephrology"
+  },
+  {
+    "term": "Anuria",
+    "full_form": "Anuria",
+    "definition": "Non-passage of urine (<100 mL/day), a medical emergency signaling complete kidney shutdown or urinary obstruction.",
+    "category": "Nephrology"
+  },
+  {
+    "term": "BPH",
+    "full_form": "Benign Prostatic Hyperplasia",
+    "definition": "Non-cancerous enlargement of the prostate gland in older men that squeezes the urethra and obstructs urine flow.",
+    "category": "Urology"
+  },
+  {
+    "term": "PSA",
+    "full_form": "Prostate-Specific Antigen",
+    "definition": "A protein produced by the prostate gland; elevated blood levels can indicate BPH, infection, or prostate cancer.",
+    "category": "Urology / Labs"
+  },
+  {
+    "term": "GERD",
+    "full_form": "Gastroesophageal Reflux Disease",
+    "definition": "A digestive disorder where stomach acid repeatedly flows back up into the esophagus, causing heartburn.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "IBS",
+    "full_form": "Irritable Bowel Syndrome",
+    "definition": "A common functional gastrointestinal disorder causing cramping, abdominal pain, bloating, gas, and alternating diarrhea or constipation.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "IBD",
+    "full_form": "Inflammatory Bowel Disease",
+    "definition": "Chronic autoimmune inflammation of the digestive tract, including Crohn's disease and Ulcerative Colitis.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Crohn's Disease",
+    "full_form": "Crohn's Disease",
+    "definition": "A type of IBD causing inflammation anywhere from the mouth to anus, often affecting the full thickness of bowel wall.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Ulcerative Colitis",
+    "full_form": "Ulcerative Colitis",
+    "definition": "A chronic IBD that causes long-lasting inflammation and ulcers in the innermost lining of the large intestine (colon and rectum).",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "LFT",
+    "full_form": "Liver Function Tests",
+    "definition": "A panel of blood tests that measure liver enzymes (SGOT, SGPT, ALP), bilirubin, and proteins (albumin).",
+    "category": "Gastroenterology / Labs"
+  },
+  {
+    "term": "SGOT / AST",
+    "full_form": "Serum Glutamic Oxaloacetic Transaminase (Aspartate Aminotransferase)",
+    "definition": "An enzyme found in liver and heart muscle cells; elevated in liver injury or myocardial damage.",
+    "category": "Gastroenterology / Labs"
+  },
+  {
+    "term": "SGPT / ALT",
+    "full_form": "Serum Glutamic Pyruvic Transaminase (Alanine Aminotransferase)",
+    "definition": "A liver-specific enzyme that spills into blood when liver cells are inflamed or injured.",
+    "category": "Gastroenterology / Labs"
+  },
+  {
+    "term": "Bilirubin",
+    "full_form": "Serum Bilirubin (Total, Direct, Indirect)",
+    "definition": "A yellowish pigment formed during normal breakdown of red blood cells; elevated levels cause jaundice.",
+    "category": "Gastroenterology / Labs"
+  },
+  {
+    "term": "Jaundice",
+    "full_form": "Icterus / Jaundice",
+    "definition": "Yellowish staining of the skin, whites of the eyes (sclerae), and mucous membranes caused by high levels of bilirubin.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Cirrhosis",
+    "full_form": "Hepatic Cirrhosis",
+    "definition": "Late-stage fibrosis (scarring) of the liver caused by many forms of liver diseases, such as chronic viral hepatitis or alcohol abuse.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Ascites",
+    "full_form": "Ascites",
+    "definition": "Abnormal buildup of fluid in the abdominal peritoneal cavity, most often caused by liver cirrhosis and portal hypertension.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Hepatitis",
+    "full_form": "Hepatitis (A, B, C, D, E)",
+    "definition": "Inflammation of the liver tissue, most commonly viral or autoimmune.",
+    "category": "Gastroenterology / Infectious"
+  },
+  {
+    "term": "PUD",
+    "full_form": "Peptic Ulcer Disease",
+    "definition": "Open sores that develop on the inside lining of your stomach (gastric ulcer) and upper small intestine (duodenal ulcer).",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "H. pylori",
+    "full_form": "Helicobacter pylori",
+    "definition": "A spiral bacterium that infects the stomach lining, the leading cause of peptic ulcers and chronic gastritis.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "ERCP",
+    "full_form": "Endoscopic Retrograde Cholangiopancreatography",
+    "definition": "A specialized endoscopic procedure used to examine and treat bile duct and pancreatic duct stones and strictures.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Cholelithiasis",
+    "full_form": "Gallstones",
+    "definition": "Hardened deposits of digestive fluid (cholesterol or bilirubin) that form inside the gallbladder.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Cholecystitis",
+    "full_form": "Cholecystitis",
+    "definition": "Inflammation of the gallbladder, usually caused by a gallstone blocking the cystic duct.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Pancreatitis",
+    "full_form": "Pancreatitis (Acute / Chronic)",
+    "definition": "Inflammation of the pancreas gland; causes severe upper abdominal pain radiating through to the back.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Amylase / Lipase",
+    "full_form": "Pancreatic Enzymes",
+    "definition": "Enzymes tested in blood to diagnose acute pancreatitis (Lipase is more specific and stays elevated longer).",
+    "category": "Gastroenterology / Labs"
+  },
+  {
+    "term": "Dysphagia",
+    "full_form": "Dysphagia",
+    "definition": "Difficulty or painful sensation when swallowing food or liquids.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Hematemesis",
+    "full_form": "Hematemesis",
+    "definition": "Vomiting of blood (bright red or dark 'coffee-ground' appearance), signaling upper gastrointestinal bleeding.",
+    "category": "Gastroenterology / Emergency"
+  },
+  {
+    "term": "Melena",
+    "full_form": "Melena",
+    "definition": "Dark, black, tarry, foul-smelling stools caused by digested blood from an upper gastrointestinal bleed.",
+    "category": "Gastroenterology / Emergency"
+  },
+  {
+    "term": "Hematochezia",
+    "full_form": "Hematochezia",
+    "definition": "Passage of fresh bright red blood from the anus, usually signaling lower gastrointestinal bleeding.",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "CBC",
+    "full_form": "Complete Blood Count",
+    "definition": "A standard blood panel measuring red blood cells, white blood cells, hemoglobin, hematocrit, and platelets.",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "Hb / Hgb",
+    "full_form": "Hemoglobin",
+    "definition": "The iron-containing protein in red blood cells that carries oxygen from the lungs throughout the body (normal: men 13.8-17.2, women 12.1-15.1 g/dL).",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "WBC / TLC",
+    "full_form": "White Blood Cells / Total Leukocyte Count",
+    "definition": "Immune cells that fight infection; elevated count indicates infection or inflammation.",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "DLC",
+    "full_form": "Differential Leukocyte Count",
+    "definition": "Percentage breakdown of individual white blood cell types: neutrophils, lymphocytes, monocytes, eosinophils, basophils.",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "Platelets",
+    "full_form": "Thrombocytes",
+    "definition": "Small cell fragments essential for normal blood clotting (normal 150,000 to 450,000 per microliter).",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "Thrombocytopenia",
+    "full_form": "Thrombocytopenia",
+    "definition": "Abnormally low platelet count in blood (<150,000/uL), increasing the risk of bruising and bleeding.",
+    "category": "Hematology"
+  },
+  {
+    "term": "Anemia",
+    "full_form": "Anemia",
+    "definition": "Condition marked by a deficiency of red blood cells or hemoglobin, leading to fatigue, pallor, and weakness.",
+    "category": "Hematology"
+  },
+  {
+    "term": "INR",
+    "full_form": "International Normalized Ratio",
+    "definition": "A standardized measurement of blood clotting time, used to monitor blood-thinning medications like Warfarin.",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "PT",
+    "full_form": "Prothrombin Time",
+    "definition": "Test measuring how many seconds it takes for plasma to clot after addition of tissue thromboplastin.",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "aPTT",
+    "full_form": "Activated Partial Thromboplastin Time",
+    "definition": "A blood test characterizing coagulation and monitoring IV unfractionated heparin therapy.",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "ESR",
+    "full_form": "Erythrocyte Sedimentation Rate",
+    "definition": "Rate at which red blood cells sediment in a tube; a non-specific indicator of bodily inflammation.",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "CRP",
+    "full_form": "C-Reactive Protein",
+    "definition": "A liver protein that surges rapidly in response to acute inflammation or bacterial infection in the body.",
+    "category": "Hematology / Labs"
+  },
+  {
+    "term": "Biopsy",
+    "full_form": "Tissue Biopsy",
+    "definition": "Surgical removal of a small sample of tissue or cells for examination under a microscope by a pathologist.",
+    "category": "Oncology / Pathology"
+  },
+  {
+    "term": "Benign",
+    "full_form": "Benign Tumor",
+    "definition": "A non-cancerous growth that does not invade nearby tissue or spread to other parts of the body.",
+    "category": "Oncology"
+  },
+  {
+    "term": "Malignant",
+    "full_form": "Malignant Neoplasm",
+    "definition": "Cancerous cells that invade neighboring tissues and can spread (metastasize) to distant organs.",
+    "category": "Oncology"
+  },
+  {
+    "term": "Metastasis",
+    "full_form": "Metastasis",
+    "definition": "The spread of cancer cells from the primary site of origin to distant body organs via bloodstream or lymphatics.",
+    "category": "Oncology"
+  },
+  {
+    "term": "TNM Staging",
+    "full_form": "Tumor, Node, Metastasis Staging",
+    "definition": "The international standard system for classifying the extent and spread of malignant tumors.",
+    "category": "Oncology"
+  },
+  {
+    "term": "Chemotherapy",
+    "full_form": "Chemotherapy",
+    "definition": "Pharmacological treatment using chemical substances to destroy rapidly dividing cancer cells.",
+    "category": "Oncology"
+  },
+  {
+    "term": "Radiation Therapy",
+    "full_form": "Radiotherapy / RT",
+    "definition": "Treatment using high doses of targeted ionizing radiation to shrink tumors and destroy cancer cells.",
+    "category": "Oncology"
+  },
+  {
+    "term": "Remission",
+    "full_form": "Clinical Remission",
+    "definition": "A period during which the symptoms and detectable signs of a disease (such as cancer) decrease or disappear.",
+    "category": "Oncology"
+  },
+  {
+    "term": "Sepsis",
+    "full_form": "Sepsis",
+    "definition": "A life-threatening medical emergency caused by the body's extreme, dysregulated response to an infection, causing organ failure.",
+    "category": "Infectious / Emergency"
+  },
+  {
+    "term": "Septic Shock",
+    "full_form": "Septic Shock",
+    "definition": "A profound subset of sepsis where circulatory and cellular abnormalities result in refractory low blood pressure and multi-organ failure.",
+    "category": "Infectious / Emergency"
+  },
+  {
+    "term": "Pathogen",
+    "full_form": "Pathogen",
+    "definition": "Any biological agent (bacterium, virus, fungus, or parasite) capable of causing disease in a host organism.",
+    "category": "Infectious"
+  },
+  {
+    "term": "Zoonosis",
+    "full_form": "Zoonotic Disease",
+    "definition": "An infectious disease that jumps from non-human animals to humans (e.g. rabies, leptospirosis).",
+    "category": "Infectious"
+  },
+  {
+    "term": "Nosocomial",
+    "full_form": "Hospital-Acquired Infection (HAI)",
+    "definition": "An infection acquired by a patient while receiving healthcare treatment in a hospital or clinic setting.",
+    "category": "Infectious"
+  },
+  {
+    "term": "Incubation Period",
+    "full_form": "Incubation Period",
+    "definition": "The time elapsed between exposure to a pathogen and the first appearance of clinical symptoms.",
+    "category": "Infectious"
+  },
+  {
+    "term": "Endemic",
+    "full_form": "Endemic",
+    "definition": "The constant, baseline presence or usual prevalence of a disease within a specific geographic area or population.",
+    "category": "Infectious / Public Health"
+  },
+  {
+    "term": "Epidemic",
+    "full_form": "Epidemic",
+    "definition": "A sudden widespread increase in the number of cases of a disease above what is normally expected in that population.",
+    "category": "Infectious / Public Health"
+  },
+  {
+    "term": "Pandemic",
+    "full_form": "Pandemic",
+    "definition": "An epidemic that has spread across multiple countries or continents, affecting a substantial portion of the global population.",
+    "category": "Infectious / Public Health"
+  },
+  {
+    "term": "Antibiotic",
+    "full_form": "Antibacterial Agent",
+    "definition": "Medication that destroys or slows down the growth of bacteria (ineffective against viral infections like common cold or flu).",
+    "category": "Pharmacology / Infectious"
+  },
+  {
+    "term": "Antiviral",
+    "full_form": "Antiviral Medication",
+    "definition": "Medication specifically designed to inhibit the replication of viruses (e.g. Oseltamivir, Acyclovir).",
+    "category": "Pharmacology / Infectious"
+  },
+  {
+    "term": "Antifungal",
+    "full_form": "Antifungal Drug",
+    "definition": "Medication used to treat fungal infections of skin, nails, or internal organs (e.g. Fluconazole).",
+    "category": "Pharmacology / Infectious"
+  },
+  {
+    "term": "Culture and Sensitivity",
+    "full_form": "Culture & Antibiotic Sensitivity (C&S)",
+    "definition": "A laboratory test where bacteria are grown from a body fluid sample and tested against different antibiotics to find the most effective drug.",
+    "category": "Microbiology / Infectious"
+  },
+  {
+    "term": "AMR",
+    "full_form": "Antimicrobial Resistance",
+    "definition": "The ability of bacteria and microbes to resist the effects of antibiotics that previously treated them, caused by overuse and misuse.",
+    "category": "Microbiology / Public Health"
+  },
+  {
+    "term": "PCR",
+    "full_form": "Polymerase Chain Reaction",
+    "definition": "A molecular biology technique that amplifies tiny amounts of viral or bacterial DNA/RNA to diagnose infections with high precision.",
+    "category": "Infectious / Labs"
+  },
+  {
+    "term": "ELISA",
+    "full_form": "Enzyme-Linked Immunosorbent Assay",
+    "definition": "A plate-based assay technique designed for detecting and quantifying soluble substances like antibodies or antigens.",
+    "category": "Immunology / Labs"
+  },
+  {
+    "term": "Anaphylaxis",
+    "full_form": "Anaphylactic Shock",
+    "definition": "A severe, potentially life-threatening allergic reaction that develops within seconds or minutes of exposure to an allergen.",
+    "category": "Immunology / Emergency"
+  },
+  {
+    "term": "OA",
+    "full_form": "Osteoarthritis",
+    "definition": "A common form of arthritis caused by the gradual breakdown of protective cartilage cushioning the ends of bones in joints.",
+    "category": "Orthopedics / Rheumatology"
+  },
+  {
+    "term": "RA",
+    "full_form": "Rheumatoid Arthritis",
+    "definition": "A chronic autoimmune disorder in which the immune system mistakenly attacks the lining of joint membranes (synovium).",
+    "category": "Rheumatology"
+  },
+  {
+    "term": "Osteoporosis",
+    "full_form": "Osteoporosis",
+    "definition": "A bone disease that occurs when the body loses too much bone, making bones weak, brittle, and prone to fractures.",
+    "category": "Orthopedics / Endocrinology"
+  },
+  {
+    "term": "DEXA Scan",
+    "full_form": "Dual-Energy X-ray Absorptiometry",
+    "definition": "A low-dose imaging scan measuring bone mineral density to screen for osteopenia and osteoporosis.",
+    "category": "Orthopedics / Radiology"
+  },
+  {
+    "term": "Fracture",
+    "full_form": "Bone Fracture",
+    "definition": "A complete or partial break in the continuity of a bone.",
+    "category": "Orthopedics"
+  },
+  {
+    "term": "Dislocation",
+    "full_form": "Joint Dislocation",
+    "definition": "An injury where bone ends are forcibly knocked or pulled out of their normal joint sockets.",
+    "category": "Orthopedics"
+  },
+  {
+    "term": "Sprain",
+    "full_form": "Ligament Sprain",
+    "definition": "Stretching or tearing of ligaments—the tough bands of fibrous tissue that connect two bones together in joints.",
+    "category": "Orthopedics"
+  },
+  {
+    "term": "Strain",
+    "full_form": "Muscle or Tendon Strain",
+    "definition": "Stretching or tearing of muscle fibers or tendons—the fibrous cords of tissue that connect muscle to bone.",
+    "category": "Orthopedics"
+  },
+  {
+    "term": "ACL",
+    "full_form": "Anterior Cruciate Ligament",
+    "definition": "One of the key stabilizing ligaments in the center of the knee joint; often torn during sudden pivot motions in sports.",
+    "category": "Orthopedics"
+  },
+  {
+    "term": "ORIF",
+    "full_form": "Open Reduction and Internal Fixation",
+    "definition": "Orthopedic surgery to repair a severe bone fracture using plates, screws, pins, or rods to hold bones in alignment.",
+    "category": "Orthopedics / Surgery"
+  },
+  {
+    "term": "Gout",
+    "full_form": "Gouty Arthritis",
+    "definition": "A painful form of inflammatory arthritis caused by high uric acid levels forming sharp urate crystals in joints (most often the big toe).",
+    "category": "Rheumatology"
+  },
+  {
+    "term": "Uric Acid",
+    "full_form": "Serum Uric Acid",
+    "definition": "A waste product formed during the breakdown of purines in foods; elevated levels cause gout and uric acid kidney stones.",
+    "category": "Rheumatology / Labs"
+  },
+  {
+    "term": "LMP",
+    "full_form": "Last Menstrual Period",
+    "definition": "The first day of a woman's most recent menstrual bleeding, used to calculate gestational age and due dates.",
+    "category": "Obstetrics"
+  },
+  {
+    "term": "EDD",
+    "full_form": "Estimated Due Date",
+    "definition": "The estimated date when spontaneous labor is expected to occur (40 weeks from the first day of LMP).",
+    "category": "Obstetrics"
+  },
+  {
+    "term": "ANC",
+    "full_form": "Antenatal Care",
+    "definition": "Routine medical and nursing care recommended for women during pregnancy to monitor maternal and fetal well-being.",
+    "category": "Obstetrics"
+  },
+  {
+    "term": "PNC",
+    "full_form": "Postnatal Care",
+    "definition": "Medical care given to the mother and newborn baby during the first six weeks following childbirth.",
+    "category": "Obstetrics / Pediatrics"
+  },
+  {
+    "term": "C-Section",
+    "full_form": "Cesarean Section",
+    "definition": "A surgical procedure used to deliver a baby through incisions in the mother's abdomen and uterus.",
+    "category": "Obstetrics"
+  },
+  {
+    "term": "Ectopic Pregnancy",
+    "full_form": "Ectopic Pregnancy",
+    "definition": "A pregnancy in which the fertilized ovum implants outside the uterine cavity, most commonly in a fallopian tube (life-threatening emergency).",
+    "category": "Obstetrics / Emergency"
+  },
+  {
+    "term": "Preeclampsia",
+    "full_form": "Preeclampsia",
+    "definition": "A serious pregnancy complication characterized by high blood pressure and signs of damage to organ systems (protein in urine) after 20 weeks.",
+    "category": "Obstetrics"
+  },
+  {
+    "term": "Gestational Diabetes",
+    "full_form": "Gestational Diabetes Mellitus (GDM)",
+    "definition": "A condition in which pregnancy hormones cause elevated blood glucose levels in a pregnant mother.",
+    "category": "Obstetrics / Endocrinology"
+  },
+  {
+    "term": "Pap Smear",
+    "full_form": "Papanicolaou Test",
+    "definition": "A screening procedure for cervical cancer testing for precancerous cells on the cervix.",
+    "category": "Gynecology"
+  },
+  {
+    "term": "HPV",
+    "full_form": "Human Papillomavirus",
+    "definition": "A common sexually transmitted virus; high-risk strains (HPV 16 and 18) cause the vast majority of cervical cancers.",
+    "category": "Gynecology / Infectious"
+  },
+  {
+    "term": "Mammogram",
+    "full_form": "Mammography",
+    "definition": "An X-ray of the breast used to detect and diagnose breast cancer early.",
+    "category": "Gynecology / Radiology"
+  },
+  {
+    "term": "Apgar Score",
+    "full_form": "Apgar Score",
+    "definition": "A quick scoring system assessed at 1 and 5 minutes after birth to evaluate a newborn's physical condition (Appearance, Pulse, Grimace, Activity, Respiration).",
+    "category": "Pediatrics"
+  },
+  {
+    "term": "Colostrum",
+    "full_form": "Colostrum",
+    "definition": "The first nutrient-rich, antibody-dense breast milk produced in the first few days after delivery, essential for infant immunity.",
+    "category": "Pediatrics"
+  },
+  {
+    "term": "UIP",
+    "full_form": "Universal Immunization Programme",
+    "definition": "India's national vaccination program providing free vaccines against 12 preventable diseases for infants and pregnant women.",
+    "category": "Pediatrics / Public Health"
+  },
+  {
+    "term": "Fontanelle",
+    "full_form": "Infant Fontanelle",
+    "definition": "The soft anatomical spots on an infant's skull where bone plates haven't yet fused (anterior fontanelle closes around 18 months).",
+    "category": "Pediatrics"
+  },
+  {
+    "term": "PRN",
+    "full_form": "Pro Re Nata",
+    "definition": "As needed; taken only when necessary rather than on a fixed schedule (e.g. Paracetamol PRN for pain).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "STAT",
+    "full_form": "Statim",
+    "definition": "Immediately; given at once without delay (used for urgent emergency medications).",
+    "category": "Pharmacology / Clinical"
+  },
+  {
+    "term": "OD",
+    "full_form": "Once Daily (Omni Die)",
+    "definition": "Medication to be taken once every 24 hours.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "BD / BID",
+    "full_form": "Twice Daily (Bis in Die)",
+    "definition": "Medication to be taken twice a day, typically 12 hours apart.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "TDS / TID",
+    "full_form": "Three Times Daily (Ter in Die)",
+    "definition": "Medication to be taken three times a day, typically every 8 hours.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "QID",
+    "full_form": "Four Times Daily (Quater in Die)",
+    "definition": "Medication to be taken four times a day, typically every 6 hours.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "SOS",
+    "full_form": "Si Opus Sit",
+    "definition": "Take if necessary / in case of need (similar to PRN).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "PO",
+    "full_form": "Per Os",
+    "definition": "By mouth / orally.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "NPO",
+    "full_form": "Nil Per Os",
+    "definition": "Nothing by mouth; patient must not eat or drink anything (fasting for surgery or test).",
+    "category": "Clinical Practice"
+  },
+  {
+    "term": "IV",
+    "full_form": "Intravenous",
+    "definition": "Administered directly into a vein through a catheter or needle.",
+    "category": "Pharmacology / Nursing"
+  },
+  {
+    "term": "IM",
+    "full_form": "Intramuscular",
+    "definition": "Injected directly into a large muscle (e.g. deltoid or gluteus).",
+    "category": "Pharmacology / Nursing"
+  },
+  {
+    "term": "SC / SubQ",
+    "full_form": "Subcutaneous",
+    "definition": "Injected into the fatty tissue layer just below the skin (e.g. insulin injections).",
+    "category": "Pharmacology / Nursing"
+  },
+  {
+    "term": "SL",
+    "full_form": "Sublingual",
+    "definition": "Dissolved under the tongue for rapid absorption into blood (e.g. nitroglycerin for angina).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Topical",
+    "full_form": "Topical Application",
+    "definition": "Applied directly to a specific body surface (creams, ointments on skin, eye drops).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "NSAID",
+    "full_form": "Non-Steroidal Anti-Inflammatory Drug",
+    "definition": "Medications that relieve pain, reduce inflammation, and lower fever without steroids (e.g. Ibuprofen, Naproxen, Diclofenac).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "PPI",
+    "full_form": "Proton Pump Inhibitor",
+    "definition": "Medications that strongly decrease stomach acid secretion by blocking gastric proton pumps (e.g. Omeprazole, Pantoprazole).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Anticoagulant",
+    "full_form": "Anticoagulant / Blood Thinner",
+    "definition": "Medications that inhibit blood clotting to prevent and treat clots (e.g. Heparin, Warfarin, Apixaban).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Antiplatelet",
+    "full_form": "Antiplatelet Agent",
+    "definition": "Medications that stop blood platelets from clumping together to prevent clots in arteries (e.g. Aspirin, Clopidogrel).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "ACEi",
+    "full_form": "ACE Inhibitor",
+    "definition": "Angiotensin-Converting Enzyme Inhibitor; blood pressure and heart failure medication ending in '-pril' (e.g. Enalapril, Ramipril).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "ARB",
+    "full_form": "Angiotensin Receptor Blocker",
+    "definition": "Blood pressure medication blocking angiotensin II receptors, ending in '-sartan' (e.g. Telmisartan, Losartan).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Beta Blocker",
+    "full_form": "Beta-Adrenergic Blocker",
+    "definition": "Medications that reduce heart rate and blood pressure by blocking adrenaline, ending in '-lol' (e.g. Metoprolol, Atenolol).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Diuretic",
+    "full_form": "Diuretic / Water Pill",
+    "definition": "Medications that help the kidneys flush out excess water and salt through urine (e.g. Furosemide, Spironolactone).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Statin",
+    "full_form": "HMG-CoA Reductase Inhibitor",
+    "definition": "Cholesterol-lowering medications that reduce heart attack and stroke risk (e.g. Atorvastatin, Rosuvastatin).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Contraindication",
+    "full_form": "Medical Contraindication",
+    "definition": "A specific situation or condition in which a drug, procedure, or surgery should NOT be used because it may cause harm.",
+    "category": "Pharmacology / Clinical"
+  },
+  {
+    "term": "Adverse Reaction",
+    "full_form": "Adverse Drug Reaction (ADR)",
+    "definition": "An unwanted, undesirable, or harmful effect that occurs after normal administration of a drug.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Black Box Warning",
+    "full_form": "Boxed Warning",
+    "definition": "The strictest safety warning issued by drug regulatory authorities on a prescription drug's label regarding serious side effects.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Generic Name",
+    "full_form": "Non-Proprietary Name",
+    "definition": "The official, scientific chemical name of an active drug molecule (e.g. Paracetamol), as opposed to brand names (e.g. Crocin, Tylenol).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Half-Life",
+    "full_form": "Biological Half-Life (t1/2)",
+    "definition": "The time required for the concentration of a drug in the body or bloodstream to be reduced by half.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Titration",
+    "full_form": "Dose Titration",
+    "definition": "The process of gradually adjusting the dose of a medication upwards or downwards to achieve maximum benefit with minimal side effects.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Acute",
+    "full_form": "Acute Condition",
+    "definition": "Describing a disease or symptom with a sudden onset, sharp rise, and short duration.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Chronic",
+    "full_form": "Chronic Condition",
+    "definition": "Describing a condition or illness that persists over a long period (typically 3 months or more) and requires ongoing management.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Prognosis",
+    "full_form": "Medical Prognosis",
+    "definition": "The likely course, outcome, and chance of recovery from a disease.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Etiology",
+    "full_form": "Etiology",
+    "definition": "The underlying cause, set of causes, or origin of a disease or medical condition.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Idiopathic",
+    "full_form": "Idiopathic Condition",
+    "definition": "Arising spontaneously or from an obscure or unknown cause.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Prophylaxis",
+    "full_form": "Medical Prophylaxis",
+    "definition": "Action, treatment, or medication taken to prevent a disease rather than treat an existing one.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Palliative Care",
+    "full_form": "Palliative Care",
+    "definition": "Specialized medical care focused on relief from the symptoms, pain, and stress of a serious illness, prioritizing quality of life.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Triage",
+    "full_form": "Triage",
+    "definition": "The sorting and prioritization of patients based on the urgency of their need for medical treatment.",
+    "category": "Emergency / Clinical"
+  },
+  {
+    "term": "Ambulation",
+    "full_form": "Ambulation",
+    "definition": "The ability to walk independently or with assistive devices (early ambulation is encouraged after surgery).",
+    "category": "Nursing / Surgical"
+  },
+  {
+    "term": "Vital Signs",
+    "full_form": "Vitals",
+    "definition": "Clinical measurements indicating state of bodily functions: Temperature, Pulse, Respiration rate, and Blood Pressure.",
+    "category": "Clinical Practice"
+  },
+  {
+    "term": "Catheter",
+    "full_form": "Urinary / Vascular Catheter",
+    "definition": "A flexible tube inserted through a narrow opening into a body cavity, duct, or vessel to drain fluids or administer fluids.",
+    "category": "Clinical / Nursing"
+  },
+  {
+    "term": "Cannula",
+    "full_form": "Intravenous Cannula",
+    "definition": "A thin tube inserted into a vein to administer fluids, medications, or blood products.",
+    "category": "Clinical / Nursing"
+  },
+  {
+    "term": "Auscultation",
+    "full_form": "Auscultation",
+    "definition": "Listening to internal sounds of the body, usually using a stethoscope (lungs, heart, bowels).",
+    "category": "Clinical Examination"
+  },
+  {
+    "term": "Palpation",
+    "full_form": "Palpation",
+    "definition": "Examining a part of the body by touching and feeling with hands to detect tenderness, size, shape, and firmness.",
+    "category": "Clinical Examination"
+  },
+  {
+    "term": "Percussion",
+    "full_form": "Percussion",
+    "definition": "Tapping body parts with fingers or small instruments as part of a physical exam to evaluate tissue density and fluid presence.",
+    "category": "Clinical Examination"
+  },
+  {
+    "term": "Edema",
+    "full_form": "Edema",
+    "definition": "Swelling caused by excess fluid trapped in your body's tissues, commonly in feet, ankles, and legs.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Erythema",
+    "full_form": "Erythema",
+    "definition": "Redness of the skin or mucous membranes caused by capillary congestion from injury or inflammation.",
+    "category": "Dermatology / Clinical"
+  },
+  {
+    "term": "Purulent",
+    "full_form": "Purulent Exudate",
+    "definition": "Containing or consisting of pus, usually indicating a bacterial infection.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Necrosis",
+    "full_form": "Tissue Necrosis",
+    "definition": "The premature death of body cells or tissues through disease, injury, or severe blood supply failure.",
+    "category": "Pathology"
+  },
+  {
+    "term": "Ischemia",
+    "full_form": "Ischemia",
+    "definition": "Inadequate blood supply to an organ or part of the body, especially the heart muscles or brain.",
+    "category": "Pathology / Cardiology"
+  },
+  {
+    "term": "Alopecia",
+    "full_form": "Alopecia",
+    "definition": "Partial or complete loss of hair from where it normally grows; baldness.",
+    "category": "Dermatology"
+  },
+  {
+    "term": "Pruritus",
+    "full_form": "Pruritus",
+    "definition": "Severe, uncomfortable itching sensation of the skin.",
+    "category": "Dermatology"
+  },
+  {
+    "term": "Apnea",
+    "full_form": "Apnea",
+    "definition": "Temporary cessation or pause in breathing.",
+    "category": "Pulmonology / Clinical"
+  },
+  {
+    "term": "Hypoxemia",
+    "full_form": "Hypoxemia",
+    "definition": "An abnormally low level of oxygen in arterial blood.",
+    "category": "Pulmonology / Critical Care"
+  },
+  {
+    "term": "Acidosis",
+    "full_form": "Acidosis",
+    "definition": "Excessive acidity of body fluids or tissues, marked by an abnormally low blood pH (<7.35).",
+    "category": "Critical Care / Labs"
+  },
+  {
+    "term": "Alkalosis",
+    "full_form": "Alkalosis",
+    "definition": "Excessive alkalinity of body fluids or tissues, marked by an abnormally high blood pH (>7.45).",
+    "category": "Critical Care / Labs"
+  },
+  {
+    "term": "Asymptomatic",
+    "full_form": "Asymptomatic",
+    "definition": "Presenting no clinical signs or symptoms of disease despite being infected or having the underlying condition.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Symptomatic",
+    "full_form": "Symptomatic",
+    "definition": "Showing or exhibiting clinical symptoms of a condition or illness.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Parenteral",
+    "full_form": "Parenteral Administration",
+    "definition": "Administering nutrients or medications via routes outside the digestive tract (such as IV, IM, or SubQ injections).",
+    "category": "Clinical / Pharmacology"
+  },
+  {
+    "term": "Enteral",
+    "full_form": "Enteral Feeding",
+    "definition": "Feeding or medication administration given directly into the gastrointestinal tract (oral or feeding tube).",
+    "category": "Clinical / Nutrition"
+  },
+  {
+    "term": "Sterile",
+    "full_form": "Sterile Field",
+    "definition": "Free from all living bacteria or other microorganisms.",
+    "category": "Surgical Terms"
+  },
+  {
+    "term": "Aseptic Technique",
+    "full_form": "Aseptic Technique",
+    "definition": "Practices and procedures designed to prevent contamination from pathogens during clinical care.",
+    "category": "Surgical / Nursing"
+  },
+  {
+    "term": "ICU",
+    "full_form": "Intensive Care Unit",
+    "definition": "A specialized hospital department providing intensive treatment and continuous monitoring for critically ill patients.",
+    "category": "Hospital Systems"
+  },
+  {
+    "term": "HDU",
+    "full_form": "High Dependency Unit",
+    "definition": "A hospital step-down care ward for patients who require more observation than a general ward but less than an intensive care unit.",
+    "category": "Hospital Systems"
+  },
+  {
+    "term": "OPD",
+    "full_form": "Outpatient Department",
+    "definition": "The hospital section where patients receive diagnosis and consultation without staying overnight.",
+    "category": "Hospital Systems"
+  },
+  {
+    "term": "IPD",
+    "full_form": "Inpatient Department",
+    "definition": "The hospital section where patients are formally admitted to a bed for treatment, monitoring, or surgery.",
+    "category": "Hospital Systems"
+  },
+  {
+    "term": "OT",
+    "full_form": "Operation Theatre",
+    "definition": "A sterile room in a hospital where surgical procedures are performed.",
+    "category": "Hospital Systems"
+  },
+  {
+    "term": "PACU",
+    "full_form": "Post-Anesthesia Care Unit",
+    "definition": "Recovery room where patients are closely monitored after surgery as they wake up from anesthesia.",
+    "category": "Hospital Systems"
+  },
+  {
+    "term": "UHID",
+    "full_form": "Unique Hospital Identification Number",
+    "definition": "A permanent identification number assigned to a patient linking all lifetime medical visits, tests, and prescriptions in a hospital.",
+    "category": "Hospital Systems"
+  },
+  {
+    "term": "Informed Consent",
+    "full_form": "Informed Consent",
+    "definition": "A formal process where a patient receives clear information about a proposed treatment or procedure and voluntarily signs their agreement.",
+    "category": "Medical Ethics / Legal"
+  },
+  {
+    "term": "DNR",
+    "full_form": "Do Not Resuscitate",
+    "definition": "A legal medical order instructing healthcare providers not to attempt cardiopulmonary resuscitation (CPR) if the patient's breathing or heartbeat stops.",
+    "category": "Medical Ethics / Critical Care"
+  },
+  {
+    "term": "Otitis Media",
+    "full_form": "Otitis Media",
+    "definition": "Inflammation or infection of the middle ear air-filled space behind the eardrum.",
+    "category": "ENT"
+  },
+  {
+    "term": "Epistaxis",
+    "full_form": "Epistaxis",
+    "definition": "Bleeding from the nose, commonly originating from Kiesselbach's plexus on the nasal septum.",
+    "category": "ENT"
+  },
+  {
+    "term": "Tinnitus",
+    "full_form": "Tinnitus",
+    "definition": "The perception of ringing, buzzing, roaring, or hissing noise in one or both ears.",
+    "category": "ENT"
+  },
+  {
+    "term": "Pharyngitis",
+    "full_form": "Pharyngitis",
+    "definition": "Inflammation of the back of the throat (pharynx), causing sore throat, dryness, and pain on swallowing.",
+    "category": "ENT"
+  },
+  {
+    "term": "Laryngitis",
+    "full_form": "Laryngitis",
+    "definition": "Inflammation of the larynx (voice box) from overuse, irritation, or infection, leading to voice hoarseness.",
+    "category": "ENT"
+  },
+  {
+    "term": "Sinusitis",
+    "full_form": "Rhinosinusitis",
+    "definition": "Inflammation and swelling of the tissues lining the sinuses, causing facial pain, nasal congestion, and headache.",
+    "category": "ENT"
+  },
+  {
+    "term": "Cataract",
+    "full_form": "Cataract",
+    "definition": "Clouding of the eye's natural clear crystalline lens, resulting in blurry, faded, or dimmed vision.",
+    "category": "Ophthalmology"
+  },
+  {
+    "term": "Glaucoma",
+    "full_form": "Glaucoma",
+    "definition": "A group of eye conditions that damage the optic nerve, often caused by abnormally high pressure inside the eye.",
+    "category": "Ophthalmology"
+  },
+  {
+    "term": "Conjunctivitis",
+    "full_form": "Conjunctivitis / Pink Eye",
+    "definition": "Inflammation or infection of the transparent membrane (conjunctiva) lining eyelids and white eyeball.",
+    "category": "Ophthalmology"
+  },
+  {
+    "term": "Photophobia",
+    "full_form": "Photophobia",
+    "definition": "Abnormal visual sensitivity and pain in response to bright light exposure.",
+    "category": "Ophthalmology / Neurology"
+  },
+  {
+    "term": "Nystagmus",
+    "full_form": "Nystagmus",
+    "definition": "Involuntary, rhythmic, rapid oscillations of the eyeballs.",
+    "category": "Ophthalmology / Neurology"
+  },
+  {
+    "term": "Strabismus",
+    "full_form": "Strabismus",
+    "definition": "Misalignment of the eyes where both eyes do not look at the same object simultaneously (crossed eyes).",
+    "category": "Ophthalmology"
+  },
+  {
+    "term": "Presbyopia",
+    "full_form": "Presbyopia",
+    "definition": "Age-related progressive loss of the eye's ability to focus on nearby objects.",
+    "category": "Ophthalmology"
+  },
+  {
+    "term": "Urticaria",
+    "full_form": "Urticaria / Hives",
+    "definition": "Red, raised, intensely itchy skin welts triggered by histamine release in allergic reactions.",
+    "category": "Dermatology / Allergy"
+  },
+  {
+    "term": "Eczema",
+    "full_form": "Atopic Dermatitis",
+    "definition": "A chronic inflammatory skin condition causing dry, red, itchy, and irritated skin patches.",
+    "category": "Dermatology"
+  },
+  {
+    "term": "Psoriasis",
+    "full_form": "Psoriasis",
+    "definition": "A chronic autoimmune skin disease where rapid cell multiplication causes thick, red skin covered with silvery scales.",
+    "category": "Dermatology"
+  },
+  {
+    "term": "Melanoma",
+    "full_form": "Malignant Melanoma",
+    "definition": "The most aggressive form of skin cancer, arising from pigment-producing cells (melanocytes).",
+    "category": "Dermatology / Oncology"
+  },
+  {
+    "term": "Cellulitis",
+    "full_form": "Cellulitis",
+    "definition": "A common, potentially serious bacterial infection of the deeper skin layers and subcutaneous tissues.",
+    "category": "Dermatology / Infectious"
+  },
+  {
+    "term": "Abscess",
+    "full_form": "Cutaneous Abscess",
+    "definition": "A painful, swollen, localized collection of pus caused by bacterial infection surrounded by inflamed tissue.",
+    "category": "Surgery / Infectious"
+  },
+  {
+    "term": "Ulcer",
+    "full_form": "Cutaneous / Mucosal Ulcer",
+    "definition": "A circumscribed open sore on skin or mucous membrane accompanied by the sloughing of inflamed necrotic tissue.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Debridement",
+    "full_form": "Surgical Debridement",
+    "definition": "The medical removal of dead, damaged, infected, or non-viable tissue to improve healing potential.",
+    "category": "Surgery"
+  },
+  {
+    "term": "Hemostat",
+    "full_form": "Hemostatic Clamp",
+    "definition": "A surgical instrument used to clamp severed blood vessels and control bleeding during operations.",
+    "category": "Surgery"
+  },
+  {
+    "term": "Tourniquet",
+    "full_form": "Arterial Tourniquet",
+    "definition": "A tight constricting band applied around a bleeding limb to compress blood vessels and arrest life-threatening hemorrhage.",
+    "category": "Emergency Medicine"
+  },
+  {
+    "term": "Intubation",
+    "full_form": "Endotracheal Intubation",
+    "definition": "Placement of a flexible plastic tube through mouth or nose into the trachea to maintain an open airway for breathing.",
+    "category": "Anesthesia / Critical Care"
+  },
+  {
+    "term": "Extubation",
+    "full_form": "Endotracheal Extubation",
+    "definition": "The scheduled removal of an endotracheal breathing tube once a patient demonstrates adequate spontaneous respiration.",
+    "category": "Anesthesia / Critical Care"
+  },
+  {
+    "term": "Mechanical Ventilation",
+    "full_form": "Mechanical Ventilation",
+    "definition": "Life-support technology where an automated ventilator machine moves breathable air in and out of lungs.",
+    "category": "Critical Care"
+  },
+  {
+    "term": "Tracheostomy",
+    "full_form": "Tracheostomy",
+    "definition": "A surgical procedure creating an opening through the neck into the trachea to facilitate breathing when upper airway is blocked.",
+    "category": "Surgery / Critical Care"
+  },
+  {
+    "term": "Bronchodilator",
+    "full_form": "Bronchodilator",
+    "definition": "A medication (like Albuterol / Salbutamol) that widens the bronchi and bronchioles to decrease airway resistance.",
+    "category": "Pharmacology / Pulmonology"
+  },
+  {
+    "term": "Vasopressor",
+    "full_form": "Vasopressor Agent",
+    "definition": "Powerful intravenous medication (e.g. Norepinephrine) that constricts blood vessels to elevate critically low arterial blood pressure in shock.",
+    "category": "Critical Care / Pharmacology"
+  },
+  {
+    "term": "Inotrope",
+    "full_form": "Inotropic Agent",
+    "definition": "Medication that alters the force or energy of muscular contractions, particularly myocardial contraction (e.g. Dobutamine).",
+    "category": "Cardiology / Critical Care"
+  },
+  {
+    "term": "Sedative",
+    "full_form": "Sedative",
+    "definition": "A substance that induces sedation by reducing irritability or physiological excitement.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Analgesic",
+    "full_form": "Analgesic",
+    "definition": "Any member of the group of drugs used to achieve relief from pain.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Antipyretic",
+    "full_form": "Antipyretic",
+    "definition": "Medication that reduces elevated body temperature in fever (e.g. Paracetamol).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Antiemetic",
+    "full_form": "Antiemetic",
+    "definition": "Medication that is effective against vomiting and nausea (e.g. Ondansetron).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Antihistamine",
+    "full_form": "Antihistamine",
+    "definition": "Drug that inhibits the physiological effects of histamine, used to treat allergic rhinitis and urticaria (e.g. Cetirizine).",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Corticosteroid",
+    "full_form": "Corticosteroid",
+    "definition": "Class of steroid hormones or synthetic drugs (e.g. Prednisolone) providing potent anti-inflammatory and immunosuppressive actions.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Immunosuppressant",
+    "full_form": "Immunosuppressive Drug",
+    "definition": "Medication that inhibits the activity of the immune system to prevent organ rejection or control autoimmune diseases.",
+    "category": "Pharmacology"
+  },
+  {
+    "term": "Thrombosis",
+    "full_form": "Intravascular Thrombosis",
+    "definition": "The formation or presence of a blood clot within a blood vessel.",
+    "category": "Pathology / Vascular"
+  },
+  {
+    "term": "Embolism",
+    "full_form": "Arterial / Venous Embolism",
+    "definition": "The sudden blocking of an artery by an embolus (clot, air, fat) carried in the bloodstream from another site.",
+    "category": "Pathology / Vascular"
+  },
+  {
+    "term": "Ischemic Stroke",
+    "full_form": "Cerebral Infarction",
+    "definition": "Stroke caused by an obstruction within an artery supplying blood to the brain.",
+    "category": "Neurology"
+  },
+  {
+    "term": "Hemorrhagic Stroke",
+    "full_form": "Intracerebral Hemorrhage",
+    "definition": "Stroke caused by the rupture of a weakened blood vessel into surrounding brain parenchyma.",
+    "category": "Neurology"
+  },
+  {
+    "term": "Aneurysm",
+    "full_form": "Vascular Aneurysm",
+    "definition": "An abnormal localized outward bulging or ballooning of an arterial wall, vulnerable to rupture.",
+    "category": "Vascular Surgery / Neurology"
+  },
+  {
+    "term": "Hematoma",
+    "full_form": "Hematoma",
+    "definition": "A localized swelling filled with blood resulting from a break in a blood vessel.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Ecchymosis",
+    "full_form": "Ecchymosis",
+    "definition": "A non-elevated subcutaneous hematoma larger than 1 centimeter; a typical bruise.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Petechiae",
+    "full_form": "Petechiae",
+    "definition": "Small (1 to 2 mm) red or purple spots on the skin or mucous membranes caused by minor hemorrhage from broken capillaries.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Purpura",
+    "full_form": "Purpura",
+    "definition": "A condition of red or purple spots on the skin that do not blanch on applying pressure, measuring 3 to 10 mm.",
+    "category": "Clinical Terms"
+  },
+  {
+    "term": "Cyanosis",
+    "full_form": "Cyanosis",
+    "definition": "A bluish or purplish discoloration of the skin and mucous membranes caused by deficient oxygenation of blood.",
+    "category": "Clinical Examination"
+  },
+  {
+    "term": "Pallor",
+    "full_form": "Pallor",
+    "definition": "An unusual paleness of the skin and mucous membranes compared with the normal complexion, indicative of anemia or shock.",
+    "category": "Clinical Examination"
+  },
+  {
+    "term": "Diaphoresis",
+    "full_form": "Diaphoresis",
+    "definition": "Profuse, cold, or inappropriate sweating caused by medical crisis (e.g., myocardial infarction, hypoglycemia, or shock).",
+    "category": "Clinical Examination"
+  },
+  {
+    "term": "Cachexia",
+    "full_form": "Cachexia",
+    "definition": "Complex metabolic syndrome characterized by progressive loss of muscle mass with or without loss of fat mass in advanced chronic illness.",
+    "category": "Oncology / Medicine"
+  },
+  {
+    "term": "Steatosis",
+    "full_form": "Hepatic Steatosis",
+    "definition": "The abnormal accumulation of triglycerides and lipids within hepatocytes (Fatty Liver Disease).",
+    "category": "Gastroenterology"
+  },
+  {
+    "term": "Cholecystectomy",
+    "full_form": "Laparoscopic / Open Cholecystectomy",
+    "definition": "The surgical removal of the diseased gallbladder.",
+    "category": "General Surgery"
+  },
+  {
+    "term": "Appendectomy",
+    "full_form": "Appendectomy",
+    "definition": "The surgical excision of the vermiform appendix, typically for acute appendicitis.",
+    "category": "General Surgery"
+  },
+  {
+    "term": "Hernia",
+    "full_form": "Hernia (Inguinal, Umbilical, Incisional)",
+    "definition": "The abnormal exit of tissue or an organ through the wall of the cavity in which it normally resides.",
+    "category": "General Surgery"
+  },
+  {
+    "term": "Ileostomy / Colostomy",
+    "full_form": "Enterostomy (Ileostomy / Colostomy)",
+    "definition": "A surgically created opening of the bowel brought out onto the surface of the abdomen to divert waste.",
+    "category": "General Surgery"
+  },
+  {
+    "term": "Foley Catheter",
+    "full_form": "Indwelling Foley Catheter",
+    "definition": "A flexible silicone tube inserted through the urethra into the urinary bladder, kept in place with an inflated retention balloon.",
+    "category": "Urology / Nursing"
+  },
+  {
+    "term": "NG Tube",
+    "full_form": "Nasogastric Tube",
+    "definition": "A flexible tube inserted through the nose, down the esophagus, and into the stomach for enteral feeding or decompression.",
+    "category": "Nursing / Surgery"
+  },
+  {
+    "term": "Central Line",
+    "full_form": "Central Venous Catheter (CVC)",
+    "definition": "A long, thin catheter placed into a large vein (internal jugular, subclavian) to administer concentrated drugs or fluids.",
+    "category": "Critical Care / Nursing"
+  },
+  {
+    "term": "Arterial Line",
+    "full_form": "Intra-Arterial Catheter (A-line)",
+    "definition": "A thin catheter placed into a peripheral artery (radial) to continuously measure real-time blood pressure and draw blood gases.",
+    "category": "Critical Care / Anesthesia"
+  }
+]

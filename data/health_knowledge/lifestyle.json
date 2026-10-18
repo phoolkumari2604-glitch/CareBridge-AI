@@ -1,0 +1,987 @@
+[
+  {
+    "id": "ls_aerobic_exercise_guidelines_001",
+    "topic": "Lifestyle: Aerobic Exercise & Physical Activity Guidelines",
+    "category": "lifestyle",
+    "keywords": [
+      "exercise guidelines",
+      "how much exercise",
+      "cardio workout",
+      "daily steps",
+      "aerobic exercise",
+      "vyayam"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "WHO and AHA physical activity recommendations for all adults:",
+      "  - At least 150 to 300 minutes of moderate-intensity aerobic exercise per week (such as brisk walking at 5 km/h, light cycling, swimming, or dancing), OR",
+      "  - At least 75 to 150 minutes of vigorous-intensity aerobic exercise per week (running, jogging, fast cycling, or singles tennis).",
+      "Spread your activity throughout the week across at least 4 to 5 days rather than cramming everything into a single weekend.",
+      "Aim for 7,000 to 10,000 steps daily: taking a 15-minute walk after lunch and dinner significantly flattens post-meal blood sugar and lowers blood pressure.",
+      "Break up prolonged sitting: stand up, stretch, and walk for 2 minutes every 45 to 60 minutes of desk work.",
+      "If you are over 40, have heart disease, or have been completely sedentary, consult your physician before starting high-intensity workouts."
+    ],
+    "doctor_answer": {
+      "assessment": "Physical Activity Assessment and Prescription according to WHO / AHA Guidelines. Assess baseline functional capacity in METs (Metabolic Equivalents).",
+      "investigations": "Cardiovascular risk stratification prior to vigorous exercise in high-risk individuals: 12-lead ECG, Treadmill Exercise Test (TMT / stress test) if symptomatic CAD.",
+      "management": "Prescribe FITT principles (Frequency: 5 days/week; Intensity: 50-70% max heart rate; Time: 30-60 min/day; Type: dynamic aerobic). Reduces all-cause mortality by 20-30%, lowers SBP by 5-8 mmHg, improves insulin sensitivity, and elevates HDL-C.",
+      "references": [
+        "WHO Guidelines on Physical Activity and Sedentary Behaviour",
+        "AHA Scientific Statement: Physical Activity Trajectories and Cardiovascular Health"
+      ]
+    },
+    "staff_answer": "Assess current activity minutes per week. Check resting BP and pulse.",
+    "red_flags": [
+      "Chest pain, pressure, lightheadedness, or fainting during exercise (Exertional Angina / Arrhythmia Alert)",
+      "Severe shortness of breath out of proportion to exertion"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT remain completely sedentary (physical inactivity is as dangerous to health as smoking)",
+      "Do NOT perform sudden unaccustomed maximal exertion without warming up"
+    ],
+    "source": "World Health Organization (WHO) & American Heart Association (AHA)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_strength_resistance_training_002",
+    "topic": "Lifestyle: Strength & Resistance Training for Muscle & Bone Health",
+    "category": "lifestyle",
+    "keywords": [
+      "strength training",
+      "weight lifting health",
+      "resistance exercise",
+      "muscle building seniors",
+      "gym health"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Adults of all ages should perform muscle-strengthening resistance activities involving all major muscle groups (legs, hips, back, chest, abdomen, shoulders, and arms) at least 2 to 3 days per week.",
+      "You do not need heavy gym weights: bodyweight exercises (squats, lunges, push-ups, wall sits) or elastic resistance bands are highly effective.",
+      "Key health benefits: Rebuilds lost muscle mass (combats sarcopenia), strengthens bone density against osteoporosis, and boosts resting metabolic rate to burn more calories around the clock.",
+      "Form over weight: Always master correct posture and smooth controlled movements before adding weights.",
+      "Rest and recover: Allow 48 hours of recovery between working the same muscle groups; muscles grow and repair during rest, not during the workout itself.",
+      "Breathe continuously: Exhale as you push or lift against gravity; inhale as you lower the weight. Never hold your breath (holding breath causes dangerous blood pressure spikes / Valsalva maneuver)."
+    ],
+    "doctor_answer": {
+      "assessment": "Resistance Training Prescription. Muscle hypertrophy and neuromuscular adaptation assessment.",
+      "investigations": "Baseline musculoskeletal screening. Blood pressure check.",
+      "management": "Prescribe 2-3 non-consecutive days/week: 8-10 exercises targeting major muscle groups, 2-3 sets of 8-12 repetitions to moderate fatigue. Emphasize progressive overload. Proven to improve glycemic control (independent of aerobic exercise), enhance bone mineral density, and reduce fall risk.",
+      "references": [
+        "ACSM (American College of Sports Medicine) Position Stand on Resistance Training",
+        "WHO Physical Activity Guidelines"
+      ]
+    },
+    "staff_answer": "Verify patient does not perform Valsalva breath-holding during lifting. Check BP.",
+    "red_flags": [
+      "Acute severe joint swelling or inability to move a limb following lifting (muscle tear/herniation)",
+      "Chest tightness or severe dizziness while lifting weights"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT hold your breath while lifting (spikes intracranial and blood pressure)",
+      "Do NOT sacrifice safe lifting form to lift heavier weights"
+    ],
+    "source": "American College of Sports Medicine (ACSM) & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_smoking_tobacco_cessation_003",
+    "topic": "Lifestyle: Smoking & Tobacco Cessation (Quitting Nicotine)",
+    "category": "lifestyle",
+    "keywords": [
+      "quit smoking",
+      "stop tobacco",
+      "smoking cessation",
+      "bidi chhodna",
+      "gutkha chhodna",
+      "nicotine gum"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Quitting smoking and tobacco is the single best decision you can make for your health, and your body begins healing within minutes:",
+      "  - Within 20 minutes: Your heart rate and blood pressure drop to normal.",
+      "  - Within 24 hours: Poisonous carbon monoxide levels in your blood clear completely.",
+      "  - Within 2 to 12 weeks: Circulation improves and lung function increases by up to 30%.",
+      "  - Within 1 year: Your risk of a heart attack drops by HALF compared to a smoker.",
+      "The 4 D's to beat a 3-minute craving:",
+      "  1. Delay: Wait 5 minutes; cravings peak and naturally pass.",
+      "  2. Deep Breathe: Take slow, deep belly breaths.",
+      "  3. Drink Water: Sip a glass of cold water slowly.",
+      "  4. Distract: Call a friend, go for a walk, or chew on sugar-free gum or clove.",
+      "Medical quitting aids: Nicotine Replacement Therapy (Nicotex gums or patches) and prescription tablets (Bupropion or Varenicline) double your chances of quitting permanently.",
+      "NATIONAL QUITLINE (Free in India): Call 1800-112-356 or SMS 'QUIT' to 56161 for free personalized counselor support."
+    ],
+    "doctor_answer": {
+      "assessment": "Tobacco Use Disorder (Nicotine Dependence). Quantify using Fagerström Test for Nicotine Dependence (FTND score > 6 indicates high physical dependence). Use the 5 A's Model (Ask, Advise, Assess, Assist, Arrange).",
+      "investigations": "Spirometry, CXR in chronic heavy smokers (>20 pack-years), blood pressure, oral cavity screening for leukoplakia/erythroplakia.",
+      "management": "Combination Pharmacotherapy + Behavioral Counseling: Nicotine Replacement Therapy (NRT: Nicotine patch for basal coverage + Nicotine gum/lozenge 2-4 mg for acute breakthrough cravings) OR Varenicline (alpha-4-beta-2 partial agonist 0.5-1 mg BID) OR Bupropion SR (150 mg BID). Behavioral cognitive relapse prevention. Link to National Tobacco Quitline Services.",
+      "references": [
+        "USPSTF Recommendation: Tobacco Smoking Cessation in Adults",
+        "WHO Tobacco Cessation Toolkit"
+      ]
+    },
+    "staff_answer": "Ask smoking status at every clinical encounter. Provide Quitline 1800-112-356 number clearly.",
+    "red_flags": [
+      "Persistent hoarseness of voice > 3 weeks in a smoker (Screen for Laryngeal Cancer)",
+      "Coughing up fresh blood (Hemoptysis - screen for Bronchogenic Carcinoma)",
+      "White leathery non-scrapable patch inside cheek in a gutkha chewer (Oral Leukoplakia - Pre-cancer)"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT chew Nicotine gum like regular bubblegum (must 'chew and park' between cheek and gum to absorb across mucosa)",
+      "Do NOT give up if you experience a slip-up; most successful quitters attempt 4-5 times before succeeding"
+    ],
+    "source": "United States Preventive Services Task Force (USPSTF) & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_alcohol_moderation_harm_004",
+    "topic": "Lifestyle: Alcohol Guidelines, Moderation & Health Risks",
+    "category": "lifestyle",
+    "keywords": [
+      "alcohol limits",
+      "how much alcohol is safe",
+      "safe drinking units",
+      "sharab peene ki limit",
+      "alcohol health risks"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Global health scientific consensus (WHO 2023 update): There is NO completely 'safe' or zero-risk level of alcohol consumption for health; even small amounts increase the risk of cancers (especially breast, esophagus, and colorectal cancers).",
+      "If you choose to drink, follow standard moderation limits:",
+      "  - Men: No more than 2 standard drinks per day.",
+      "  - Women: No more than 1 standard drink per day.",
+      "What counts as 1 Standard Drink (approx. 10 to 14 grams of pure alcohol):",
+      "  - 330 mL of regular beer (5% alcohol), OR",
+      "  - 140 mL of table wine (12% alcohol), OR",
+      "  - 40 mL (one standard peg) of 40% spirits (whiskey, vodka, rum, gin).",
+      "Keep at least 3 to 4 days completely ALCOHOL-FREE every week to give your liver and cardiovascular system time to regenerate.",
+      "NEVER DRINK IF: You are pregnant or trying to conceive, taking medications (especially Metronidazole, Paracetamol, sedatives, or blood pressure pills), driving, or have a history of liver disease."
+    ],
+    "doctor_answer": {
+      "assessment": "Alcohol Consumption Risk Assessment. Screen using AUDIT-C (Alcohol Use Disorders Identification Test - Consumption) or CAGE questionnaire.",
+      "investigations": "LFTs (GGT, AST, ALT; AST/ALT ratio > 2 suggests alcoholic etiology), CBC (macrocytosis / elevated MCV), abdominal ultrasound.",
+      "management": "Brief Motivational Intervention (FRAMES model). Education on cancer risks associated with alcohol. Encourage alcohol-free days. Harm reduction and complete abstinence for liver disease, hypertension, or cardiomyopathy.",
+      "references": [
+        "WHO Statement on Alcohol Consumption and Health (2023)",
+        "Dietary Guidelines for Americans - Alcohol Guidance"
+      ]
+    },
+    "staff_answer": "Administer AUDIT-C screening. Calculate weekly units of alcohol. Warn against binge drinking.",
+    "red_flags": [
+      "Signs of alcohol-related end-organ damage: jaundice, ascites, upper GI bleeding (esophageal varices)",
+      "Alcohol withdrawal seizures or Delirium Tremens"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "NEVER consume alcohol during pregnancy (causes irreversible Fetal Alcohol Spectrum Disorder)",
+      "Do NOT engage in weekend 'binge drinking' (consuming 5+ drinks in 2 hours dramatically triggers atrial fibrillation and strokes)"
+    ],
+    "source": "World Health Organization (WHO) & Centers for Disease Control and Prevention",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_sleep_optimization_circadian_005",
+    "topic": "Lifestyle: Optimizing Sleep Quality & Circadian Rhythms",
+    "category": "lifestyle",
+    "keywords": [
+      "sleep quality",
+      "how to sleep better",
+      "circadian rhythm",
+      "better sleep tips",
+      "deep sleep",
+      "sleep optimization"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Adults require 7 to 9 hours of quality, restorative sleep each night for immune function, brain waste clearance (glymphatic system), and metabolic regulation.",
+      "Synchronize your master circadian clock: Get 20 to 30 minutes of natural outdoor sunlight within 1 hour of waking up; morning photons set your daytime alertness and start the 14-hour timer for evening melatonin release.",
+      "Dim ambient indoor lighting after sunset; avoid bright overhead LED lights and blue screens at night.",
+      "Keep your bedroom cold: Your core body temperature must drop by approximately 1°C (2°F) to initiate deep sleep; keep the room comfortably cool (around 18-20°C / 65-68°F).",
+      "Maintain consistent timing: Going to sleep and waking up at the exact same times every day (even on weekends) stabilizes deep delta sleep stages.",
+      "Avoid eating within 3 hours of sleep: digesting heavy meals raises core body temperature and elevates nighttime heart rate, disrupting sleep continuity."
+    ],
+    "doctor_answer": {
+      "assessment": "Circadian Rhythm and Sleep Quality Assessment. Differentiate Circadian Rhythm Sleep-Wake Disorders (Delayed Sleep Phase, Advanced Sleep Phase, Shift Work Disorder) from Primary Insomnia.",
+      "investigations": "Munich Chronotype Questionnaire, Actigraphy, Sleep diary.",
+      "management": "Circadian entrainment: Early morning bright light therapy (>=10,000 lux or natural outdoor sun), strict wake-time consistency, evening light avoidance (blue-blocking), pre-sleep core cooling. Melatonin timing: micro-dose (0.5 mg) administered 4-5 hours prior to desired bedtime for phase-advancement.",
+      "references": [
+        "AASM Clinical Practice Guidelines for Circadian Rhythm Sleep-Wake Disorders",
+        "National Sleep Foundation Sleep Guidelines"
+      ]
+    },
+    "staff_answer": "Review morning sunlight habits, evening screen habits, and bed-time consistency.",
+    "red_flags": [
+      "Falling asleep unintentionally while driving or operating machinery",
+      "Extreme shift-work sleep disorder leading to severe medical errors or cognitive impairment"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT sleep in late on weekends to 'make up' for lost sleep (creates 'social jetlag' that destroys weekday sleep quality)",
+      "Do NOT keep mobile phones beside your pillow"
+    ],
+    "source": "American Academy of Sleep Medicine (AASM) & National Sleep Foundation",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_stress_management_mind_body_006",
+    "topic": "Lifestyle: Mind-Body Stress Reduction & Cortisol Management",
+    "category": "lifestyle",
+    "keywords": [
+      "manage stress",
+      "reduce cortisol",
+      "stress relief",
+      "how to de-stress",
+      "chronic stress relief",
+      "mental calm"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Chronic unmanaged stress keeps your nervous system in a continuous fight-or-flight state, flooding your body with cortisol and adrenaline that elevates blood pressure, spikes blood sugar, and suppresses immune cells.",
+      "The 'Physiological Sigh': A rapid reset for acute stress discovered by neuroscientists: take two quick sniffs in through your nose (one deep breath, followed by a second sharp top-up sniff), then exhale slowly and fully through your mouth. Doing this just 2 to 3 times instantly slows heart rate.",
+      "Engage in non-sleep deep rest (NSDR / Yoga Nidra): a 20-minute guided relaxation session that restores physical energy and replenishes mental focus.",
+      "Nature exposure ('Shinrin-yoku' / Forest bathing): Spending just 20 minutes in a green park or natural setting scientifically reduces salivary cortisol and heart rate variability.",
+      "Audit your digital consumption: reduce doom-scrolling, social media comparison, and continuous breaking news alerts.",
+      "Connect with friends: social laughter and physical hugs release oxytocin, the body's natural hormone that neutralizes stress chemicals."
+    ],
+    "doctor_answer": {
+      "assessment": "Chronic Allostatic Load and Stress Assessment. Evaluate sympathetic overdrive and hypothalamic-pituitary-adrenal (HPA) axis dysregulation.",
+      "investigations": "Perceived Stress Scale (PSS-10), resting heart rate, 24-hour ambulatory blood pressure, fasting glucose.",
+      "management": "Evidence-based autonomic modulation: Physiological sigh breathing protocols, Mindfulness-Based Stress Reduction (MBSR), progressive muscle relaxation, nature immersion therapy. Cognitive restructuring of catastrophic cognitive distortions.",
+      "references": [
+        "Huberman Lab / Stanford Studies on Cyclic Sighing and Autonomic Control",
+        "American Psychological Association (APA) Stress Guidelines"
+      ]
+    },
+    "staff_answer": "Demonstrate the physiological sigh technique (double inhale through nose, long exhale through mouth).",
+    "red_flags": [
+      "Severe acute panic or hypertensive spike triggered by emotional stress",
+      "Stress manifesting as severe chest pain (must rule out Takotsubo Cardiomyopathy / Broken Heart Syndrome)"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT use nicotine, alcohol, or junk food as stress coping mechanisms",
+      "Do NOT bottle up chronic emotional distress without talking to someone"
+    ],
+    "source": "Stanford Medicine Neurobiology Research & American Psychological Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_hydration_water_rules_007",
+    "topic": "Lifestyle: Daily Hydration Guidelines & Water Balance",
+    "category": "lifestyle",
+    "keywords": [
+      "how much water to drink",
+      "daily water intake",
+      "pani kitna piye",
+      "dehydration prevention",
+      "hydration rules"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "General daily fluid guideline: Healthy adults living in temperate climates require approximately 2.5 to 3 liters (10 to 12 glasses) of water daily for men, and 2.0 to 2.5 liters (8 to 10 glasses) daily for women.",
+      "Increase water intake in hot summer weather, humid conditions, and during physical exercise (drink 1 to 2 extra glasses for every 30 minutes of sweating).",
+      "THE SIMPLE URINE COLOR TEST: Check your urine color in the toilet bowl: pale straw or light transparent yellow indicates healthy, optimal hydration. Dark yellow, amber, or brown urine means you are dehydrated and need to drink water immediately.",
+      "Drink a tall glass of water first thing upon waking to rehydrate your body after 8 hours of overnight sleep.",
+      "IMPORTANT MEDICAL EXCEPTION: If your cardiologist or nephrologist has placed you on a strict fluid limit (common in congestive heart failure and advanced kidney disease), follow your doctor's exact daily milliliter limit."
+    ],
+    "doctor_answer": {
+      "assessment": "Euhydration vs Hypohydration Assessment. Evaluate fluid turnover, renal concentrating capacity, and environmental heat load.",
+      "investigations": "Urine color chart (Armstrong 8-point scale; grades 1-3 indicate euhydration), Serum Sodium, BUN/Creatinine ratio, urine specific gravity.",
+      "management": "Individualized fluid prescription based on body weight (~30-35 mL/kg/day in healthy adults) adjusted for ambient temperature and physical activity. Recognize medical fluid restrictions in heart failure (typically 1.5-2 L/day) and oliguric CKD.",
+      "references": [
+        "National Academies of Sciences, Engineering, and Medicine Dietary Reference Intakes for Water",
+        "European Food Safety Authority (EFSA) Hydration Guidelines"
+      ]
+    },
+    "staff_answer": "Review urine color. Check for medical fluid restriction orders in EHR (CHF/CKD).",
+    "red_flags": [
+      "Hyponatremia symptoms: confusion, nausea, seizures from drinking massive volumes of water rapidly (Water Intoxication / Hyponatremia)",
+      "Severe dehydration with SBP < 90 mmHg and dark concentrated urine"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT drink gallons of water excessively beyond thirst (can dilute blood sodium dangerously)",
+      "Do NOT wait until you feel desperately thirsty (thirst signals that dehydration has already begun)"
+    ],
+    "source": "National Academies of Sciences (NASEM) & European Food Safety Authority (EFSA)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_ergonomics_desk_posture_008",
+    "topic": "Lifestyle: Workplace Ergonomics & Posture (Preventing Tech Neck)",
+    "category": "lifestyle",
+    "keywords": [
+      "ergonomics",
+      "desk posture",
+      "computer neck pain",
+      "tech neck",
+      "sitting posture back pain",
+      "ergonomic chair setup"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Poor sitting ergonomics causes chronic cervical spine strain ('tech neck'), rounded shoulders, lower back stiffness, and carpal tunnel wrist pain.",
+      "OPTIMAL WORKSTATION SETUP:",
+      "  1. Monitor Height: Position your monitor directly in front of you so the TOP THIRD of the screen is at eye level (looking down bends your neck; looking straight ahead relieves neck spine load).",
+      "  2. Arm Length Distance: Screen should be approximately arm's length (50 to 70 cm) away from your face.",
+      "  3. Chair Support: Sit with your hips pushed all the way to the back of the chair; use a small lumbar cushion to support your natural lower back curve.",
+      "  4. Foot Placement: Keep both feet flat on the floor; use a footrest if your feet dangle.",
+      "  5. Elbow Angle: Keep elbows bent at 90 degrees with forearms resting parallel to the desk while typing.",
+      "THE 30-MINUTE MOVEMENT RULE: Stand up, stretch, and perform chin tucks (gently pulling your chin back like making a double chin) every 30 to 45 minutes."
+    ],
+    "doctor_answer": {
+      "assessment": "Workplace Ergonomic and Postural Strain Assessment. Evaluate Upper Crossed Syndrome (tight pectorals/upper trapezius, weak deep neck flexors/rhomboids) and lumbar disc compression.",
+      "investigations": "Physical exam: forward head posture angle (craniovertebral angle), cervical range of motion, Spurling's test (rule out radiculopathy).",
+      "management": "Ergonomic workstation adjustment (monitor elevation, lumbar support, 90-degree elbow/knee angles). Postural correction exercises: chin tucks, wall angels, thoracic extension over foam roller, core strengthening.",
+      "references": [
+        "OSHA Computer Workstations Ergonomics Guidelines",
+        "Mayo Clinic Guide to Office Ergonomics"
+      ]
+    },
+    "staff_answer": "Demonstrate proper chin tuck and screen height alignment. Assess daily desk hours.",
+    "red_flags": [
+      "Shooting sharp pain, numbness, or tingling traveling down from neck into fingers (Cervical Radiculopathy)",
+      "Severe progressive weakness in hand grip"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT slouch forward or rest your chin in your hands while staring at screens",
+      "Do NOT work on a laptop flat on your lap for hours (use a laptop riser stand with external keyboard)"
+    ],
+    "source": "Occupational Safety and Health Administration (OSHA) & Mayo Clinic Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_ultra_processed_foods_risks_009",
+    "topic": "Lifestyle: Ultra-Processed Foods (UPFs) & Metabolic Health",
+    "category": "lifestyle",
+    "keywords": [
+      "ultra processed foods",
+      "junk food health risks",
+      "packaged food dangers",
+      "upf foods",
+      "healthy eating whole foods"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Ultra-processed foods (UPFs) are industrial food formulations made mostly from extracted substances (modified starches, hydrogenated fats, isolated soy protein) with artificial flavorings, colors, and emulsifiers.",
+      "Common examples: Packaged chips, commercial namkeens, instant noodles, sugary breakfast cereals, packaged sweet biscuits, hot dogs, and packaged soda drinks.",
+      "Scientific health dangers: Heavy consumption of UPFs is directly linked to chronic systemic inflammation, obesity, Type 2 diabetes, high blood pressure, fatty liver, and increased cancer risk.",
+      "Chemical cravings: UPFs are scientifically engineered to achieve the 'bliss point' of salt, sugar, and fat that bypasses normal brain fullness signals, causing overeating.",
+      "THE 80/20 RULE: Fill at least 80% of your diet with whole, single-ingredient foods cooked from scratch (vegetables, lentils, fresh fruits, whole grains, eggs, curd).",
+      "Read labels: If the ingredient list contains chemical names, artificial preservatives, or items you would never find in a home kitchen, it is an ultra-processed product."
+    ],
+    "doctor_answer": {
+      "assessment": "Dietary Quality and Processing Classification using NOVA Food Classification System (Group 1: Unprocessed/Minimally processed; Group 4: Ultra-processed food formulations).",
+      "investigations": "Fasting lipid panel, Fasting glucose & HbA1c, LFTs, hs-CRP, BMI and waist circumference.",
+      "management": "Structured transition toward whole-food, plant-rich dietary patterns (Mediterranean, DASH). Educate on reading nutrition facts labels (identifying hidden sugars, high sodium, and industrial emulsifiers). Replace UPF snacks with whole alternatives (roasted chana, unsalted nuts, fresh fruit).",
+      "references": [
+        "NOVA Food Classification System (Monteiro et al.)",
+        "BMJ Clinical Review: Ultra-processed food exposure and adverse health outcomes"
+      ]
+    },
+    "staff_answer": "Assess daily percentage of diet from packaged/fast foods. Review nutrition labels.",
+    "red_flags": [
+      "Severe metabolic syndrome (obesity + hypertension + elevated triglycerides + elevated fasting glucose)"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT believe misleading health claims on the front of packaged boxes ('Heart healthy', 'Rich in vitamins') without checking the actual ingredient list",
+      "Do NOT use ultra-processed snacks as primary meal replacements"
+    ],
+    "source": "NOVA System (University of São Paulo) & British Medical Journal (BMJ)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_sun_exposure_vitamin_d_010",
+    "topic": "Lifestyle: Sensible Sun Exposure & Sunscreen Protection",
+    "category": "lifestyle",
+    "keywords": [
+      "sun exposure",
+      "sunscreen use",
+      "how to get vitamin d from sun",
+      "sunburn prevention",
+      "spf guide"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Morning sunlight is the most natural way for your skin to synthesize Vitamin D3, essential for strong bones, calcium absorption, and healthy immune function.",
+      "SENSIBLE SUN EXPOSURE FOR VITAMIN D: Expose your arms, face, and legs to natural morning sunlight for 15 to 20 minutes (before 10 AM or after 4 PM) 3 to 4 times a week without burning.",
+      "SUNSCREEN PROTECTION DURING PEAK HOURS: Between 10 AM and 4 PM, ultraviolet (UV) rays are intense and cause DNA skin damage, premature skin aging (wrinkles, dark spots), and skin cancers.",
+      "How to use sunscreen correctly:",
+      "  - Choose a broad-spectrum sunscreen with SPF 30 or higher and PA+++ rating (protects against both UVA aging rays and UVB burning rays).",
+      "  - Apply generously (about 2 finger-lengths of cream for face and neck) at least 15 to 20 minutes before going outdoors.",
+      "  - Reapply every 2 hours if outdoors, or immediately after swimming or heavy sweating.",
+      "Wear UV-blocking sunglasses and a wide-brimmed hat during midday sun."
+    ],
+    "doctor_answer": {
+      "assessment": "Photoprotection vs Cutaneous Vitamin D Synthesis. Assess Fitzpatrick Skin Phototype (Type I-VI) and ultraviolet index (UV Index).",
+      "investigations": "Serum 25-OH Vitamin D level.",
+      "management": "Sensible sun exposure tailored to skin type (darker phototypes IV-VI require longer exposure for equivalent Vitamin D synthesis). Daily broad-spectrum sunscreen (SPF >= 30, PA+++) application for photocarcinogenesis and photoaging prevention. Oral Vitamin D3 supplementation (1000-2000 IU/day) preferred over excessive unprotected UV exposure.",
+      "references": [
+        "AAD Guidelines on Sunscreen and Sun Safety",
+        "WHO Guidelines on Ultraviolet Radiation and Health"
+      ]
+    },
+    "staff_answer": "Educate on the two-finger rule for sunscreen application. Check 25-OH Vitamin D levels.",
+    "red_flags": [
+      "Severe blistering sunburn with fever, chills, and dizziness (Sunburn Toxemia / Sunstroke Emergency)",
+      "Changing, irregularly pigmented, asymmetric skin mole (Screen for Melanoma)"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT stay in intense midday sun without sunscreen protection",
+      "Do NOT use tanning beds or artificial UV tanning lamps"
+    ],
+    "source": "American Academy of Dermatology (AAD) & World Health Organization (WHO)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_sedentary_lifestyle_risks_011",
+    "topic": "Lifestyle: Breaking Prolonged Sitting & Sedentary Behavior",
+    "category": "lifestyle",
+    "keywords": [
+      "sedentary lifestyle",
+      "sitting all day health risks",
+      "desk job sitting dangers",
+      "active workstation",
+      "sitting disease"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Prolonged unbroken sitting (more than 8 hours daily) slows down blood circulation, deactivates muscle enzymes that clear fats and blood sugar, and significantly increases cardiovascular and diabetes mortality.",
+      "Even if you exercise for 30 minutes in the morning, sitting motionless for the remaining 10 hours still carries independent health risks ('The Active Couch Potato' effect).",
+      "HOW TO BREAK UP SITTING TIME (EASY MICRO-HABITS):",
+      "  - The '20-8-2 Rule': For every 30 minutes of desk work, sit for 20 minutes, stand for 8 minutes, and walk/stretch for 2 minutes.",
+      "  - Take phone calls standing up or walking around the room.",
+      "  - Stand up and stretch every time an online video meeting ends.",
+      "  - Walk over to talk to a colleague instead of sending an internal message.",
+      "  - Take the stairs instead of the elevator for 1 to 2 floors.",
+      "Small, frequent movements throughout the day keep metabolic enzymes active and prevent neck and lower back stiffness."
+    ],
+    "doctor_answer": {
+      "assessment": "Sedentary Behavior Assessment (total daily sitting hours and sitting bout durations). Differentiate sedentary behavior from physical inactivity.",
+      "investigations": "Daily sitting time logs, step count tracking, fasting lipid profile, HbA1c.",
+      "management": "Sedentary break prescription: Interrupt sitting every 30-45 minutes with 2-3 minutes of light-intensity physical activity (walking, calf raises, standing). Sit-stand desk utilization. Proven to lower postprandial glucose and insulin excursions by 15-20% and reduce vascular endothelial dysfunction.",
+      "references": [
+        "WHO Guidelines on Physical Activity and Sedentary Behaviour",
+        "AHA Scientific Statement on Sedentary Behavior"
+      ]
+    },
+    "staff_answer": "Ask patient to estimate total daily sitting hours. Prescribe active movement breaks.",
+    "red_flags": [
+      "Sudden calf swelling, warmth, and pain after long motionless sitting (Deep Vein Thrombosis Alert)",
+      "Acute severe back spasm with inability to stand"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT sit motionless for 3 to 4 continuous hours without standing up",
+      "Do NOT assume a morning workout completely cancels out 10 hours of unbroken sitting"
+    ],
+    "source": "World Health Organization (WHO) & American Heart Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_mindful_eating_habits_012",
+    "topic": "Lifestyle: Mindful Eating & Overcoming Emotional Eating",
+    "category": "lifestyle",
+    "keywords": [
+      "mindful eating",
+      "emotional eating",
+      "eating when bored",
+      "overeating habits",
+      "slow eating benefits"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Mindful eating is the practice of paying full, curious attention to the physical experience of eating, rather than eating automatically while distracted.",
+      "The 20-Minute Satiety Lag: It takes approximately 15 to 20 minutes for your stomach to produce and send fullness hormones (leptin, CCK) to your brain. Eating too fast causes you to swallow excess food before your brain realizes you are full.",
+      "PRACTICE MINDFUL EATING HABITS:",
+      "  - Eliminate screen distractions: Turn off the TV and put your smartphone away during meals; distracted eating leads to consuming 30% more calories.",
+      "  - Chew thoroughly: Chew each mouthful 15 to 20 times to appreciate flavors, textures, and facilitate smooth stomach digestion.",
+      "  - Put your fork or spoon down between bites.",
+      "Differentiate Physical Hunger from Emotional Hunger:",
+      "  - Physical hunger builds up gradually, can be satisfied with healthy food (like an apple or dal), and stops when full.",
+      "  - Emotional hunger strikes suddenly, craves a specific comfort food (like ice cream or chips), and is accompanied by guilt afterward.",
+      "When emotional hunger hits, pause and ask: 'Am I actually hungry, or am I stressed, bored, or lonely?' Drink a glass of water first."
+    ],
+    "doctor_answer": {
+      "assessment": "Eating Behavior Assessment. Screen for emotional eating, binge eating episodes, and external eating cues.",
+      "investigations": "Mindful Eating Questionnaire (MEQ), food and mood diary.",
+      "management": "Mindful eating interventions (slowing down eating speed, recognizing hunger/fullness cues on a 1-10 scale, sensory appreciation of food). Cognitive behavioral strategies for emotional eating (developing non-food coping mechanisms for stress and sadness: walks, journaling, music).",
+      "references": [
+        "Harvard T.H. Chan School of Public Health Mindful Eating Review",
+        "Center for Mindful Eating Guidelines"
+      ]
+    },
+    "staff_answer": "Inquire about meal speed and eating in front of televisions/screens. Review hunger scale.",
+    "red_flags": [
+      "Binge eating disorder with severe loss of control, distress, and guilt",
+      "Severe self-induced vomiting after meals (Bulimia)"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT eat meals while staring at smartphone screens or television",
+      "Do NOT use food as your primary emotional reward or stress relief"
+    ],
+    "source": "Harvard T.H. Chan School of Public Health & Center for Mindful Eating",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_smoking_secondhand_smoke_013",
+    "topic": "Lifestyle: Secondhand & Thirdhand Smoke Dangers to Family",
+    "category": "lifestyle",
+    "keywords": [
+      "secondhand smoke",
+      "passive smoking",
+      "thirdhand smoke",
+      "smoke danger children",
+      "passive smoking risks"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Secondhand smoke (passive smoking) is the smoke exhaled by a smoker plus the smoke that drifts from the burning tip of a cigarette or bidi.",
+      "There is NO safe level of secondhand smoke exposure: non-smokers who breathe secondhand smoke inhale the exact same 7,000 toxic chemicals and 70 cancer-causing substances as the smoker.",
+      "DANGERS TO CHILDREN AND BABIES:",
+      "  - Dramatically increases the risk of Sudden Infant Death Syndrome (SIDS / cot death).",
+      "  - Triggers severe, frequent asthma attacks and chronic bronchitis in children.",
+      "  - Causes recurring painful middle ear infections and hospitalizations for pneumonia.",
+      "THIRDHAND SMOKE: Toxic nicotine and chemical gases soak into carpets, curtains, sofas, walls, and clothing, lingering for months. Babies crawling on floors absorb these poisons through their skin and hands.",
+      "Smoking in another room, opening a window, or turning on a fan does NOT eliminate the danger; the ONLY effective way to protect your family is to maintain a 100% strictly SMOKE-FREE home and car."
+    ],
+    "doctor_answer": {
+      "assessment": "Environmental Tobacco Smoke (ETS) Exposure Assessment in pediatric and non-smoking adult populations.",
+      "investigations": "Urinary cotinine levels (if testing exposure), pediatric respiratory evaluation.",
+      "management": "Establish 100% smoke-free home and vehicle policies. Smoking cessation support for household smokers. Counsel parents that outdoor smoking still leaves thirdhand residues on clothing; emphasize handwashing and changing clothes before holding infants.",
+      "references": [
+        "US Surgeon General's Report: The Health Consequences of Involuntary Exposure to Tobacco Smoke",
+        "WHO Second-Hand Smoke Fact Sheet"
+      ]
+    },
+    "staff_answer": "Ask non-smokers and mothers of asthmatic children about household smoking exposures. Prescribe smoke-free home.",
+    "red_flags": [
+      "Severe pediatric asthma exacerbation requiring emergency admission in a household with smokers",
+      "Infant with severe recurrent lower respiratory infections"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT smoke inside the house even if children are in a different room (smoke travels through ventilation)",
+      "Do NOT smoke inside cars even with windows rolled down"
+    ],
+    "source": "US Surgeon General & World Health Organization (WHO)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_circadian_shift_work_health_014",
+    "topic": "Lifestyle: Shift Work Health, Night Shifts & Sleep Adaptation",
+    "category": "lifestyle",
+    "keywords": [
+      "shift work",
+      "night shift health",
+      "night duty sleep",
+      "working night shift health",
+      "shift work sleep disorder"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Working rotating or overnight shifts forces your body to operate against its natural 24-hour circadian clock, increasing the risk of digestive issues, sleep debt, metabolic syndrome, and heart disease.",
+      "PREPARING FOR SLEEP AFTER A NIGHT SHIFT:",
+      "  - Wear dark sunglasses on your morning drive or commute home; bright morning sunlight signals your brain to wake up and suppresses daytime sleep.",
+      "  - Keep your bedroom as dark as a cave: use heavy blackout curtains or a comfortable eye mask.",
+      "  - Use earplugs or a white noise machine (or fan) to drown out daytime neighborhood noise.",
+      "  - Turn off phone notifications and ask family members to treat your daytime sleep as sacred and uninterrupted.",
+      "NUTRITION ON NIGHT SHIFT:",
+      "  - Eat your main balanced meal BEFORE your night shift begins.",
+      "  - Eat light, protein-rich snacks (nuts, fruit, curd) during the shift; avoid heavy greasy curries or pizzas at 3 AM (your digestive enzymes are naturally asleep at night).",
+      "  - Stop all caffeine (tea, coffee, energy drinks) at least 4 to 5 hours before your shift ends so caffeine clears your system before bedtime."
+    ],
+    "doctor_answer": {
+      "assessment": "Shift Work Sleep Disorder (ICSD-3: Insomnia or excessive sleepiness temporally associated with a recurring work schedule that overlaps the normal sleep period).",
+      "investigations": "Sleep log, Epworth Sleepiness Scale (ESS), metabolic profiling.",
+      "management": "Circadian alignment: Dark sunglasses on morning commute home, strict blackout bedroom, scheduled core sleep. Strategic caffeine use (early in shift, avoid in second half). Anchor sleep strategy for permanent night workers. Short-term Melatonin (3-5 mg taken prior to daytime sleep) to enhance daytime sleep duration.",
+      "references": [
+        "AASM Practice Parameters for the Clinical Evaluation and Treatment of Circadian Rhythm Sleep Disorders",
+        "ACOEM Guidance on Fatigue Risk Management"
+      ]
+    },
+    "staff_answer": "Review shift schedule and sleep environment. Check for drowsy driving risk after night duty.",
+    "red_flags": [
+      "Severe micro-sleeps while driving home after night shift (High motor vehicle collision danger)",
+      "Chronic insomnia with severe metabolic syndrome"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT consume coffee or energy drinks during the last 4 hours of your night shift",
+      "Do NOT skip daytime sleep to run household errands"
+    ],
+    "source": "American Academy of Sleep Medicine (AASM) & ACOEM Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_alcohol_hangover_myths_facts_015",
+    "topic": "Lifestyle: Alcohol Hangover Recovery: Evidence vs Myths",
+    "category": "lifestyle",
+    "keywords": [
+      "hangover cure",
+      "hangover recovery",
+      "hangover headache nausea",
+      "sharab ka nasha utarna",
+      "hangover remedy"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "A hangover is your body's physical reaction to acute alcohol poisoning, driven by dehydration, toxic acetaldehyde buildup, stomach lining irritation, and sleep disruption.",
+      "EVIDENCE-BASED RECOVERY STEPS:",
+      "  1. Rehydrate with electrolytes: Drink plenty of water along with Oral Rehydration Salts (ORS), coconut water, or fruit juices to replace vital fluids and salts flushed out by alcohol.",
+      "  2. Eat bland carbohydrates: Toast, crackers, khichdi, or porridge gently raise depleted blood sugar levels without upsetting your inflamed stomach.",
+      "  3. Take Paracetamol cautiously for headache: Do NOT exceed 1000 mg (and avoid heavy paracetamol with chronic alcohol); NEVER take Ibuprofen or Aspirin on a hangover-inflamed stomach (triggers severe stomach bleeding and ulcers).",
+      "  4. Rest and sleep: Time and sleep are the only true cures; your liver requires time to metabolize and clear toxic breakdown products.",
+      "POPULAR HANGOVER MYTHS DEBUNKED:",
+      "  - MYTH: 'Hair of the dog' (drinking more alcohol in the morning) cures a hangover. TRUTH: It only delays the hangover and deepens alcohol dependency.",
+      "  - MYTH: A cold shower or strong black coffee sobers you up. TRUTH: Coffee does not clear alcohol from your blood and further irritates your stomach."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Alcohol Hangover (Veisalgia). Multi-factorial physiological state involving dehydration, mild metabolic acidosis, hypoglycemia, gastrointestinal irritation, and cytokine release.",
+      "investigations": "Clinical assessment. If patient is unrousable: check fingerstick glucose immediately (alcohol-induced hypoglycemia) and evaluate for head trauma.",
+      "management": "Oral fluid and electrolyte replacement (WHO ORS). Bland complex carbohydrates to correct mild hypoglycemia. Cautious analgesia: Paracetamol (max 1-2g/day) or antacids for gastritis. Avoid NSAIDs due to heightened gastric mucosal injury risk. Rest.",
+      "references": [
+        "Alcohol Hangover Research Group (AHRG) Consensus Guidelines",
+        "Mayo Clinic Clinical Review on Hangover Management"
+      ]
+    },
+    "staff_answer": "Check mental status and blood glucose if patient is lethargic. Verify no head trauma.",
+    "red_flags": [
+      "Alcohol poisoning: unrousable, slow breathing (<8 breaths/min), cold clammy bluish skin, or vomiting while unconscious (Medical Emergency - Place on side and call 112)",
+      "Severe coffee-ground vomiting"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "NEVER take Ibuprofen or Aspirin for a hangover (destroys stomach lining)",
+      "NEVER drink more alcohol in the morning to 'cure' a hangover"
+    ],
+    "source": "Alcohol Hangover Research Group & Mayo Clinic Clinical Guidance",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_sugar_addiction_reduction_016",
+    "topic": "Lifestyle: Cutting Added Sugars & Breaking Sweet Cravings",
+    "category": "lifestyle",
+    "keywords": [
+      "reduce sugar",
+      "stop eating sugar",
+      "sugar addiction",
+      "sweet cravings",
+      "mithai kam karna",
+      "cut down sugar"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "WHO recommendation for added sugars: Less than 5% to 10% of total daily calories (approximately 5 to 6 teaspoons / 25 grams of added sugar daily). Most people consume more than triple this amount.",
+      "Added sugars provide zero vitamins or minerals ('empty calories') and are the primary driver of obesity, fatty liver, insulin resistance, and dental cavities.",
+      "WHERE HIDDEN SUGARS LURK: Packaged sodas, commercial fruit juices, sweetened chai/coffee, flavored yogurts, tomato ketchup, energy bars, and breakfast cereals.",
+      "PRACTICAL STEPS TO CUT SUGAR:",
+      "  - Stop drinking your sugar: Replace sodas, packaged juices, and sweet teas with plain water, lime water (nimbu pani without sugar), or unsweetened green tea.",
+      "  - Satisfy sweet cravings with whole fruits: Fresh apples, berries, papayas, and oranges provide natural sweetness bound with dietary fiber that prevents sugar spikes.",
+      "  - Reduce sugar in tea and coffee gradually by half every week until your tastebuds adapt.",
+      "  - Eat protein and healthy fats with meals; balanced meals stabilize blood glucose and prevent the sharp insulin drops that trigger intense sweet cravings."
+    ],
+    "doctor_answer": {
+      "assessment": "Dietary Free Sugar Assessment. Quantify added/free sugar intake against WHO guidelines (<5-10% of total energy).",
+      "investigations": "Fasting blood glucose, HbA1c, fasting lipid panel, dental examination.",
+      "management": "Nutritional counseling to eliminate sugar-sweetened beverages (SSBs) and ultra-processed confectionery. Gradual taste receptor adaptation. Increase dietary fiber and protein to enhance satiety. Educational label reading (identifying sucrose, high-fructose corn syrup, maltodextrin, dextrose).",
+      "references": [
+        "WHO Guideline: Sugars Intake for Adults and Children",
+        "AHA Scientific Statement on Dietary Sugars and Cardiovascular Health"
+      ]
+    },
+    "staff_answer": "Review daily consumption of sugary chai/coffee, sodas, and Indian sweets (mithai).",
+    "red_flags": [
+      "Severe uncontrolled hyperglycemia in known diabetics consuming high-sugar diets"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT replace sugar with unlimited jaggery (gur) or honey (both contain over 90% sucrose/fructose and spike blood sugar identically)",
+      "Do NOT consume commercial diet sodas in massive quantities"
+    ],
+    "source": "World Health Organization (WHO) & American Heart Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_smoking_vaping_ecigarettes_017",
+    "topic": "Lifestyle: E-Cigarettes & Vaping Health Hazards",
+    "category": "lifestyle",
+    "keywords": [
+      "vaping",
+      "e-cigarettes",
+      "vape health risks",
+      "is vaping safe",
+      "vaping vs smoking",
+      "e-cigarette ban india"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "E-cigarettes (vapes) are NOT harmless water vapor; they heat an aerosol liquid containing highly addictive concentrated nicotine, heavy metals (lead, nickel, tin), ultrafine particles that penetrate deep into the lungs, and toxic chemical flavorings.",
+      "Vaping and lung health: Vaping chemicals cause acute lung inflammation, chronic wheezing, and EVALI (E-cigarette or Vaping Product Use-Associated Lung Injury), a life-threatening pneumonia-like lung damage.",
+      "Brain development risks: Nicotine in vapes permanently alters brain circuits controlling attention, learning, and impulse control in teenagers and young adults.",
+      "LEGAL STATUS IN INDIA: E-cigarettes and all vaping devices are completely BANNED in India under the Prohibition of Electronic Cigarettes Act (2019) due to grave public health hazards to youth.",
+      "Quitting vaping: If you vape, switch to medically approved nicotine replacement therapies (gums/patches) and behavioral support to quit nicotine safely."
+    ],
+    "doctor_answer": {
+      "assessment": "E-Cigarette or Vaping Product Use Assessment. Screen for EVALI (E-cigarette or Vaping Product Use-Associated Lung Injury) and nicotine dependence.",
+      "investigations": "CXR / HRCT Chest (ground-glass opacities, subpleural sparing characteristic of EVALI), pulse oximetry, spirometry.",
+      "management": "Complete cessation of all vaping and combustible tobacco. For EVALI: Hospitalization, supportive oxygen, systemic corticosteroids (Methylprednisolone/Prednisone), rule out infectious pneumonia. Nicotine dependence management with approved NRT.",
+      "references": [
+        "CDC Guidelines on E-cigarette, or Vaping, Product Use-Associated Lung Injury (EVALI)",
+        "Government of India Prohibition of Electronic Cigarettes Act 2019"
+      ]
+    },
+    "staff_answer": "Ask adolescents and young adults about vaping habits. Check oxygen saturation if respiratory symptoms present.",
+    "red_flags": [
+      "Acute shortness of breath, chest pain, and hypoxemia in a vaper (EVALI - Immediate Hospitalization)",
+      "Seizures or accidental ingestion of liquid nicotine refill by young children (Toxic Nicotine Emergency)"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT believe the marketing myth that vaping is 'harmless water vapor'",
+      "Do NOT modify commercial vape cartridges or add illicit oils"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & Ministry of Health India",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_cold_plunge_ice_baths_018",
+    "topic": "Lifestyle: Cold Water Plunges & Ice Baths: Safety & Science",
+    "category": "lifestyle",
+    "keywords": [
+      "cold plunge",
+      "ice bath",
+      "cold water therapy",
+      "ice bath benefits",
+      "cold shower health"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Cold water immersion (ice baths at 10°C to 15°C / 50°F to 59°F for 2 to 5 minutes) has gained popularity for boosting alertness, reducing muscle soreness, and stimulating norepinephrine release.",
+      "HOW IT WORKS: Sudden cold triggers an intense sympathetic nervous system shock: deep gasp reflex, rapid heart rate spike, and massive constriction of blood vessels throughout your body.",
+      "CARDIOVASCULAR WARNING: The sudden cold shock causes an immediate surge in blood pressure and cardiac workload; it is DANGEROUS for anyone with high blood pressure, heart disease, cardiac arrhythmias, or Raynaud's disease.",
+      "Safe cold immersion rules:",
+      "  - Start slowly: Begin with 30 seconds of cool water at the end of a normal warm shower.",
+      "  - Never hyperventilate or hold your breath before entering cold water (can trigger shallow-water blackout and drowning).",
+      "  - Keep sessions brief: 2 to 3 minutes is sufficient for alertness benefits; longer immersion risks dangerous hypothermia.",
+      "  - Never plunge alone in deep water or open rivers.",
+      "If you have high blood pressure, history of heart attacks, or arrhythmias, consult a cardiologist before attempting ice baths."
+    ],
+    "doctor_answer": {
+      "assessment": "Cardiovascular and Autonomic Effects of Cold Water Immersion (CWI). Differentiate cold habituation from acute Cold Shock Response (CSR) and diving reflex conflict.",
+      "investigations": "Cardiovascular risk screening (12-lead ECG, blood pressure check) prior to extreme temperature challenges.",
+      "management": "Education on safety protocols. Emphasize breathing control (avoid hyperventilation). Absolute contraindications: Uncontrolled hypertension, coronary artery disease, cardiac arrhythmias, Raynaud's phenomenon, peripheral artery disease. Duration limit <= 2-5 minutes at 10-15°C.",
+      "references": [
+        "American Heart Association Scientific Advisory on Cold Water Immersion",
+        "Extreme Physiology & Medicine Review on Cold Water Immersion"
+      ]
+    },
+    "staff_answer": "Screen for hypertension and cardiac history before patient attempts cold plunges.",
+    "red_flags": [
+      "Severe chest pain, palpitations, or syncope upon entering cold water (Acute Arrhythmia / Coronary Spasm Emergency)",
+      "Signs of hypothermia: uncontrollable shivering, slurred speech, confusion"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "NEVER hyperventilate before entering cold water (causes immediate blackout and drowning)",
+      "Do NOT perform cold water plunging if you have heart disease or high blood pressure"
+    ],
+    "source": "American Heart Association (AHA) & International Life Saving Federation",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_sauna_heat_therapy_cardio_019",
+    "topic": "Lifestyle: Sauna & Heat Therapy: Cardiovascular Benefits & Safety",
+    "category": "lifestyle",
+    "keywords": [
+      "sauna benefits",
+      "steam bath health",
+      "heat therapy",
+      "sauna blood pressure",
+      "sauna safety"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Regular sauna bathing (dry Finnish sauna at 80°C to 90°C / 176°F to 194°F for 10 to 20 minutes) mimics moderate-intensity cardiovascular exercise: your heart rate elevates to 120-150 bpm, blood vessels dilate, and circulation increases.",
+      "Health benefits: Studies show that 2 to 3 sauna sessions weekly are associated with lower blood pressure, reduced cardiovascular mortality, improved arterial compliance, and relaxed muscle tension.",
+      "ESSENTIAL SAUNA SAFETY RULES:",
+      "  - Hydrate before and after: Drink 2 to 3 full glasses of water before entering and immediately after leaving the sauna to replace heavy sweat losses.",
+      "  - Time limit: Stay inside for only 10 to 15 minutes; exit immediately if you feel dizzy, lightheaded, or nauseous.",
+      "  - Cool down gradually: Sit quietly at room temperature for 10 minutes before taking a shower.",
+      "ABSOLUTE DANGER: NEVER CONSUME ALCOHOL before or during a sauna; alcohol plus sauna heat causes severe dehydration, profound blood pressure collapse, and fatal arrhythmias.",
+      "Contraindicated in unstable angina, recent heart attack, severe aortic stenosis, and during pregnancy."
+    ],
+    "doctor_answer": {
+      "assessment": "Hemodynamic and Neuroendocrine Effects of Whole-Body Hyperthermia (Sauna Bathing). Induces cutaneous vasodilation, elevated cardiac output, and heat shock protein (HSP) synthesis.",
+      "investigations": "Resting blood pressure, cardiovascular history.",
+      "management": "Sauna protocol: 10-20 minutes at 80-90°C, followed by hydration. Contraindications: Unstable angina, recent myocardial infarction (<3 months), severe aortic stenosis, decompensated heart failure, orthostatic hypotension, pregnancy (hyperthermia is teratogenic in 1st trimester). Absolute prohibition of alcohol.",
+      "references": [
+        "Mayo Clinic Proceedings Review: Cardiovascular and Other Health Benefits of Sauna Bathing",
+        "AHA Guidance on Heat Exposure"
+      ]
+    },
+    "staff_answer": "Review cardiac history. Confirm patient drinks water before and after sauna.",
+    "red_flags": [
+      "Dizziness, lightheadedness, or syncope upon standing inside/outside sauna",
+      "Angina chest pain or rapid irregular heartbeats in sauna"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "NEVER drink alcohol before or during a sauna (severely spikes fatal collapse risk)",
+      "Do NOT use a sauna during pregnancy (high core heat causes fetal neural tube defects)"
+    ],
+    "source": "Mayo Clinic Proceedings & American Heart Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ls_intermittent_fasting_safety_020",
+    "topic": "Lifestyle: Intermittent Fasting (16/8 Method) Benefits & Safe Practice",
+    "category": "lifestyle",
+    "keywords": [
+      "intermittent fasting",
+      "16 8 fasting",
+      "fasting for weight loss",
+      "time restricted eating",
+      "intermittent fasting rules"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Intermittent Fasting (Time-Restricted Eating) is an eating pattern where you cycle between periods of eating and fasting, most commonly the 16/8 method (fasting for 16 hours and eating all meals within an 8-hour window, such as 11 AM to 7 PM).",
+      "Health benefits: Improves insulin sensitivity, promotes cellular cleanup (autophagy), lowers visceral belly fat, and supports weight loss by naturally curbing late-night snacking.",
+      "During the fasting window: You can drink water, plain black coffee, and unsweetened green or herbal tea (zero-calorie liquids do NOT break the fast).",
+      "During the 8-hour eating window: Eat balanced, nutrient-dense whole meals (vegetables, dal, paneer, eggs, whole grains); fasting is NOT an excuse to gorge on junk food or sweets.",
+      "WHO SHOULD NOT DO INTERMITTENT FASTING:",
+      "  - Pregnant or breastfeeding women.",
+      "  - People with a history of eating disorders (anorexia, bulimia).",
+      "  - Type 1 diabetics or Type 2 diabetics taking insulin or sulfonylurea medicines (fasting without medication adjustment triggers severe, life-threatening low blood sugar / hypoglycemia).",
+      "Consult your doctor before starting fasting if you take prescription medications."
+    ],
+    "doctor_answer": {
+      "assessment": "Time-Restricted Eating (TRE) / Intermittent Fasting (IF). Metabolic effects: glycogen depletion, fatty acid oxidation, ketone generation, and circadian metabolic synchronization.",
+      "investigations": "Baseline Fasting Glucose, HbA1c, Lipid panel, review medication administration schedule.",
+      "management": "16/8 protocol: 8-hour daytime feeding window aligned with circadian rhythms (e.g., 9 AM - 5 PM or 10 AM - 6 PM). Maintain nutrient density. Contraindications: Pregnancy, lactation, active eating disorders, lean/frail elderly (sarcopenia risk). In diabetic patients on insulin/sulfonylureas: mandatory endocrinologist medication adjustment to prevent fatal hypoglycemia.",
+      "references": [
+        "New England Journal of Medicine Review: Effects of Intermittent Fasting on Health, Aging, and Disease",
+        "ADA Standards of Care in Diabetes"
+      ]
+    },
+    "staff_answer": "Check if patient is diabetic on insulin or sulfonylureas before recommending fasting. Adjust medication timing.",
+    "red_flags": [
+      "Hypoglycemia (blood sugar < 70 mg/dL with shakiness, sweating, confusion) while fasting",
+      "Orthostatic fainting or severe electrolyte depletion"
+    ],
+    "follow_up_questions": [
+      "What is your current daily routine and lifestyle habits?",
+      "Do you have any existing chronic medical conditions?",
+      "What specific lifestyle goals are you looking to achieve?"
+    ],
+    "avoid": [
+      "Do NOT fast if you take insulin or sulfonylureas without medical supervision (causes fatal hypoglycemia)",
+      "Do NOT binge on ultra-processed junk food during the eating window"
+    ],
+    "source": "New England Journal of Medicine (NEJM) & American Diabetes Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

@@ -277,8 +277,13 @@ export default function Appointments() {
 
     try {
       const selectedDoc = doctors.find((d) => (d._id || d.id) === addForm.doctor_id);
+      const todayStr = new Date().toISOString().split("T")[0];
+      const isPast = addForm.appointment_date < todayStr;
+      const statusToSet = addForm.status || (isPast ? "COMPLETED" : "APPROVED");
+
       const payload = {
         ...addForm,
+        status: statusToSet,
         hospital_id: selectedDoc?.hospital_id || undefined,
       };
 
@@ -292,6 +297,7 @@ export default function Appointments() {
         doctor_id: "",
         appointment_date: new Date().toISOString().split("T")[0],
         appointment_time: "10:00 AM",
+        status: "APPROVED",
         reason: "",
       });
       fetchAppointments();
@@ -799,12 +805,35 @@ export default function Appointments() {
               {/* Date & Time Grid */}
               <div className="form-grid-2">
                 <div className="form-group">
-                  <label>Appointment Date <span className="req">*</span></label>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <label style={{ margin: 0 }}>Appointment Date <span className="req">*</span></label>
+                    {(() => {
+                      const todayStr = new Date().toISOString().split("T")[0];
+                      if (!addForm.appointment_date) return null;
+                      if (addForm.appointment_date < todayStr) {
+                        return <span className="apt-badge badge-completed" style={{ fontSize: "11px", padding: "2px 8px" }}>Past record</span>;
+                      }
+                      if (addForm.appointment_date === todayStr) {
+                        return <span className="apt-badge badge-pending" style={{ fontSize: "11px", padding: "2px 8px" }}>Today</span>;
+                      }
+                      return <span className="apt-badge badge-approved" style={{ fontSize: "11px", padding: "2px 8px" }}>Upcoming</span>;
+                    })()}
+                  </div>
                   <input
                     type="date"
-                    min={new Date().toISOString().split("T")[0]}
+                    min="1990-01-01"
+                    max="2036-12-31"
                     value={addForm.appointment_date}
-                    onChange={(e) => setAddForm({ ...addForm, appointment_date: e.target.value })}
+                    onChange={(e) => {
+                      const newDate = e.target.value;
+                      const todayStr = new Date().toISOString().split("T")[0];
+                      const isPast = newDate < todayStr;
+                      setAddForm({
+                        ...addForm,
+                        appointment_date: newDate,
+                        status: isPast ? "COMPLETED" : "APPROVED",
+                      });
+                    }}
                     className={addFormErrors.appointment_date ? "input-error" : ""}
                   />
                   {addFormErrors.appointment_date && <span className="field-err">{addFormErrors.appointment_date}</span>}
@@ -817,9 +846,46 @@ export default function Appointments() {
                     onChange={(e) => setAddForm({ ...addForm, appointment_time: e.target.value })}
                     className={addFormErrors.appointment_time ? "input-error" : ""}
                   >
-                    {TIME_SLOTS.map((slot) => (
-                      <option key={slot} value={slot}>{slot}</option>
-                    ))}
+                    {TIME_SLOTS.map((slot) => {
+                      const todayStr = new Date().toISOString().split("T")[0];
+                      const isToday = addForm.appointment_date === todayStr;
+
+                      // Check if already booked for doctor on this date
+                      const isAlreadyBooked = appointments.some(
+                        (a) =>
+                          (a.doctor_id === addForm.doctor_id || a.doctor?._id === addForm.doctor_id) &&
+                          a.appointment_date === addForm.appointment_date &&
+                          a.appointment_time === slot &&
+                          ["PENDING", "APPROVED", "CONFIRMED"].includes((a.status || "").toUpperCase())
+                      );
+
+                      // Check if slot has already passed today
+                      let isPastSlotToday = false;
+                      if (isToday) {
+                        try {
+                          const now = new Date();
+                          const [timePart, meridiem] = slot.split(" ");
+                          const [hours, minutes] = timePart.split(":").map(Number);
+                          let slotHour = hours % 12;
+                          if (meridiem === "PM") slotHour += 12;
+                          const slotDate = new Date();
+                          slotDate.setHours(slotHour, minutes, 0, 0);
+                          if (slotDate < now) {
+                            isPastSlotToday = true;
+                          }
+                        } catch {
+                          // Ignore parsing errors
+                        }
+                      }
+
+                      const isDisabled = isAlreadyBooked || isPastSlotToday;
+
+                      return (
+                        <option key={slot} value={slot} disabled={isDisabled}>
+                          {slot} {isAlreadyBooked ? "— (Booked)" : isPastSlotToday ? "— (Passed)" : ""}
+                        </option>
+                      );
+                    })}
                   </select>
                   {addFormErrors.appointment_time && <span className="field-err">{addFormErrors.appointment_time}</span>}
                 </div>

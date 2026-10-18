@@ -13,8 +13,9 @@ audit_bp = Blueprint("audit", __name__)
 
 def resolve_user_display(db, user_id_val, fallback_role="STAFF"):
     """Helper to resolve a user ID into real full name and role."""
-    if not user_id_val:
-        return "System Service", "SYSTEM"
+    normalized_role = str(fallback_role or "STAFF").strip().upper()
+    if not user_id_val or str(user_id_val).upper() in ["SYSTEM", "UNKNOWN"] or normalized_role == "SYSTEM":
+        return "System Automation", "SYSTEM"
     try:
         user = None
         if is_valid_object_id(str(user_id_val)):
@@ -24,10 +25,16 @@ def resolve_user_display(db, user_id_val, fallback_role="STAFF"):
             
         if user:
             name = user.get("name") or user.get("fullName") or "CareBridge Staff"
-            role = user.get("role", fallback_role)
+            role = (user.get("role") or fallback_role or "STAFF").upper()
             return name, role
     except Exception:
         pass
+    if normalized_role == "PATIENT":
+        return "Patient User", "PATIENT"
+    elif normalized_role == "DOCTOR":
+        return "Doctor User", "DOCTOR"
+    elif normalized_role == "ADMIN":
+        return "Admin Administrator", "ADMIN"
     return "Staff Administrator", fallback_role
 
 @audit_bp.route("/stats", methods=["GET"], strict_slashes=False)
@@ -102,9 +109,10 @@ def get_audit_logs():
     elif date_range == "30d":
         query["created_at"] = {"$gte": now - timedelta(days=30)}
 
-    # Role Filter
-    if role_filter and role_filter.upper() != "ALL":
-        query["user_role"] = {"$regex": f"^{role_filter}$", "$options": "i"}
+    # Role Filter (exact case-insensitive match, ignore 'ALL' and 'All Roles')
+    if role_filter and role_filter.strip().upper() not in ["ALL", "ALL ROLES"]:
+        clean_role = role_filter.strip()
+        query["user_role"] = {"$regex": f"^{re.escape(clean_role)}$", "$options": "i"}
 
     # Status Filter
     if status_filter and status_filter.upper() != "ALL":
@@ -165,12 +173,23 @@ def get_audit_logs():
     })
     active_uids = db.audit_logs.distinct("user_id", {"created_at": {"$gte": twenty_four_hours_ago}})
 
+    # Calculate live role counts for exact role dropdown options
+    role_counts = {
+        "ALL": total_events_stat,
+        "ADMIN": db.audit_logs.count_documents({"user_role": {"$regex": "^ADMIN$", "$options": "i"}}),
+        "STAFF": db.audit_logs.count_documents({"user_role": {"$regex": "^STAFF$", "$options": "i"}}),
+        "DOCTOR": db.audit_logs.count_documents({"user_role": {"$regex": "^DOCTOR$", "$options": "i"}}),
+        "PATIENT": db.audit_logs.count_documents({"user_role": {"$regex": "^PATIENT$", "$options": "i"}}),
+        "SYSTEM": db.audit_logs.count_documents({"user_role": {"$regex": "^SYSTEM$", "$options": "i"}}),
+    }
+
     # Enrich logs with real user names and formatted fields
     enriched_logs = []
     for log in raw_logs:
         log_id_str = str(log["_id"])
         uid = log.get("user_id")
         user_name, user_role = resolve_user_display(db, uid, log.get("user_role", "STAFF"))
+        is_automated = (str(user_role).upper() == "SYSTEM")
 
         # Determine normalized status
         action_str = log.get("action", "USER_ACTION").upper()
@@ -196,9 +215,10 @@ def get_audit_logs():
             "_id": log_id_str,
             "id": log_id_str,
             "event_id": f"AUD-{log_id_str[-6:].upper()}",
-            "user_id": str(uid) if uid else None,
+            "user_id": str(uid) if uid else ("SYSTEM" if is_automated else None),
             "user_name": user_name,
             "user_role": user_role,
+            "is_automated": is_automated,
             "action": action_str,
             "resource": log.get("resource") or "SYSTEM",
             "resource_id": str(log.get("resource_id", "")) if log.get("resource_id") else "—",
@@ -217,6 +237,7 @@ def get_audit_logs():
         "page": page,
         "limit": limit,
         "pages": total_pages,
+        "role_counts": role_counts,
         "stats": {
             "total_events": total_events_stat,
             "events_24h": events_24h_stat,
@@ -242,8 +263,9 @@ def export_audit_csv():
             {"action": {"$regex": r"FAILED|DENIED|UNAUTHORIZED", "$options": "i"}},
             {"status": {"$regex": r"FAILED|DENIED|ERROR", "$options": "i"}}
         ]
-    if role_filter and role_filter.upper() != "ALL":
-        query["user_role"] = {"$regex": f"^{role_filter}$", "$options": "i"}
+    if role_filter and role_filter.strip().upper() not in ["ALL", "ALL ROLES"]:
+        clean_role = role_filter.strip()
+        query["user_role"] = {"$regex": f"^{re.escape(clean_role)}$", "$options": "i"}
 
     logs = list(db.audit_logs.find(query).sort("created_at", -1).limit(1000))
 

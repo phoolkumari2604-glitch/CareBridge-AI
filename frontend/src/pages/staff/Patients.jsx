@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import patientService from "../../services/patientService";
 import { useAuth } from "../../context/AuthContext";
+import { COUNTRIES } from "../../utils/countries";
 import "./Patients.css";
 
 const GENDERS = ["Male", "Female", "Other"];
@@ -80,11 +81,13 @@ function Patients() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState({
     name: "",
+    dial_code: "+91",
     phone: "",
     email: "",
     age: "",
     gender: "Male",
     blood_group: "O+",
+    address: "",
     emergency_contact: "",
     allergies: "",
     medical_history: "",
@@ -193,13 +196,12 @@ function Patients() {
       errors.name = "Name can only contain letters, spaces, dots, and hyphens.";
     }
 
-    // 2. Phone validation (10 digits)
+    // 2. Phone validation (digits check)
     const rawDigits = addForm.phone.replace(/\D/g, "");
-    const cleanDigits = rawDigits.startsWith("91") && rawDigits.length === 12 ? rawDigits.slice(2) : rawDigits;
     if (!addForm.phone.trim()) {
       errors.phone = "Mobile phone number is required.";
-    } else if (addForm.phone.toLowerCase() === "string" || cleanDigits.length !== 10) {
-      errors.phone = "Please enter a valid 10-digit mobile number.";
+    } else if (addForm.phone.toLowerCase() === "string" || rawDigits.length < 7 || rawDigits.length > 15) {
+      errors.phone = "Please enter a valid phone number (7 to 15 digits).";
     }
 
     // 3. Email validation
@@ -238,8 +240,7 @@ function Patients() {
       setAddLoading(true);
 
       const rawDigits = addForm.phone.replace(/\D/g, "");
-      const cleanDigits = rawDigits.startsWith("91") && rawDigits.length === 12 ? rawDigits.slice(2) : rawDigits;
-      const formattedPhone = `+91 ${cleanDigits}`;
+      const formattedPhone = `${addForm.dial_code || "+91"} ${rawDigits}`;
 
       const payload = {
         name: addForm.name.trim(),
@@ -248,6 +249,7 @@ function Patients() {
         age: addForm.age !== "" ? parseInt(addForm.age, 10) : undefined,
         gender: addForm.gender,
         blood_group: addForm.blood_group,
+        address: addForm.address.trim() || undefined,
         status: addForm.status || "Active",
         emergency_contact: addForm.emergency_contact.trim() || undefined,
         allergies: addForm.allergies
@@ -989,19 +991,34 @@ function Patients() {
                       <label htmlFor="pphone" className="field-label required">
                         Mobile Phone Number *
                       </label>
-                      <input
-                        id="pphone"
-                        type="tel"
-                        autoComplete="tel"
-                        placeholder="e.g. 9876543210"
-                        value={addForm.phone}
-                        onChange={(e) => {
-                          setAddForm({ ...addForm, phone: e.target.value });
-                          if (fieldErrors.phone) setFieldErrors({ ...fieldErrors, phone: null });
-                        }}
-                        className={fieldErrors.phone ? "input-error" : ""}
-                        required
-                      />
+                      <div className="phone-input-country-group">
+                        <select
+                          id="pdial"
+                          value={addForm.dial_code || "+91"}
+                          onChange={(e) => setAddForm({ ...addForm, dial_code: e.target.value })}
+                          className="country-dial-select"
+                          aria-label="Country dial code"
+                        >
+                          {COUNTRIES.map((c) => (
+                            <option key={`${c.code}-${c.dial_code}`} value={c.dial_code}>
+                              {c.flag} {c.dial_code} ({c.name})
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          id="pphone"
+                          type="tel"
+                          autoComplete="tel"
+                          placeholder="e.g. 9876543210"
+                          value={addForm.phone}
+                          onChange={(e) => {
+                            setAddForm({ ...addForm, phone: e.target.value });
+                            if (fieldErrors.phone) setFieldErrors({ ...fieldErrors, phone: null });
+                          }}
+                          className={`phone-num-input ${fieldErrors.phone ? "input-error" : ""}`}
+                          required
+                        />
+                      </div>
                       {fieldErrors.phone && (
                         <span className="field-error-msg">{fieldErrors.phone}</span>
                       )}
@@ -1029,19 +1046,36 @@ function Patients() {
                     </div>
                   </div>
 
-                  <div className="form-field-group">
-                    <label htmlFor="pemerg" className="field-label">
-                      Emergency Contact (Name & Phone)
-                    </label>
-                    <input
-                      id="pemerg"
-                      type="text"
-                      placeholder="e.g. +91 9876543199 (Spouse)"
-                      value={addForm.emergency_contact}
-                      onChange={(e) =>
-                        setAddForm({ ...addForm, emergency_contact: e.target.value })
-                      }
-                    />
+                  <div className="form-grid-2">
+                    <div className="form-field-group">
+                      <label htmlFor="pemerg" className="field-label">
+                        Emergency Contact (Name & Phone)
+                      </label>
+                      <input
+                        id="pemerg"
+                        type="text"
+                        placeholder="e.g. +91 9876543199 (Spouse)"
+                        value={addForm.emergency_contact}
+                        onChange={(e) =>
+                          setAddForm({ ...addForm, emergency_contact: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div className="form-field-group">
+                      <label htmlFor="paddress" className="field-label">
+                        Residential Address
+                      </label>
+                      <input
+                        id="paddress"
+                        type="text"
+                        placeholder="e.g. Flat 402, Lotus Towers, Green Glen, Bengaluru"
+                        value={addForm.address || ""}
+                        onChange={(e) =>
+                          setAddForm({ ...addForm, address: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
                 </fieldset>
 

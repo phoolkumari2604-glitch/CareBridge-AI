@@ -1,0 +1,624 @@
+{
+  "fever": {
+    "en": [
+      "fever",
+      "high temperature",
+      "pyrexia",
+      "feeling feverish",
+      "body hot",
+      "chills and rigors",
+      "shivering with fever"
+    ],
+    "hi": [
+      "बुखार",
+      "ताप",
+      "तेज बुखार",
+      "कंपकंपी"
+    ],
+    "hinglish": [
+      "bukhar",
+      "tez bukhar",
+      "sharir garm",
+      "tap",
+      "thand lag ke bukhar",
+      "bukhar char gaya"
+    ],
+    "te": [
+      "జ్వరం",
+      "తీవ్రమైన జ్వరం",
+      "ఒళ్ళు వేడిగా ఉండటం",
+      "చలి జ్వరం",
+      "jwaram",
+      "tez jwaram",
+      "ollu vediga undi",
+      "chali jwaram"
+    ],
+    "ta": [
+      "காய்ச்சல்",
+      "அதிக காய்ச்சல்",
+      "உடல் சூடு",
+      "குளிர் காய்ச்சல்",
+      "suram",
+      "kaaichal",
+      "udal soodu",
+      "kulir kaaichal"
+    ]
+  },
+  "headache": {
+    "en": [
+      "headache",
+      "head pain",
+      "migraine",
+      "throbbing head",
+      "temple pain",
+      "tension headache"
+    ],
+    "hi": [
+      "सिरदर्द",
+      "सर दर्द",
+      "आधा सीसी",
+      "सिर में भारीपन"
+    ],
+    "hinglish": [
+      "sir dard",
+      "sar dard",
+      "sar ghoom raha hai",
+      "aadha sir dard",
+      "migraine ka dard"
+    ],
+    "te": [
+      "తలనొప్పి",
+      "తల భారంగా ఉండటం",
+      "ఒంటి తలనొప్పి",
+      "thala noppi",
+      "thalanopi",
+      "thala bharam"
+    ],
+    "ta": [
+      "தலைவலி",
+      "ஒற்றைத் தலைவலி",
+      "தலை பாரம்",
+      "thalai vali",
+      "thalaivali",
+      "ottrai thalaivali",
+      "thalai baaram"
+    ]
+  },
+  "stomach_pain": {
+    "en": [
+      "stomach pain",
+      "abdominal pain",
+      "tummy ache",
+      "belly cramps",
+      "cramping in abdomen",
+      "gastric pain"
+    ],
+    "hi": [
+      "पेट दर्द",
+      "पेट में मरोड़",
+      "पेट में ऐंठन",
+      "गैस का दर्द"
+    ],
+    "hinglish": [
+      "pet dard",
+      "pet me marod",
+      "pet me gas",
+      "pet kharab",
+      "pet me jalan",
+      "pet dard ho raha hai"
+    ],
+    "te": [
+      "కడుపు నొప్పి",
+      "కడుపులో మంట",
+      "కడుపు ఉబ్బరం",
+      "kadupu noppi",
+      "kadupunoppi",
+      "kadupulo manta"
+    ],
+    "ta": [
+      "வயிற்று வலி",
+      "வயிற்று எரிச்சல்",
+      "வயிறு உப்புசம்",
+      "vayiru vali",
+      "vayiṟṟu vali",
+      "vayiru erichal"
+    ]
+  },
+  "chest_pain": {
+    "en": [
+      "chest pain",
+      "chest tightness",
+      "chest pressure",
+      "heart pain",
+      "pain radiating to arm",
+      "crushing chest pain"
+    ],
+    "hi": [
+      "सीने में दर्द",
+      "छाती में दर्द",
+      "सीने में भारीपन",
+      "दिल का दौरा"
+    ],
+    "hinglish": [
+      "seene me dard",
+      "chhati me dard",
+      "chhati par bojh",
+      "heart me dard",
+      "seene me jalan"
+    ],
+    "te": [
+      "ఛాతీ నొప్పి",
+      "గుండె నొప్పి",
+      "ఛాతీలో బిగుతుగా ఉండటం",
+      "chathi noppi",
+      "gunde noppi",
+      "chathilo noppi"
+    ],
+    "ta": [
+      "மார்பு வலி",
+      "நெஞ்சு வலி",
+      "நெஞ்சு எரிச்சல்",
+      "maarbu vali",
+      "nenju vali",
+      "maarbil baaram"
+    ]
+  },
+  "breathlessness": {
+    "en": [
+      "breathlessness",
+      "shortness of breath",
+      "difficulty breathing",
+      "dyspnea",
+      "wheezing",
+      "asthma attack",
+      "can't breathe"
+    ],
+    "hi": [
+      "सांस फूलना",
+      "सांस लेने में दिक्कत",
+      "दम घुटना",
+      "घरघराहट"
+    ],
+    "hinglish": [
+      "saans phoolna",
+      "saans lene me takleef",
+      "dam ghutna",
+      "saans chadhna",
+      "saans nahi aa rahi"
+    ],
+    "te": [
+      "శ్వాస తీసుకోవడంలో ఇబ్బంది",
+      "దమ్ము",
+      "ఆయాసం",
+      "swasa theesukovadamlo ibbandi",
+      "aayasam",
+      "dammu"
+    ],
+    "ta": [
+      "மூச்சுத் திணறல்",
+      "மூச்சு வாங்குதல்",
+      "இளைப்பு",
+      "moochu thinaral",
+      "moochu vaanguthal",
+      "ilaippu"
+    ]
+  },
+  "cough": {
+    "en": [
+      "cough",
+      "dry cough",
+      "wet cough",
+      "phlegm",
+      "productive cough",
+      "throat tickle"
+    ],
+    "hi": [
+      "खांसी",
+      "सूखी खांसी",
+      "बलगम वाली खांसी",
+      "कफ"
+    ],
+    "hinglish": [
+      "khansi",
+      "sukhi khansi",
+      "balgam wali khansi",
+      "khasi",
+      "gale me kharash"
+    ],
+    "te": [
+      "దగ్గు",
+      "పొడి దగ్గు",
+      "కఫం దగ్గు",
+      "daggu",
+      "podi daggu",
+      "kafam daggu"
+    ],
+    "ta": [
+      "இருமல்",
+      "வறட்டு இருமல்",
+      "சளி இருமல்",
+      "irumal",
+      "varattu irumal",
+      "sali irumal"
+    ]
+  },
+  "cold": {
+    "en": [
+      "cold",
+      "runny nose",
+      "blocked nose",
+      "sneezing",
+      "congestion",
+      "sinus pressure"
+    ],
+    "hi": [
+      "जुकाम",
+      "सर्दी",
+      "नाक बहना",
+      "नाक बंद",
+      "छींक"
+    ],
+    "hinglish": [
+      "jukam",
+      "sardi",
+      "naak behna",
+      "naak band",
+      "chheenk",
+      "nazla"
+    ],
+    "te": [
+      "జలుబు",
+      "ముక్కు కారడం",
+      "ముక్కు దిబ్బడ",
+      "jalubu",
+      "mukku kaaradam",
+      "mukku dibbada"
+    ],
+    "ta": [
+      "சளி",
+      "மூக்கொழுகுதல்",
+      "மூக்கடைப்பு",
+      "தும்பல்",
+      "sali",
+      "mookozhuguthal",
+      "mookkadaippu",
+      "thumbal"
+    ]
+  },
+  "vomiting": {
+    "en": [
+      "vomiting",
+      "nausea",
+      "throwing up",
+      "feeling sick",
+      "emesis"
+    ],
+    "hi": [
+      "उल्टी",
+      "जी मिचलाना",
+      "कै होना"
+    ],
+    "hinglish": [
+      "ulti",
+      "ji michlana",
+      "vomit",
+      "ulti jaisa lagna",
+      "ulti aana"
+    ],
+    "te": [
+      "వాంతులు",
+      "వికారం",
+      "vaanthulu",
+      "vikaaram",
+      "vaanthi"
+    ],
+    "ta": [
+      "வாந்தி",
+      "குமட்டல்",
+      "vaanthi",
+      "kumattal",
+      "vaanthi varuthu"
+    ]
+  },
+  "diarrhea": {
+    "en": [
+      "diarrhea",
+      "loose motions",
+      "watery stools",
+      "dysentery",
+      "loose motions stomach"
+    ],
+    "hi": [
+      "दस्त",
+      "पतले दस्त",
+      "पेचिश",
+      "झाड़ा"
+    ],
+    "hinglish": [
+      "dast",
+      "loose motion",
+      "patla dast",
+      "pet chal raha hai",
+      "pechish"
+    ],
+    "te": [
+      "విరేచనాలు",
+      "నీళ్ల విరేచనాలు",
+      "virechanaalu",
+      "neella virechanaalu",
+      "motion"
+    ],
+    "ta": [
+      "வயிற்றுப்போக்கு",
+      "பேதி",
+      "vayitruppokku",
+      "bedhi",
+      "loose motions"
+    ]
+  },
+  "dizziness": {
+    "en": [
+      "dizziness",
+      "vertigo",
+      "lightheadedness",
+      "feeling faint",
+      "spinning head"
+    ],
+    "hi": [
+      "चक्कर आना",
+      "सिर घूमना",
+      "बेहोशी जैसा लगना"
+    ],
+    "hinglish": [
+      "chakkar aana",
+      "sir ghumna",
+      "chakkar lag raha hai",
+      "ankhon ke aage andhera"
+    ],
+    "te": [
+      "తలతిరగడం",
+      "కళ్ళు తిరగడం",
+      "thalathiragadam",
+      "kallu thiragadam"
+    ],
+    "ta": [
+      "தலைச்சுற்றல்",
+      "மயக்கம்",
+      "thalaichutral",
+      "mayakkam"
+    ]
+  },
+  "joint_pain": {
+    "en": [
+      "joint pain",
+      "knee pain",
+      "arthritis",
+      "joint stiffness",
+      "swollen joint"
+    ],
+    "hi": [
+      "जोड़ों का दर्द",
+      "घुटनों का दर्द",
+      "गठिया",
+      "जोड़ों में सूजन"
+    ],
+    "hinglish": [
+      "jodo ka dard",
+      "ghutne me dard",
+      "gathiya",
+      "jodo me soojan"
+    ],
+    "te": [
+      "కీళ్ల నొప్పులు",
+      "మోకాళ్ళ నొప్పులు",
+      "keella noppulu",
+      "mokaalla noppulu"
+    ],
+    "ta": [
+      "மூட்டு வலி",
+      "முழங்கால் வலி",
+      "moottu vali",
+      "muzhangaalu vali"
+    ]
+  },
+  "skin_rash": {
+    "en": [
+      "skin rash",
+      "itching",
+      "pruritus",
+      "hives",
+      "red spots on skin",
+      "skin allergy"
+    ],
+    "hi": [
+      "त्वचा पर चकत्ते",
+      "खुजली",
+      "दाद",
+      "पित्ती",
+      "लाल दाने"
+    ],
+    "hinglish": [
+      "khujli",
+      "skin allergy",
+      "daane",
+      "laal daane",
+      "khujli aur rash"
+    ],
+    "te": [
+      "చర్మంపై దద్దుర్లు",
+      "దురద",
+      "charmampai daddurlu",
+      "duradha",
+      "rash"
+    ],
+    "ta": [
+      "தோல் தடிப்புகள்",
+      "அரிப்பு",
+      "thol thadippugal",
+      "arippu"
+    ]
+  },
+  "toothache": {
+    "en": [
+      "toothache",
+      "dental pain",
+      "swollen gums",
+      "cavity pain",
+      "tooth sensitivity"
+    ],
+    "hi": [
+      "दांत दर्द",
+      "मसूड़ों में सूजन",
+      "दांत में कीड़ा"
+    ],
+    "hinglish": [
+      "daant dard",
+      "dant me dard",
+      "masude me soojan",
+      "daant me kida"
+    ],
+    "te": [
+      "పంటి నొప్పి",
+      "చిగుళ్ల వాపు",
+      "panti noppi",
+      "chigulla vaapu"
+    ],
+    "ta": [
+      "பல் வலி",
+      "ஈறு வீக்கம்",
+      "pal vali",
+      "eeru veekkam"
+    ]
+  },
+  "eye_redness": {
+    "en": [
+      "red eye",
+      "pink eye",
+      "eye infection",
+      "conjunctivitis",
+      "watery eyes",
+      "eye burning"
+    ],
+    "hi": [
+      "आंख लाल होना",
+      "आंख आना",
+      "आंखों में जलन",
+      "आंख से पानी आना"
+    ],
+    "hinglish": [
+      "aankh lal hona",
+      "aankh aana",
+      "aankhon me jalan",
+      "aankh me dard"
+    ],
+    "te": [
+      "కళ్ళు ఎర్రబడటం",
+      "కళ్లకలక",
+      "kallu errabadatam",
+      "kallakalaka"
+    ],
+    "ta": [
+      "கண் சிவத்தல்",
+      "மெட்ராஸ் ஐ",
+      "கண் வலி",
+      "kan sivathal",
+      "madras eye",
+      "kan vali"
+    ]
+  },
+  "back_pain": {
+    "en": [
+      "back pain",
+      "lower back pain",
+      "spine pain",
+      "lumbago",
+      "sciatica"
+    ],
+    "hi": [
+      "पीठ दर्द",
+      "कमर दर्द",
+      "रीढ़ की हड्डी में दर्द"
+    ],
+    "hinglish": [
+      "kamar dard",
+      "peeth dard",
+      "kamar me tez dard",
+      "reedh ki haddi me dard"
+    ],
+    "te": [
+      "వెన్నునొప్పి",
+      "నడుము నొప్పి",
+      "vennu noppi",
+      "nadumu noppi"
+    ],
+    "ta": [
+      "முதுகு வலி",
+      "இடுப்பு வலி",
+      "muthugu vali",
+      "iduppu vali"
+    ]
+  },
+  "diabetes": {
+    "en": [
+      "diabetes",
+      "high blood sugar",
+      "sugar problem",
+      "sugar level high",
+      "frequent urination thirsty"
+    ],
+    "hi": [
+      "मधुमेह",
+      "शुगर की बीमारी",
+      "खून में शर्करा"
+    ],
+    "hinglish": [
+      "sugar ki bimari",
+      "sugar badh gaya",
+      "madhumeh",
+      "sugar test"
+    ],
+    "te": [
+      "మధుమేహం",
+      "షుగర్ వ్యాధి",
+      "madhumeham",
+      "sugar vyadhi"
+    ],
+    "ta": [
+      "நீரிழிவு நோய்",
+      "சர்க்கரை நோய்",
+      "neerizhivu noi",
+      "sarkarai noi"
+    ]
+  },
+  "hypertension": {
+    "en": [
+      "high blood pressure",
+      "hypertension",
+      "bp high",
+      "blood pressure increased"
+    ],
+    "hi": [
+      "उच्च रक्तचाप",
+      "हाई बीपी",
+      "ब्लड प्रेशर"
+    ],
+    "hinglish": [
+      "high bp",
+      "bp badh gaya",
+      "blood pressure badhna",
+      "bp high ho gaya"
+    ],
+    "te": [
+      "అధిక రక్తపోటు",
+      "హై బీపీ",
+      "adhika rakthapotu",
+      "high bp"
+    ],
+    "ta": [
+      "உயர் ரத்த அழுத்தம்",
+      "ஹை பிபி",
+      "uyar ratha azhutham",
+      "high bp"
+    ]
+  }
+}

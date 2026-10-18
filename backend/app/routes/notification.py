@@ -132,6 +132,28 @@ def mark_all_as_read(patient_id):
     )
     return jsonify({"message": "All notifications marked as read"}), 200
 
+@notification_bp.route("/mark-all-read", methods=["PUT", "POST"], strict_slashes=False)
+@token_required
+def mark_all_notifications_read():
+    db = get_database()
+    current_user = getattr(g, "current_user", None) or {}
+    user_id = str(current_user.get("_id") or current_user.get("id") or "")
+    role = (current_user.get("role") or "").upper()
+    
+    query = {"is_read": False}
+    if role == "PATIENT" and user_id:
+        u_obj = ObjectId(user_id) if is_valid_object_id(user_id) else None
+        or_conds = [{"patient_id": user_id}, {"user_id": user_id}]
+        if u_obj:
+            or_conds.extend([{"patient_id": u_obj}, {"user_id": u_obj}])
+        query["$or"] = or_conds
+        
+    db.notifications.update_many(
+        query,
+        {"$set": {"is_read": True, "updated_at": datetime.now(timezone.utc)}}
+    )
+    return jsonify({"message": "All notifications marked as read successfully"}), 200
+
 @notification_bp.route("/<patient_id>/clear-all", methods=["DELETE"], strict_slashes=False)
 @token_required
 def clear_all_notifications(patient_id):

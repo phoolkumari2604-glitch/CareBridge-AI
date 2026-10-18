@@ -3,16 +3,16 @@
 ========================================================= */
 
 .vitals-page-layout {
-  --vt-bg: #07111f;
-  --vt-card: #0d1b2e;
-  --vt-tx: #f8fafc;
-  --vt-mut: #94a3b8;
-  --vt-bd: #1e293b;
-  --vt-ac: #0284c7;
-  --vt-ac-glow: rgba(2, 132, 199, 0.25);
-  --vt-ok: #10b981;
-  --vt-bad: #ef4444;
-  --vt-warn: #f59e0b;
+  --vt-bg: #0B1426;
+  --vt-card: #111D35;
+  --vt-tx: #FFFFFF;
+  --vt-mut: #94A3B8;
+  --vt-bd: #1F2D4A;
+  --vt-ac: #0284C7;
+  --vt-ac-glow: rgba(56, 189, 248, 0.25);
+  --vt-ok: #10B981;
+  --vt-bad: #F87171;
+  --vt-warn: #FBBF24;
   color: var(--vt-tx);
   max-width: 1240px;
   margin: 0 auto;
@@ -23,16 +23,16 @@
 
 [data-theme="light"] .vitals-page-layout,
 .light .vitals-page-layout {
-  --vt-bg: #f1f5f9;
-  --vt-card: #ffffff;
-  --vt-tx: #0f172a;
-  --vt-mut: #64748b;
-  --vt-bd: #e2e8f0;
-  --vt-ac: #0284c7;
-  --vt-ac-glow: rgba(2, 132, 199, 0.12);
-  --vt-ok: #059669;
-  --vt-bad: #dc2626;
-  --vt-warn: #d97706;
+  --vt-bg: #0B1426;
+  --vt-card: #111D35;
+  --vt-tx: #FFFFFF;
+  --vt-mut: #94A3B8;
+  --vt-bd: #1F2D4A;
+  --vt-ac: #0284C7;
+  --vt-ac-glow: rgba(56, 189, 248, 0.25);
+  --vt-ok: #10B981;
+  --vt-bad: #F87171;
+  --vt-warn: #FBBF24;
 }
 
 .vitals-page-layout * {
@@ -962,4 +962,781 @@
   .detail-item.full-width {
     grid-column: span 1;
   }
+}
+
+/* ==================================================
+   CUSTOM SEARCHABLE PATIENT DROPDOWN (HIGH Z-INDEX)
+   ================================================== */
+
+.custom-patient-selector-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.custom-patient-select-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--vt-card);
+  border: 1px solid var(--vt-bd);
+  border-radius: 10px;
+  color: var(--vt-tx);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: left;
+}
+
+[data-theme="light"] .custom-patient-select-btn,
+.light .custom-patient-select-btn {
+  background: #16233F;
+  border-color: #1F2D4A;
+  color: #FFFFFF;
+}
+
+.custom-patient-select-btn:hover {
+  border-color: #38BDF8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.selected-patient-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.selected-patient-preview strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vt-tx);
+}
+
+[data-theme="light"] .selected-patient-preview strong,
+.light .selected-patient-preview strong {
+  color: #FFFFFF;
+}
+
+.p-id-tag {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(14, 165, 168, 0.15);
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.dropdown-chevron {
+  transition: transform 0.2s ease;
+  color: var(--text-muted, #94a3b8);
+}
+
+.dropdown-chevron.open {
+  transform: rotate(180deg);
+}
+
+.custom-patient-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  min-width: 320px;
+  background: #0f172a;
+  border: 1px solid var(--border, #334155);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  overflow: hidden;
+  animation: fadeInModal 0.15s ease-out;
+}
+
+.dropdown-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border, #334155);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dropdown-search-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f8fafc;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.dropdown-search-box .clear-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.dropdown-search-box .clear-btn:hover {
+  color: #fff;
+}
+
+.patient-options-list {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.patient-option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.patient-option-item:hover {
+  background: rgba(14, 165, 168, 0.12);
+}
+
+.patient-option-item.selected {
+  background: rgba(14, 165, 168, 0.2);
+  border: 1px solid rgba(14, 165, 168, 0.4);
+}
+
+.option-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0ea5a8, #2563eb);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.option-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.option-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.option-info strong {
+  font-size: 13px;
+  color: #f8fafc;
+}
+
+.option-info span {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.crit-badge {
+  font-size: 10px;
+  font-weight: 800;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.no-patients-found {
+  padding: 18px;
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* ==================================================
+   PATIENT AVATAR & PROFILE SECTION IN VITALS
+   ================================================== */
+
+.vitals-patient-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.patient-avatar-box {
+  flex-shrink: 0;
+}
+
+.patient-avatar-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0ea5a8, #2563eb);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(14, 165, 168, 0.4);
+}
+
+.patient-avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.patient-avatar-edit-btn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.8);
+  border: none;
+  color: #fff;
+  padding: 2px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.patient-avatar-edit-btn:hover {
+  background: rgba(14, 165, 168, 0.95);
+}
+
+.patient-health-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.patient-health-status-badge.critical {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  animation: pulseCritBadge 1.5s infinite ease-in-out;
+}
+
+.patient-health-status-badge.stable {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+@keyframes pulseCritBadge {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+  }
+}
+
+.patient-appointments-quick-btn {
+  margin-left: auto;
+}
+
+/* ==================================================
+   CRITICAL ALERT BANNER
+   ================================================== */
+
+.vitals-critical-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(185, 28, 28, 0.1) 100%);
+  border: 1px solid #ef4444;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+  animation: slideDown 0.3s ease;
+}
+
+.critical-alert-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.pulse-danger {
+  animation: pulseCritBadge 1.2s infinite ease-in-out;
+}
+
+.critical-alert-body strong {
+  display: block;
+  font-size: 14px;
+  color: #fca5a5;
+  margin-bottom: 3px;
+}
+
+.critical-alert-body p {
+  margin: 0;
+  font-size: 13px;
+  color: #f87171;
+  line-height: 1.4;
+}
+
+/* ==================================================
+   SORTABLE HEADERS IN VITALS TABLE
+   ================================================== */
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.sortable-th:hover {
+  color: #38bdf8 !important;
+}
+
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sort-active {
+  color: #38bdf8;
+}
+
+.sort-idle {
+  opacity: 0.35;
+}
+
+/* ==================================================
+   MODAL VALIDATION ERROR
+   ================================================== */
+
+.modal-validation-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 24px 0;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 10px;
+  color: #fca5a5;
+  font-size: 13px;
+}
+
+/* ==================================================
+   APPOINTMENTS MODAL FOR PATIENT
+   ================================================== */
+
+.apt-modal-card {
+  max-width: 680px !important;
+  max-height: 80vh;
+}
+
+.apt-modal-search-bar {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border, #334155);
+}
+
+.apt-modal-list {
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.apt-loading-state,
+.apt-empty-state {
+  text-align: center;
+  padding: 36px 20px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.apt-card-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border, #334155);
+  border-radius: 12px;
+  padding: 14px 18px;
+  transition: all 0.2s;
+}
+
+.apt-card-item:hover {
+  border-color: #0ea5a8;
+  background: rgba(14, 165, 168, 0.05);
+}
+
+.apt-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+}
+
+.apt-date-col strong {
+  display: block;
+  font-size: 14px;
+  color: #f8fafc;
+}
+
+.apt-date-col span {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.apt-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.apt-badge.approved,
+.apt-badge.confirmed {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.apt-badge.pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.apt-badge.completed {
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.apt-badge.cancelled {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.apt-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.apt-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apt-detail-row .lbl {
+  color: #94a3b8;
+  width: 72px;
+}
+
+.apt-detail-row.booked-time {
+  margin-top: 4px;
+  font-size: 11.5px;
+}
+
+/* =========================================================
+   ADDITIONAL STYLES: QUICK SEARCH, AUDIO, INFO STRIP, VOICE
+   ========================================================= */
+
+/* Quick search bar above cards */
+.vitals-quick-search-section {
+  position: relative;
+  width: 100%;
+}
+
+.vitals-quick-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--vt-card);
+  border: 1px solid var(--vt-bd);
+  border-radius: 12px;
+  padding: 10px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.vitals-quick-search-box .search-icon {
+  color: var(--vt-mut);
+  flex-shrink: 0;
+}
+
+.vitals-quick-search-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--vt-tx);
+  font-size: 14px;
+}
+
+.quick-search-dropdown-matches {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--vt-card);
+  border: 1px solid var(--vt-bd);
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  z-index: 100;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.quick-search-dropdown-matches .match-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--vt-bd);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.quick-search-dropdown-matches .match-item:hover,
+.quick-search-dropdown-matches .match-item.active {
+  background: rgba(2, 132, 199, 0.12);
+}
+
+.quick-search-dropdown-matches .match-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--vt-tx);
+}
+
+.quick-search-dropdown-matches .match-sub {
+  font-size: 12px;
+  color: var(--vt-mut);
+}
+
+.quick-search-dropdown-matches .no-matches-item {
+  padding: 14px 16px;
+  color: var(--vt-mut);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Vitals Cards Header Bar */
+.vitals-cards-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.vitals-cards-header-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vt-tx);
+  letter-spacing: 0.02em;
+}
+
+.vitals-mute-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--vt-card);
+  border: 1px solid var(--vt-bd);
+  color: var(--vt-mut);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vitals-mute-btn:hover {
+  color: var(--vt-tx);
+  border-color: var(--vt-ac);
+}
+
+.vitals-mute-btn.muted {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Speaker button on vital cards */
+.card-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-speaker-btn {
+  background: transparent;
+  border: none;
+  color: var(--vt-mut);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.card-speaker-btn:hover {
+  color: var(--vt-ac);
+  background: rgba(2, 132, 199, 0.12);
+}
+
+/* Card No Data State */
+.card-no-data-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-record-cta-btn {
+  background: rgba(2, 132, 199, 0.15);
+  border: 1px solid rgba(2, 132, 199, 0.35);
+  color: #38bdf8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.card-record-cta-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+/* Patient Info Strip Above Table */
+.table-patient-info-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--vt-bg);
+  border: 1px solid var(--vt-bd);
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+.info-strip-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-strip-item .lbl {
+  color: var(--vt-mut);
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.info-strip-item strong {
+  color: var(--vt-tx);
+}
+
+.info-strip-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--vt-bd);
+}
+
+.info-strip-status {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.info-strip-status.stable {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.info-strip-status.critical {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* Voice dictation banner in Record Vitals modal */
+.vitals-voice-dictation-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.voice-mic-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  background: rgba(2, 132, 199, 0.12);
+  border: 1px solid rgba(2, 132, 199, 0.35);
+  color: #38bdf8;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voice-mic-btn.listening {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #ef4444;
+  color: #ef4444;
+  animation: pulseVoice 1.2s infinite;
+}
+
+@keyframes pulseVoice {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.voice-dictation-notice {
+  font-size: 12px;
+  color: var(--vt-mut);
+  background: var(--vt-bg);
+  border: 1px dashed var(--vt-bd);
+  padding: 8px 12px;
+  border-radius: 6px;
 }

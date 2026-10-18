@@ -3,7 +3,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 30px;
-  color: var(--text-primary, #172033);
+  color: #FFFFFF;
   box-sizing: border-box;
 }
 
@@ -22,7 +22,7 @@
 
 .page-eyebrow {
   display: inline-block;
-  color: #2563eb;
+  color: #38BDF8;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 1.4px;
@@ -34,12 +34,13 @@
   font-size: clamp(28px, 4vw, 40px);
   font-weight: 800;
   letter-spacing: -0.8px;
+  color: #FFFFFF;
 }
 
 .notifications-header p {
   margin: 10px 0 0;
   max-width: 650px;
-  color: #667085;
+  color: #94A3B8;
   line-height: 1.6;
   font-size: 15px;
 }
@@ -67,22 +68,26 @@
 }
 
 .secondary-action {
-  background: #eef4ff;
-  color: #2563eb;
+  background: rgba(56, 189, 248, 0.1);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
 }
 
 .secondary-action:hover:not(:disabled) {
-  background: #dce9ff;
+  background: #0284C7;
+  color: #FFFFFF;
   transform: translateY(-1px);
 }
 
 .danger-action {
-  background: #fff1f2;
-  color: #dc2626;
+  background: rgba(248, 113, 113, 0.12);
+  color: #F87171;
+  border: 1px solid rgba(248, 113, 113, 0.4);
 }
 
 .danger-action:hover:not(:disabled) {
-  background: #ffe1e5;
+  background: #F87171;
+  color: #FFFFFF;
   transform: translateY(-1px);
 }
 
@@ -105,14 +110,14 @@
 }
 
 .notification-stat {
-  background: #ffffff;
-  border: 1px solid #e7eaf0;
+  background: #111D35;
+  border: 1px solid #1F2D4A;
   border-radius: 16px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 15px;
-  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .stat-icon {
@@ -128,30 +133,30 @@
 }
 
 .stat-icon.blue {
-  background: #eaf2ff;
-  color: #2563eb;
+  background: rgba(56, 189, 248, 0.1);
+  color: #38BDF8;
 }
 
 .stat-icon.orange {
-  background: #fff5e7;
-  color: #f59e0b;
+  background: rgba(251, 191, 36, 0.12);
+  color: #FBBF24;
 }
 
 .stat-icon.green {
-  background: #e9fbf2;
-  color: #16a34a;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
 }
 
 .notification-stat span {
   display: block;
-  color: #7b8495;
+  color: #94A3B8;
   font-size: 12px;
   margin-bottom: 5px;
 }
 
 .notification-stat strong {
   font-size: 24px;
-  color: #172033;
+  color: #FFFFFF;
 }
 
 
@@ -160,8 +165,8 @@
 ========================= */
 
 .notification-toolbar {
-  background: #ffffff;
-  border: 1px solid #e7eaf0;
+  background: #111D35;
+  border: 1px solid #1F2D4A;
   border-radius: 14px;
   padding: 12px;
   margin-bottom: 16px;
@@ -179,7 +184,7 @@
 .filter-btn {
   border: none;
   background: transparent;
-  color: #667085;
+  color: #94A3B8;
   padding: 9px 15px;
   border-radius: 9px;
   font-weight: 700;
@@ -187,25 +192,26 @@
 }
 
 .filter-btn:hover {
-  background: #f5f7fa;
+  background: #16233F;
+  color: #FFFFFF;
 }
 
 .filter-btn.active {
-  background: #2563eb;
-  color: #ffffff;
+  background: #0284C7;
+  color: #FFFFFF;
 }
 
 .filter-count {
   margin-left: 7px;
-  background: #ffffff;
-  color: #2563eb;
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
   padding: 2px 6px;
   border-radius: 10px;
   font-size: 10px;
 }
 
 .notification-count {
-  color: #7b8495;
+  color: #94A3B8;
   font-size: 13px;
   font-weight: 600;
 }
@@ -225,8 +231,8 @@
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  background: #ffffff;
-  border: 1px solid #e7eaf0;
+  background: #111D35;
+  border: 1px solid #1F2D4A;
   border-radius: 16px;
   padding: 18px;
   transition:
@@ -237,13 +243,13 @@
 
 .notification-card:hover {
   transform: translateY(-2px);
-  border-color: #d7deeb;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+  border-color: #38BDF8;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .notification-card.unread {
-  border-left: 4px solid #2563eb;
-  background: #fbfdff;
+  border-left: 4px solid #38BDF8;
+  background: #16233F;
 }
 
 
@@ -264,28 +270,28 @@
 }
 
 .notification-type.appointment {
-  background: #eaf2ff;
-  color: #2563eb;
+  background: rgba(56, 189, 248, 0.1);
+  color: #38BDF8;
 }
 
 .notification-type.approval {
-  background: #eafbf1;
-  color: #16a34a;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
 }
 
 .notification-type.queue {
-  background: #fff6e8;
-  color: #d97706;
+  background: rgba(251, 191, 36, 0.12);
+  color: #FBBF24;
 }
 
 .notification-type.health {
-  background: #fff0f1;
-  color: #dc2626;
+  background: rgba(248, 113, 113, 0.12);
+  color: #F87171;
 }
 
 .notification-type.system {
-  background: #f1f3f6;
-  color: #475467;
+  background: #16233F;
+  color: #94A3B8;
 }
 
 
@@ -309,26 +315,27 @@
   margin: 0;
   font-size: 16px;
   font-weight: 750;
-  color: #172033;
+  color: #FFFFFF;
 }
 
 .notification-content p {
   margin: 7px 0;
-  color: #667085;
+  color: #94A3B8;
   line-height: 1.55;
   font-size: 14px;
 }
 
 .notification-time {
-  color: #98a2b3;
+  color: #64748B;
   font-size: 12px;
 }
 
 .unread-badge {
   font-size: 9px;
   font-weight: 800;
-  color: #2563eb;
-  background: #eaf2ff;
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.4);
   padding: 4px 7px;
   border-radius: 6px;
   letter-spacing: 0.5px;
@@ -357,23 +364,27 @@
 }
 
 .read-btn {
-  background: #eafbf1;
-  color: #16a34a;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
 .read-btn:hover {
-  background: #d6f6e5;
+  background: #10B981;
+  color: #FFFFFF;
 }
 
 .delete-btn {
-  background: #f5f6f8;
-  color: #667085;
+  background: #16233F;
+  border: 1px solid #1F2D4A;
+  color: #94A3B8;
   font-size: 19px;
 }
 
 .delete-btn:hover {
-  background: #fff0f1;
-  color: #dc2626;
+  background: rgba(248, 113, 113, 0.12);
+  color: #F87171;
+  border-color: rgba(248, 113, 113, 0.4);
 }
 
 
@@ -383,8 +394,8 @@
 
 .notification-empty {
   text-align: center;
-  background: #ffffff;
-  border: 1px dashed #d7dce5;
+  background: #111D35;
+  border: 1px dashed #1F2D4A;
   border-radius: 18px;
   padding: 70px 20px;
 }
@@ -394,7 +405,8 @@
   height: 64px;
   margin: 0 auto 16px;
   border-radius: 50%;
-  background: #f1f4f8;
+  background: #16233F;
+  border: 1px solid #1F2D4A;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -404,11 +416,12 @@
 .notification-empty h2 {
   margin: 0 0 8px;
   font-size: 20px;
+  color: #FFFFFF;
 }
 
 .notification-empty p {
   margin: 0;
-  color: #7b8495;
+  color: #94A3B8;
   font-size: 14px;
 }
 

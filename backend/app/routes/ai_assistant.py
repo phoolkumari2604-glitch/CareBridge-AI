@@ -6,224 +6,50 @@ import re
 import secrets
 from flask import Blueprint, request, jsonify, g, Response, stream_with_context
 from bson import ObjectId
+
 from app.core.database import get_database
 from app.utils.decorators import token_required
 from app.utils.helpers import serialize_doc, is_valid_object_id
 from app.services.ai_safety import detect_emergency, get_emergency_response
 from app.services.ai_vision import strip_exif_and_sanitize, analyze_medical_images, MAX_IMAGES, MAX_IMAGE_SIZE_BYTES, ALLOWED_EXTENSIONS
+from app.services.safety_layers import (
+    evaluate_safety_pipeline,
+    apply_output_filter,
+    EMERGENCY_FIXED_RESPONSE,
+    CRISIS_FIXED_RESPONSE
+)
+from app.services.conversation_manager import (
+    detect_language,
+    LOCALIZED_PROMPTS,
+    SymptomCheckerStateMachine,
+    SessionMemory,
+    LANG_EN
+)
 from app.services.clinical_kb import (
-    seed_clinical_kb_if_empty,
-    search_kb_conditions,
-    format_protocol_card,
+    load_knowledge_base,
+    search_health_knowledge,
+    lookup_glossary,
+    format_glossary_card,
+    format_role_response,
+    evaluate_vitals_safety,
     check_drug_interactions,
     log_unmatched_query,
-    normalize_text
+    format_protocol_card,
+    search_kb_conditions,
+    seed_clinical_kb_if_empty,
+    _KB_ENTRIES
 )
-
-# Optional Anthropic SDK for production streaming
-try:
-    import anthropic
-    ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-    anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
-except Exception:
-    anthropic_client = None
 
 ai_assistant_bp = Blueprint("ai_assistant", __name__)
 
 CLINICAL_DISCLAIMER = (
-    "CareBridge AI provides educational health insights and clinical decision support. "
-    "It is not a substitute for formal bedside examination or emergency clinical care."
+    "CareBridge AI provides educational health insights and clinical decision support based on accredited guidelines. "
+    "It is not a substitute for formal physical examination, bedside diagnostics, or emergency care."
 )
-
-CLINICAL_SYSTEM_PROMPT = (
-    "You are CareBridge MedAI, an advanced clinical decision support assistant for medical professionals and patients. "
-    "The user may type short statements, symptoms, or events instead of questions. Treat every message as a clinical request. "
-    "State briefly how you interpreted it, then give: "
-    "(1) urgent red flags and immediate actions, "
-    "(2) likely diagnoses or complications with ICD-10 codes where applicable, "
-    "(3) recommended examination and laboratory/radiology tests, "
-    "(4) evidence-based management plan, "
-    "(5) when to refer or admit. "
-    "If key details are missing (who, when, severity, baseline health), still give the best comprehensive clinical answer "
-    "and list the 2-3 specific questions that would sharpen the assessment."
-)
-
-
-def build_clinical_response(message: str, role: str, context: dict) -> str:
-    """Generate structured patient-specific assessment based on clinical request"""
-    msg = message.lower().strip()
-    patient_name = context.get("patient_name", "Patient")
-    age = context.get("age", 48)
-    gender = context.get("gender", "Unspecified")
-    blood = context.get("blood_group", "O+")
-    vital = context.get("vitals") or {}
-    
-    hr = vital.get("heart_rate", 76)
-    sbp = vital.get("systolic_bp", 124)
-    dbp = vital.get("diastolic_bp", 82)
-    spo2 = vital.get("spo2", 98)
-    temp = vital.get("temperature", 36.8)
-    sugar = vital.get("blood_sugar", 98)
-
-    # 1. Electric shock
-    if "electric" in msg or "shock" in msg or "electrocution" in msg or "current" in msg:
-        return f"""### 🩺 Patient-Specific Clinical Assessment: Electrical Injury
-**Patient:** {patient_name} ({age}y, {gender}) · **Baseline:** HR {hr} bpm · BP {sbp}/{dbp} mmHg · SpO₂ {spo2}%
-
-**Clinical Interpretation:** Electrical current exposure with potential for occult deep tissue coagulative injury, cardiac dysrhythmia, and secondary blunt trauma.
-
-#### 1. 🚨 Urgent Red Flags & Immediate Actions
-- **Airway & Breathing:** Immediate cervical spine stabilization if secondary fall occurred; supplemental O₂ if respiratory distress.
-- **Cardiovascular:** High risk of occult ventricular arrhythmias (VF/VT) or transient conduction block. Obtain immediate 12-lead ECG.
-- **Renal/Muscular:** Massive rhabdomyolysis causing acute tubular necrosis. Inspect urine for tea/burgundy discoloration.
-
-#### 2. 📋 Likely Diagnoses & Complications (ICD-10)
-- **Primary:** `T75.4` (Effects of electric current / Electrical shock injury)
-- **Cardiovascular:** `I49.9` (Cardiac arrhythmia, unspecified)
-- **Musculoskeletal/Renal:** `M62.82` (Rhabdomyolysis) & `N17.9` (Acute Kidney Injury)
-- **Cutaneous:** `T30.0` (Electrical contact burns at entry/exit sites)
-
-#### 3. 🔬 Recommended Examination & Diagnostic Workup
-- **ECG:** 12-lead baseline immediately and continuous telemetry for 12–24h if symptomatic or high-voltage.
-- **Lab Panel:** Serum Creatine Kinase (CK, CK-MB), Troponin I, Serum Creatinine, BUN, Electrolytes (K⁺, Ca²⁺), Urinalysis for myoglobin.
-- **Imaging:** X-rays of extremities/spine if tetanic spasm or fall injury suspected.
-
-#### 4. 💊 Management Plan
-- **IV Fluid Resuscitation:** Isotonic 0.9% Saline targeted to maintain urinary output >= 1.5–2 mL/kg/hour until urine clears.
-- **Burn Wound Care:** Gentle debridement, topical silver sulfadiazine, sterile dressings; verify tetanus vaccination status.
-- **Pain Control:** Multimodal analgesia (Acetaminophen + IV opioid as indicated).
-
-#### 5. 🏥 Disposition & Admission Criteria
-- **Admit:** Any high voltage (>1000V), abnormal ECG, loss of consciousness, elevated troponin/CK, or deep burns.
-- **Clarifying questions:** (1) What was the voltage source? (2) Was there loss of consciousness or a fall? (3) How long ago did the shock occur?"""
-
-    # 2. Chest pain
-    elif "chest" in msg or "angina" in msg or "coronary" in msg or "infarct" in msg:
-        return f"""### 🩺 Patient-Specific Clinical Assessment: Acute Chest Pain
-**Patient:** {patient_name} ({age}y, {gender}) · **Telemetry:** HR {hr} bpm · BP {sbp}/{dbp} mmHg · SpO₂ {spo2}%
-
-**Clinical Interpretation:** Acute onset chest discomfort requiring emergent differentiation between Acute Coronary Syndrome (ACS), Pulmonary Embolism, Aortic Dissection, and non-emergent etiologies.
-
-#### 1. 🚨 Urgent Red Flags & Immediate Actions
-- Radiation of pain to jaw, neck, left arm, or back; diaphoresis, dyspnea, nausea, syncope.
-- Immediate 12-lead ECG within 10 minutes of presentation.
-- Oxygen therapy only if SpO₂ < 90%; establish wide-bore IV access.
-
-#### 2. 📋 Differential Diagnoses (ICD-10)
-- **`I21.9` Acute Myocardial Infarction (STEMI / NSTEMI)** — High clinical probability.
-- **`I26.99` Acute Pulmonary Embolism** — Consider if sudden dyspnea, tachypnea, or DVT risk factors.
-- **`I71.00` Acute Aortic Dissection** — Consider if tearing back pain with asymmetric blood pressures.
-- **`J93.0` Spontaneous Pneumothorax** — Unilateral pleuritic pain and decreased breath sounds.
-- **`K21.9` GERD / Esophageal Spasm / Musculoskeletal** — Diagnosis of exclusion.
-
-#### 3. 🔬 Diagnostic Workup
-- **Biomarkers:** Serial High-Sensitivity Cardiac Troponin (hs-cTn at 0h and 1h/3h).
-- **Diagnostics:** Portable Chest X-ray, D-dimer, Comprehensive Metabolic Panel, Lipid Profile.
-
-#### 4. 💊 Management Plan
-- **Antiplatelet Loading:** Chewable Aspirin 300 mg + P2Y12 inhibitor (Ticagrelor 180 mg or Clopidogrel 300 mg) unless aortic dissection suspected.
-- **Anti-anginal:** Sublingual Nitroglycerin 0.4 mg if SBP > 100 mmHg and no right ventricular infarct.
-- **Anticoagulation:** Enoxaparin or unfractionated heparin once dissection ruled out.
-
-#### 5. 🏥 Referral & Disposition
-- Immediate Cardiac Catheterization Lab activation for STEMI (<90 min door-to-balloon).
-- **Sharpening questions:** (1) Exact onset and duration of pain? (2) Does breathing or posture alter the pain? (3) Any history of cardiac disease or diabetes?"""
-
-    # 3. Fever
-    elif "fever" in msg or "pyrexia" in msg or "temperature" in msg or "bukhar" in msg:
-        return f"""### 🩺 Patient-Specific Clinical Assessment: Acute Febrile Illness
-**Patient:** {patient_name} ({age}y, {gender}) · **Vitals:** Core Temp {temp}°C · HR {hr} bpm · BP {sbp}/{dbp} mmHg
-
-**Clinical Interpretation:** Acute febrile episode. Priority focus on screening for systemic sepsis, bacteremia, and endemic vector-borne illnesses (Dengue, Malaria, Typhoid).
-
-#### 1. 🚨 Urgent Red Flags & Immediate Actions
-- **Sepsis Screening:** SBP < 100 mmHg, Heart Rate > 100 bpm, Respiratory Rate > 22 bpm, altered mental status.
-- **Neurological:** Nuchal rigidity, photophobia, petechial/purpuric skin lesions.
-- **Hematological:** Bleeding manifestations, severe thrombocytopenia, or persistent vomiting.
-
-#### 2. 📋 Differential Diagnoses (ICD-10)
-- **`A97.9` Dengue Fever** — High clinical index during endemic transmission; retro-orbital pain, severe myalgia.
-- **`B54` Malaria (P. falciparum / P. vivax)** — Paroxysmal fever with chills and rigors.
-- **`A01.0` Typhoid Fever (Enteric Fever)** — Step-ladder pyrexia, coated tongue, relative bradycardia.
-- **`J18.9` Pneumonia / Lower Respiratory Tract Infection** — Productive cough, tachypnea.
-- **`A41.9` Sepsis, Unspecified** — Severe systemic inflammatory response.
-
-#### 3. 🔬 Diagnostic Workup
-- Complete Blood Count (CBC) with differential & platelet count, ESR, hs-CRP.
-- Dengue NS1 Antigen & IgM/IgG, Malaria Antigen (RDT) & Peripheral Smear, Widal/Typhidot.
-- Paired blood cultures before starting antibiotics if sepsis suspected; Urinalysis & culture.
-
-#### 4. 💊 Management Plan
-- **Antipyretic:** Paracetamol 650 mg PO Q6H PRN (maximum 3g/day).
-- **CRITICAL WARNING:** Avoid NSAIDs (Ibuprofen, Aspirin) until Dengue is ruled out to prevent hemorrhagic complications.
-- **Hydration:** Aggressive oral fluid intake (ORS, tender coconut water) or IV balanced crystalloids.
-
-#### 5. 🏥 Disposition & Admission
-- Admit if qSOFA >= 2, severe thrombocytopenia (platelets < 50,000/μL), dehydration, or warning signs of Dengue.
-- **Sharpening questions:** (1) Are there chills, rash, or body ache? (2) Any cough, dysuria, or diarrhea? (3) Any recent travel?"""
-
-    # 4. SOAP note
-    elif "soap" in msg or "note" in msg:
-        return f"""### 📋 Comprehensive Clinical SOAP Note
-**Patient Name:** {patient_name} | **Age/Sex:** {age}y / {gender} | **ID Code:** {context.get('patient_code', 'Verified')}
-**Date of Examination:** {datetime.now().strftime('%d %B %Y')} | **Attending Physician:** Dr. {context.get('doctor_name', 'Consultant')}
-
----
-
-#### 1. Subjective (S)
-* **Chief Complaint:** Clinical consultation and systemic physiological review.
-* **History of Present Illness (HPI):** Patient reports ongoing health monitoring. Denies acute substernal chest pressure, orthopnea, paroxysmal nocturnal dyspnea, syncope, or focal neurological deficits.
-* **Past Medical History:** Managed under CareBridge AI digital health surveillance.
-* **Medications & Allergies:** Reviewed and verified in electronic health chart.
-
-#### 2. Objective (O)
-* **Physiological Telemetry:** HR {hr} bpm (Regular Sinus Rhythm) | BP {sbp}/{dbp} mmHg | SpO₂ {spo2}% (Room Air) | Temp {temp}°C | Blood Sugar {sugar} mg/dL.
-* **General Examination:** Conscious, alert, oriented ×3. Well-perfused, no pallor, icterus, cyanosis, or peripheral pedal edema.
-* **Cardiovascular:** S1, S2 audible, no murmurs, rubs, or gallops.
-* **Respiratory:** Bilateral clear vesicular breath sounds throughout all lung fields. No wheezing or crackles.
-* **Abdomen:** Soft, non-tender, non-distended; normal active bowel sounds.
-
-#### 3. Assessment (A)
-* **Primary Impression:** Stable clinical status with controlled hemodynamics.
-* **Risk Stratification:** Low to Moderate acute cardiovascular/metabolic risk.
-
-#### 4. Plan (P)
-* **Diagnostics:** Routine quarterly metabolic panel (Lipid profile, HbA1c, Renal panel).
-* **Therapeutics:** Maintain current prescribed medical regimen.
-* **Lifestyle:** Sodium-restricted heart-healthy diet, 150 min/week moderate aerobic exercise.
-* **Follow-up:** Scheduled clinical reassessment in 4 weeks or immediate emergency review if red-flag symptoms arise."""
-
-    # 5. Default General Clinical Assessment
-    else:
-        return f"""### 🩺 Clinical Decision Support Assessment
-**Patient Context Evaluated:** {patient_name} ({age}y, {gender}, Blood: {blood})  
-**Active Telemetry Baseline:** HR {hr} bpm · BP {sbp}/{dbp} mmHg · SpO₂ {spo2}% · Temp {temp}°C · Glucose {sugar} mg/dL
-
-**Clinical Query Interpretation:** "{message}" evaluated against evidence-based medical guidelines and active patient history.
-
-#### 1. 🚨 Urgent Red Flags & Immediate Actions
-- Screen for any acute chest pain, altered consciousness, dyspnea, severe persistent headache, or focal deficits.
-- Maintain continuous hemodynamic and SpO₂ monitoring.
-
-#### 2. 📋 Clinical Differentials & Considerations
-- Primary symptomatic evaluation in accordance with current clinical baseline.
-- Cross-reference with chronic medical history and active pharmacological regimen.
-
-#### 3. 🔬 Recommended Investigations
-- Vital signs trend analysis over the past 24–48 hours.
-- Baseline screening: Complete Blood Count, Serum Electrolytes, Renal Panel.
-
-#### 4. 💊 Management Strategy
-- Symptom-directed supportive care and continuous telemetry tracking.
-- Ensure adequate hydration and review any concurrent medications.
-
-#### 5. 🏥 Referral & Disposition
-- Follow up as scheduled; seek immediate emergency triage if acute hemodynamic instability occurs.
-- **Clarifying questions:** (1) When did the symptoms start? (2) What is the severity on a 1-10 scale? (3) Any associated symptoms?"""
 
 
 # ============================================================================
-# 1. CORE AI CHAT & STREAMING ENDPOINT (/api/ai/chat, /api/ai-assistant/chat)
+# 1. CORE AI CHAT & STREAMING ENDPOINT (/chat, /chat/stream)
 # ============================================================================
 @ai_assistant_bp.route("/chat", methods=["POST"], strict_slashes=False)
 @ai_assistant_bp.route("/chat/stream", methods=["POST", "GET"], strict_slashes=False)
@@ -231,42 +57,93 @@ def build_clinical_response(message: str, role: str, context: dict) -> str:
 def clinical_ai_chat():
     """
     CareBridge Clinical AI Assistant Chat & SSE Stream Endpoint
-    1. Looks up approved protocols in clinical KB -> sends instant verified card
-    2. Checks drug interactions if 2+ medications mentioned
-    3. Streams patient-specific clinical assessment token-by-token
+    1. Safety Layers 1-4 (Emergency, Crisis, Prompt-injection, Controlled Drugs)
+    2. Vision Guard (Layer 5: Non-diagnostic observation)
+    3. Abnormal Vitals Safety Check with simulated vs real distinction
+    4. Symptom-checker ladder for vague queries (max 5 questions)
+    5. Role-based structured answer (Patient, Doctor, Staff)
+    6. Multilingual support across EN, HI, Hinglish, TE, TA
+    7. Ambiguity detection with clarification pills
     """
     db = get_database()
-    seed_clinical_kb_if_empty()
+    load_knowledge_base()
 
     current_user = getattr(g, "current_user", None) or {}
     role = (current_user.get("role") or "PATIENT").upper()
     user_id = str(current_user.get("_id") or current_user.get("id") or "")
+    user_name = current_user.get("name") or "User"
 
     if request.method == "GET":
-        message = request.args.get("message", "")
+        message = request.args.get("message", "").strip()
         patient_id = request.args.get("patient_id")
         stream_requested = True
+        attachments = []
+        is_simulated = request.args.get("simulated", "false").lower() == "true"
+        session_id = request.args.get("session_id") or user_id
     else:
         data = request.get_json() or {}
         message = data.get("message", "").strip()
         patient_id = data.get("patient_id")
         stream_requested = data.get("stream", True)
+        attachments = data.get("attachments") or []
+        is_simulated = data.get("is_simulated", False)
+        session_id = data.get("session_id") or user_id
 
     if not message:
         return jsonify({"error": "Validation Error", "detail": "Message is required"}), 400
 
-    # Build patient clinical context
+    # ------------------------------------------------------------------------
+    # STEP 1: SAFETY PIPELINE EVALUATION (Layers 1-3)
+    # ------------------------------------------------------------------------
+    safety = evaluate_safety_pipeline(
+        message=message,
+        role=role,
+        has_attachments=bool(attachments)
+    )
+
+    if safety["blocked"]:
+        blocked_text = safety["response"]
+        now = datetime.now(timezone.utc)
+        db.ai_conversations.insert_one({
+            "user_id": user_id,
+            "patient_id": patient_id,
+            "role": role,
+            "user_message": message,
+            "ai_response": blocked_text,
+            "layer_triggered": safety["layer_triggered"],
+            "is_emergency": safety["is_emergency"],
+            "is_crisis": safety["is_crisis"],
+            "created_at": now
+        })
+
+        if not stream_requested:
+            return jsonify({
+                "message": message,
+                "response": blocked_text,
+                "is_emergency": safety["is_emergency"],
+                "is_crisis": safety["is_crisis"],
+                "blocked": True,
+                "layer_triggered": safety["layer_triggered"],
+                "disclaimer": CLINICAL_DISCLAIMER
+            }), 200
+
+        def stream_blocked():
+            yield f"data: {json.dumps({'type': 'content', 'delta': blocked_text, 'is_emergency': safety['is_emergency'], 'is_crisis': safety['is_crisis']})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'disclaimer': CLINICAL_DISCLAIMER})}\n\n"
+
+        return Response(stream_with_context(stream_blocked()), mimetype="text/event-stream")
+
+    # ------------------------------------------------------------------------
+    # STEP 2: CONTEXT & VITALS BUILDING
+    # ------------------------------------------------------------------------
     context = {
-        "patient_name": current_user.get("name", "Patient"),
+        "patient_name": user_name,
         "role": role,
         "age": 45,
         "gender": "Unspecified",
         "blood_group": "O+",
         "vitals": {},
-        "alerts": [],
-        "records": [],
-        "medications": [],
-        "allergies": []
+        "is_simulated": is_simulated
     }
 
     if patient_id:
@@ -279,94 +156,163 @@ def clinical_ai_chat():
             context["blood_group"] = p_doc.get("blood_group", "O+")
             context["patient_code"] = p_doc.get("patient_code") or str(p_doc.get("_id"))[-6:]
 
-        latest_vital = db.vitals.find_one(
+        latest_vital = db.vital_signs.find_one(
             {"$or": [{"patient_id": p_obj}, {"patient_id": patient_id}] if p_obj else [{"patient_id": patient_id}]},
             sort=[("recorded_at", -1)]
         )
         if latest_vital:
             context["vitals"] = latest_vital
+            context["is_simulated"] = False
+    elif not context["vitals"] and data.get("vitals") if request.method != "GET" else None:
+        context["vitals"] = data.get("vitals")
+        context["is_simulated"] = is_simulated
 
-    # Step 1: Check Clinical Knowledge Base for approved protocol
-    kb_hits = search_kb_conditions(message, limit=1)
-    protocol_card_md = ""
-    if kb_hits:
-        protocol_card_md = format_protocol_card(kb_hits[0])
-    else:
-        log_unmatched_query(message, user_id)
+    # Evaluate Vitals Safety Alert
+    vitals_alert_md = evaluate_vitals_safety(context["vitals"], is_simulated=context.get("is_simulated", False))
 
-    # Step 2: Check Drug-Drug Interactions
-    drug_interaction_md = check_drug_interactions(message)
+    # ------------------------------------------------------------------------
+    # STEP 3: ATTACHMENTS (IMAGE / LAB REPORT GUARD - Layer 5)
+    # ------------------------------------------------------------------------
+    attachment_analysis_md = ""
+    if attachments:
+        obs_banner = "> ⚠️ **AI Observation Only, Not a Diagnosis**: *The following analysis is an automated observational report intended to assist medical discussions with your physician. It does not constitute a definitive medical diagnosis.*\n\n"
+        attachment_analysis_md = obs_banner + analyze_medical_images(attachments, message, context)
 
-    # Step 3: Build Patient-Specific Clinical Assessment
-    patient_assessment_md = build_clinical_response(message, role, context)
+    # ------------------------------------------------------------------------
+    # STEP 4: SYMPTOM CHECKER STATE MACHINE (VAGUE SYMPTOMS)
+    # ------------------------------------------------------------------------
+    is_vague = SymptomCheckerStateMachine.is_vague_query(message)
+    current_step = SessionMemory.get_step_count(session_id)
+    symptom_next_step = None
+    clarification_options = []
 
-    # Assemble full content
+    final_response_text = ""
+
+    if is_vague and current_step < 5:
+        detected_lang = detect_language(message)
+        q_info = SymptomCheckerStateMachine.get_next_question(current_step, lang=detected_lang)
+        if q_info:
+            symptom_next_step, q_text = q_info
+            final_response_text = q_text
+
+    # ------------------------------------------------------------------------
+    # STEP 5: CLINICAL KNOWLEDGE BASE SEARCH & RETRIEVAL
+    # ------------------------------------------------------------------------
+    kb_entry = None
+    if not final_response_text:
+        search_res = search_health_knowledge(message, role=role)
+        detected_lang = search_res.get("lang", LANG_EN)
+
+        # A. Glossary Match
+        if search_res.get("glossary"):
+            final_response_text = format_glossary_card(search_res["glossary"], lang=detected_lang)
+
+        # B. Ambiguity Handling
+        elif search_res.get("ambiguous") and search_res.get("options"):
+            clarification_options = search_res.get("options", [])
+            prompts = LOCALIZED_PROMPTS.get(detected_lang, LOCALIZED_PROMPTS[LANG_EN])
+            intro = prompts.get("ambiguity_intro", "Did you mean one of these specific health topics?")
+            options_text = "\n".join([f"- **{opt['topic']}**" for opt in clarification_options])
+            final_response_text = f"### ❓ Clarification Needed\n{intro}\n\n{options_text}\n\n*Please select one of the topics below or clarify your question.*"
+
+        # C. Best Direct Match in KB
+        elif search_res.get("entry"):
+            kb_entry = search_res["entry"]
+            final_response_text = format_role_response(kb_entry, role=role, lang=detected_lang)
+
+        # D. Drug-Drug Interaction Check
+        else:
+            drug_interaction_md = check_drug_interactions(message)
+            if drug_interaction_md:
+                final_response_text = drug_interaction_md
+            else:
+                log_unmatched_query(message, user_id)
+                # Fallback role-appropriate message
+                if role in ("DOCTOR", "CLINICIAN"):
+                    final_response_text = f"""### 🩺 Clinical Decision Support Query: *"{message}"*
+> ⚠️ **Peer-Review Queue Notice**: No direct protocol match found in the local knowledge base.
+
+#### 1. 📋 General Clinical Approach
+Perform focused clinical history, symptom onset timeline, and physical examination.
+
+#### 2. 🔬 Recommended General Diagnostics
+CBC, basic metabolic panel, and diagnostic investigations tailored to organ system.
+
+#### 3. 💊 Evidence-Based Management
+Provide supportive care and symptomatic relief pending confirmed diagnosis."""
+                else:
+                    final_response_text = f"""### 🩺 Guidance for: *"{message}"*
+1. **Rest & Hydration**: Drink plenty of clear liquids and rest comfortably in a cool room.
+2. **Monitor Symptoms**: Keep track of any changes in temperature or worsening discomfort.
+3. **When to See a Doctor**: Consult a healthcare provider if symptoms persist for more than 48 hours or if severe pain, difficulty breathing, or dizziness develops.
+
+> *CareBridge Health Education Guidance*"""
+
+    # ------------------------------------------------------------------------
+    # STEP 6: ASSEMBLE FINAL RESPONSE (VITALS ALERT + VISION + RESPONSE)
+    # ------------------------------------------------------------------------
     full_parts = []
-    if protocol_card_md:
-        full_parts.append(protocol_card_md)
-    if drug_interaction_md:
-        full_parts.append(drug_interaction_md)
-    if full_parts:
-        full_parts.append(f"---\n\n{patient_assessment_md}")
-    else:
-        full_parts.append(patient_assessment_md)
+    if vitals_alert_md:
+        full_parts.append(vitals_alert_md)
+    if attachment_analysis_md:
+        full_parts.append(attachment_analysis_md)
+    if final_response_text:
+        full_parts.append(final_response_text)
 
-    final_response_text = "\n\n".join(full_parts)
+    assembled_output = "\n\n".join(full_parts)
 
-    # Record message to history
+    # Record to session memory
+    SessionMemory.add_turn(
+        session_id=session_id,
+        user_msg=message,
+        ai_msg=assembled_output,
+        metadata={"symptom_checker_step": symptom_next_step}
+    )
+
+    # Record to database
     now = datetime.now(timezone.utc)
     db.ai_conversations.insert_one({
         "user_id": user_id,
         "patient_id": patient_id,
+        "session_id": session_id,
         "role": role,
         "user_message": message,
-        "ai_response": final_response_text,
-        "has_kb_protocol": bool(kb_hits),
-        "has_drug_interaction": bool(drug_interaction_md),
+        "attachments": attachments,
+        "ai_response": assembled_output,
+        "has_kb_entry": bool(kb_entry),
+        "entry_id": kb_entry.get("id") if kb_entry else None,
+        "clarification_options": clarification_options,
+        "symptom_checker_step": symptom_next_step,
+        "has_vitals_alert": bool(vitals_alert_md),
         "created_at": now
     })
 
+    # Return Non-streaming JSON
     if not stream_requested:
         return jsonify({
             "message": message,
-            "response": final_response_text,
-            "has_kb_protocol": bool(kb_hits),
-            "has_drug_interaction": bool(drug_interaction_md),
+            "response": assembled_output,
+            "has_kb_entry": bool(kb_entry),
+            "entry_id": kb_entry.get("id") if kb_entry else None,
+            "clarification_options": clarification_options,
+            "symptom_checker_step": symptom_next_step,
+            "has_vitals_alert": bool(vitals_alert_md),
             "disclaimer": CLINICAL_DISCLAIMER
         }), 200
 
-    # Stream token by token (SSE)
+    # Stream SSE Token-by-Token
     def generate_sse():
-        # First send instant protocol card if available
-        if protocol_card_md:
-            instant_payload = {
-                "type": "protocol_card",
-                "delta": protocol_card_md + "\n\n---\n\n"
-            }
-            yield f"data: {json.dumps(instant_payload)}\n\n"
-            time.sleep(0.05)
+        # First send clarification options if any
+        if clarification_options:
+            yield f"data: {json.dumps({'type': 'clarifications', 'options': clarification_options})}\n\n"
 
-        if drug_interaction_md:
-            drug_payload = {
-                "type": "drug_interaction",
-                "delta": drug_interaction_md + "\n\n---\n\n"
-            }
-            yield f"data: {json.dumps(drug_payload)}\n\n"
-            time.sleep(0.05)
+        chunk_size = 32
+        for i in range(0, len(assembled_output), chunk_size):
+            chunk = assembled_output[i:i + chunk_size]
+            yield f"data: {json.dumps({'type': 'content', 'delta': chunk})}\n\n"
+            time.sleep(0.015)
 
-        # Stream assessment in chunks
-        chunk_size = 28
-        for i in range(0, len(patient_assessment_md), chunk_size):
-            chunk = patient_assessment_md[i:i + chunk_size]
-            payload = {
-                "type": "content",
-                "delta": chunk
-            }
-            yield f"data: {json.dumps(payload)}\n\n"
-            time.sleep(0.02)
-
-        # End of stream
-        yield f"data: {json.dumps({'type': 'done', 'disclaimer': CLINICAL_DISCLAIMER})}\n\n"
+        yield f"data: {json.dumps({'type': 'done', 'clarification_options': clarification_options, 'disclaimer': CLINICAL_DISCLAIMER})}\n\n"
 
     return Response(
         stream_with_context(generate_sse()),
@@ -380,185 +326,202 @@ def clinical_ai_chat():
 
 
 # ============================================================================
-# 2. CLINICAL KNOWLEDGE BASE (KB) MANAGEMENT API
+# 2. FEEDBACK & REPORTING API (/feedback)
+# ============================================================================
+@ai_assistant_bp.route("/feedback", methods=["POST"], strict_slashes=False)
+@token_required
+def submit_ai_feedback():
+    """Submit user rating (thumbs up/down) or report wrong answer"""
+    db = get_database()
+    current_user = getattr(g, "current_user", None) or {}
+    data = request.get_json() or {}
+
+    entry_id = data.get("entry_id")
+    question = data.get("question")
+    rating = data.get("rating")  # 1 for thumbs up, -1 for thumbs down
+    report_wrong = data.get("report_wrong", False)
+    comments = data.get("comments", "").strip()
+
+    now = datetime.now(timezone.utc)
+    feedback_doc = {
+        "user_id": str(current_user.get("_id") or current_user.get("id") or ""),
+        "user_name": current_user.get("name", "Anonymous"),
+        "role": (current_user.get("role") or "PATIENT").upper(),
+        "entry_id": entry_id,
+        "question": question,
+        "rating": rating,
+        "report_wrong": report_wrong,
+        "comments": comments,
+        "created_at": now
+    }
+    db.ai_feedback.insert_one(feedback_doc)
+
+    return jsonify({
+        "message": "Feedback submitted successfully. Thank you for helping improve CareBridge clinical accuracy.",
+        "id": str(feedback_doc.get("_id"))
+    }), 201
+
+
+# ============================================================================
+# 3. CLINICAL REVIEW QUEUE & APPROVAL API (/review-queue, /entry/approve, /entry/edit)
+# ============================================================================
+@ai_assistant_bp.route("/review-queue", methods=["GET"], strict_slashes=False)
+@token_required
+def get_review_queue():
+    """Retrieve all draft entries awaiting clinician peer review"""
+    load_knowledge_base()
+    current_user = getattr(g, "current_user", None) or {}
+    category = request.args.get("category")
+
+    drafts = []
+    for entry in _KB_ENTRIES:
+        if entry.get("review_status") == "draft":
+            if not category or entry.get("category") == category:
+                drafts.append(entry)
+
+    return jsonify({
+        "total_drafts": len(drafts),
+        "queue": drafts
+    }), 200
+
+
+@ai_assistant_bp.route("/entry/approve", methods=["POST"], strict_slashes=False)
+@token_required
+def approve_kb_entry():
+    """Approve a draft knowledge base entry (Doctor / Admin only)"""
+    db = get_database()
+    current_user = getattr(g, "current_user", None) or {}
+    role = (current_user.get("role") or "").upper()
+
+    if role not in ("DOCTOR", "ADMIN", "CLINICIAN"):
+        return jsonify({"error": "Forbidden", "detail": "Only registered doctors or admins can approve clinical entries."}), 403
+
+    data = request.get_json() or {}
+    entry_id = data.get("entry_id")
+    if not entry_id:
+        return jsonify({"error": "Validation Error", "detail": "entry_id is required"}), 400
+
+    now = datetime.now(timezone.utc)
+    doctor_name = current_user.get("name") or "Medical Officer"
+
+    # Update in memory
+    matched = None
+    for entry in _KB_ENTRIES:
+        if entry.get("id") == entry_id:
+            entry["review_status"] = "approved"
+            entry["reviewed_by"] = doctor_name
+            entry["reviewed_at"] = now.isoformat()
+            matched = entry
+            break
+
+    # Persist in DB / audit
+    db.kb_entry_approvals.insert_one({
+        "entry_id": entry_id,
+        "approved_by": doctor_name,
+        "user_id": str(current_user.get("_id") or current_user.get("id") or ""),
+        "approved_at": now
+    })
+
+    return jsonify({
+        "message": f"Entry {entry_id} approved by {doctor_name}.",
+        "entry": matched
+    }), 200
+
+
+@ai_assistant_bp.route("/entry/edit", methods=["POST"], strict_slashes=False)
+@token_required
+def edit_kb_entry():
+    """Edit knowledge base entry with automated version history tracking"""
+    db = get_database()
+    current_user = getattr(g, "current_user", None) or {}
+    role = (current_user.get("role") or "").upper()
+
+    if role not in ("DOCTOR", "ADMIN", "CLINICIAN"):
+        return jsonify({"error": "Forbidden", "detail": "Only registered clinicians or admins can edit clinical entries."}), 403
+
+    data = request.get_json() or {}
+    entry_id = data.get("entry_id")
+    updates = data.get("updates") or {}
+
+    if not entry_id or not updates:
+        return jsonify({"error": "Validation Error", "detail": "entry_id and updates are required"}), 400
+
+    now = datetime.now(timezone.utc)
+    doctor_name = current_user.get("name") or "Clinician"
+
+    matched = None
+    for entry in _KB_ENTRIES:
+        if entry.get("id") == entry_id:
+            # Save version history
+            if "version_history" not in entry:
+                entry["version_history"] = []
+            
+            entry["version_history"].append({
+                "patient_answer": entry.get("patient_answer"),
+                "doctor_answer": entry.get("doctor_answer"),
+                "edited_by": doctor_name,
+                "edited_at": now.isoformat()
+            })
+
+            # Apply permitted updates
+            for k, v in updates.items():
+                if k not in ("id", "version_history"):
+                    entry[k] = v
+
+            entry["updated_at"] = now.isoformat()
+            matched = entry
+            break
+
+    if not matched:
+        return jsonify({"error": "Not Found", "detail": "Entry not found"}), 404
+
+    return jsonify({
+        "message": f"Entry {entry_id} updated successfully.",
+        "entry": matched
+    }), 200
+
+
+@ai_assistant_bp.route("/session/clear", methods=["POST", "DELETE"], strict_slashes=False)
+@token_required
+def clear_session_memory():
+    """Clear conversational session memory (trash icon action)"""
+    current_user = getattr(g, "current_user", None) or {}
+    user_id = str(current_user.get("_id") or current_user.get("id") or "")
+    data = request.get_json(silent=True) or {}
+    session_id = data.get("session_id") or request.args.get("session_id") or user_id
+
+    SessionMemory.clear_session(session_id)
+    return jsonify({
+        "message": "Session memory cleared successfully.",
+        "session_id": session_id
+    }), 200
+
+
+# ============================================================================
+# 4. BACKWARDS-COMPATIBLE KB & HISTORY ROUTES
 # ============================================================================
 @ai_assistant_bp.route("/kb/conditions", methods=["GET"], strict_slashes=False)
 @token_required
 def get_kb_conditions():
-    """List knowledge base condition protocols with status filter and search"""
+    """List knowledge base condition protocols"""
     db = get_database()
-    seed_clinical_kb_if_empty()
-
     status = request.args.get("status")
     search = request.args.get("search", "").strip()
 
-    query = {}
-    if status and status.lower() != "all":
-        query["status"] = status.lower()
-
-    if search:
-        query["$or"] = [
-            {"title": {"$regex": search, "$options": "i"}},
-            {"slug": {"$regex": search, "$options": "i"}},
-            {"aliases": {"$regex": search, "$options": "i"}},
-            {"icd10": {"$regex": search, "$options": "i"}}
-        ]
-
-    conditions = list(db.kb_conditions.find(query).sort("updated_at", -1))
-    return jsonify(serialize_doc(conditions)), 200
-
-
-@ai_assistant_bp.route("/kb/conditions", methods=["POST"], strict_slashes=False)
-@token_required
-def add_kb_condition():
-    """Add a new condition protocol to the knowledge base (defaults to draft)"""
-    db = get_database()
-    current_user = getattr(g, "current_user", None) or {}
-    data = request.get_json() or {}
-
-    title = data.get("title")
-    if not title:
-        return jsonify({"error": "Validation Error", "detail": "Title is required"}), 400
-
-    slug = data.get("slug") or re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-    now = datetime.now(timezone.utc)
-
-    doc = {
-        "slug": slug,
-        "title": title,
-        "aliases": data.get("aliases", []),
-        "icd10": data.get("icd10", []),
-        "category": data.get("category", "general"),
-        "summary": data.get("summary", ""),
-        "red_flags": data.get("red_flags", []),
-        "differentials": data.get("differentials", []),
-        "workup": data.get("workup", []),
-        "management": data.get("management", []),
-        "disposition": data.get("disposition", ""),
-        "patient_education": data.get("patient_education", ""),
-        "sources": data.get("sources", []),
-        "status": data.get("status", "draft"), # draft, approved, retired
-        "reviewed_by": current_user.get("name") if data.get("status") == "approved" else None,
-        "reviewed_at": now if data.get("status") == "approved" else None,
-        "created_at": now,
-        "updated_at": now
-    }
-
-    res = db.kb_conditions.insert_one(doc)
-    doc["id"] = str(res.inserted_id)
-
-    return jsonify({
-        "message": "Protocol saved to knowledge base",
-        "condition": serialize_doc(doc)
-    }), 201
-
-
-@ai_assistant_bp.route("/kb/conditions/<cond_id>", methods=["PUT"], strict_slashes=False)
-@token_required
-def update_kb_condition(cond_id):
-    """Update, approve, or retire a condition protocol"""
-    db = get_database()
-    current_user = getattr(g, "current_user", None) or {}
-    data = request.get_json() or {}
-
-    query = {"_id": ObjectId(cond_id)} if is_valid_object_id(cond_id) else {"slug": cond_id}
-    existing = db.kb_conditions.find_one(query)
-    if not existing:
-        return jsonify({"error": "Not Found", "detail": "Condition protocol not found"}), 404
-
-    now = datetime.now(timezone.utc)
-    updates = {
-        "updated_at": now
-    }
-
-    for key in ["title", "aliases", "icd10", "category", "summary", "red_flags", "differentials", "workup", "management", "disposition", "patient_education", "sources", "status"]:
-        if key in data:
-            updates[key] = data[key]
-
-    if data.get("status") == "approved" and existing.get("status") != "approved":
-        updates["reviewed_by"] = current_user.get("name") or "Clinician Reviewer"
-        updates["reviewed_at"] = now
-
-    db.kb_conditions.update_one(query, {"$set": updates})
-    updated = db.kb_conditions.find_one(query)
-
-    return jsonify({
-        "message": "Protocol updated successfully",
-        "condition": serialize_doc(updated)
-    }), 200
-
-
-@ai_assistant_bp.route("/kb/drugs", methods=["GET"], strict_slashes=False)
-@token_required
-def get_kb_drugs():
-    """List drug-drug interactions with severity and status"""
-    db = get_database()
-    seed_clinical_kb_if_empty()
-    interactions = list(db.kb_drug_interactions.find({}))
-    return jsonify(serialize_doc(interactions)), 200
-
-
-@ai_assistant_bp.route("/kb/unmatched", methods=["GET"], strict_slashes=False)
-@token_required
-def get_unmatched_queries():
-    """List clinical queries with no KB match for continuous quality improvement"""
-    db = get_database()
-    queries = list(db.kb_unmatched_queries.find({}).sort("created_at", -1).limit(50))
-    return jsonify(serialize_doc(queries)), 200
-
-
-@ai_assistant_bp.route("/kb/import", methods=["POST"], strict_slashes=False)
-@token_required
-def import_kb_entries():
-    """Batch import knowledge base protocols from JSON array (imported as draft)"""
-    db = get_database()
-    data = request.get_json() or {}
-    entries = data.get("entries", [])
-
-    if not isinstance(entries, list) or len(entries) == 0:
-        return jsonify({"error": "Validation Error", "detail": "entries must be a non-empty array"}), 400
-
-    now = datetime.now(timezone.utc)
-    inserted_count = 0
-
-    for entry in entries:
-        title = entry.get("title")
-        if not title:
+    load_knowledge_base()
+    results = []
+    for e in _KB_ENTRIES:
+        if status and status.lower() != "all" and e.get("review_status") != status.lower():
             continue
-        slug = entry.get("slug") or re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+        if search:
+            q = search.lower()
+            if q not in e.get("topic", "").lower() and not any(q in k.lower() for k in e.get("keywords", [])):
+                continue
+        results.append(e)
 
-        doc = {
-            "slug": slug,
-            "title": title,
-            "aliases": entry.get("aliases", []),
-            "icd10": entry.get("icd10", []),
-            "category": entry.get("category", "imported"),
-            "summary": entry.get("summary", ""),
-            "red_flags": entry.get("red_flags", []),
-            "differentials": entry.get("differentials", []),
-            "workup": entry.get("workup", []),
-            "management": entry.get("management", []),
-            "disposition": entry.get("disposition", ""),
-            "patient_education": entry.get("patient_education", ""),
-            "sources": entry.get("sources", []),
-            "status": "draft",
-            "reviewed_by": None,
-            "reviewed_at": None,
-            "created_at": now,
-            "updated_at": now
-        }
-        db.kb_conditions.update_one({"slug": slug}, {"$set": doc}, upsert=True)
-        inserted_count += 1
-
-    return jsonify({
-        "message": f"Successfully imported {inserted_count} protocols as draft.",
-        "imported_count": inserted_count
-    }), 200
+    return jsonify(results), 200
 
 
-# ============================================================================
-# 3. CONVERSATION HISTORY & IMAGE TRIAGE
-# ============================================================================
 @ai_assistant_bp.route("/history/<patient_id>", methods=["GET"], strict_slashes=False)
 @token_required
 def get_ai_history(patient_id):
@@ -576,4 +539,5 @@ def clear_ai_history(patient_id):
     db = get_database()
     query = {"$or": [{"patient_id": patient_id}, {"user_id": patient_id}]}
     res = db.ai_conversations.delete_many(query)
+    SessionMemory.clear_session(patient_id)
     return jsonify({"message": "Conversation history cleared", "deleted_count": res.deleted_count}), 200

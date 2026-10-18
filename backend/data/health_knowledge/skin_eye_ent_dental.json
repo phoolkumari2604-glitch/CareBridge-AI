@@ -1,0 +1,989 @@
+[
+  {
+    "id": "sed_acne_vulgaris_001",
+    "topic": "Skin, Eye, ENT & Dental: Acne Vulgaris & Breakouts (Pimples / Keel Muhase)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "acne",
+      "pimples",
+      "keel muhase",
+      "blackheads",
+      "whiteheads",
+      "cystic acne",
+      "acne treatment"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Wash your face twice daily with a gentle, non-comedogenic foaming cleanser and lukewarm water; do NOT scrub vigorously.",
+      "For mild acne: Over-the-counter topical Benzoyl Peroxide (2.5% to 5% gel) or Salicylic Acid wash kills acne bacteria and clears blocked pores.",
+      "For stubborn acne: Consult a dermatologist for topical retinoids (such as Adapalene 0.1% gel applied at bedtime in a pea-sized amount).",
+      "Always use an oil-free, non-comedogenic moisturizer and broad-spectrum sunscreen daily; acne treatments can cause mild peeling.",
+      "NEVER pop, squeeze, or pick at pimples; popping forces infection deeper into the skin and causes permanent pitted scarring and dark pigmentation."
+    ],
+    "doctor_answer": {
+      "assessment": "Acne Vulgaris (multifactorial follicular disease: follicular hyperkeratinization, Cutibacterium acnes colonization, excess sebum production, and inflammation). Classify severity: Mild (comedonal), Moderate (papulopustular), Severe (nodulocystic).",
+      "investigations": "Clinical diagnosis. Endocrine evaluation (Total testosterone, DHEAS, LH/FSH) if adult female with hirsutism or irregular menses (rule out PCOS).",
+      "management": "Mild: Topical Retinoid (Adapalene 0.1%) + Topical Benzoyl Peroxide (BPO 2.5-5%). Moderate: Topical Retinoid + BPO + Topical/Oral Antibiotic (Doxycycline 100 mg daily for max 8-12 weeks; always combine with BPO to prevent resistance). Severe nodulocystic / scarring: Oral Isotretinoin (0.5-1.0 mg/kg/day; strict teratogenicity / pregnancy prevention protocol).",
+      "references": [
+        "AAD Guidelines of Care for the Management of Acne Vulgaris",
+        "European Evidence-Based Guidelines for the Treatment of Acne"
+      ]
+    },
+    "staff_answer": "Verify patient does not squeeze pimples. Check pregnancy status before any oral retinoid prescription.",
+    "red_flags": [
+      "Severe nodulocystic acne with scarring (requires oral Isotretinoin)",
+      "Sudden explosive severe acne with joint pain and fever (Acne Fulminans)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "NEVER squeeze or pop pimples (causes permanent scarring)",
+      "NEVER take oral Isotretinoin during pregnancy (severe teratogenicity / birth defects)"
+    ],
+    "source": "American Academy of Dermatology (AAD) & European Dermatology Forum",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_fungal_ringworm_tinea_002",
+    "topic": "Skin, Eye, ENT & Dental: Fungal Skin Infections (Ringworm / Tinea / Daad)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "ringworm",
+      "tinea",
+      "daad",
+      "fungal skin infection",
+      "itchy circular rash",
+      "jock itch",
+      "athlete foot"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Ringworm (Tinea) is a fungal infection of the skin that forms red, circular, raised, ring-shaped patches with clear centers and scaly, itchy borders.",
+      "Common locations: Body (Tinea corporis), Groin (Tinea cruris / Jock itch), and Feet (Tinea pedis / Athlete's foot).",
+      "Apply a topical antifungal cream (such as Clotrimazole 1%, Terbinafine 1%, or Luliconazole 1%) twice daily, covering 2 cm beyond the border of the rash.",
+      "Continue applying the cream for at least 1 to 2 weeks AFTER the rash completely disappears to eradicate deep fungal spores.",
+      "Keep the skin completely clean and dry; wear loose, breathable cotton clothing and change innerwear twice daily in humid weather.",
+      "STRICT DANGER WARNING: NEVER apply steroid creams (like Betnovate, Panderm, Quadriderm, Dermovate) to a fungal rash; steroids temporarily reduce itching but supercharge the fungal growth, causing extensive, treatment-resistant infection."
+    ],
+    "doctor_answer": {
+      "assessment": "Dermatophytosis (Tinea Corporis / Cruris / Pedis, caused by Trichophyton, Microsporum, or Epidermophyton genera). Recognize Tinea Incognito (fungal infection masked and exacerbated by improper topical corticosteroid abuse).",
+      "investigations": "KOH direct microscopic mount of skin scrapings (demonstrating septate branching hyphae). Fungal culture if refractory.",
+      "management": "Localized: Topical allylamine (Terbinafine 1% cream BID for 2-3 weeks) or topical azole (Luliconazole 1% or Sertaconazole). Extensive / recalcitrant / steroid-modified: Oral Antifungal (Oral Terbinafine 250 mg daily for 2-4 weeks or Itraconazole 100-200 mg daily for 2-4 weeks; monitor LFTs). STRICTLY PROHIBIT topical corticosteroids.",
+      "references": [
+        "IADVL Guidelines for Management of Dermatophytosis in India",
+        "CDC Fungal Diseases: Ringworm Treatment"
+      ]
+    },
+    "staff_answer": "Ask explicitly if patient applied mixed steroid-antifungal-antibiotic creams (Panderm/Quadriderm). Prohibit steroids.",
+    "red_flags": [
+      "Extensive body involvement covering > 30% body surface area (Steroid-modified Tinea Incognito)",
+      "Secondary bacterial cellulitis from deep scratching"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "STRICTLY AVOID applying topical steroid creams (Betnovate, Panderm, Quadriderm) to fungal infections",
+      "Do NOT share towels, bedsheets, or soap with family members"
+    ],
+    "source": "Indian Association of Dermatologists, Venereologists and Leprologists (IADVL) & CDC",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_eczema_atopic_dermatitis_003",
+    "topic": "Skin, Eye, ENT & Dental: Eczema (Atopic Dermatitis) Care & Flare Control",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "eczema",
+      "atopic dermatitis",
+      "dry itchy skin patches",
+      "childhood eczema",
+      "khujli dry skin"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Eczema is a chronic inflammatory skin condition characterized by a damaged skin barrier leading to dry, intensely itchy, red, cracked patches (commonly in elbow and knee creases).",
+      "Moisturize, moisturize, moisturize: Apply a thick, fragrance-free emollient ointment or cream (petroleum jelly, ceramide cream) immediately within 3 minutes of stepping out of the shower while skin is still damp.",
+      "Take short baths (5 to 10 minutes) in lukewarm (never hot) water using mild, soap-free cleansers.",
+      "Wear smooth, 100% breathable cotton clothing; avoid scratchy wool, synthetic fabrics, and scented laundry detergents.",
+      "Keep fingernails trimmed short; scratching damages the skin barrier and introduces dangerous bacterial infections.",
+      "Consult a doctor during flare-ups for short courses of topical anti-inflammatory creams (mild corticosteroid or topical calcineurin inhibitor)."
+    ],
+    "doctor_answer": {
+      "assessment": "Atopic Dermatitis (chronic relapsing pruritic inflammatory dermatosis associated with epidermal barrier dysfunction [filaggrin gene mutations] and immune dysregulation).",
+      "investigations": "Clinical diagnosis (Hanifin and Rajka criteria). Skin swab culture only if secondary bacterial impetiginization.",
+      "management": "Stepped care: 1. Baseline: Liberal emollient therapy (>=250-500 g/week), avoidance of irritants. 2. Acute flares: Low-to-medium potency Topical Corticosteroids (Hydrocortisone 1% for face; Triamcinolone or Mometasone for body) applied BID for 5-14 days. 3. Maintenance: Proactive twice-weekly topical calcineurin inhibitor (Tacrolimus 0.03-0.1% ointment). Systemic biologics (Dupilumab) for severe refractory disease.",
+      "references": [
+        "AAD Guidelines of Care for the Management of Atopic Dermatitis",
+        "NICE Guideline CG57: Atopic eczema in under 12s"
+      ]
+    },
+    "staff_answer": "Examine distribution (flexural creases in children/adults, cheeks/extensors in infants). Reinforce liberal emollient application.",
+    "red_flags": [
+      "Rapid outbreak of painful, punched-out, umbilicated blisters with fever (Eczema Herpeticum - Medical Emergency requiring IV Acyclovir)",
+      "Honey-colored crusting indicating secondary Staphylococcal infection"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT take long, scalding hot baths (strips skin lipids and severely worsens itching)",
+      "Do NOT use fragranced soaps, bubble baths, or harsh perfumed detergents"
+    ],
+    "source": "American Academy of Dermatology (AAD) & NICE Guideline CG57",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_hives_acute_urticaria_004",
+    "topic": "Skin, Eye, ENT & Dental: Hives & Acute Urticaria (Allergic Wheals / Chhapaki)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "hives",
+      "urticaria",
+      "chhapaki",
+      "itchy welts",
+      "allergic rash bumps",
+      "acute hives"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Hives (Urticaria) are raised, red or pink, intensely itchy skin welts of varying shapes and sizes that appear suddenly and individual welts typically fade within 24 hours without leaving scars.",
+      "Common triggers: Viral infections (most common in children), food allergies, antibiotics or painkillers (NSAIDs), insect stings, or sudden temperature changes.",
+      "Take a modern, non-drowsy oral second-generation antihistamine (such as Cetirizine 10 mg, Fexofenadine 180 mg, or Bilastine 20 mg) for rapid relief of itching and wheals.",
+      "Apply soothing calamine lotion or cool damp cloths to relieve intense itching.",
+      "Take lukewarm baths; avoid hot water, tight belts, and strenuous exercise while hives are active.",
+      "EMERGENCY WARNING (ANAPHYLAXIS): Seek emergency care immediately if hives are accompanied by swelling of your lips, tongue, or eyelids, difficulty breathing, throat tightness, or dizziness."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Urticaria (< 6 weeks duration). Mast cell degranulation releasing histamine and inflammatory mediators. Must assess for systemic Anaphylaxis and Angioedema.",
+      "investigations": "Clinical diagnosis. Allergy testing not indicated for self-limiting acute episodes unless clear anaphylaxis trigger.",
+      "management": "First-line: Second-generation non-sedating H1-antihistamines (Cetirizine 10 mg, Fexofenadine 180 mg, Bilastine 20 mg daily; dose can be titrated up to 4-fold under physician supervision for stubborn wheals). Short-course oral Prednisolone (20-30 mg daily for 3-5 days) reserved only for severe acute angioedema. Discontinue suspect culprit medications.",
+      "references": [
+        "EAACI/GA²LEN/EuroGuiDerm/APAAACI Guideline for the Definition, Classification, Diagnosis, and Management of Urticaria",
+        "WAO Guidelines"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red if facial/lip swelling, throat tightness, or dyspnea (Anaphylaxis); Green if isolated hives. Check airway and vitals.",
+    "red_flags": [
+      "Swelling of lips, tongue, uvula, or difficulty swallowing (Angioedema)",
+      "Wheezing, stridor, or shortness of breath",
+      "Dizziness, fainting, or SBP < 90 mmHg (Anaphylactic Shock - STAT IM Epinephrine)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT take Ibuprofen, Aspirin, or NSAIDs during an urticaria outbreak (frequently worsens hives dramatically)",
+      "Do NOT scratch vigorously"
+    ],
+    "source": "EAACI/GA²LEN/WAO Urticaria Guidelines & World Allergy Organization",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_scabies_itch_burrows_005",
+    "topic": "Skin, Eye, ENT & Dental: Scabies Mite Infestation (Nocturnal Itching)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "scabies",
+      "scabies itch",
+      "burrows skin",
+      "night itching hands",
+      "permethrin scabies",
+      "itch between fingers"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Scabies is caused by microscopic mites (Sarcoptes scabiei) that burrow into the upper layer of the skin to live and lay eggs, triggering an intense allergic reaction.",
+      "Hallmark sign: Severe, unbearable itching that becomes DRAMATICALLY WORSE AT NIGHT in bed or after a hot bath.",
+      "Common locations: Tiny pimple-like bumps and thin wavy gray/red burrow lines between the fingers, wrists, armpits, waist, navel, and genital area.",
+      "TREATMENT PROCEDURE: Apply 5% Permethrin dermal cream over your entire body from the neck down to the tips of your toes, leaving it on for 8 to 14 hours (overnight) before washing off.",
+      "REPEAT APPLICATION: Apply the treatment again exactly 7 days later to eradicate any newly hatched mites.",
+      "ALL HOUSEHOLD CONTACTS MUST BE TREATED ON THE SAME NIGHT, even if they have zero itching, to prevent endless reinfection.",
+      "Wash all bedsheets, towels, and clothing in hot water (at least 50°C / 122°F) and dry on high heat."
+    ],
+    "doctor_answer": {
+      "assessment": "Scabies Infestation. Highly contagious ectoparasitosis. Differentiate classic scabies from Crusted (Norwegian) scabies in immunocompromised patients.",
+      "investigations": "Clinical diagnosis. Dermoscopy ('delta-wing' jet sign), skin scraping with mineral oil microscopy (identifies mites, eggs, scybala).",
+      "management": "First-line: Topical Permethrin 5% cream applied neck-to-toes for 8-14 hours, repeated on Day 8. Oral Ivermectin (200 mcg/kg single dose with food, repeated on Day 8-14) for institutional outbreaks or topical failures. Mandatory simultaneous treatment of all household contacts. Oral antihistamines and topical hydrocortisone for post-scabetic pruritus (persists 2-4 weeks after mite death).",
+      "references": [
+        "CDC Scabies Treatment Guidelines",
+        "IUSTI European Guideline for the Management of Scabies"
+      ]
+    },
+    "staff_answer": "Confirm that ALL household members are treated on the same night. Instruct hot water laundering of bedding.",
+    "red_flags": [
+      "Crusted (Norwegian) scabies: thick warty hyperkeratotic crusts containing millions of mites (highly infectious, requires oral Ivermectin + topical Permethrin)",
+      "Secondary bacterial cellulitis"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT treat only one family member while ignoring household contacts (causes immediate reinfection loop)",
+      "Do NOT assume ongoing itch in the first 2 weeks means treatment failed (post-scabetic itch takes weeks to settle)"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & International Alliance for the Control of Scabies",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_psoriasis_plaques_006",
+    "topic": "Skin, Eye, ENT & Dental: Psoriasis (Scaly Plaques & Flakes)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "psoriasis",
+      "silvery scales skin",
+      "scaly skin patches",
+      "psoriasis plaques",
+      "red scaly elbows knees"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Psoriasis is a chronic autoimmune condition that speeds up the lifecycle of skin cells, causing cells to build up rapidly on the surface into thick, silvery-scaled red plaques.",
+      "Common areas: Knees, elbows, scalp, lower back, and nails (nail pitting or discoloration).",
+      "Moisturize daily: Apply thick emollient ointments immediately after bathing to soften scales and soothe dryness.",
+      "Take short lukewarm baths with Epsom salts or oatmeal to gently loosen thick plaques; do NOT vigorously pick or scrape scales.",
+      "Sensible sunlight exposure (10-15 minutes of mild morning sun) can help slow skin cell proliferation.",
+      "Consult a dermatologist for specialized treatments: prescription Vitamin D analogues (Calcipotriol), topical corticosteroids, targeted phototherapy (narrowband UVB), or modern biologic therapies."
+    ],
+    "doctor_answer": {
+      "assessment": "Plaque Psoriasis (Psoriasis Vulgaris, T-cell mediated autoimmune dermatosis). Screen for Psoriatic Arthritis (PsA: DIP joint involvement, dactylitis 'sausage digit', enthesitis) and metabolic syndrome.",
+      "investigations": "Psoriasis Area and Severity Index (PASI score). Screen for PsA using PEST questionnaire. Baseline LFT, lipid profile, fasting glucose, hepatitis/TB screen prior to systemic agents.",
+      "management": "Mild (<3-5% BSA): Topical Corticosteroid + Topical Vitamin D3 analogue (Calcipotriol/Betamethasone combination ointment). Moderate-to-Severe (>10% BSA or refractory): Narrowband UVB Phototherapy, Systemic non-biologics (Methotrexate 10-25 mg ONCE WEEKLY, Apremilast), or Biologic therapy (anti-TNF, anti-IL-17, anti-IL-23).",
+      "references": [
+        "AAD-NPF Guidelines of Care for the Management and Treatment of Psoriasis",
+        "NICE Guideline CG153: Psoriasis: assessment and management"
+      ]
+    },
+    "staff_answer": "Inspect joints and nails (pitting, onycholysis). Screen for joint pain and dactylitis.",
+    "red_flags": [
+      "Joint pain, morning stiffness, or swollen 'sausage' fingers/toes (Psoriatic Arthritis - requires urgent systemic therapy to prevent joint destruction)",
+      "Sudden generalized redness and skin shedding over >90% body (Erythrodermic Psoriasis - Medical Emergency)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT aggressively pick, peel, or scratch scales (triggers the Koebner phenomenon, where injury creates new plaques)",
+      "Do NOT stop systemic psoriasis medications abruptly"
+    ],
+    "source": "American Academy of Dermatology (AAD) & National Psoriasis Foundation (NPF)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_dandruff_seborrheic_dermatitis_007",
+    "topic": "Skin, Eye, ENT & Dental: Dandruff & Seborrheic Dermatitis (Scalp Flakes)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "dandruff",
+      "seborrheic dermatitis",
+      "scalp flakes",
+      "itchy scalp",
+      "rusi",
+      "cradle cap baby"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Dandruff is a mild form of seborrheic dermatitis driven by sensitivity to a naturally occurring harmless scalp yeast called Malassezia.",
+      "Key signs: Itchy scalp, white or yellowish greasy flakes in your hair and on your shoulders, and redness along the hairline, eyebrows, sides of the nose, and ears.",
+      "In infants: Known as 'Cradle Cap' (thick, yellowish, greasy crusts on the baby's scalp), which is harmless and usually resolves on its own.",
+      "Effective treatment for adults: Use an anti-dandruff shampoo containing Ketoconazole 2%, Zinc Pyrithione, Selenium Sulfide, or Salicylic Acid 2 to 3 times a week.",
+      "CRUCIAL SHAMPOO TECHNIQUE: Lather the shampoo into your scalp and LEAVE IT ON FOR 5 FULL MINUTES before rinsing out, allowing the active antifungal medicine time to work.",
+      "Avoid applying heavy hair oils (mustard oil, heavy coconut oil); excess oil feeds the Malassezia yeast and worsens inflammation."
+    ],
+    "doctor_answer": {
+      "assessment": "Seborrheic Dermatitis (inflammatory dermatosis involving sebum-rich areas, driven by Malassezia yeast colonization and altered sebum lipid profile). Differentiate from scalp psoriasis (thick silvery micaceous scales).",
+      "investigations": "Clinical diagnosis. Rule out underlying HIV or Parkinson's disease if acute, severe, or generalized recalcitrant seborrheic dermatitis.",
+      "management": "Adult scalp: Ketoconazole 2% shampoo or Ciclopirox 1% shampoo twice weekly (leave on scalp for 5 minutes). Mild topical corticosteroid lotion or topical calcineurin inhibitor for facial/ear involvement. Infant cradle cap: Softening with mineral oil/coconut oil followed by gentle soft-brush combing and gentle baby shampoo.",
+      "references": [
+        "AAD Guidelines on Seborrheic Dermatitis",
+        "British Association of Dermatologists Guidelines"
+      ]
+    },
+    "staff_answer": "Instruct patient on leaving antifungal shampoo on scalp for full 5 minutes before rinsing.",
+    "red_flags": [
+      "Severe refractory seborrheic dermatitis in young adult (consider HIV testing)",
+      "Secondary bacterial infection with impetigo crusts"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT apply heavy cooking or hair oils to active seborrheic dermatitis (feeds the yeast)",
+      "Do NOT wash shampoo off instantly (requires 5-minute contact time)"
+    ],
+    "source": "American Academy of Dermatology (AAD) & British Association of Dermatologists",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_warts_molluscum_viral_008",
+    "topic": "Skin, Eye, ENT & Dental: Warts (Verrucae) & Molluscum Contagiosum",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "warts",
+      "verruca",
+      "massa",
+      "skin warts",
+      "plantar warts",
+      "molluscum contagiosum",
+      "water warts"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Common warts are benign skin growths caused by Human Papillomavirus (HPV) infection of the outer skin layer, commonly appearing on fingers, hands, and feet (plantar warts).",
+      "Molluscum Contagiosum is another common viral skin infection (frequent in children) causing small, firm, dome-shaped, pearly bumps with a tiny dimple in the center.",
+      "Both are spread through direct skin-to-skin contact, sharing towels, or walking barefoot around damp swimming pool decks.",
+      "Home treatment for warts: Over-the-counter Salicylic acid liquid or wart pads: soak wart in warm water for 5 minutes, gently file dead skin with an emery board, apply medicine strictly to the wart, and cover with tape.",
+      "Never scratch, pick, or bite warts; scratching spreads the virus to surrounding skin.",
+      "Consult a dermatologist for stubborn warts: treatments include cryotherapy (freezing with liquid nitrogen), chemical peeling, or laser removal."
+    ],
+    "doctor_answer": {
+      "assessment": "Verruca Vulgaris / Plantar Warts (HPV types 1, 2, 4, 27, 57) and Molluscum Contagiosum (Poxvirus). Benign epidermal proliferations with high rates of eventual spontaneous immune clearance.",
+      "investigations": "Clinical examination (dermoscopy of verruca shows pinpoint thrombosed black capillaries).",
+      "management": "Warts: Topical Salicylic Acid (17-40% with occlusion) or Cryotherapy (liquid nitrogen Q2-3W). Plantar warts: pairing followed by cryotherapy. Molluscum: Watchful waiting (typically clears spontaneously in 6-18 months), topical cantharidin, or gentle curettage.",
+      "references": [
+        "British Association of Dermatologists Guidelines for the Management of Cutaneous Warts",
+        "CDC Molluscum Contagiosum Guidance"
+      ]
+    },
+    "staff_answer": "Verify diagnosis. Confirm patient does not pick at lesions.",
+    "red_flags": [
+      "Genital warts (Condyloma acuminata - requires evaluation for sexually transmitted HPV)",
+      "Rapidly proliferating extensive warts in immunocompromised patients"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT cut or slice warts off at home with razors or nail clippers (causes severe infection and scarring)",
+      "Do NOT share personal towels or pumice stones"
+    ],
+    "source": "British Association of Dermatologists & Centers for Disease Control and Prevention",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_acute_red_eye_conjunctivitis_009",
+    "topic": "Skin, Eye, ENT & Dental: Red Eye: Viral vs Bacterial vs Allergic Conjunctivitis",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "red eye",
+      "pink eye",
+      "conjunctivitis",
+      "aankh lal",
+      "eye discharge",
+      "sticky eye morning",
+      "allergic eye"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Red eye is most commonly caused by conjunctivitis (inflammation of the clear membrane covering the white of your eye).",
+      "DIFFERENTIATING TYPES OF CONJUNCTIVITIS:",
+      "  - Viral ('Pink Eye'): Watery discharge, gritty feeling, starts in one eye and spreads to the other within 24 to 48 hours; highly contagious; resolves on its own in 1 to 2 weeks.",
+      "  - Bacterial: Thick, yellow or green pus-like discharge that glues your eyelids shut in the morning; requires antibiotic eye drops.",
+      "  - Allergic: Intense bilateral itching, watery eyes, and puffy swollen lids, often accompanied by sneezing and runny nose.",
+      "Clean discharge gently with clean cotton pads soaked in cooled boiled water, wiping from the inner corner outwards.",
+      "Do NOT wear contact lenses or eye makeup until the red eye has completely resolved.",
+      "DANGER SIGNS: If you have severe deep eye pain, sensitivity to light, or decreased vision, see an eye specialist immediately."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Conjunctivitis. Differentiate Viral vs Bacterial vs Allergic vs sight-threatening conditions (Keratitis, Acute Anterior Uveitis, Acute Angle-Closure Glaucoma).",
+      "investigations": "Visual acuity testing (Snellen), slit-lamp biomicroscopy, fluorescein staining to rule out corneal abrasions/herpetic dendritic ulcers.",
+      "management": "Viral: Supportive (cold compresses, preservative-free artificial tears). Bacterial: Topical antibiotic drops (Moxifloxacin 0.5% or Tobramycin 0.3% QID for 5-7 days). Allergic: Topical Olopatadine 0.1% BID or Ketotifen drops.",
+      "references": [
+        "AAO Preferred Practice Pattern: Conjunctivitis",
+        "RCOphth Clinical Guidelines on Management of Acute Red Eye"
+      ]
+    },
+    "staff_answer": "Check visual acuity and pupil reactivity. Ask if patient wears contact lenses (high risk for Pseudomonas keratitis).",
+    "red_flags": [
+      "Severe deep eye pain or intense sensitivity to light (Photophobia)",
+      "Noticeable reduction in vision or cloudy cornea",
+      "Contact lens wearer with red eye and white corneal spot (Corneal Ulcer Emergency)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "NEVER use steroid eye drops without an eye doctor's explicit examination (can cause corneal perforation or blindness if viral)",
+      "Do NOT share towels or eye drops"
+    ],
+    "source": "American Academy of Ophthalmology (AAO) & Royal College of Ophthalmologists",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_dry_eyes_digital_strain_010",
+    "topic": "Skin, Eye, ENT & Dental: Dry Eye Disease & Digital Eye Strain (Computer Vision Syndrome)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "dry eyes",
+      "digital eye strain",
+      "computer vision syndrome",
+      "eye strain screens",
+      "burning eyes computer",
+      "artificial tears"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Staring at smartphone, laptop, or TV screens reduces your natural blinking rate by over 60%, causing the protective tear film on your eyes to evaporate rapidly.",
+      "Symptoms: Gritty sensation (feeling like sand in the eyes), burning, redness, eye fatigue, and paradoxical watery tearing (reflex tears triggered by dry spots).",
+      "THE 20-20-20 RULE: Every 20 minutes of screen time, look at an object at least 20 feet away for at least 20 seconds to relax your eye focusing muscles.",
+      "Blink consciously: Make a deliberate effort to perform full, complete blinks while reading or working on screens.",
+      "Use preservative-free lubricating artificial tear drops 3 to 4 times a day to replenish moisture.",
+      "Screen setup: Position your monitor about arm's length away, with the top of the screen slightly below eye level so you look slightly downward (which exposes less eye surface to air)."
+    ],
+    "doctor_answer": {
+      "assessment": "Dry Eye Disease (DED: Evaporative [Meibomian Gland Dysfunction] vs Aqueous Deficient) and Digital Eye Strain.",
+      "investigations": "Tear Break-Up Time (TBUT < 10s abnormal), Schirmer's test, ocular surface fluorescein staining, Meibography.",
+      "management": "Environmental and behavioral modification (20-20-20 rule, conscious blinking, humidification). Preservative-free artificial tears (Carboxymethylcellulose 0.5% or Sodium Hyaluronate 0.1-0.18%). Warm compresses and eyelid hygiene for Meibomian Gland Dysfunction. Topical Cyclosporine 0.05% or Lifitegrast for chronic inflammatory DED.",
+      "references": [
+        "TFOS DEWS II (Tear Film & Ocular Surface Society Dry Eye Workshop II) Report",
+        "AAO Preferred Practice Pattern: Dry Eye Syndrome"
+      ]
+    },
+    "staff_answer": "Review daily screen hours and contact lens use. Demonstrate warm compress and lid massage technique.",
+    "red_flags": [
+      "Severe persistent eye pain or foreign body sensation that does not improve with lubricating drops",
+      "Corneal abrasions or vision loss"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT use 'redness-reliever' eye drops (like naphazoline/decongestant drops) daily (causes severe rebound red eye)",
+      "Do NOT direct air conditioning fans or blowers straight at your face"
+    ],
+    "source": "TFOS DEWS II Global Consensus & American Academy of Ophthalmology",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_stye_chalazion_eyelid_011",
+    "topic": "Skin, Eye, ENT & Dental: Stye (Hordeolum) vs Chalazion (Eyelid Lumps)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "stye",
+      "chalazion",
+      "eyelid bump",
+      "pimple on eyelid",
+      "bilni",
+      "swollen eyelid lump"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "A Stye (Hordeolum) is an acute, painful, red bacterial infection of an eyelash oil gland at the eyelid edge, looking like a tender red pimple.",
+      "A Chalazion is a painless, firm, non-infected lump deeper inside the eyelid caused by a blocked meibomian oil gland.",
+      "THE BEST TREATMENT: Warm compresses applied 3 to 4 times daily for 10 to 15 minutes each time. Soak a clean washcloth in warm water and place it gently over the closed eyelid.",
+      "The moist heat melts hardened oils inside the blocked gland, allowing it to drain and heal naturally.",
+      "NEVER POP OR SQUEEZE an eyelid bump; the eyelid tissues are delicate and popping can spread severe bacterial infection into the eye socket.",
+      "Do not wear eye makeup or contact lenses until the stye has completely drained and healed.",
+      "Consult an ophthalmologist if the bump does not shrink after 2 weeks, or if swelling spreads to the entire eyelid."
+    ],
+    "doctor_answer": {
+      "assessment": "Hordeolum (acute focal infection, internal [Meibomian] or external [Zeis/Moll], most commonly Staphylococcus aureus) vs Chalazion (chronic sterile lipogranulomatous inflammatory lesion of Meibomian gland).",
+      "investigations": "Clinical slit-lamp examination. Evert eyelid to inspect tarsal conjunctiva.",
+      "management": "Frequent warm moist compresses (10-15 min TID-QID) + gentle eyelid margin hygiene. Topical antibiotic ointment (Erythromycin or Bacitracin) for external hordeolum. Persistent chalazion (>4-6 weeks): Incision and curettage under local anesthesia or intralesional triamcinolone injection.",
+      "references": [
+        "AAO Preferred Practice Pattern: Blepharitis and Hordeolum",
+        "RCOphth Clinical Guidelines on Chalazion Management"
+      ]
+    },
+    "staff_answer": "Examine eyelid margin. Verify redness is localized to the lid and not spreading to the periorbital tissue.",
+    "red_flags": [
+      "Swelling, redness, and heat spreading to the entire cheek or eyebrow with fever (Periorbital / Orbital Cellulitis - STAT Emergency)",
+      "Proptosis (eyeball protruding forward) or painful eye movement"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "NEVER squeeze, prick, or pop a stye with a pin (can cause orbital cellulitis or cavernous sinus thrombosis)",
+      "Do NOT apply warm compresses that are scalding hot"
+    ],
+    "source": "American Academy of Ophthalmology (AAO) & Royal College of Ophthalmologists",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_glaucoma_warning_signs_012",
+    "topic": "Skin, Eye, ENT & Dental: Glaucoma Warning Signs & Vision Preservation",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "glaucoma",
+      "kala motia",
+      "eye pressure",
+      "intraocular pressure",
+      "loss of side vision",
+      "glaucoma test"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Glaucoma ('Kala Motia') is a group of eye diseases that damage the optic nerve, typically associated with elevated pressure inside the eye (Intraocular Pressure).",
+      "THE SILENT THIEF OF SIGHT: Open-Angle Glaucoma (the most common type) has ZERO pain and ZERO warning symptoms in early stages; it slowly steals peripheral (side) vision so gradually that patients do not notice until permanent tunnel vision occurs.",
+      "Vision lost to glaucoma can NEVER be recovered; however, early treatment with daily pressure-lowering eye drops completely halts further damage.",
+      "ACUTE ANGLE-CLOSURE GLAUCOMA (SIGHT-THREATENING EMERGENCY):",
+      "  - Sudden, severe, excruciating eye pain and headache.",
+      "  - Rainbow-colored halos around bright lights.",
+      "  - Severe nausea and vomiting.",
+      "  - Red eye with a cloudy or steamy cornea and fixed, enlarged pupil.",
+      "If you experience sudden severe eye pain with halos, go to an eye hospital emergency department IMMEDIATELY.",
+      "Everyone aged 40 and older, and anyone with a family history of glaucoma, should have their eye pressure tested annually."
+    ],
+    "doctor_answer": {
+      "assessment": "Glaucoma: Primary Open-Angle Glaucoma (POAG: chronic progressive optic neuropathy with cupping and visual field loss) vs Primary Angle-Closure Glaucoma (PACG: acute or chronic appositional/synechial closure of anterior chamber angle).",
+      "investigations": "Goldmann Applanation Tonometry (IOP > 21 mmHg is elevated), Gonioscopy (angle assessment), Automated Visual Field perimetry (Humphrey visual fields: arcuate scotomas), Optical Coherence Tomography (OCT of retinal nerve fiber layer / RNFL).",
+      "management": "POAG: First-line Topical Prostaglandin Analogues (Latanoprost, Bimatoprost once daily bedtime). Second-line: Beta-blockers (Timolol 0.5%), Alpha-2 agonists, or Carbonic anhydrase inhibitors. Selective Laser Trabeculoplasty (SLT). Acute Angle-Closure Emergency: STAT medical pressure reduction (IV Mannitol, oral Acetazolamide 500 mg, topical Timolol, Pilocarpine 2%) followed by definitive bilateral Laser Peripheral Iridotomy (LPI).",
+      "references": [
+        "AAO Preferred Practice Pattern: Primary Open-Angle Glaucoma",
+        "EGS (European Glaucoma Society) Terminology and Guidelines for Glaucoma"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red for acute painful red eye with nausea and halos. Measure intraocular pressure immediately.",
+    "red_flags": [
+      "Acute severe eye pain with blurred vision, halos around lights, and nausea/vomiting (Acute Angle-Closure Glaucoma - STAT Emergency)",
+      "Sudden painless loss of vision in one eye"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT skip daily prescribed glaucoma eye drops (IOP spikes silently when doses are missed)",
+      "Do NOT take over-the-counter anticholinergic or cold medications if diagnosed with narrow angles"
+    ],
+    "source": "American Academy of Ophthalmology (AAO) & European Glaucoma Society (EGS)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_acute_sinusitis_facial_pain_013",
+    "topic": "Skin, Eye, ENT & Dental: Sinusitis & Facial Pressure (Sinus Infection)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "sinusitis",
+      "sinus pain",
+      "facial pressure forehead",
+      "sinus headache",
+      "blocked nose headache",
+      "sinus infection"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Sinusitis is inflammation of the air cavities inside your skull around your nose, forehead, and cheeks, most commonly following a viral cold.",
+      "Key signs: Facial pain, aching pressure behind the eyes, forehead, or cheekbones that worsens when bending forward, nasal congestion, and thick yellow or green nasal mucus.",
+      "Over 90% of acute sinus infections are VIRAL and resolve on their own within 7 to 10 days WITHOUT antibiotics.",
+      "Effective home relief:",
+      "  - Inhale steam from a bowl of hot water or take a warm steamy shower for 10 minutes 2 to 3 times a day.",
+      "  - Flush your sinuses with a saline nasal spray or sinus rinse bottle (use sterile/distilled water).",
+      "  - Place a warm washcloth across your cheeks and forehead to ease pressure.",
+      "  - Take Paracetamol or Ibuprofen for facial pain.",
+      "Consult a doctor if symptoms last more than 10 days without improvement, or if fever spikes after initially improving ('double sickening')."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Rhinosinusitis (ARS: symptoms < 4 weeks). Differentiate Acute Viral Rhinosinusitis (AVRS) from Acute Bacterial Rhinosinusitis (ABRS: criteria = symptoms >= 10 days without improvement, severe onset [temp >=39°C + purulent rhinorrhea >=3-4 consecutive days], or 'double sickening' worsening).",
+      "investigations": "Clinical diagnosis. Routine sinus CT is NOT recommended for uncomplicated ARS. CT Paranasal Sinuses indicated if orbital/intracranial complications or recurrent refractory disease.",
+      "management": "Symptomatic therapy for viral ARS: Saline nasal irrigation, Intranasal Corticosteroids (Mometasone / Fluticasone spray 2 sprays per nostril BID), analgesia. First-line for confirmed ABRS: Oral Amoxicillin-Clavulanate 875/125 mg BID for 5-7 days. Alternative in penicillin allergy: Doxycycline 100 mg BID.",
+      "references": [
+        "IDSA Clinical Practice Guideline for Acute Bacterial Rhinosinusitis in Children and Adults",
+        "AAO-HNS Clinical Practice Guideline: Adult Sinusitis"
+      ]
+    },
+    "staff_answer": "Check for orbital swelling, diplopia, or meningismus. Assess duration (>=10 days for bacterial suspicion).",
+    "red_flags": [
+      "Swelling, redness, or pain around one eye socket (Periorbital / Orbital Cellulitis complication)",
+      "Severe unrelenting forehead headache with high fever and neck stiffness (Intracranial abscess / Meningitis)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT use OTC nasal decongestant sprays (like Otrivin/Xylometazoline) for more than 3 to 5 days (causes severe rebound congestion)",
+      "Do NOT demand antibiotics for early sinus colds (<10 days)"
+    ],
+    "source": "Infectious Diseases Society of America (IDSA) & AAO-HNS Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_earwax_impaction_cleaning_014",
+    "topic": "Skin, Eye, ENT & Dental: Earwax Impaction & Safe Ear Cleaning",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "earwax",
+      "blocked ear wax",
+      "kaan me mail",
+      "earwax removal",
+      "ear drops wax",
+      "cerumen impaction"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Earwax (cerumen) is natural and healthy: it traps dirt, lubricates the ear canal, and contains enzymes that fight bacterial and fungal infections.",
+      "Your ears are naturally self-cleaning: chewing and jaw movements continuously migrate old earwax outwards to the ear opening where it flakes off.",
+      "Impaction occurs when wax builds up and blocks the canal, causing muffled hearing, fullness, ringing (tinnitus), or mild ear discomfort.",
+      "SAFE HOME SOFTENING: Instill 2 to 3 drops of plain mineral oil, baby oil, or earwax drops (such as carbamide peroxide or sodium bicarbonate drops) twice daily for 3 to 5 days to soften the wax so it drains naturally.",
+      "STRICT GOLDEN RULE: NEVER insert cotton swabs (Q-tips), safety pins, matchsticks, or car keys into your ear canal; swabs act like a piston that pushes wax deeper, packing it against your delicate eardrum and risking eardrum puncture.",
+      "If hearing remains blocked, visit an ENT clinic for painless ear syringing or micro-suction removal under direct vision."
+    ],
+    "doctor_answer": {
+      "assessment": "Cerumen Impaction (accumulation of cerumen causing symptoms [hearing loss, otalgia, tinnitus, fullness] or preventing necessary clinical examination).",
+      "investigations": "Otoscopic examination (identifies dark yellow, brown, or black cerumen completely occluding external auditory canal).",
+      "management": "Options: 1. Cerumenolytic drops (Carbamide peroxide 6.5%, mineral oil, sodium bicarbonate 5% drops for 3-5 days). 2. Irrigation with body-temperature water (must confirm tympanic membrane is intact without perforation). 3. Manual removal / Micro-suction under direct microscopic or otoscopic visualization by trained clinician.",
+      "references": [
+        "AAO-HNS Clinical Practice Guideline: Cerumen Impaction (Update)",
+        "NICE Clinical Knowledge Summaries: Earwax"
+      ]
+    },
+    "staff_answer": "Examine canal with otoscope. Verify water temperature is strictly body temperature (37°C) before irrigation (cold/hot water triggers violent caloric vertigo).",
+    "red_flags": [
+      "Sudden sharp excruciating pain with hearing loss and bleeding while inserting a swab (Traumatic Tympanic Membrane Perforation)",
+      "Severe pain and foul drainage in an elderly diabetic patient (Malignant Otitis Externa)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "NEVER insert cotton buds, keys, or foreign objects into your ear canal",
+      "Do NOT use 'Ear Candling' (completely ineffective and causes severe ear burns and canal obstruction)"
+    ],
+    "source": "American Academy of Otolaryngology-Head and Neck Surgery (AAO-HNS)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_gingivitis_gum_bleeding_015",
+    "topic": "Skin, Eye, ENT & Dental: Gingivitis & Bleeding Gums (Gum Health Basics)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "bleeding gums",
+      "gingivitis",
+      "gums bleeding brushing",
+      "pyria",
+      "gum disease",
+      "mukh se badbu",
+      "periodontitis"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Gingivitis is the early, reversible stage of gum disease caused by dental plaque (a sticky film of bacteria) accumulating along the gumline.",
+      "Key signs: Gums that bleed easily when you brush or floss, red swollen tender gums, and persistent bad breath (halitosis).",
+      "If neglected, gingivitis advances to Periodontitis: the gum tissue pulls away from the teeth, bone support dissolves, and teeth become loose and fall out.",
+      "Daily oral hygiene essentials:",
+      "  - Brush your teeth thoroughly twice a day for a full 2 minutes using a soft-bristled toothbrush and fluoride toothpaste.",
+      "  - Floss between your teeth once a day to clean food and plaque from tight spaces your toothbrush bristles cannot reach.",
+      "  - Rinse with a warm salt water rinse or antiseptic mouthwash.",
+      "Do NOT stop brushing or flossing because your gums bleed; gentle, thorough cleaning removes the bacterial plaque that causes the bleeding in the first place.",
+      "Visit a dentist every 6 months for professional scaling and cleaning to remove hardened tartar (calculus)."
+    ],
+    "doctor_answer": {
+      "assessment": "Gingivitis (plaque-induced gingival inflammation without loss of attachment) vs Periodontitis (irreversible destruction of periodontal ligament and alveolar bone). Screen for systemic associations (diabetes mellitus, pregnancy, smoking, leukemia).",
+      "investigations": "Periodontal probing depth measurements (probing depths > 3 mm indicate periodontal pocketing). Full mouth dental radiographs (OPG / periapical).",
+      "management": "Professional dental scaling and root planing (deep cleaning). Oral hygiene instruction: Bass brushing technique, daily interdental flossing. Chlorhexidine gluconate 0.12% mouthwash short-term (max 2 weeks to prevent tooth staining). Treat systemic comorbidities (glycemic control in diabetics).",
+      "references": [
+        "AAP / EFP World Workshop on the Classification of Periodontal and Peri-Implant Diseases",
+        "ADA Guidelines on Periodontal Disease"
+      ]
+    },
+    "staff_answer": "Inquire about brushing frequency, flossing, and history of diabetes or blood thinners.",
+    "red_flags": [
+      "Rapid spontaneous gum bleeding accompanied by easy skin bruising, extreme fatigue, and fever (screen for Acute Leukemia)",
+      "Teeth becoming visibly loose and shifting position"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT stop brushing because your gums bleed (cleaning clears the bacterial cause of bleeding)",
+      "Do NOT use stiff hard-bristled toothbrushes (damages enamel and recedes gums)"
+    ],
+    "source": "American Dental Association (ADA) & European Federation of Periodontology",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_dental_abscess_emergency_016",
+    "topic": "Skin, Eye, ENT & Dental: Dental Abscess & Severe Tooth Infection",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "tooth abscess",
+      "dental infection",
+      "pus in tooth",
+      "severe toothache swelling",
+      "daant me peeb",
+      "face swollen tooth"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "A dental abscess is a localized collection of pus caused by a severe bacterial infection that spreads from an untreated dental cavity into the root of the tooth or surrounding jawbone.",
+      "Key signs: Severe, continuous, throbbing tooth pain that radiates to your jaw, ear, or neck, extreme sensitivity to hot and cold, swelling in your cheek or jaw, and a foul taste in your mouth if the abscess ruptures.",
+      "First aid while waiting for dental care:",
+      "  - Take Ibuprofen (400 mg with food) or Paracetamol for pain and inflammation.",
+      "  - Rinse gently with warm salt water (1/2 teaspoon salt in a glass of warm water) 3 to 4 times a day.",
+      "  - Hold an ice pack wrapped in a cloth against the outside of your cheek for 15 minutes.",
+      "URGENT DENTAL ATTENTION IS MANDATORY: An abscess will NEVER heal on its own; a dentist must drain the infection and perform root canal treatment or extract the tooth.",
+      "AIRWAY EMERGENCY WARNING: If swelling spreads down into your neck, under your tongue, or makes it difficult to swallow or breathe, go to a hospital emergency room IMMEDIATELY (concern for Ludwig's Angina)."
+    ],
+    "doctor_answer": {
+      "assessment": "Periapical Abscess vs Periodontal Abscess. High risk of fascial space infection (Ludwig's Angina / Submandibular space cellulitis) and cavernous sinus thrombosis.",
+      "investigations": "Dental periapical radiograph, panoramic OPG. Check for trismus (inability to open mouth) and floor-of-mouth elevation.",
+      "management": "Urgent dental referral for drainage: incision and drainage or pulpectomy/root canal therapy. Analgesia: NSAIDs + Paracetamol. Systemic antibiotics indicated if systemic signs (fever, lymphadenopathy, cellulitis): Amoxicillin-Clavulanate 625 mg TID or Clindamycin 300 mg QID for 5-7 days.",
+      "references": [
+        "ADA Clinical Practice Guideline on Antibiotic Use for Odontogenic Infections",
+        "NICE Clinical Knowledge Summaries: Dental Abscess"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red if facial/neck swelling with difficulty swallowing or breathing. Check for floor-of-mouth elevation and trismus.",
+    "red_flags": [
+      "Swelling spreading into the neck or floor of the mouth, causing difficulty swallowing or breathing (Ludwig's Angina - Critical Airway Emergency)",
+      "Inability to open mouth wider than 1 finger (Severe Trismus)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "NEVER place an Aspirin tablet directly against your gum or tooth (causes severe chemical burn and tissue necrosis)",
+      "Do NOT delay dental treatment hoping antibiotics alone will cure an abscess"
+    ],
+    "source": "American Dental Association (ADA) & American Association of Endodontists",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_mouth_ulcers_canker_sores_017",
+    "topic": "Skin, Eye, ENT & Dental: Mouth Ulcers & Canker Sores (Aphthous Stomatitis)",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "mouth ulcer",
+      "canker sore",
+      "chhale",
+      "muh me chhale",
+      "aphthous ulcer",
+      "painful mouth sore"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Canker sores (Aphthous ulcers) are small, painful, shallow oval ulcers with a white or yellowish center and a bright red border appearing inside the cheeks, lips, gums, or under the tongue.",
+      "They are NOT contagious and are NOT caused by cold sores (herpes virus).",
+      "Common triggers: Accidental cheek biting, sharp food scratches, stress, lack of sleep, Vitamin B12 / iron deficiency, or food sensitivities (acidic fruits, spicy chili).",
+      "Soothing relief:",
+      "  - Rinse with warm salt water (1/2 teaspoon salt in 1 cup warm water) 3 times daily.",
+      "  - Apply an over-the-counter soothing oral gel containing Choline Salicylate, Benzocaine, or protective hyaluronic acid over the ulcer before meals.",
+      "  - Avoid spicy, salty, citrus, and rough crunchy foods that cause sharp burning pain.",
+      "Most canker sores heal completely on their own within 7 to 10 days.",
+      "RED FLAG: ANY mouth ulcer that lasts longer than 3 WEEKS without healing MUST be examined by a dentist or ENT specialist to rule out oral cancer."
+    ],
+    "doctor_answer": {
+      "assessment": "Recurrent Aphthous Stomatitis (RAS: Minor <10 mm, Major >10 mm, Herpetiform). Differentiate from Oral Squamous Cell Carcinoma (OSCC), Behcet's disease, Crohn's disease, and Celiac disease.",
+      "investigations": "Clinical diagnosis. Laboratory workup for recurrent ulcers: CBC, Serum Ferritin, Vitamin B12, Folate, anti-tTG IgA. Incisional biopsy mandatory for any non-healing indurated ulcer persisting > 3 weeks.",
+      "management": "Topical analgesia/anesthetic gels (Benzocaine/Lidocaine gel). Topical anti-inflammatory: Triamcinolone acetonide 0.1% dental paste applied QID after meals. Antimicrobial mouth rinse (Chlorhexidine 0.2%). Supplement nutritional deficiencies.",
+      "references": [
+        "AAO-HNS Clinical Guidelines on Aphthous Ulcers",
+        "British Dental Association Clinical Reference"
+      ]
+    },
+    "staff_answer": "Inquire about ulcer duration. Inspect ulcer base (firm induration requires biopsy). Screen for tobacco/areca nut use.",
+    "red_flags": [
+      "Mouth ulcer persisting for longer than 3 WEEKS without healing (Mandatory Oral Biopsy to rule out Oral Cancer)",
+      "Ulcer accompanied by hard, enlarged, non-tender neck lymph nodes",
+      "Multiple deep painful ulcers accompanied by genital ulcers and eye inflammation (Behcet's Disease)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT ignore a painless or painful mouth ulcer that lasts longer than 3 weeks",
+      "Do NOT use tobacco, gutkha, paan, or supari (primary causes of oral pre-cancer and cancer)"
+    ],
+    "source": "American Academy of Oral Medicine & British Dental Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_nosebleeds_epistaxis_first_aid_018",
+    "topic": "Skin, Eye, ENT & Dental: Nosebleeds First Aid & Epistaxis Management",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "nosebleed",
+      "bleeding nose",
+      "nakseer",
+      "epistaxis",
+      "nose blood first aid",
+      "how to stop nosebleed"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "CORRECT FIRST AID TO STOP A NOSEBLEED:",
+      "1. Sit upright and LEAN SLIGHTLY FORWARD. (Do NOT tilt your head backwards; tilting backwards causes blood to drain down into your throat and stomach, triggering vomiting and choking).",
+      "2. PINCH THE SOFT LOWER PART OF YOUR NOSE (just below the bony bridge) firmly using your thumb and index finger.",
+      "3. Hold continuous, uninterrupted pressure for AT LEAST 10 TO 15 FULL MINUTES while breathing calmly through your mouth.",
+      "4. Apply an ice pack or cold damp cloth across the bridge of your nose and forehead to constrict blood vessels.",
+      "5. After 15 minutes, gently release pressure. Do NOT blow your nose, pick inside, or bend over for several hours to keep the blood clot intact.",
+      "SEEK EMERGENCY CARE IF: Bleeding does not stop after 20 minutes of firm direct pressure, bleeding is heavy and flowing down the back of your throat, or if the nosebleed started after a severe head blow."
+    ],
+    "doctor_answer": {
+      "assessment": "Epistaxis: Anterior (Kiesselbach's / Little's plexus on anterior septum ~90%) vs Posterior (Sphenopalatine artery ~10%, common in elderly/hypertensive, high airway compromise risk).",
+      "investigations": "Check vital signs (blood pressure), CBC, PT/INR, aPTT if on anticoagulants or frequent recurrent bleeds.",
+      "management": "Firm continuous compression of anterior nasal cartilages for 15 minutes with forward lean. Topical vasoconstrictor (Oxymetazoline or Phenylephrine spray). Chemical cautery with Silver Nitrate (75%) if discrete bleeding vessel visualized on anterior septum. Anterior nasal packing (Rapid Rhino or Merocel) if compression fails. Posterior packing / balloon catheter and hospital admission for posterior bleeds.",
+      "references": [
+        "AAO-HNS Clinical Practice Guideline: Nosebleed (Epistaxis)",
+        "NICE Clinical Knowledge Summaries: Epistaxis"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow/Red based on blood loss and hemodynamic stability. Check BP immediately. Ensure patient leans FORWARD.",
+    "red_flags": [
+      "Bleeding continuing unabated after 20 minutes of continuous direct pressure",
+      "Posterior bleeding with large volumes of blood pouring down the pharynx",
+      "Nosebleed accompanied by dizziness, pallor, or SBP < 90 mmHg (Hemorrhagic shock)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "NEVER tilt your head backwards during a nosebleed (causes blood swallowing, vomiting, and airway aspiration)",
+      "Do NOT pack your nose with dry tissue paper or unsterile cotton"
+    ],
+    "source": "American Academy of Otolaryngology-Head and Neck Surgery (AAO-HNS)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_foreign_body_eye_ear_nose_019",
+    "topic": "Skin, Eye, ENT & Dental: Foreign Body in Eye, Ear, or Nose First Aid",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "foreign body eye",
+      "something in eye",
+      "object in ear",
+      "child put bead in nose",
+      "dust in eye removal"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "FOREIGN OBJECT IN THE EYE (Dust, eyelash, insect):",
+      "  - Blink repeatedly in a cup of clean, lukewarm water or flush gently with saline eye drops.",
+      "  - Pull the upper eyelid gently down over the lower lid so lower lashes sweep out the particle.",
+      "  - NEVER RUB YOUR EYE; rubbing scratches the clear cornea with the sharp particle (corneal abrasion).",
+      "  - If a metal fragment, chemical, or sharp object penetrates the eye: do NOT touch it, tape a protective paper cup over the eye, and go to an eye hospital IMMEDIATELY.",
+      "CHILD WITH OBJECT IN NOSE (Bead, button battery, pea):",
+      "  - Practice the 'Mother's Kiss': cover the clear nostril with a finger, place your mouth over the child's mouth, and deliver a quick puff of air to pop the object out.",
+      "  - NEVER use tweezers to blindly poke inside the nose (pushes the object deeper into the breathing airway).",
+      "DANGER: BUTTON BATTERIES: If a tiny circular button battery is stuck in the ear or nose, it releases electric current and caustic alkali that destroys tissue within 2 hours; seek EMERGENCY hospital removal immediately."
+    ],
+    "doctor_answer": {
+      "assessment": "Foreign body in sensory organ (Corneal/conjunctival foreign body, Aural foreign body, Nasal foreign body). High-risk categories: Button batteries (rapid tissue necrosis), magnetic objects, penetrating intraocular foreign bodies.",
+      "investigations": "Eye: Slit-lamp exam, fluorescein stain with cobalt blue light (demonstrates corneal epithelial defect / Seidel's test for perforation). ENT: Otoscopy, anterior rhinoscopy.",
+      "management": "Superficial ocular FB: Gentle saline irrigation or moist cotton swab under topical anesthesia. Button battery in ear/nose: IMMEDIATE STAT emergency endoscopic extraction. Live insect in ear: Instill mineral oil to suffocate insect before gentle removal.",
+      "references": [
+        "AAO Preferred Practice Patterns: Eye Trauma",
+        "AAO-HNS Clinical Guidance on Pediatric Foreign Bodies"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red if button battery lodged in nose/ear or penetrating eye injury. Keep patient NPO for potential ENT removal under anesthesia.",
+    "red_flags": [
+      "Button battery lodged in nose or ear (Emergency tissue liquefactive necrosis within 2 hours)",
+      "Penetrating eye injury with distorted pupil or leaking fluid (STAT Ophthalmology)"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT blindly dig inside the ear or nose with tweezers or pins (risks pushing object into lungs or puncturing eardrum)",
+      "Do NOT rub an eye containing a foreign object"
+    ],
+    "source": "American Academy of Ophthalmology & AAO-HNS Clinical Guidance",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "sed_cataract_symptoms_surgery_020",
+    "topic": "Skin, Eye, ENT & Dental: Cataracts (Safed Motia) & Modern Phaco Surgery",
+    "category": "skin_eye_ent_dental",
+    "keywords": [
+      "cataract",
+      "safed motia",
+      "cloudy eye vision",
+      "cataract surgery",
+      "lens cloudy",
+      "blurry vision old age"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "A Cataract is a natural clouding of the clear lens inside your eye, occurring predominantly as a normal part of aging (usually starting after age 55 to 60).",
+      "Key signs: Gradual, painless blurring of vision (feeling like looking through a foggy or frosted glass window), colors appearing faded or yellowed, difficulty driving at night due to glare from oncoming headlights, and needing brighter light to read.",
+      "Eye drops, exercises, diets, or glasses CANNOT dissolve or cure a cataract; surgery is the only scientifically proven treatment.",
+      "When is surgery needed? Cataract surgery is NOT an emergency; you can choose surgery whenever cloudy vision begins to interfere with your daily activities (reading, watching TV, cooking, or driving safely).",
+      "Modern Phacoemulsification surgery: A quick, painless, 15-minute outpatient procedure performed under numbing eye drops (no needle injection); an ultrasound probe liquefies the cloudy lens, and a clear foldable Intraocular Lens (IOL) is inserted."
+    ],
+    "doctor_answer": {
+      "assessment": "Age-Related Cataract (Nuclear Sclerosis, Cortical, Posterior Subcapsular). Differentiate from Glaucoma, Macular Degeneration, and Diabetic Retinopathy.",
+      "investigations": "Visual acuity, Slit-lamp biomicroscopy after pupillary dilation, Intraocular lens (IOL) power calculation via Optical Biometry (IOLMaster / Lenstar). Dilated fundus examination.",
+      "management": "Definitive curative management: Micro-Incision Cataract Surgery (MICS / Phacoemulsification) with foldable IOL implantation (Monofocal, Toric for astigmatism, or Multifocal/EDOF for spectacle independence) under topical anesthesia. Postoperative care: Topical antibiotic-corticosteroid drops tapered over 4 weeks.",
+      "references": [
+        "AAO Preferred Practice Pattern: Cataract in the Adult Eye",
+        "RCOphth Cataract Surgery Guidelines"
+      ]
+    },
+    "staff_answer": "Verify patient understands surgery is elective based on functional visual goals. Review systemic medications (Alpha-blockers like Tamsulosin cause Intraoperative Floppy Iris Syndrome / IFIS).",
+    "red_flags": [
+      "Severe acute eye pain, redness, and rapid vision loss days after cataract surgery (Acute Postoperative Endophthalmitis - STAT Emergency)",
+      "Dense hypermature morgagnian cataract causing phacolytic glaucoma"
+    ],
+    "follow_up_questions": [
+      "How long have you had this symptom?",
+      "Is there any severe pain, discharge, or changes in vision or hearing?",
+      "Have you applied any creams or drops already?"
+    ],
+    "avoid": [
+      "Do NOT purchase unproven OTC eye drops claiming to 'dissolve cataracts'",
+      "Do NOT rub your eye or splash tap water into the eye during the first 2 weeks after surgery"
+    ],
+    "source": "American Academy of Ophthalmology (AAO) & Royal College of Ophthalmologists",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

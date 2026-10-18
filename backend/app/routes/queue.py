@@ -201,7 +201,7 @@ def get_queue():
         
     entries = list(cursor)
     
-    # Enrich entries with patient details (phone, email, patient code)
+    # Enrich entries with patient details (phone, email, patient code) and doctor details
     for item in entries:
         if not item.get("token_code"):
             item["token_code"] = f"T-{str(item.get('token_number', 1)).zfill(3)}"
@@ -209,9 +209,22 @@ def get_queue():
         if item.get("patient_id"):
             pat = db.patients.find_one({"_id": item["patient_id"]})
             if pat:
+                item["patient_name"] = pat.get("name") or item.get("patient_name") or "Walk-in Patient"
                 item["patient_phone"] = pat.get("phone", "—")
                 item["patient_email"] = pat.get("email", "—")
                 item["patient_id_code"] = pat.get("patient_id_code", f"PT-{str(pat['_id'])[-6:].upper()}")
+        elif not item.get("patient_name"):
+            item["patient_name"] = "Walk-in Patient"
+
+        if item.get("doctor_id") and (not item.get("doctor_name") or item.get("doctor_name") == "Doctor"):
+            doc = db.doctors.find_one({"_id": item["doctor_id"]})
+            if doc:
+                item["doctor_name"] = doc.get("name", "Duty Physician")
+                item["specialty"] = doc.get("specialty", "General Medicine")
+        if not item.get("doctor_name"):
+            item["doctor_name"] = "On-Duty Physician"
+        if not item.get("specialty"):
+            item["specialty"] = "General Practice"
                 
     serialized = serialize_doc(entries)
     

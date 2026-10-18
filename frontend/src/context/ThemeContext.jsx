@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const ThemeContext = createContext({
-  theme: "light",
+  theme: "dark",
   setTheme: () => {},
   toggleTheme: () => {},
   compactMode: false,
@@ -15,7 +15,7 @@ export function ThemeProvider({ children }) {
     if (saved && (saved === "light" || saved === "dark" || saved === "system")) {
       return saved;
     }
-    return "light";
+    return "dark";
   });
 
   const [compactMode, setCompactModeState] = useState(() => {

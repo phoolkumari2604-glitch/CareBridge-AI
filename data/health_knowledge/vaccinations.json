@@ -1,0 +1,920 @@
+[
+  {
+    "id": "vax_bcg_birth_001",
+    "topic": "Vaccination: BCG Vaccine (Birth)",
+    "category": "vaccinations",
+    "keywords": [
+      "bcg",
+      "bcg vaccine",
+      "birth vaccine",
+      "tuberculosis vaccine baby",
+      "tika birth",
+      "bcg mark"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Administered at birth, or as soon as possible before 1 year of age.",
+      "Given as a single dose of 0.05 mL (at birth) or 0.1 mL (after 1 month) intradermally on the left upper arm.",
+      "A small red papule develops at the injection site after 2 to 3 weeks, which forms a small ulcer and heals leaving a permanent scar.",
+      "This healing scar is completely normal and shows that the vaccine has taken effect.",
+      "Do not squeeze the bump or apply ointments or herbal pastes to the injection site."
+    ],
+    "doctor_answer": {
+      "assessment": "BCG live-attenuated vaccine for prevention of severe childhood extrapulmonary tuberculosis.",
+      "investigations": "Verify infant weight and absence of severe immunodeficiency (HIV/SCID).",
+      "management": "Administer 0.05 mL intradermally on left upper arm using tuberculin syringe. Normal reaction: papule at 2-3 weeks, ulceration, healed scar by 6-12 weeks.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "WHO Position Paper on BCG Vaccine"
+      ]
+    },
+    "staff_answer": "Verify left deltoid administration. Counsel mother that formation of a small pus point and scar is normal and expected.",
+    "red_flags": [
+      "Extensive ulceration > 10 mm or spreading axillary lymphadenitis (BCGitis)",
+      "Severe systemic infection in an infant with known or suspected immunodeficiency"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT apply antiseptics, herbal pastes, or bandages to the healing BCG scar",
+      "Do NOT administer subcutaneously or intramuscularly"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_opv_hep_b_birth_002",
+    "topic": "Vaccination: Birth Dose: OPV Zero & Hepatitis B Birth Dose",
+    "category": "vaccinations",
+    "keywords": [
+      "opv zero",
+      "polio drops birth",
+      "hepatitis b birth dose",
+      "janam ka tika",
+      "polio drop infant"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Hepatitis B birth dose must be administered within 24 hours of birth to protect against mother-to-child transmission.",
+      "OPV 'zero dose' (2 drops orally) is given at birth before discharge from the hospital.",
+      "Both vaccines are administered free of charge at all government hospitals and maternity centers across India.",
+      "Hepatitis B is injected intramuscularly into the outer mid-thigh (anterolateral thigh), never into the buttock.",
+      "Ensure the infant's Mother and Child Protection (MCP) card is stamped and saved safely."
+    ],
+    "doctor_answer": {
+      "assessment": "Perinatal immunoprophylaxis for Hepatitis B virus and early mucosal priming against Poliovirus.",
+      "investigations": "Screen maternal HBsAg status if possible.",
+      "management": "Hepatitis B vaccine 0.5 mL IM in anterolateral thigh within 24 hours. OPV 2 drops orally. If mother is HBsAg positive: co-administer Hepatitis B Immunoglobulin (HBIG) within 12 hours.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "WHO Hepatitis B Vaccines Position Paper"
+      ]
+    },
+    "staff_answer": "Administer within 24h of birth. Ensure IM injection is given in anterolateral thigh (vastus lateralis), never gluteal.",
+    "red_flags": [
+      "Infant born to known HBsAg-positive mother failing to receive HBIG and vaccine within 12 hours",
+      "Severe birth asphyxia or shock"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT delay Hepatitis B birth dose beyond 24 hours (efficacy against perinatal transmission drops sharply)",
+      "Do NOT inject into buttock"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_pentavalent_003",
+    "topic": "Vaccination: Pentavalent Vaccine (DPT + Hep B + Hib)",
+    "category": "vaccinations",
+    "keywords": [
+      "pentavalent",
+      "pentavalent vaccine",
+      "dpt hep b hib",
+      "6 10 14 weeks vaccine",
+      "5 in 1 vaccine baby"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Administered in 3 primary doses at 6 weeks, 10 weeks, and 14 weeks of age.",
+      "Injected intramuscularly into the left outer mid-thigh.",
+      "Mild fever, swelling, or irritability at the injection site is very common for 24 to 48 hours after the shot.",
+      "Paracetamol infant drops dosed by body weight can be given if the baby is uncomfortable from fever.",
+      "Apply a clean cool damp cloth gently to the thigh if there is local swelling; do not massage."
+    ],
+    "doctor_answer": {
+      "assessment": "Pentavalent combination vaccine against DTP, Hepatitis B, and invasive Hib disease (meningitis, pneumonia).",
+      "investigations": "Verify age (minimum 6 weeks) and interval (minimum 4 weeks between doses).",
+      "management": "0.5 mL IM into anterolateral aspect of mid-thigh. Paracetamol 10-15 mg/kg for post-immunization fever.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "IAP Guidebook on Immunization"
+      ]
+    },
+    "staff_answer": "Check age and intervals (6, 10, 14 weeks). Record batch number in MCP card. Instruct parent on Paracetamol dosage.",
+    "red_flags": [
+      "Encephalopathy or prolonged inconsolable crying (>3 hours) within 48 hours of previous dose (contraindication to whole-cell pertussis)",
+      "Immediate anaphylaxis"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT massage the injection site vigorously",
+      "Do NOT skip subsequent doses due to mild expected post-vaccine fever"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & Indian Academy of Pediatrics",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_rotavirus_004",
+    "topic": "Vaccination: Rotavirus Vaccine (RVV Drops)",
+    "category": "vaccinations",
+    "keywords": [
+      "rotavirus vaccine",
+      "rotavirus drops",
+      "diarrhea drops baby",
+      "rvv",
+      "child diarrhea vaccine"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Administered orally as drops at 6 weeks, 10 weeks, and 14 weeks of age alongside Pentavalent vaccine.",
+      "Given strictly by mouth (drops), NEVER by injection.",
+      "Babies can be breastfed normally before and immediately after receiving the drops.",
+      "If the baby spits out or vomits the drops immediately, wait a few minutes and re-administer the dose once.",
+      "Wash hands thoroughly after changing diapers, as live attenuated vaccine virus is shed in stools for a few days."
+    ],
+    "doctor_answer": {
+      "assessment": "Live-attenuated oral vaccine against rotaviral gastroenteritis.",
+      "investigations": "Rule out history of bowel intussusception or severe combined immunodeficiency (SCID).",
+      "management": "Administer orally per manufacturer formulation (e.g. 5 drops of Rotavac or 2.5 mL of RotaTeq). Complete series before 8 months of age.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "WHO Rotavirus Position Paper"
+      ]
+    },
+    "staff_answer": "Verify drops are administered orally. Confirm no past history of intussusception.",
+    "red_flags": [
+      "History of intussusception (absolute contraindication)",
+      "Severe persistent vomiting, red jelly-like stools, or severe abdominal colic post-vaccination"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "NEVER INJECT rotavirus drops (it is strictly an oral vaccine)",
+      "Do NOT delay starting the first dose beyond 15 weeks of age"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_pcv_child_005",
+    "topic": "Vaccination: Pneumococcal Conjugate Vaccine (PCV - Child)",
+    "category": "vaccinations",
+    "keywords": [
+      "pcv",
+      "pneumococcal vaccine baby",
+      "pneumonia vaccine child",
+      "pneumococcal conjugate",
+      "pcv booster"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "UIP Schedule in India: Given at 6 weeks and 14 weeks (primary doses), followed by a booster dose at 9 months of age.",
+      "Injected intramuscularly into the right outer mid-thigh.",
+      "Mild fever and localized soreness at the injection site may occur for 1 to 2 days.",
+      "PCV dramatically reduces hospital admissions for childhood pneumonia and ear infections.",
+      "Ensure your baby completes all three doses to establish long-lasting immunity."
+    ],
+    "doctor_answer": {
+      "assessment": "Conjugate vaccine conferring immunity against predominant serotypes of Streptococcus pneumoniae.",
+      "investigations": "Verify immunization records.",
+      "management": "0.5 mL IM into anterolateral mid-thigh at 6 weeks, 14 weeks, and 9 completed months.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "WHO Pneumococcal Position Paper"
+      ]
+    },
+    "staff_answer": "Check opposite thigh from pentavalent to monitor local reactions. Update MCP card.",
+    "red_flags": [
+      "Severe anaphylaxis to previous dose of conjugate vaccine",
+      "High fever > 39.5°C"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT miss the 9-month booster dose (crucial for long-term protective memory)",
+      "Do NOT apply warm compresses or oils to fresh injection site"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_mr_child_006",
+    "topic": "Vaccination: Measles-Rubella Vaccine (MR 1st & 2nd Dose)",
+    "category": "vaccinations",
+    "keywords": [
+      "mr vaccine",
+      "measles rubella vaccine",
+      "khasra tika",
+      "9 months vaccine",
+      "mr booster 16 months"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "1st Dose: Administered at 9 completed months up to 12 months of age.",
+      "2nd Dose: Administered at 16 to 24 months of age.",
+      "Given subcutaneously on the right upper arm.",
+      "Vitamin A liquid dose is administered orally at the same 9-month visit to protect eyesight and boost immunity.",
+      "A mild fever or faint rash may appear 5 to 10 days after the shot as the immune response develops; this is mild and self-limiting."
+    ],
+    "doctor_answer": {
+      "assessment": "Live attenuated combination vaccine for measles elimination and rubella / congenital rubella syndrome prevention.",
+      "investigations": "Check age (completed 9 months) and pregnancy status if adolescent/adult.",
+      "management": "0.5 mL subcutaneously into right upper arm. Co-administer Vitamin A 100,000 IU orally at 9 months, and 200,000 IU with MR-2 at 16-24 months.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "WHO Guidelines on Measles and Rubella Elimination"
+      ]
+    },
+    "staff_answer": "Confirm subcutaneous injection on upper arm. Administer Vitamin A oral syrup simultaneously at 9 months.",
+    "red_flags": [
+      "Severe anaphylaxis to neomycin or previous dose",
+      "Severe immunocompromised state (live vaccine contraindicated)"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT administer before 9 completed months in routine schedule (maternal antibodies interfere)",
+      "Do NOT skip the second booster dose at 16-24 months"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_dpt_boosters_007",
+    "topic": "Vaccination: DPT Booster Vaccines (16-24 Months & 5-6 Years)",
+    "category": "vaccinations",
+    "keywords": [
+      "dpt booster",
+      "triple antigen",
+      "dpt 1st booster",
+      "dpt 5 years",
+      "pertussis booster child"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "DPT 1st Booster: Given at 16 to 24 months of age.",
+      "DPT 2nd Booster: Given at 5 to 6 years of age (before entering primary school).",
+      "Injected intramuscularly (mid-thigh for toddlers under 2 years; upper arm deltoid for children 5 years and older).",
+      "Local pain, swelling, and temporary fever are common after DPT boosters.",
+      "These boosters maintain strong immunity against tetanus and whooping cough during school-age years."
+    ],
+    "doctor_answer": {
+      "assessment": "Active booster immunization against Corynebacterium diphtheriae, Clostridium tetani, and Bordetella pertussis.",
+      "investigations": "Verify completion of primary 3-dose series.",
+      "management": "0.5 mL IM. DPT-1 at 16-24 months (anterolateral thigh); DPT-2 at 5-6 years (deltoid). Oral Polio Vaccine booster (OPV) co-administered at 16-24 months.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "IAP Immunization Timetable"
+      ]
+    },
+    "staff_answer": "Check previous DPT dates. Confirm site: thigh for 16-24 months, deltoid for 5-6 years.",
+    "red_flags": [
+      "History of encephalopathy within 7 days of previous pertussis-containing vaccine (use DT without pertussis)",
+      "Progressive neurological disorder"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT omit the 5-year school-entry booster",
+      "Do NOT use whole-cell pertussis if child has progressive uncontrolled epilepsy"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & IAP",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_td_adolescent_pregnant_008",
+    "topic": "Vaccination: Td Vaccine (Tetanus & Adult Diphtheria - 10y, 16y & Pregnancy)",
+    "category": "vaccinations",
+    "keywords": [
+      "td vaccine",
+      "tetanus toxoid",
+      "tt tika",
+      "td pregnancy",
+      "tetanus injection pregnancy",
+      "td 10 years 16 years"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Adolescent Schedule: Td is given at 10 years and again at 16 years of age.",
+      "Pregnancy Schedule: Td-1 is given early in pregnancy, followed by Td-2 at least 4 weeks later. If previously vaccinated within 3 years, a single Td Booster is given.",
+      "Protects both the mother and the newborn baby from neonatal tetanus, a fatal umbilical infection.",
+      "Injected intramuscularly into the upper arm (deltoid muscle).",
+      "Mild arm soreness for 1 to 2 days is the most common side effect."
+    ],
+    "doctor_answer": {
+      "assessment": "Tetanus and reduced-antigen content Diphtheria toxoid (Td). Eliminates maternal and neonatal tetanus and maintains diphtheria antitoxin levels.",
+      "investigations": "Check obstetric history and past tetanus vaccination records.",
+      "management": "0.5 mL IM into deltoid muscle. In pregnancy: Td-1 early in 1st/2nd trimester, Td-2 four weeks later (minimum 2 weeks before expected delivery). If received 2 doses in pregnancy within past 3 years: single Td Booster.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "WHO Maternal and Neonatal Tetanus Elimination (MNTE)"
+      ]
+    },
+    "staff_answer": "Verify replacement of TT with Td across all government and private health facilities. Record in ANC card.",
+    "red_flags": [
+      "History of Guillain-Barre syndrome within 6 weeks of previous tetanus shot",
+      "Severe immediate anaphylaxis"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT use TT alone when Td is available (Td provides essential diphtheria protection)",
+      "Do NOT omit maternal vaccination (neonatal tetanus is fatal)"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_hpv_009",
+    "topic": "Vaccination: HPV Vaccine (Human Papillomavirus / Cervical Cancer Prevention)",
+    "category": "vaccinations",
+    "keywords": [
+      "hpv vaccine",
+      "cervical cancer vaccine",
+      "gardasil",
+      "cervavac",
+      "gardasil 9",
+      "hpv injection girls"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Target age: Girls and boys aged 9 to 14 years receive the highest long-term protection (before exposure to HPV).",
+      "Dosage schedule for age 9 to 14 years: 2 doses given 6 months apart (Month 0 and Month 6).",
+      "If starting at age 15 to 26 years: 3 doses are required (Month 0, Month 1-2, and Month 6).",
+      "Injected intramuscularly into the upper arm deltoid muscle.",
+      "Approved vaccines: Cervavac (indigenous quadrivalent in India), Gardasil 4, and Gardasil 9.",
+      "Regular cervical cancer screening (Pap smear / HPV DNA) is still recommended starting at age 25 to 30 even after vaccination."
+    ],
+    "doctor_answer": {
+      "assessment": "Recombinant L1 capsid virus-like particle (VLP) vaccine targeting oncogenic HPV types (16, 18 +/- 31, 33, 45, 52, 58) and wart-causing types (6, 11).",
+      "investigations": "Screen age and immune status.",
+      "management": "Age 9-14y: 2 doses (0, 6 months). Age >=15y or immunocompromised (HIV): 3 doses (0, 1-2, 6 months). 0.5 mL IM into deltoid muscle. Observe for 15 minutes post-injection for vasovagal syncope.",
+      "references": [
+        "WHO Position Paper on Human Papillomavirus Vaccines (2022 Update)",
+        "FOGSI Clinical Guidelines on HPV Vaccination"
+      ]
+    },
+    "staff_answer": "Observe adolescent seated for 15 minutes post-vaccination (high incidence of anxiety-related vasovagal syncope).",
+    "red_flags": [
+      "Severe yeast hypersensitivity (for Gardasil)",
+      "Pregnancy (delay vaccination until completion of pregnancy)"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT administer during pregnancy",
+      "Do NOT discontinue routine cervical Pap screening in vaccinated women"
+    ],
+    "source": "WHO HPV Vaccines Position Paper & FOGSI India Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_annual_influenza_010",
+    "topic": "Vaccination: Annual Influenza (Flu) Vaccine",
+    "category": "vaccinations",
+    "keywords": [
+      "flu shot",
+      "influenza vaccine",
+      "annual flu vaccine",
+      "flu shot adult",
+      "quadrivalent flu vaccine",
+      "influenza injection"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Recommended annually because influenza viruses constantly mutate each year.",
+      "Strongly recommended for high-risk groups: adults aged 65 and older, pregnant women, young children, individuals with asthma, COPD, diabetes, heart disease, and healthcare workers.",
+      "Best taken before the monsoon or winter flu season begins.",
+      "Injected intramuscularly into the upper arm (deltoid).",
+      "Cannot cause the flu; the vaccine contains completely inactivated (killed) virus particles."
+    ],
+    "doctor_answer": {
+      "assessment": "Inactivated quadrivalent influenza vaccine (IIV4). Reformulated biannually for Northern and Southern hemisphere strains based on WHO surveillance.",
+      "investigations": "Verify history of severe egg allergy (most modern vaccines safe; cell-based/recombinant alternatives available).",
+      "management": "0.5 mL IM into deltoid annually. In children 6 months to 8 years receiving flu vaccine for first time: 2 doses separated by 4 weeks.",
+      "references": [
+        "WHO Position Paper on Influenza Vaccines",
+        "CDC ACIP Influenza Vaccine Recommendations"
+      ]
+    },
+    "staff_answer": "Check for previous Guillain-Barre syndrome. Administer annually prior to peak seasonal transmission.",
+    "red_flags": [
+      "History of severe allergic anaphylaxis to previous flu vaccine",
+      "Moderate or severe acute illness with high fever (defer until recovered)"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT believe the myth that the flu shot gives you the flu (inactivated virus cannot replicate)",
+      "Do NOT skip annual updates (previous year's antibodies decline)"
+    ],
+    "source": "World Health Organization (WHO) & CDC Advisory Committee on Immunization Practices",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_pneumococcal_adult_011",
+    "topic": "Vaccination: Adult Pneumococcal Vaccines (PCV20 / PCV15 + PPSV23)",
+    "category": "vaccinations",
+    "keywords": [
+      "adult pneumonia vaccine",
+      "pneumococcal adult",
+      "prevnar",
+      "pneumovax",
+      "pneumonia shot over 65",
+      "copd pneumonia vaccine"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Strongly recommended for all adults aged 65 and older.",
+      "Recommended for adults aged 19 to 64 with high-risk conditions: asthma, COPD, diabetes, chronic heart/liver/kidney disease, smokers, or low immunity.",
+      "Standard modern regimen: A single dose of PCV20 (Prevnar 20), OR PCV15 followed by PPSV23 (Pneumovax 23) one year later.",
+      "Injected intramuscularly into the upper arm.",
+      "Provides powerful protection against hospital admissions and death from invasive pneumococcal disease."
+    ],
+    "doctor_answer": {
+      "assessment": "Conjugate (PCV15/PCV20) and polysaccharide (PPSV23) vaccines protecting against invasive pneumococcal disease (IPD) and pneumococcal pneumonia.",
+      "investigations": "Review past pneumococcal immunization history and comorbid conditions.",
+      "management": "Adults >=65y or 19-64y with immunocompromising/chronic conditions: Option A: Single dose PCV20. Option B: PCV15 followed by PPSV23 >= 1 year later (>= 8 weeks later if immunocompromised).",
+      "references": [
+        "CDC ACIP Pneumococcal Vaccine Recommendations",
+        "WHO Pneumococcal Vaccines for Adults"
+      ]
+    },
+    "staff_answer": "Verify prior pneumococcal vaccine history. Record brand and serotype formulation.",
+    "red_flags": [
+      "Severe anaphylaxis to any component or diphtheria-toxoid-containing conjugate"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT administer PCV and PPSV23 on the same day (must be spaced apart by at least 1 year in immunocompetent adults)"
+    ],
+    "source": "CDC Advisory Committee on Immunization Practices (ACIP) & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_adult_hepatitis_b_012",
+    "topic": "Vaccination: Adult Hepatitis B Vaccine",
+    "category": "vaccinations",
+    "keywords": [
+      "hepatitis b vaccine adult",
+      "hep b adult",
+      "hepatitis b 3 doses",
+      "engerix b adult",
+      "dialysis hepatitis b"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Standard adult schedule: 3 doses given at 0, 1 month, and 6 months.",
+      "Highly recommended for healthcare workers, dialysis patients, diabetics, travelers, household contacts of Hepatitis B patients, and individuals with multiple sexual partners.",
+      "Injected intramuscularly into the deltoid muscle of the upper arm.",
+      "A blood test (Anti-HBs antibody titer) can be checked 1 to 2 months after the 3rd dose to confirm lifelong immunity (titer >= 10 mIU/mL indicates complete protection).",
+      "Dialysis patients or immunocompromised adults receive double the standard adult dose (40 mcg) to establish adequate antibody protection."
+    ],
+    "doctor_answer": {
+      "assessment": "Recombinant surface antigen (HBsAg) vaccine. Provides >=95% protective antibody response (Anti-HBs >= 10 mIU/mL).",
+      "investigations": "Baseline HBsAg and Anti-HBs if screening high-risk individuals. Post-vaccination serology (Anti-HBs) at 1-2 months post 3rd dose for healthcare workers and dialysis patients.",
+      "management": "Adult dose: 20 mcg (1.0 mL) IM into deltoid at 0, 1, 6 months. For hemodialysis / immunocompromised: 40 mcg (high dose) at 0, 1, 2, 6 months.",
+      "references": [
+        "CDC ACIP Hepatitis B Vaccine Guidance",
+        "WHO Hepatitis B Position Paper"
+      ]
+    },
+    "staff_answer": "Confirm deltoid injection (gluteal injection results in lower seroconversion rates).",
+    "red_flags": [
+      "Severe anaphylactic reaction to baker's yeast or previous dose"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "NEVER inject Hepatitis B vaccine into the buttock/gluteal region (fat tissue dramatically reduces immune absorption)",
+      "Do NOT restart the entire series if a dose is delayed"
+    ],
+    "source": "CDC ACIP Guidelines & World Health Organization (WHO)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_shingles_zoster_013",
+    "topic": "Vaccination: Herpes Zoster (Shingles) Vaccine (Shingrix)",
+    "category": "vaccinations",
+    "keywords": [
+      "shingles vaccine",
+      "zoster vaccine",
+      "shingrix",
+      "herpes zoster shot",
+      "nerve pain shingles vaccine"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Recommended for all adults aged 50 and older, and for adults aged 19 and older with weakened immune systems.",
+      "Schedule: 2 doses given 2 to 6 months apart.",
+      "Injected intramuscularly into the upper arm deltoid muscle.",
+      "Even if you had chickenpox or already suffered a shingles attack in the past, vaccination is recommended to prevent future episodes.",
+      "Common side effects: muscle ache, fatigue, and soreness at the injection site for 2 to 3 days."
+    ],
+    "doctor_answer": {
+      "assessment": "Recombinant zoster vaccine (RZV, Shingrix: recombinant glycoprotein E + AS01B adjuvant system). Non-live vaccine with >90% efficacy against herpes zoster and post-herpetic neuralgia.",
+      "investigations": "Confirm patient age (>=50y, or >=19y if immunocompromised).",
+      "management": "0.5 mL IM into deltoid muscle. 2-dose series separated by 2-6 months (1-2 months if immunocompromised). Can be administered regardless of prior varicella or live zoster vaccine history.",
+      "references": [
+        "CDC ACIP Recommendations for Use of Herpes Zoster Vaccines",
+        "NICE Guidelines on Shingles"
+      ]
+    },
+    "staff_answer": "Reassure patient that localized muscle soreness and mild fever are common signs of strong adjuvant immune stimulation.",
+    "red_flags": [
+      "Severe anaphylaxis to any vaccine component",
+      "Current active shingles flare (wait until lesions resolve before vaccinating)"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT administer during an acute active shingles episode",
+      "Do NOT skip the second dose (required for long-term protective memory)"
+    ],
+    "source": "CDC Advisory Committee on Immunization Practices (ACIP) & NICE",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_yellow_fever_travel_014",
+    "topic": "Vaccination: Yellow Fever Travel Vaccine (Stamaril)",
+    "category": "vaccinations",
+    "keywords": [
+      "yellow fever vaccine",
+      "yellow fever card",
+      "travel vaccine africa",
+      "yellow fever certificate",
+      "stamaril"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Administered as a single subcutaneous or intramuscular injection at designated government yellow fever vaccination centers.",
+      "Must be taken at least 10 days BEFORE traveling to an endemic country for international validity.",
+      "You will receive an official yellow International Certificate of Vaccination or Prophylaxis (ICVP), which is valid for life.",
+      "Without this official certificate, travelers can be placed under mandatory quarantine at airport immigration.",
+      "Mild flu-like symptoms (low fever, headache) may appear 3 to 7 days after the shot."
+    ],
+    "doctor_answer": {
+      "assessment": "Live-attenuated viral vaccine (17D strain) conferring lifelong neutralizing antibody protection against Yellow Fever virus.",
+      "investigations": "Screen age (>60y risk of YEL-AVD), thymus disorder history, and immunocompromised status.",
+      "management": "0.5 mL SC or IM. Single lifetime dose. Mandatory 10-day pre-travel lead time for ICVP validity per International Health Regulations (IHR 2005).",
+      "references": [
+        "WHO International Travel and Health: Yellow Fever",
+        "IHR 2005 Annex 7 Guidelines"
+      ]
+    },
+    "staff_answer": "Verify traveler's itinerary. Confirm designated authorized yellow fever vaccination center issuance of ICVP card.",
+    "red_flags": [
+      "Thymus gland disorders (myasthenia gravis, thymoma) or severe immunodeficiency (risk of Yellow Fever Vaccine-Associated Viscerotropic Disease / YEL-AVD)",
+      "Severe egg allergy"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT travel without the official yellow ICVP card stamped at least 10 days prior",
+      "Do NOT administer to infants under 6-9 months or severe immunocompromised patients"
+    ],
+    "source": "World Health Organization (WHO) & International Health Regulations (IHR 2005)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_typhoid_conjugate_015",
+    "topic": "Vaccination: Typhoid Conjugate Vaccine (TCV / Typbar-TCV)",
+    "category": "vaccinations",
+    "keywords": [
+      "typhoid vaccine",
+      "typbar tcv",
+      "typhoid conjugate vaccine",
+      "enteric fever vaccine",
+      "motijhara tika"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Can be administered to infants as young as 6 months old and adults up to 45-65 years.",
+      "Given as a single intramuscular injection in the mid-thigh (infants) or deltoid (older children and adults).",
+      "Unlike older polysaccharide vaccines that wore off after 2 years, Typhoid Conjugate Vaccine (TCV) provides strong, durable immunity for many years.",
+      "Highly recommended for all children in India, food handlers, and travelers visiting endemic areas.",
+      "Safe and well-tolerated with only mild injection site tenderness."
+    ],
+    "doctor_answer": {
+      "assessment": "Vi polysaccharide conjugated to tetanus toxoid protein (TCV). Induces T-cell dependent immune memory and mucosal immunity.",
+      "investigations": "Verify age >= 6 months.",
+      "management": "0.5 mL IM into deltoid or anterolateral thigh. Single dose provides sustained protective efficacy for >= 4-5 years.",
+      "references": [
+        "WHO Position Paper on Typhoid Vaccines",
+        "IAP Advisory Committee on Vaccines and Immunization Practices"
+      ]
+    },
+    "staff_answer": "Verify conjugate formulation (TCV) over older unconjugated Vi polysaccharide.",
+    "red_flags": [
+      "Severe anaphylaxis to previous dose of tetanus toxoid conjugate"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT rely on typhoid vaccine alone for 100% prevention; safe drinking water and food hygiene remain essential"
+    ],
+    "source": "World Health Organization (WHO) & Indian Academy of Pediatrics (IAP)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_hepatitis_a_016",
+    "topic": "Vaccination: Hepatitis A Vaccine",
+    "category": "vaccinations",
+    "keywords": [
+      "hepatitis a vaccine",
+      "hep a vaccine",
+      "havrix",
+      "biovac a",
+      "jaundice vaccine"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Recommended for children starting at 12 months of age, travelers, food handlers, and individuals with chronic liver disease.",
+      "Dosage schedule: Inactivated vaccine requires 2 doses given 6 months apart (Month 0 and Month 6). Live attenuated single-dose vaccine is also available.",
+      "Injected intramuscularly into the upper arm (deltoid) or mid-thigh.",
+      "Provides near 100% long-lasting protection against Hepatitis A.",
+      "Extremely safe with minimal side effects like mild temporary soreness."
+    ],
+    "doctor_answer": {
+      "assessment": "Inactivated or live-attenuated Hepatitis A virus vaccine. Induces high Anti-HAV antibody seroconversion.",
+      "investigations": "Confirm age >= 12 months.",
+      "management": "Inactivated HAV: 0.5 mL IM (pediatric <=18y) or 1.0 mL IM (adult >=19y) at 0 and 6-12 months. Live HAV: single 0.5 mL SC dose.",
+      "references": [
+        "WHO Position Paper on Hepatitis A Vaccines",
+        "IAP Guidebook on Immunization"
+      ]
+    },
+    "staff_answer": "Check vaccine type (inactivated 2-dose vs live single-dose). Record brand.",
+    "red_flags": [
+      "Severe hypersensitivity to previous dose",
+      "Age under 12 months"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT skip the second booster dose of inactivated vaccine at 6 months for complete long-term protection"
+    ],
+    "source": "World Health Organization (WHO) & Indian Academy of Pediatrics",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_meningococcal_travel_017",
+    "topic": "Vaccination: Meningococcal Vaccine (Quadrivalent MenACWY - Hajj & Travel)",
+    "category": "vaccinations",
+    "keywords": [
+      "meningococcal vaccine",
+      "menacwy",
+      "meningitis vaccine",
+      "hajj vaccine",
+      "umrah vaccine meningitis"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Mandatory requirement for all pilgrims traveling for Hajj or Umrah to Saudi Arabia (administered at least 10 days before travel).",
+      "Recommended for university students living in dormitories, travelers to the African meningitis belt, and individuals with spleen removal (asplenia).",
+      "Administered as a single intramuscular injection into the upper arm.",
+      "Valid for 3 to 5 years depending on the conjugate vaccine used.",
+      "Ensure you receive the Quadrivalent (ACWY) Conjugate vaccine certificate for travel compliance."
+    ],
+    "doctor_answer": {
+      "assessment": "Quadrivalent meningococcal conjugate vaccine (MenACWY-CRM, MenACWY-TT, or MenACWY-D). Protects against invasive meningococcal disease.",
+      "investigations": "Verify travel requirements (Saudi Ministry of Health requires MenACWY issued between 10 days and 3-5 years prior to arrival).",
+      "management": "0.5 mL IM into deltoid muscle. Booster every 5 years for individuals at continuous high risk.",
+      "references": [
+        "Saudi Ministry of Health Hajj & Umrah Health Requirements",
+        "WHO Meningococcal Vaccines Position Paper"
+      ]
+    },
+    "staff_answer": "Verify official travel certificate for pilgrims. Confirm quadrivalent ACWY formulation.",
+    "red_flags": [
+      "Severe anaphylactic reaction to previous meningococcal conjugate"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT take the shot less than 10 days before travel (fails visa and immunity requirements)",
+      "Do NOT use bivalent A+C when quadrivalent ACWY is required"
+    ],
+    "source": "Saudi Ministry of Health & World Health Organization (WHO)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_japanese_encephalitis_018",
+    "topic": "Vaccination: Japanese Encephalitis Vaccine (JE)",
+    "category": "vaccinations",
+    "keywords": [
+      "japanese encephalitis vaccine",
+      "je vaccine",
+      "brain fever vaccine",
+      "je tika",
+      "encephalitis vaccine child"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Included in the Universal Immunization Programme (UIP) in endemic districts across India (such as parts of Assam, UP, Bihar, West Bengal, and Tamil Nadu).",
+      "Schedule for children in endemic districts: 1st dose given at 9 months (with MR-1), and 2nd dose given at 16 to 24 months (with MR-2).",
+      "Recommended for travelers and rural residents spending extended time in rice-farming endemic areas during transmission seasons.",
+      "Administered subcutaneously on the left upper arm.",
+      "Significantly reduces fatal brain swelling and paralysis caused by the virus."
+    ],
+    "doctor_answer": {
+      "assessment": "Live attenuated (SA 14-14-2) or inactivated vero-cell derived Japanese Encephalitis vaccine.",
+      "investigations": "Check residential address for national JE-endemic district classification.",
+      "management": "Live attenuated: 0.5 mL SC at 9 months and 16-24 months. Inactivated (JENVAC / IXIARO): 2 doses separated by 28 days.",
+      "references": [
+        "National Immunization Schedule, MoHFW India",
+        "WHO Japanese Encephalitis Position Paper"
+      ]
+    },
+    "staff_answer": "Verify district endemicity in national immunization registry.",
+    "red_flags": [
+      "Severe immunodeficiency or pregnancy (for live attenuated SA 14-14-2)"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT administer live JE vaccine to immunocompromised individuals or pregnant women"
+    ],
+    "source": "Universal Immunization Programme (UIP), MoHFW India & WHO",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_missed_dose_catchup_019",
+    "topic": "Vaccination: Missed-Dose Catch-Up Immunization Guidance",
+    "category": "vaccinations",
+    "keywords": [
+      "missed vaccine",
+      "catch up vaccination",
+      "delayed vaccine",
+      "missed vaccine baby",
+      "tika chhut gaya",
+      "late vaccine"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "GOLDEN RULE: If a vaccine dose is delayed or missed, NEVER restart the entire series from the beginning.",
+      "Simply resume the schedule and administer the next due dose as soon as possible, maintaining the minimum recommended interval between doses.",
+      "Multiple routine vaccines can be given safely on the same day at different injection sites (e.g., right thigh and left thigh).",
+      "Children up to 5 years old can receive catch-up vaccinations under government Mission Indradhanush campaigns.",
+      "Bring your child's immunization card to the nearest clinic or pediatrician; they will create a personalized catch-up schedule."
+    ],
+    "doctor_answer": {
+      "assessment": "Catch-up immunization planning. Vaccine-induced immunological memory persists; lapsed intervals do not impair ultimate antibody titers.",
+      "investigations": "Audit complete vaccination history and calculate chronological age and minimum dosing intervals.",
+      "management": "Administer all eligible overdue vaccines simultaneously using separate anatomical sites and syringes. Minimum interval between primary pentavalent/PCV doses is 4 weeks. Transition children >7 years with incomplete DPT to Tdap/Td.",
+      "references": [
+        "WHO Catch-up Vaccination Guidance",
+        "IAP Advisory Committee on Vaccines and Immunization Practices"
+      ]
+    },
+    "staff_answer": "Review immunization card. Calculate minimum intervals. NEVER restart series from dose 1.",
+    "red_flags": [
+      "Administering two live parenteral vaccines (e.g. MR and Yellow Fever) less than 28 days apart (must be given same day or separated by >=28 days)"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "NEVER restart a vaccine series from the beginning because of a delay",
+      "Do NOT turn away a child with minor cold or low-grade sniffles (not a contraindication)"
+    ],
+    "source": "WHO Global Vaccine Safety & Indian Academy of Pediatrics (IAP)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "vax_adult_tdap_cocooning_020",
+    "topic": "Vaccination: Adult Tdap Vaccine & Infant Cocooning Strategy",
+    "category": "vaccinations",
+    "keywords": [
+      "tdap adult",
+      "whooping cough adult vaccine",
+      "boostrix",
+      "tdap pregnancy",
+      "cocooning pertussis",
+      "tdap vs td"
+    ],
+    "intent": "vaccination_guidance",
+    "patient_answer": [
+      "Recommended during every single pregnancy between 27 and 36 weeks of gestation.",
+      "Vaccinating the mother allows her protective antibodies to cross the placenta into the baby's bloodstream, shielding the infant during their vulnerable first 2 months of life.",
+      "Cocooning strategy: All fathers, grandparents, and household caregivers should receive a Tdap booster at least 2 weeks before holding the newborn.",
+      "Injected as a single 0.5 mL dose intramuscularly into the upper arm deltoid.",
+      "Replaces one routine 10-year Td tetanus booster in adults."
+    ],
+    "doctor_answer": {
+      "assessment": "Tetanus toxoid, reduced diphtheria toxoid, and acellular pertussis (Tdap: Boostrix / Adacel). Maternal immunization maximizes neonatal transplacental IgG transfer.",
+      "investigations": "Check gestational age (optimal window: 27 to 36 weeks gestation).",
+      "management": "0.5 mL IM into deltoid muscle during each pregnancy (ideally 27-36 weeks). Single adult booster for all close infant contacts (cocooning) >=2 weeks prior to infant contact.",
+      "references": [
+        "ACOG Committee Opinion on Maternal Immunization with Tdap",
+        "CDC ACIP Tdap Recommendations"
+      ]
+    },
+    "staff_answer": "Promote Tdap between 27-36 weeks of pregnancy to protect neonates against pertussis.",
+    "red_flags": [
+      "Severe allergic anaphylaxis to previous pertussis vaccine",
+      "Encephalopathy within 7 days of previous dose"
+    ],
+    "follow_up_questions": [
+      "What is the person's exact age?",
+      "Which previous vaccines have been documented on their immunization card?",
+      "Are there any active medical conditions or upcoming travel plans?"
+    ],
+    "avoid": [
+      "Do NOT omit Tdap in subsequent pregnancies (transplacental antibodies must be boosted for each child)",
+      "Do NOT delay vaccination until after delivery"
+    ],
+    "source": "American College of Obstetricians and Gynecologists (ACOG) & CDC ACIP",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

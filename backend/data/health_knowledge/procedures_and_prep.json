@@ -1,0 +1,916 @@
+[
+  {
+    "id": "proc_fasting_blood_test_001",
+    "topic": "Fasting Blood Tests Preparation (Glucose, Lipid Profile)",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "fasting blood test",
+      "fasting blood sugar prep",
+      "lipid profile prep",
+      "how many hours fasting for blood test",
+      "khali pet blood test"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Fast for 8 to 12 hours before your scheduled blood collection (10-12 hours for lipid profile; 8-10 hours for fasting glucose).",
+      "You may drink plain water in normal amounts; staying hydrated makes your veins easier to find for the blood draw.",
+      "Do NOT drink tea, coffee (even black or sugarless), milk, juices, soda, or alcohol during the fasting window.",
+      "Do NOT smoke, chew tobacco, or chew gum as this stimulates digestive enzymes and alters metabolic readings.",
+      "Take your regular prescription medications with plain water unless your doctor explicitly told you to hold morning doses (e.g., insulin or oral diabetes pills are usually taken with or after breakfast).",
+      "Arrive at the laboratory early in the morning so you can take your medications and eat breakfast immediately after the test."
+    ],
+    "doctor_answer": {
+      "assessment": "Pre-analytical patient preparation for fasting biochemical analytes (FBS, Lipid Panel).",
+      "investigations": "FBS, Fasting Lipid Profile, Serum Insulin, Liver Panel if indicated.",
+      "management": "Enforce strict 8-12h overnight fast. Allow plain water. Advise diabetic patients to bring breakfast and morning hypoglycemic agents to take immediately post-phlebotomy to prevent hypoglycemia.",
+      "references": [
+        "Clinical and Laboratory Standards Institute (CLSI) Phlebotomy Guidelines",
+        "American Association for Clinical Chemistry (AACC) Preanalytical Recommendations"
+      ]
+    },
+    "staff_answer": "Verify patient fasting status upon arrival (ask exact time of last calorie intake). If fasting <8h for fasting lipid or FBS, advise rescheduling or document non-fasting on requisition.",
+    "red_flags": [
+      "Signs of hypoglycemia in diabetic patients during prolonged fasting (shakiness, sweating, confusion - give 15g fast sugar immediately)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT take morning insulin or sulfonylureas before blood collection (risk of severe hypoglycemia)",
+      "Do NOT consume black coffee or smoke during fast"
+    ],
+    "source": "American Diabetes Association (ADA) & CLSI Diagnostic Phlebotomy Protocols",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_ultrasound_abdomen_pelvis_002",
+    "topic": "Ultrasound Abdomen & Pelvis Preparation",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "ultrasound preparation",
+      "usg abdomen prep",
+      "usg pelvis prep",
+      "sonography fasting",
+      "full bladder ultrasound"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "For Upper Abdomen Ultrasound (liver, gallbladder, pancreas): Fast completely for 6 to 8 hours prior to the scan. This allows the gallbladder to fill with bile and minimizes bowel gas that obscures sound waves.",
+      "For Pelvic Ultrasound (uterus, ovaries, bladder, prostate): A full urinary bladder is essential. Drink 3 to 4 glasses (approx. 1 liter) of plain water 1 hour before the exam and DO NOT urinate until after the scan.",
+      "For Combined Abdomen & Pelvis Ultrasound: Fast for 6 hours, then drink 1 liter of water 1 hour prior to your appointment time without voiding.",
+      "Wear comfortable, loose two-piece clothing so the technician can easily expose your abdomen.",
+      "The exam is completely painless and safe, using sound waves without any harmful radiation."
+    ],
+    "doctor_answer": {
+      "assessment": "Acoustic window optimization for transabdominal sonography.",
+      "investigations": "Abdominal/Pelvic Ultrasonography.",
+      "management": "Empty stomach for hepatobiliary visualization (gallbladder distension). Full bladder provides acoustic window to pelvic viscera and displaces gas-filled bowel loops.",
+      "references": [
+        "American College of Radiology (ACR) Practice Parameter for Abdominal Ultrasound",
+        "AIUM Guidelines for Performance of Ultrasound Examination"
+      ]
+    },
+    "staff_answer": "Check appointment type: If pelvic/KUB, check if patient feels bladder fullness. If empty, provide 3 glasses of water and wait 45 minutes before imaging. For upper abdomen, confirm 6h fast.",
+    "red_flags": [
+      "Extreme abdominal pain with inability to tolerate transducer pressure (surgical abdomen)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT empty your bladder right before a pelvic ultrasound",
+      "Do NOT eat greasy or dairy foods in the 6 hours prior to abdominal scan"
+    ],
+    "source": "American College of Radiology (ACR) & Society of Radiologists in Ultrasound",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_mri_safety_prep_003",
+    "topic": "MRI Scan Preparation & Metallic Safety Screening",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "mri prep",
+      "mri preparation",
+      "mri metal implant",
+      "mri contrast prep",
+      "mri scanner claustrophobia"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Inform the imaging staff if you have any metal or electronic devices in your body: cardiac pacemakers, defibrillators, cochlear implants, aneurysm clips, metal plates, screws, or shrapnel.",
+      "Remove all metal items before entering the scan room: jewelry, watches, hairpins, body piercings, eyeglasses, hearing aids, dental dentures, bras with metal underwires, and clothing with metal zippers.",
+      "Leave bank cards, credit cards, and mobile phones in the locker outside—the powerful magnetic field will erase magnetic strips and damage electronics.",
+      "If receiving IV contrast dye (Gadolinium), fast for 2 to 4 hours prior and ensure a recent Serum Creatinine / kidney function test result is available.",
+      "Inform the technologist if you suffer from claustrophobia (fear of enclosed spaces); mild sedation or open-bore options may be arranged with your doctor.",
+      "During the scan, you will hear loud knocking and buzzing noises; earplugs or headphones will be provided. You must remain completely motionless."
+    ],
+    "doctor_answer": {
+      "assessment": "Pre-scan MRI safety screening and contrast administration eligibility.",
+      "investigations": "Recent Serum Creatinine / eGFR if IV Gadolinium is planned (assess risk of Nephrogenic Systemic Fibrosis).",
+      "management": "Mandatory ferromagnetic metal checklist. Ensure compatibility of implantable devices (MR-conditional vs MR-unsafe). If eGFR < 30 mL/min/1.73m2, avoid group I gadolinium agents.",
+      "references": [
+        "ACR Manual on MR Safety",
+        "ESUR Guidelines on Contrast Agents"
+      ]
+    },
+    "staff_answer": "Review MRI screening questionnaire thoroughly with patient and attendant. Verify absence of pacemakers or non-compatible metallic foreign bodies. Provide locker key for personal effects.",
+    "red_flags": [
+      "Unscreened patient entering Zone IV (magnet room) with ferromagnetic oxygen tanks, scissors, or wheel chairs (projectile hazard)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT wear clothing with metallic threads, zippers, or magnetic closures",
+      "Do NOT conceal past metal eye injuries or surgical clips"
+    ],
+    "source": "American College of Radiology (ACR) Guidance Document on MR Safe Practices",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_ct_scan_contrast_prep_004",
+    "topic": "CT Scan (Computed Tomography) Preparation & Contrast Precautions",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "ct scan prep",
+      "ct scan fasting",
+      "ct contrast dye",
+      "contrast allergy ct",
+      "creatinine for ct scan"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Plain CT Scan (No Contrast): Usually requires no special fasting; wear comfortable clothing without metal buttons or zippers over the scan area.",
+      "Contrast-Enhanced CT (CECT): Fast for 4 hours before the scan to prevent nausea or vomiting from the iodine-based contrast agent.",
+      "Hydrate well with plain water before and after the test to help your kidneys flush out the contrast material quickly.",
+      "A recent Serum Creatinine blood test (within the last 30 to 60 days) is mandatory to confirm your kidneys are healthy enough to clear the dye.",
+      "Inform the staff if you have a known history of severe allergy to IV contrast, asthma, or kidney failure.",
+      "If you take Metformin for diabetes, inform your doctor—Metformin may need to be stopped at the time of the scan and held for 48 hours afterward."
+    ],
+    "doctor_answer": {
+      "assessment": "Contrast-Induced Nephropathy (CIN) risk assessment and iodine hypersensitivity prophylaxis.",
+      "investigations": "Serum Creatinine, eGFR within 30 days.",
+      "management": "If eGFR < 45 mL/min/1.73m2, evaluate risk-benefit; provide IV pre-hydration with normal saline (1 mL/kg/h for 6-12h). In known mild iodine hypersensitivity, pre-medicate with oral Prednisone 50 mg at 13h, 7h, and 1h plus Diphenhydramine 50 mg at 1h.",
+      "references": [
+        "ACR Manual on Contrast Media",
+        "Royal College of Radiologists (RCR) Standards for Intravascular Contrast Administration"
+      ]
+    },
+    "staff_answer": "Verify Serum Creatinine / eGFR value in EHR. Confirm fast of >=4h for CECT. Secure a 20-gauge or 18-gauge IV cannula in antecubital fossa for high-pressure power injector.",
+    "red_flags": [
+      "Acute anaphylactoid reaction to contrast: stridor, facial angioedema, hypotension, bronchospasm (administer IM Epinephrine 0.5 mg 1:1000 immediately)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT take Metformin on the day of CECT if eGFR is <45 mL/min without physician review",
+      "Do NOT omit hydration after scan"
+    ],
+    "source": "American College of Radiology (ACR) Guidelines for Contrast Media",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_ecg_prep_005",
+    "topic": "ECG (Electrocardiogram) Preparation & What to Expect",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "ecg prep",
+      "ecg preparation",
+      "how to prepare for ecg",
+      "electrocardiogram instructions",
+      "ecg chest pain test"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "An ECG is a quick, safe, and completely non-invasive test that records the electrical activity of your heart without giving you any electrical shocks.",
+      "Wear a two-piece outfit that is easy to unbutton or take off from the waist up (avoid one-piece dresses or tight bodysuits).",
+      "Do not apply oily skin lotions, creams, or talcum powder on your chest or limbs on the day of the test, as oils prevent the adhesive patches from sticking.",
+      "Avoid cold water, heavy caffeine, smoking, and vigorous exercise for 30 minutes before the ECG, as these can temporarily alter heart rhythm.",
+      "Lie down comfortably and breathe normally; do not talk, laugh, or move during the 10 seconds of recording to prevent artifact distortion on the graph."
+    ],
+    "doctor_answer": {
+      "assessment": "Acquisition of diagnostic 12-lead Electrocardiogram with minimal somatic artifact.",
+      "investigations": "Standard 12-lead resting ECG (25 mm/s, 10 mm/mV).",
+      "management": "Clean skin with alcohol swab; shave excessive chest hair if electrode adhesion is poor. Standard electrode placement: V1 (4th ICS right sternal border) to V6 (5th ICS midaxillary line).",
+      "references": [
+        "AHA/ACC Recommendations for the Standardization and Interpretation of the Electrocardiogram"
+      ]
+    },
+    "staff_answer": "Ensure patient is positioned supine, relaxed, and warm to prevent shivering artifacts. Clean skin with alcohol wipe. Ensure limbs are grounded.",
+    "red_flags": [
+      "New STEMI or acute ischemic changes (ST elevation >=1 mm in limb leads or >=2 mm in chest leads) - alert cardiologist immediately"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT talk or move during the recording",
+      "Do NOT use oily creams on chest prior to exam"
+    ],
+    "source": "American Heart Association (AHA) Diagnostic ECG Practice Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_colonoscopy_bowel_prep_006",
+    "topic": "Colonoscopy Bowel Preparation & Dietary Instructions",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "colonoscopy prep",
+      "bowel prep colonoscopy",
+      "peg solution",
+      "peglar prep",
+      "colonoscopy fasting diet"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "3 to 5 Days Before: Switch to a low-fiber diet. Avoid seeds, nuts, corn, raw fruits with skins, whole grains, and red/purple food colorings.",
+      "1 Day Before: Consume only clear liquids throughout the entire day (clear broth, apple juice, plain coconut water, lemon water, electrolyte drinks). No solid food or dairy.",
+      "Take the prescribed bowel cleansing solution (such as PEG - Polyethylene Glycol) exactly in divided split doses as instructed by your gastroenterologist (half the evening before, half 4 to 6 hours before the procedure).",
+      "Expect frequent, watery bowel movements within 1 to 2 hours of starting the solution; stay close to a bathroom.",
+      "Your bowel preparation is successful when your bowel movements become clear, yellowish liquid without solid stool.",
+      "Stop all fluids completely 2 to 4 hours before the procedure for safe anesthesia/sedation. Arrange for an adult companion to escort you home."
+    ],
+    "doctor_answer": {
+      "assessment": "Adequacy of mucosal visualization for diagnostic/screening colonoscopy via Boston Bowel Preparation Scale (BBPS).",
+      "investigations": "Diagnostic / screening colonoscopy with or without biopsy / polypectomy.",
+      "management": "Split-dose PEG-ELS (4L) regimen or low-volume PEG + ascorbate. Hold iron supplements 5 days prior. Adjust anticoagulants/antiplatelets per gastroenterology protocol.",
+      "references": [
+        "ASGE Guidelines on Bowel Preparation Before Colonoscopy",
+        "ESGE Guideline: Bowel Preparation for Colonoscopy"
+      ]
+    },
+    "staff_answer": "Inquire about bowel movement appearance. If stool is still dark or brown with particulate matter, alert endoscopist—additional enema or prep may be required.",
+    "red_flags": [
+      "Severe electrolyte disturbance, extreme dehydration, or syncope during aggressive purgation"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT consume red or purple colored juices or gelatin (mimics bleeding during endoscopy)",
+      "Do NOT drive for 24 hours after sedation"
+    ],
+    "source": "American Society for Gastrointestinal Endoscopy (ASGE) Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_upper_gi_endoscopy_prep_007",
+    "topic": "Upper GI Endoscopy (Gastroscopy / OGD) Preparation",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "endoscopy prep",
+      "upper gi endoscopy fasting",
+      "gastroscopy instructions",
+      "food pipe camera prep",
+      "endoscopy khali pet"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Fast completely from all solid foods for at least 6 to 8 hours before the procedure so your stomach is completely empty for safe visualization and to prevent aspiration.",
+      "You may sip small amounts of clear water up to 2 hours before the procedure, but nothing thereafter.",
+      "Inform the doctor about all medications you take, especially blood thinners (aspirin, clopidogrel, warfarin, apixaban) and diabetes medications.",
+      "Remove dentures, removable partials, and eyeglasses before entering the procedure room.",
+      "A local anesthetic spray will be applied to numb your throat, and light sedation will help you relax during the 10-15 minute test.",
+      "Do not eat or drink for 1 hour after the procedure until your throat numbness completely wears off, to prevent choking."
+    ],
+    "doctor_answer": {
+      "assessment": "Esophagogastroduodenoscopy (EGD) pre-procedure safety and mucosal clearing.",
+      "investigations": "Diagnostic EGD with biopsy / rapid urease test (CLO test) for H. pylori.",
+      "management": "Enforce strict 6h solid and 2h clear fluid fast. Review anticoagulant management. Monitor airway reflexes post-procedure before resuming oral intake.",
+      "references": [
+        "ASGE Standards of Practice: Endoscopy Preparation",
+        "British Society of Gastroenterology (BSG) Guidelines for Sedation in Endoscopy"
+      ]
+    },
+    "staff_answer": "Verify NPO (nil per os) time of >=6 hours. Check consent and presence of responsible adult escort for post-sedation discharge.",
+    "red_flags": [
+      "Aspiration during procedure or persistent hematemesis / severe retrosternal pain post-endoscopy"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT eat or drink hot liquids until throat spray numbness has worn off",
+      "Do NOT drive or operate machinery for 24 hours after sedation"
+    ],
+    "source": "American College of Gastroenterology (ACG) & ASGE Clinical Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_mammography_prep_008",
+    "topic": "Mammography (Breast Screening) Preparation",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "mammography prep",
+      "mammogram instructions",
+      "breast x ray prep",
+      "mammogram deodorant",
+      "best time for mammogram"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Schedule the test for the week following your period (days 7 to 14 of your menstrual cycle), when breast tissue is least tender and swollen.",
+      "Do NOT apply deodorant, antiperspirant, body powder, perfume, lotions, or creams under your arms or on your breasts on the day of the exam. These products often contain metallic particles (like aluminum) that show up as white specks and can be mistaken for calcifications.",
+      "Wear a comfortable two-piece outfit (blouse and skirt or pants) so you only need to undress from the waist up.",
+      "Bring previous mammogram, ultrasound, or breast MRI reports and films for direct comparison with previous baseline images.",
+      "Inform the radiologist or technologist if you are pregnant, might be pregnant, are breastfeeding, or have breast implants."
+    ],
+    "doctor_answer": {
+      "assessment": "Diagnostic or screening digital mammography / tomosynthesis (BI-RADS).",
+      "investigations": "Bilateral Digital Mammography (CC and MLO views) +/- spot compression / tomosynthesis.",
+      "management": "Optimal timing is post-menstrual follicular phase. Direct comparison with prior imaging is crucial for identifying interval architectural distortion or microcalcifications.",
+      "references": [
+        "ACR Practice Parameter for the Performance of Screening and Diagnostic Mammography",
+        "American Cancer Society Screening Guidelines"
+      ]
+    },
+    "staff_answer": "Provide wet wipes for patient to remove any deodorant or cosmetic cream if applied accidentally before imaging.",
+    "red_flags": [
+      "Palpable dominant hard breast mass with skin tethering, nipple retraction, or bloody discharge (fast-track for diagnostic mammogram + USG)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT apply deodorant, perfume, or talc on chest/axilla on morning of test",
+      "Do NOT schedule during premenstrual days if breasts are painfully tender"
+    ],
+    "source": "American College of Radiology (ACR) & American Cancer Society (ACS)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_pet_ct_prep_009",
+    "topic": "PET-CT Scan Preparation (FDG PET-CT)",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "pet scan prep",
+      "pet ct preparation",
+      "fdg pet fasting",
+      "pet scan sugar level",
+      "pet scan diet instructions"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "24 Hours Prior: Follow a strict low-carbohydrate, high-protein diet (eggs, meat, paneer, tofu, green vegetables). Avoid sugars, bread, rice, potatoes, fruits, sweets, soft drinks, and caffeine.",
+      "Fast completely for at least 6 hours prior to your scan time; drink plenty of plain water to stay well-hydrated.",
+      "Avoid strenuous exercise, weight lifting, cycling, or jogging for 48 hours before the scan, as working muscles absorb the tracer and cause false-positive readings.",
+      "For Diabetic Patients: Blood glucose must strictly be below 150-200 mg/dL at injection time. Notify the nuclear medicine department in advance for specialized medication timing.",
+      "After the radioactive tracer is injected, you must rest quietly in a dim room for 45 to 60 minutes without speaking, reading, or using your phone, to avoid muscle and brain uptake.",
+      "Drink extra fluids after the test and maintain distance from pregnant women and infants for 6 to 12 hours as the tracer naturally clears via urine."
+    ],
+    "doctor_answer": {
+      "assessment": "Fluorodeoxyglucose (18F-FDG) radiotracer biodistribution optimization for oncologic staging.",
+      "investigations": "Whole body 18F-FDG PET/CT scan.",
+      "management": "Stringent glycemic control (blood sugar ideally <150 mg/dL). Hyperglycemia competitively inhibits FDG uptake by GLUT-1 transporters in tumor cells, degrading image contrast. Quiet isolation post-injection minimizes physiological brown fat and striated muscle activation.",
+      "references": [
+        "SNMMI Procedure Standard / EANM Guideline for Tumor PET/CT Imaging",
+        "NCCN Imaging Guidelines"
+      ]
+    },
+    "staff_answer": "Check capillary blood glucose immediately on arrival. If >200 mg/dL, notify nuclear medicine physician (injection may need postponement or short-acting insulin protocol).",
+    "red_flags": [
+      "Pregnancy (relative contraindication - requires urgent discussion of alternatives)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT perform strenuous gym workouts in the 48h prior to scan",
+      "Do NOT consume chewing gum, mints, or juices during the fast"
+    ],
+    "source": "Society of Nuclear Medicine and Molecular Imaging (SNMMI) & EANM Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_post_op_wound_care_010",
+    "topic": "Post-Surgery Wound Care & Infection Prevention",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "wound care post surgery",
+      "surgical dressing care",
+      "stitches care",
+      "wound wet after surgery",
+      "surgical site infection signs"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Keep the incision clean and dry for the first 24 to 48 hours, or as explicitly directed by your surgeon.",
+      "Always wash your hands thoroughly with soap and water for 20 seconds before touching your wound or changing dressings.",
+      "Unless waterproof dressings are applied, do not take a shower or soak in a bathtub until your surgeon gives clearance. Take sponge baths instead.",
+      "Leave surgical glue, Steri-Strips (paper tapes), or dressings in place; allow Steri-Strips to peel off naturally over 7 to 10 days.",
+      "Do not pick at scabs, scratch the wound, or apply unprescribed turmeric, herbal pastes, or non-sterile ointments.",
+      "Wear loose, soft cotton clothing that does not rub or exert pressure on the surgical incision site.",
+      "Watch for red flag signs of Surgical Site Infection (SSI): increasing pain, spreading redness, warmth, swelling, or foul-smelling yellow/green pus."
+    ],
+    "doctor_answer": {
+      "assessment": "Surgical Site Infection (SSI) surveillance and wound healing optimization.",
+      "investigations": "Wound swab for Gram stain and culture if purulent exudate is present. CBC with differential.",
+      "management": "Primary intention healing monitoring. Cleanse with sterile saline; maintain moist wound environment if open. Do not apply cytotoxic antiseptic agents (e.g. concentrated povidone-iodine) to granulating tissue.",
+      "references": [
+        "WHO Global Guidelines for the Prevention of Surgical Site Infection",
+        "CDC Healthcare Infection Control Practices Advisory Committee (HICPAC) Guidelines"
+      ]
+    },
+    "staff_answer": "Inspect surgical dressing for strike-through bleeding or exudate. Document wound edges, erythema margins (mark with surgical pen if spreading), and drain output.",
+    "red_flags": [
+      "High fever (>38°C) with wound dehiscence (edges separating), foul odor, or active spurting bleeding"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT soak incisions in bathtubs, swimming pools, or hot tubs until fully healed",
+      "Do NOT apply homemade turmeric, dettol, or cow dung pastes to surgical wounds"
+    ],
+    "source": "WHO Global Guidelines for Prevention of Surgical Site Infection & CDC",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_suture_staple_removal_011",
+    "topic": "Suture & Staple Removal Timing and Guidelines",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "suture removal",
+      "stitches removal time",
+      "staple removal surgery",
+      "tanka katwana",
+      "stitches open after removal"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Facial stitches: Typically removed quickly in 3 to 5 days to minimize visible scar formation.",
+      "Scalp sutures or staples: Usually removed in 7 to 10 days.",
+      "Chest, abdomen, and back stitches: Removed in 10 to 14 days depending on surgical tension and healing.",
+      "Joints, hands, feet, and high-tension areas: Removed in 12 to 18 days.",
+      "Never attempt to cut or pull out surgical stitches or staples yourself at home; use sterile instruments at a clinic to prevent wound opening and infection.",
+      "After removal, keep the area clean and protected with paper tape (Steri-Strips) or light sunscreen for several weeks to promote optimal scar remodeling."
+    ],
+    "doctor_answer": {
+      "assessment": "Wound tensile strength adequacy and timing for removal of external cutaneous closures.",
+      "investigations": "Clinical inspection of wound margin coaptation.",
+      "management": "Aseptic removal with sterile stitch cutter / staple extractor. Apply reinforcing adhesive strips (Steri-Strips) post-removal across incision to prevent micro-dehiscence.",
+      "references": [
+        "Royal College of Surgeons (RCS) Surgical Wound Management Guidelines",
+        "Principles of Wound Closure, American College of Surgeons"
+      ]
+    },
+    "staff_answer": "Verify healing along entire incision line before removing all staples/sutures. Consider alternating staple removal if wound appears minimally supported.",
+    "red_flags": [
+      "Incision separation / wound edges gaping open (dehiscence) during removal - stop immediately and apply butterfly bandages/notify surgeon"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT pull sutures yourself with household scissors",
+      "Do NOT scrub or scratch the freshly unstitched line"
+    ],
+    "source": "American College of Surgeons (ACS) Wound Care Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_post_op_spirometry_012",
+    "topic": "Post-Operative Deep Breathing & Incentive Spirometry",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "incentive spirometry",
+      "breathing exercise after surgery",
+      "spirometer 3 balls",
+      "prevent pneumonia after surgery",
+      "deep breathing post op"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "After chest or abdominal surgery, anesthesia and pain cause shallow breathing, which can collapse tiny air sacs in the lungs (atelectasis) and cause pneumonia.",
+      "Use your incentive spirometer 10 to 15 times every waking hour.",
+      "Sit upright in bed or in a chair. Place the mouthpiece firmly between your lips to create a tight seal.",
+      "Inhale SLOWLY and deeply through your mouth (not your nose) to lift the balls/indicator as high as comfortable, and hold your breath for 3 to 5 seconds before exhaling gently.",
+      "Support your surgical incision with a soft pillow or folded towel (splinting) when coughing, to minimize surgical pain.",
+      "Gentle coughing after deep breathing helps clear mucus secretions from your airways."
+    ],
+    "doctor_answer": {
+      "assessment": "Prevention of post-operative pulmonary complications (PPC) including atelectasis, hypoxemia, and pneumonia.",
+      "investigations": "Pulse Oximetry (SpO2), Chest X-Ray if persistent fever or crackles.",
+      "management": "Incentive spirometry 10 breaths/hour while awake. Early ambulation is the most effective physiologic maneuver. Splinted coughing techniques for pain management.",
+      "references": [
+        "American Association for Respiratory Care (AARC) Clinical Practice Guideline: Incentive Spirometry",
+        "ERAS (Enhanced Recovery After Surgery) Guidelines"
+      ]
+    },
+    "staff_answer": "Coach patient at bedside on correct inhalation technique (many mistakenly blow into spirometer instead of inhaling). Check SpO2 pre- and post-session.",
+    "red_flags": [
+      "Sudden desaturation (SpO2 < 90%), chest pain, or purulent rust-colored sputum"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT blow air into the incentive spirometer (you must suck air IN)",
+      "Do NOT skip breathing exercises because of mild manageable pain"
+    ],
+    "source": "American Association for Respiratory Care (AARC) Clinical Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_physiotherapy_early_mobility_013",
+    "topic": "Early Ambulation & Post-Surgery Mobility",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "early walking after surgery",
+      "post surgery walking",
+      "dvt prevention walking",
+      "physiotherapy bed exercises",
+      "leg exercises in bed"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Getting out of bed and walking as early as the same evening or the morning after surgery is one of the most effective ways to prevent dangerous blood clots (DVT).",
+      "While resting in bed, perform ankle pumps (pointing and flexing your toes) 20 to 30 times every hour to keep blood circulating in your calves.",
+      "Wear hospital-issued anti-embolism compression stockings or intermittent pneumatic compression cuffs as instructed by your nursing team.",
+      "When sitting up for the first time, pause on the edge of the bed for 1 to 2 minutes with assistance to avoid dizziness or fainting from blood pressure shifts.",
+      "Always call a nurse or physiotherapist for assistance during your first few walks; never try to walk alone while unsteady or attached to IV lines.",
+      "Early walking also stimulates sluggish bowel function and relieves painful gas and bloating."
+    ],
+    "doctor_answer": {
+      "assessment": "Venous thromboembolism (VTE) prophylaxis and functional mobility recovery.",
+      "investigations": "Caprini VTE Risk Score assessment.",
+      "management": "Multi-modal VTE prevention: mechanical compression devices, pharmacological prophylaxis (LMWH per protocol), and structured early ambulation protocols.",
+      "references": [
+        "CHEST Guidelines on Antithrombotic Therapy and Prevention of Thrombosis",
+        "ERAS Society Guidelines for Perioperative Care"
+      ]
+    },
+    "staff_answer": "Assist patient to dangle legs over bed before standing. Check standing pulse and BP if patient reports lightheadedness. Supervise first ambulation.",
+    "red_flags": [
+      "Unilateral calf swelling, redness, and deep calf pain on dorsiflexion (Homan's sign - rule out DVT before ambulation)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT attempt to walk unassisted while connected to IV pumps or PCA narcotics",
+      "Do NOT keep legs completely still for hours in bed"
+    ],
+    "source": "American College of Chest Physicians (CHEST) & ERAS Society Protocols",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_plaster_cast_care_014",
+    "topic": "Plaster Cast & Splint Home Care Guidelines",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "cast care",
+      "plaster care",
+      "broken bone cast wet",
+      "itchy cast",
+      "compartment syndrome signs"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Keep the cast completely dry at all times; cover with two plastic bags sealed with waterproof tape during sponge baths. Wet padding can cause severe skin ulceration and infection.",
+      "Elevate your injured limb on pillows above heart level for the first 48 to 72 hours to reduce swelling and throbbing pain.",
+      "Wiggle your fingers or toes frequently every hour to promote circulation and prevent stiffness.",
+      "Never stick coat hangers, knitting needles, rulers, or objects inside the cast to scratch itchy skin (this breaks the skin and causes deep infections). Use a hairdryer on a COOL setting instead.",
+      "Do not trim or cut the edges of the cast, and do not put talcum powder or lotions down the cast.",
+      "Urgent Red Flags (Compartment Syndrome): Severe increasing pain not relieved by medication, tingling/numbness, pale or blue digits, or inability to move fingers/toes."
+    ],
+    "doctor_answer": {
+      "assessment": "Fracture immobilization integrity and neurovascular monitoring (5 Ps of Compartment Syndrome: Pain out of proportion, Paresthesia, Pallor, Paralysis, Pulselessness).",
+      "investigations": "Check capillary refill (<2s) and two-point discrimination in peripheral digits.",
+      "management": "Urgent bivalving of cast if compartment pressure is suspected. Elevation above right atrium. Immediate orthopedic consult for intracompartmental pressure monitoring.",
+      "references": [
+        "American Academy of Orthopaedic Surgeons (AAOS) Clinical Practice Guidelines",
+        "British Orthopaedic Association (BOA) Cast Management Guidelines"
+      ]
+    },
+    "staff_answer": "Assess capillary refill and active digital motion distal to cast. Inquire about pain severity and tight sensation. Notify orthopedic resident immediately if digits are dusky or cold.",
+    "red_flags": [
+      "Pain out of proportion to injury, pain with passive stretch of digits, loss of sensation or pulse (acute compartment syndrome - surgical emergency)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT poke sharp objects inside the cast to scratch",
+      "Do NOT bear weight on a non-walking plaster cast"
+    ],
+    "source": "American Academy of Orthopaedic Surgeons (AAOS) Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_bronchoscopy_prep_015",
+    "topic": "Bronchoscopy Procedure Preparation",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "bronchoscopy prep",
+      "lung camera test prep",
+      "bronchoscopy fasting",
+      "bronchoscopy instructions",
+      "biopsy lung scope prep"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Fast completely (no food or drinks) for at least 6 to 8 hours before the procedure to avoid any aspiration into the lungs during airway examination.",
+      "Review all current medications with your pulmonologist; blood thinners (aspirin, clopidogrel, warfarin, direct oral anticoagulants) must typically be held for several days if a biopsy is planned.",
+      "Arrange for a family member or friend to accompany you to the hospital and drive you home; you will receive conscious sedation and cannot drive.",
+      "Your throat will be sprayed with a numbing medication (lidocaine) which tastes bitter and makes swallowing feel strange for about an hour.",
+      "After the procedure, do not eat or drink until throat sensation returns fully (usually 1.5 to 2 hours), and start with small sips of cool water.",
+      "A mild sore throat, hoarseness, and tiny flecks of blood in phlegm are common for 24 hours after a biopsy."
+    ],
+    "doctor_answer": {
+      "assessment": "Diagnostic/therapeutic flexible bronchoscopy safety and bleeding risk stratification.",
+      "investigations": "Coagulation profile (PT/INR, aPTT), Platelet count, Chest CT review.",
+      "management": "Enforce strict NPO status. Monitor airway reflexes and oxygenation post-procedure. Hold oral intake until gag reflex is proven intact with water sip test.",
+      "references": [
+        "British Thoracic Society (BTS) Guideline for Diagnostic Flexible Bronchoscopy",
+        "American College of Chest Physicians (CHEST) Guidelines"
+      ]
+    },
+    "staff_answer": "Verify NPO >=6h. Check coagulation reports prior to transfer to endoscopy suite. Perform tongue depressor / gag reflex test prior to allowing post-procedure fluids.",
+    "red_flags": [
+      "Massive hemoptysis (>50 mL), sudden dyspnea with stridor, or tension pneumothorax post-transbronchial biopsy"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT swallow fluids or food immediately after bronchoscopy before throat numbness resolves",
+      "Do NOT drive home unaccompanied"
+    ],
+    "source": "British Thoracic Society (BTS) & CHEST Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_cardiac_cath_angio_prep_016",
+    "topic": "Cardiac Catheterization (Coronary Angiography) Preparation",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "angiography prep",
+      "cardiac cath preparation",
+      "heart stent prep",
+      "radial angiogram instructions",
+      "heart angiography fasting"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Fast from solid food for 6 hours prior to the procedure; clear fluids may be taken up to 2 hours before as advised by the cardiac team.",
+      "Blood tests including Serum Creatinine (kidney function) and coagulation profile (PT/INR) must be completed before the procedure.",
+      "Inform the team of any allergy to iodinated contrast dye or seafood.",
+      "Medications: Take your heart and blood pressure pills with small sips of water unless instructed otherwise; diabetic pills (metformin) and insulin require specific dosage adjustments.",
+      "The access site is usually the right wrist (radial artery) or groin (femoral artery). The area will be shaved and sterilized.",
+      "After radial artery angiography, a pressure wristband (TR band) will remain in place for 2 to 4 hours; keep your wrist straight and rested.",
+      "If groin femoral access is used, you must lie completely flat in bed without bending your leg for 4 to 6 hours to prevent bleeding."
+    ],
+    "doctor_answer": {
+      "assessment": "Coronary artery disease evaluation and acute coronary intervention planning.",
+      "investigations": "Serum Creatinine/eGFR, CBC, Coagulation profile, 12-lead ECG, Transthoracic Echocardiogram.",
+      "management": "Radial first approach per ESC guidelines (reduced bleeding and vascular complications). Maintain adequate pre-procedural hydration for contrast nephropathy prevention.",
+      "references": [
+        "ACC/AHA Guidelines for Coronary Artery Revascularization",
+        "ESC Guidelines on Myocardial Revascularization"
+      ]
+    },
+    "staff_answer": "Check radial and dorsalis pedis pulses bilaterally pre- and post-procedure. Monitor puncture site for hematoma, thrill, or bleeding. Enforce bed rest duration for femoral access.",
+    "red_flags": [
+      "Expanding femoral hematoma, sudden severe groin/retroperitoneal pain, loss of distal pulse, or hypotension (retroperitoneal bleed)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT bend the punctured wrist or hip during the designated compression window",
+      "Do NOT lift heavy objects (>5 kg) for 48 hours post-procedure"
+    ],
+    "source": "American College of Cardiology (ACC) & European Society of Cardiology (ESC)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_lumbar_puncture_prep_017",
+    "topic": "Lumbar Puncture (Spinal Tap) Preparation & Recovery",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "lumbar puncture prep",
+      "spinal tap instructions",
+      "csf test prep",
+      "spinal headache prevention",
+      "lumbar puncture recovery"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "A lumbar puncture involves collecting a small sample of cerebrospinal fluid (CSF) from the lower spinal canal to check for meningitis, bleeding, or neurological conditions.",
+      "Inform the doctor about all medications, especially blood thinners like aspirin, clopidogrel, warfarin, or apixaban, which must be discontinued in advance.",
+      "You will sit hunched over or curl onto your side in a fetal position to open the spaces between your vertebrae.",
+      "Local anesthetic will be injected to numb the skin and deeper tissue, minimizing discomfort.",
+      "Recovery: Lie flat on your back without a pillow for at least 1 to 2 hours (or up to 4 hours) immediately following the procedure to minimize the chance of a spinal headache.",
+      "Drink plenty of fluids (including caffeinated tea or coffee) over the next 24 hours to help replenish spinal fluid volume.",
+      "Contact the clinic if you experience a severe throbbing headache that gets worse when standing up and better when lying down."
+    ],
+    "doctor_answer": {
+      "assessment": "Diagnostic evaluation of CSF opening pressure, biochemistry, cytology, and microbiology.",
+      "investigations": "Review prior neuroimaging (CT/MRI brain) to rule out elevated ICP or mass lesion before LP. Platelet count and coagulation screen.",
+      "management": "Use atraumatic (pencil-point) needles to significantly decrease risk of Post-Dural Puncture Headache (PDPH). Maintain supine positioning. If persistent PDPH occurs: oral caffeine, analgesia, and epidural blood patch if refractory.",
+      "references": [
+        "AAN Practice Parameter: Lumbar Puncture",
+        "Association of British Neurologists (ABN) Guidelines on Lumbar Puncture"
+      ]
+    },
+    "staff_answer": "Ensure CT brain report confirms no midline shift or herniation risk before assisting with procedure. Encourage oral hydration post-procedure. Keep patient supine.",
+    "red_flags": [
+      "Brain herniation signs (altered consciousness, pupillary asymmetry), severe progressive paraparesis, or fever with meningismus"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT sit up or stand abruptly immediately after the procedure",
+      "Do NOT proceed without ruling out raised intracranial pressure on imaging"
+    ],
+    "source": "American Academy of Neurology (AAN) Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_day_surgery_discharge_018",
+    "topic": "Day Surgery (Outpatient Procedure) Discharge Rules",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "day surgery discharge",
+      "same day surgery rules",
+      "day care surgery instructions",
+      "anesthesia recovery home",
+      "outpatient surgery escort"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "You MUST have a responsible adult family member or friend accompany you home and stay with you for the first 24 hours.",
+      "Do NOT drive a car, ride a motorcycle, or operate heavy machinery for at least 24 hours following general anesthesia or IV sedation.",
+      "Do NOT make critical personal decisions, sign legal contracts, or execute financial transactions for 24 hours, as anesthetic drugs impair memory and judgment.",
+      "Do NOT drink alcohol or take unprescribed sleeping pills or tranquilizers for 24 hours.",
+      "Diet: Start with clear liquids (water, apple juice, light tea) and progress to a bland diet (toast, soup, khichdi) as tolerated; avoid greasy or spicy foods.",
+      "Take prescribed pain medications with a light snack to prevent stomach irritation.",
+      "Call the hospital helpline or emergency room if you develop unmanageable pain, persistent vomiting, high fever, or active bleeding."
+    ],
+    "doctor_answer": {
+      "assessment": "Post-Anesthetic Discharge Scoring System (PADSS) criteria for safe outpatient ambulatory discharge.",
+      "investigations": "Vital signs stability, ability to tolerate oral fluids, spontaneous voiding (if spinal/pelvic surgery), adequate pain control, ambulation.",
+      "management": "Verify PADSS score >=9 before discharge. Provide clear written post-operative instructions, surgeon contact details, and follow-up appointment date.",
+      "references": [
+        "ASA Guidelines for Ambulatory Anesthesia and Surgery",
+        "Association of Anaesthetists Guidelines on Day-Case Surgery"
+      ]
+    },
+    "staff_answer": "Verify patient meets PADSS criteria (stable vitals, alert, minimal pain, no significant nausea). Confirm presence of adult escort and hand over written discharge folder.",
+    "red_flags": [
+      "Inability to maintain airway, persistent refractory vomiting, severe surgical bleeding, or urinary retention"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT discharge a sedated patient to take a bus or taxi alone",
+      "Do NOT permit driving within 24 hours of general anesthesia"
+    ],
+    "source": "American Society of Anesthesiologists (ASA) Guidelines for Ambulatory Care",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_endoscopy_colonoscopy_sedation_019",
+    "topic": "Conscious Sedation Recovery & Instructions",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "conscious sedation recovery",
+      "twilight sleep recovery",
+      "sedation instructions endoscopy",
+      "propofol recovery rules"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Conscious sedation (twilight sleep) uses medications like Midazolam or Propofol to help you feel completely relaxed, drowsy, and pain-free during your procedure.",
+      "You may drift into a light sleep and will have little or no memory of the procedure afterward.",
+      "After the procedure is finished, you will rest in the recovery area for 30 to 60 minutes while your vital signs (blood pressure, pulse, oxygen levels) are monitored.",
+      "Even if you feel wide awake, your reflexes, reaction times, and balance remain impaired for up to 24 hours.",
+      "A companion must accompany you home. Rest quietly for the remainder of the day.",
+      "Do not consume alcohol, make legal agreements, or care for young children unassisted for 24 hours."
+    ],
+    "doctor_answer": {
+      "assessment": "Post-procedural recovery from moderate to deep procedural sedation.",
+      "investigations": "Aldrete score monitoring every 15 minutes.",
+      "management": "Continuous pulse oximetry and non-invasive BP monitoring until Aldrete score >=9 or return to pre-procedure baseline. Ensure reversal agents (Flumazenil, Naloxone) are immediately accessible.",
+      "references": [
+        "ASA Practice Guidelines for Moderate Procedural Sedation and Analgesia"
+      ]
+    },
+    "staff_answer": "Calculate Aldrete score prior to transfer. Confirm companion is present at bedside for verbal and written discharge debriefing.",
+    "red_flags": [
+      "Delayed respiratory depression, hypoxemia (SpO2 < 92% on room air), or hypotension"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT drive, ride bicycles, or cook over open flames for 24 hours post-sedation"
+    ],
+    "source": "American Society of Anesthesiologists (ASA) Practice Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "proc_radiology_general_contrast_safe_020",
+    "topic": "Radiological Contrast Media Safety & Hydration Protocol",
+    "category": "procedures_and_prep",
+    "keywords": [
+      "contrast media safety",
+      "radiology dye allergy",
+      "iodinated contrast hydration",
+      "kidney protection contrast"
+    ],
+    "intent": "procedure_instructions",
+    "patient_answer": [
+      "Intravenous contrast media (used in CT scans and angiograms) are safe, specialized pharmaceutical liquids that outline blood vessels and organs clearly.",
+      "Hydration is the single most proven method to protect kidney function: Drink 500 mL of water before your scan and at least 1.5 to 2 liters of water over the next 24 hours.",
+      "Inform the staff if you have kidney disease, solitary kidney, diabetes, multiple myeloma, or severe allergies to food or medications.",
+      "You may experience a temporary warm flushing sensation throughout your body, a metallic taste in your mouth, or a feeling like you wet yourself during injection—this is completely normal and lasts less than 60 seconds.",
+      "Tell the technologist immediately if you experience hives, itching, lip swelling, difficulty swallowing, or wheezing."
+    ],
+    "doctor_answer": {
+      "assessment": "Contrast-Induced Acute Kidney Injury (CI-AKI) prevention and anaphylactoid reaction management.",
+      "investigations": "Baseline eGFR / Serum Creatinine within 30 days in at-risk cohorts.",
+      "management": "Adequate oral or IV isotonic saline hydration (100 mL/h for 4h pre and 4h post). Use low-osmolar or iso-osmolar non-ionic contrast agents at minimal diagnostic volume.",
+      "references": [
+        "ACR Manual on Contrast Media",
+        "KDIGO Clinical Practice Guideline for Acute Kidney Injury"
+      ]
+    },
+    "staff_answer": "Ensure pre-scan IV cannula is functioning smoothly with saline flush. Monitor patient for 15 minutes post-injection for delayed cutaneous or respiratory reactions.",
+    "red_flags": [
+      "Severe anaphylactoid reaction with airway compromise or hemodynamic collapse (epinephrine 0.5 mg IM, high-flow O2, IV fluid bolus)"
+    ],
+    "follow_up_questions": [
+      "When is your procedure scheduled?",
+      "Have you had blood tests or fasting confirmed with your doctor?",
+      "Do you take any blood thinners or diabetes medications?"
+    ],
+    "avoid": [
+      "Do NOT withhold fluids post-contrast unless strictly fluid-restricted for end-stage heart or renal failure"
+    ],
+    "source": "American College of Radiology (ACR) & KDIGO Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

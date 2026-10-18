@@ -1,11 +1,15 @@
 import re
 import math
-from datetime import datetime, timezone
+import secrets
+import string
+import hashlib
+from datetime import datetime, timezone, timedelta
 from flask import Blueprint, request, jsonify, g
 from bson import ObjectId
 from app.core.database import get_database
 from app.utils.decorators import token_required, staff_or_admin_required
 from app.utils.helpers import serialize_doc, is_valid_object_id
+from app.services.audit_service import log_audit_action
 
 appointment_bp = Blueprint("appointments", __name__)
 
@@ -85,8 +89,8 @@ def create_appointment():
         "appointment_date": appointment_date,
         "appointment_time": appointment_time,
         "reason": reason,
-        "status": "APPROVED" if current_user.get("role") in ["STAFF", "ADMIN", "DOCTOR"] else "PENDING",
-        "approval_status": "APPROVED" if current_user.get("role") in ["STAFF", "ADMIN", "DOCTOR"] else "PENDING",
+        "status": data.get("status") or ("APPROVED" if current_user.get("role") in ["STAFF", "ADMIN", "DOCTOR"] else "PENDING"),
+        "approval_status": data.get("status") or ("APPROVED" if current_user.get("role") in ["STAFF", "ADMIN", "DOCTOR"] else "PENDING"),
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc)
     }
@@ -115,6 +119,73 @@ def create_appointment():
     except Exception as e:
         print("Warning: could not auto-create approval doc:", e)
         
+    # Auto-create OPD Pass in db.opd_passes
+    try:
+        apt_date = appointment_doc.get("appointment_date") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        date_clean = apt_date.replace("-", "")
+        apt_suffix = str(result.inserted_id)[-6:].upper()
+        pass_number = f"OPD-{date_clean}-{apt_suffix}"
+        
+        # 6-digit patient ID
+        p_num_id = (
+            str(patient.get("patient_numeric_id"))
+            if patient and patient.get("patient_numeric_id") and len(str(patient.get("patient_numeric_id"))) == 6
+            else "104829"
+        )
+        
+        otp_code = f"{secrets.randbelow(900000) + 100000}"
+        hashed_otp = hashlib.sha256(otp_code.encode("utf-8")).hexdigest()
+        try:
+            exp_date = datetime.strptime(apt_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
+        except Exception:
+            exp_date = datetime.now(timezone.utc) + timedelta(days=30)
+            
+        queue_token = f"Q-{str(int(apt_suffix, 16) % 900 + 100)}"
+        
+        opd_pass_doc = {
+            "appointment_id": result.inserted_id,
+            "patient_id": ObjectId(patient_id),
+            "patient_numeric_id": p_num_id,
+            "patient_name": appointment_doc["patient_name"],
+            "doctor_id": ObjectId(doctor_id),
+            "doctor_name": appointment_doc["doctor_name"],
+            "department": appointment_doc["specialty"],
+            "specialty": appointment_doc["specialty"],
+            "hospital_id": appointment_doc["hospital_id"],
+            "hospital_name": appointment_doc["hospital_name"],
+            "hospital_address": hospital.get("address", "CareBridge Medical Enclave, Hyderabad") if hospital else "CareBridge Medical Enclave, Hyderabad",
+            "appointment_date": apt_date,
+            "appointment_time": appointment_doc["appointment_time"],
+            "reason": appointment_doc["reason"],
+            "pass_number": pass_number,
+            "token": pass_number,
+            "status": "ACTIVE",
+            "queue_number": queue_token,
+            "otp": otp_code,
+            "otp_hash": hashed_otp,
+            "expiry": exp_date.isoformat(),
+            "expires_at": exp_date,
+            "checked_in": False,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        db.opd_passes.insert_one(opd_pass_doc)
+        
+        # Insert initial OTP record
+        db.opd_pass_otps.insert_one({
+            "pass_number": pass_number,
+            "hashed_otp": hashed_otp,
+            "plain_otp": otp_code,
+            "attempts": 0,
+            "max_attempts": 5,
+            "created_at": datetime.now(timezone.utc),
+            "expires_at": exp_date,
+            "masked_contact": "patient's registered contact",
+            "is_used": False
+        })
+    except Exception as opd_err:
+        print("Warning: could not auto-create OPD pass:", opd_err)
+
     return jsonify({
         "message": "Appointment booked successfully",
         "appointment_id": str(result.inserted_id),
@@ -151,11 +222,41 @@ def get_appointments():
     if role == "PATIENT":
         user_id = str(current_user["_id"])
         email = current_user.get("email", "").lower()
-        patient = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": email}]})
-        if patient:
-            query["patient_id"] = patient["_id"]
-        elif patient_id_arg and is_valid_object_id(patient_id_arg):
-            query["patient_id"] = ObjectId(patient_id_arg)
+        patient = None
+        if current_user.get("patient_id") and is_valid_object_id(str(current_user["patient_id"])):
+            patient = db.patients.find_one({"_id": ObjectId(str(current_user["patient_id"]))})
+        if not patient:
+            patient = db.patients.find_one({
+                "$or": [
+                    {"user_id": user_id},
+                    {"user_id": ObjectId(user_id)},
+                    {"email": email}
+                ]
+            })
+        if not patient and current_user.get("phone"):
+            patient = db.patients.find_one({"phone": current_user["phone"]})
+            if patient:
+                db.patients.update_one({"_id": patient["_id"]}, {"$set": {"user_id": user_id}})
+        if not patient:
+            pat_code = "".join(secrets.choice(string.digits) for _ in range(6))
+            while db.patients.find_one({"patient_code": pat_code}):
+                pat_code = "".join(secrets.choice(string.digits) for _ in range(6))
+            new_pat = {
+                "user_id": user_id,
+                "name": current_user.get("name") or "Registered Patient",
+                "email": email,
+                "phone": current_user.get("phone", ""),
+                "status": "Active",
+                "patient_code": pat_code,
+                "patient_id_code": pat_code,
+                "created_at": datetime.now(timezone.utc)
+            }
+            res = db.patients.insert_one(new_pat)
+            patient = {**new_pat, "_id": res.inserted_id}
+            db.users.update_one({"_id": current_user["_id"]}, {"$set": {"patient_id": str(res.inserted_id)}})
+            
+        # The server must filter by the authenticated user, never by an id taken from the URL or client.
+        query["patient_id"] = patient["_id"]
     else:
         if patient_id_arg and is_valid_object_id(patient_id_arg):
             query["patient_id"] = ObjectId(patient_id_arg)
@@ -250,10 +351,17 @@ def get_appointments():
             appt["specialty"] = doc.get("specialty") or appt.get("specialty", "Medical Consultation")
             appt["doctor_room"] = doc.get("room_number", "OPD-101")
             appt["doctor_experience"] = doc.get("experience_years", 10)
+            appt["doctor_photo"] = doc.get("avatar") or doc.get("photo") or doc.get("image") or ""
+            appt["doctor_avatar"] = appt["doctor_photo"]
+            appt["fee"] = appt.get("fee") or appt.get("consultation_fee") or doc.get("consultation_fee") or doc.get("fee") or 800
             if not appt.get("hospital_id") and doc.get("hospital_id"):
                 appt["hospital_id"] = doc["hospital_id"]
             if not appt.get("hospital_name"):
                 appt["hospital_name"] = doc.get("hospital_name") or doc.get("hospital")
+        else:
+            appt["doctor_photo"] = appt.get("doctor_photo") or ""
+            appt["doctor_avatar"] = appt.get("doctor_avatar") or appt["doctor_photo"]
+            appt["fee"] = appt.get("fee") or 800
 
         # Ensure hospital and its address are fully resolved
         hosp = None
@@ -267,6 +375,70 @@ def get_appointments():
         else:
             appt["hospital_address"] = appt.get("hospital_address") or "Hospital Outpatient Department"
             appt["hospital_phone"] = appt.get("hospital_phone") or "+91 40 2345 6789"
+
+        # Check OPD pass & Queue token
+        opd = db.opd_passes.find_one({"appointment_id": appt["_id"]}) or db.opd_passes.find_one({"appointment_id": str(appt["_id"])})
+        if opd:
+            appt["has_opd_pass"] = True
+            appt["opd_pass_id"] = str(opd["_id"])
+            appt["pass_number"] = opd.get("pass_number")
+        
+        q_item = db.queue.find_one({"appointment_id": str(appt["_id"])}) or db.queue.find_one({"appointment_id": appt["_id"]})
+        if q_item:
+            appt["queue_token"] = q_item.get("token_number") or q_item.get("token") or appt.get("queue_token")
+
+    # Automatic in-app reminder notifications (24h and 1h before confirmed appointments)
+    now_dt = datetime.now(timezone.utc)
+    for appt in appointments:
+        if (appt.get("status") or "").upper() in ["CONFIRMED", "APPROVED"] and appt.get("appointment_date") and appt.get("appointment_time"):
+            try:
+                time_clean = appt["appointment_time"].strip().upper()
+                try:
+                    p_time = datetime.strptime(time_clean, "%I:%M %p").time()
+                except ValueError:
+                    p_time = datetime.strptime(time_clean, "%H:%M").time()
+                appt_dt = datetime.strptime(appt["appointment_date"], "%Y-%m-%d").replace(
+                    hour=p_time.hour, minute=p_time.minute, tzinfo=timezone.utc
+                )
+                diff_hours = (appt_dt - now_dt).total_seconds() / 3600.0
+                patient_id_str = str(appt.get("patient_id"))
+                
+                if 0 < diff_hours <= 24:
+                    exists_24 = db.notifications.find_one({
+                        "recipient_id": patient_id_str,
+                        "appointment_id": str(appt["_id"]),
+                        "type": "APPOINTMENT_REMINDER_24H"
+                    })
+                    if not exists_24:
+                        db.notifications.insert_one({
+                            "recipient_id": patient_id_str,
+                            "recipient_role": "PATIENT",
+                            "title": "Upcoming Consultation in 24 Hours",
+                            "message": f"Reminder: Your consultation with Dr. {appt.get('doctor_name')} is scheduled for {appt['appointment_date']} at {appt['appointment_time']}.",
+                            "type": "APPOINTMENT_REMINDER_24H",
+                            "appointment_id": str(appt["_id"]),
+                            "read": False,
+                            "created_at": now_dt
+                        })
+                if 0 < diff_hours <= 1:
+                    exists_1 = db.notifications.find_one({
+                        "recipient_id": patient_id_str,
+                        "appointment_id": str(appt["_id"]),
+                        "type": "APPOINTMENT_REMINDER_1H"
+                    })
+                    if not exists_1:
+                        db.notifications.insert_one({
+                            "recipient_id": patient_id_str,
+                            "recipient_role": "PATIENT",
+                            "title": "Consultation Starting in 1 Hour",
+                            "message": f"Urgent Reminder: Your consultation with Dr. {appt.get('doctor_name')} starts in 1 hour at {appt['appointment_time']}.",
+                            "type": "APPOINTMENT_REMINDER_1H",
+                            "appointment_id": str(appt["_id"]),
+                            "read": False,
+                            "created_at": now_dt
+                        })
+            except Exception as e:
+                pass
 
     serialized = serialize_doc(appointments)
     
@@ -430,7 +602,7 @@ def cancel_appointment(appointment_id):
     if current_status in ["COMPLETED", "CONSULTED"]:
         return jsonify({"error": "Bad Request", "detail": "Cannot cancel an appointment that has already been completed"}), 400
 
-    # Verify future appointment check
+    # Verify future appointment & 2-hour window check
     appt_date_str = appt.get("appointment_date")
     appt_time_str = appt.get("appointment_time")
     now_dt = datetime.now(timezone.utc)
@@ -439,11 +611,39 @@ def cancel_appointment(appointment_id):
     if appt_date_str and appt_date_str < today_str:
         return jsonify({"error": "Bad Request", "detail": "Cannot cancel past appointments."}), 400
 
+    # 2-hour cancellation rule
+    if appt_date_str and appt_time_str:
+        try:
+            time_clean = appt_time_str.strip().upper()
+            try:
+                parsed_time = datetime.strptime(time_clean, "%I:%M %p").time()
+            except ValueError:
+                parsed_time = datetime.strptime(time_clean, "%H:%M").time()
+            appt_dt = datetime.strptime(appt_date_str, "%Y-%m-%d").replace(
+                hour=parsed_time.hour, minute=parsed_time.minute, tzinfo=timezone.utc
+            )
+            diff_seconds = (appt_dt - now_dt).total_seconds()
+            if 0 <= diff_seconds < 7200: # within 2 hours
+                return jsonify({
+                    "error": "Cancellation window closed",
+                    "detail": "Cancellation is not permitted within 2 hours of scheduled consultation."
+                }), 400
+        except Exception as e:
+            pass
+
     data = request.get_json() or {}
-    cancel_reason = data.get("reason", "Patient requested cancellation").strip()
-    other_reason = data.get("other_reason", "").strip()
-    if cancel_reason == "Other" and other_reason:
+    cancel_reason = (data.get("reason") or "").strip()
+    other_reason = (data.get("other_reason") or "").strip()
+    if cancel_reason.lower() == "other" and other_reason:
         cancel_reason = f"Other: {other_reason}"
+    elif other_reason and not cancel_reason:
+        cancel_reason = other_reason
+
+    if not cancel_reason:
+        return jsonify({
+            "error": "Validation Error",
+            "detail": "Cancellation reason is required so your doctor understands the cancellation."
+        }), 400
 
     now_iso = now_dt.isoformat()
 
@@ -473,6 +673,20 @@ def cancel_appointment(appointment_id):
             {"appointment_id": str(appointment_id)}
         ]
     })
+
+    # Log to audit_logs
+    try:
+        log_audit_action(
+            db=db,
+            user_id=user_id,
+            user_role=role,
+            action="APPOINTMENT_CANCELLED",
+            resource="APPOINTMENTS",
+            resource_id=str(appointment_id),
+            details=f"Appointment {appt.get('booking_id', appointment_id)} cancelled: {cancel_reason}"
+        )
+    except Exception as e:
+        print("Audit log error:", e)
 
     # Create notification for patient
     patient_id_val = appt.get("patient_id")
@@ -509,4 +723,168 @@ def cancel_appointment(appointment_id):
         "status": "CANCELLED",
         "appointment": serialize_doc(updated_doc)
     }), 200
+
+# ============================================================
+# RESCHEDULE FLOW (SERVER-SIDE DOUBLE-BOOKING CHECK, STATUS PENDING, AUDIT LOG)
+# ============================================================
+@appointment_bp.route("/<appointment_id>/reschedule", methods=["POST"], strict_slashes=False)
+@token_required
+def reschedule_appointment(appointment_id):
+    db = get_database()
+    current_user = g.current_user
+    user_id = str(current_user["_id"])
+    role = current_user.get("role", "PATIENT")
+
+    if not is_valid_object_id(appointment_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid appointment ID"}), 400
+
+    appt = db.appointments.find_one({"_id": ObjectId(appointment_id)})
+    if not appt:
+        return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
+
+    # Permission check
+    if role == "PATIENT":
+        patient_record = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": current_user.get("email", "").lower()}]})
+        patient_id = patient_record["_id"] if patient_record else None
+        if appt.get("patient_id") and patient_id and str(appt["patient_id"]) != str(patient_id):
+            return jsonify({"error": "Forbidden", "detail": "You can only reschedule your own appointments"}), 403
+
+    current_status = (appt.get("status") or "").upper()
+    if current_status == "CANCELLED":
+        return jsonify({"error": "Bad Request", "detail": "Cannot reschedule a cancelled appointment"}), 400
+    if current_status in ["COMPLETED", "CONSULTED"]:
+        return jsonify({"error": "Bad Request", "detail": "Cannot reschedule an appointment that has already been completed"}), 400
+
+    data = request.get_json() or {}
+    new_date = data.get("appointment_date") or data.get("date")
+    new_time = data.get("appointment_time") or data.get("time")
+
+    if not new_date or not new_time:
+        return jsonify({"error": "Validation Error", "detail": "New appointment date and time slot are required"}), 400
+
+    # Prevent server-side double booking for the same doctor
+    conflict = db.appointments.find_one({
+        "doctor_id": appt.get("doctor_id"),
+        "appointment_date": new_date,
+        "appointment_time": new_time,
+        "_id": {"$ne": ObjectId(appointment_id)},
+        "status": {"$in": ["PENDING", "APPROVED", "CONFIRMED"]}
+    })
+    if conflict:
+        return jsonify({
+            "error": "Slot Conflict",
+            "detail": "This consultation slot is already reserved for this doctor. Please pick another time slot."
+        }), 409
+
+    now_dt = datetime.now(timezone.utc)
+    # Reschedule returns appointment to PENDING status if approval is required
+    update_data = {
+        "appointment_date": new_date,
+        "appointment_time": new_time,
+        "status": "PENDING",
+        "approval_status": "PENDING",
+        "rescheduled_at": now_dt.isoformat(),
+        "rescheduled_by": user_id,
+        "updated_at": now_dt
+    }
+
+    db.appointments.update_one({"_id": ObjectId(appointment_id)}, {"$set": update_data})
+    db.approvals.update_one(
+        {"appointment_id": ObjectId(appointment_id)},
+        {"$set": {
+            "appointment_date": new_date,
+            "appointment_time": new_time,
+            "status": "PENDING",
+            "updated_at": now_dt
+        }}
+    )
+
+    # Write to audit_logs
+    try:
+        log_audit_action(
+            db=db,
+            user_id=user_id,
+            user_role=role,
+            action="APPOINTMENT_RESCHEDULED",
+            resource="APPOINTMENTS",
+            resource_id=str(appointment_id),
+            details=f"Appointment {appt.get('booking_id', appointment_id)} rescheduled to {new_date} at {new_time}"
+        )
+    except Exception as e:
+        print("Audit log error:", e)
+
+    # Notifications
+    if appt.get("doctor_id"):
+        db.notifications.insert_one({
+            "recipient_id": str(appt["doctor_id"]),
+            "recipient_role": "DOCTOR",
+            "title": "Appointment Rescheduled",
+            "message": f"Patient {appt.get('patient_name', 'Patient')} rescheduled consultation {appt.get('booking_id', '')} to {new_date} at {new_time}.",
+            "type": "APPOINTMENT_RESCHEDULED",
+            "appointment_id": str(appointment_id),
+            "read": False,
+            "created_at": now_dt
+        })
+
+    updated_doc = db.appointments.find_one({"_id": ObjectId(appointment_id)})
+    return jsonify({
+        "message": "Appointment rescheduled successfully. Status updated to Pending for clearance.",
+        "appointment": serialize_doc(updated_doc)
+    }), 200
+
+
+# ============================================================
+@appointment_bp.route("/<appointment_id>/rate", methods=["POST"], strict_slashes=False)
+@token_required
+def rate_appointment(appointment_id):
+    """
+    Submits a rating and review for an appointment:
+    - Verifies appointment exists
+    - Saves rating (1-5), review text, and timestamp
+    - Logs to audit_logs
+    """
+    db = get_database()
+    current_user = g.current_user
+    user_id = str(current_user["_id"])
+    role = current_user.get("role", "PATIENT")
+
+    if not is_valid_object_id(appointment_id):
+        return jsonify({"error": "Validation Error", "detail": "Invalid appointment ID"}), 400
+
+    appt = db.appointments.find_one({"_id": ObjectId(appointment_id)})
+    if not appt:
+        return jsonify({"error": "Not Found", "detail": "Appointment not found"}), 404
+
+    data = request.get_json() or {}
+    rating = data.get("rating")
+    feedback = (data.get("feedback") or data.get("review") or "").strip()
+
+    if not rating or not isinstance(rating, (int, float)) or rating < 1 or rating > 5:
+        return jsonify({"error": "Validation Error", "detail": "Rating must be a number between 1 and 5"}), 400
+
+    now_dt = datetime.now(timezone.utc)
+    db.appointments.update_one(
+        {"_id": ObjectId(appointment_id)},
+        {"$set": {
+            "rating": rating,
+            "patient_feedback": feedback,
+            "rated_at": now_dt.isoformat()
+        }}
+    )
+
+    try:
+        log_audit_action(
+            db=db,
+            user_id=user_id,
+            user_role=role,
+            action="APPOINTMENT_RATED",
+            resource="APPOINTMENTS",
+            resource_id=str(appointment_id),
+            details=f"Appointment {appt.get('booking_id', appointment_id)} rated {rating}/5"
+        )
+    except Exception as e:
+        pass
+
+    return jsonify({"message": "Thank you! Your feedback has been recorded.", "rating": rating}), 200
+
 

@@ -1,0 +1,48 @@
+[
+  {
+    "id": "medlineplus_gout_sample_001",
+    "topic": "Gout (Acute Gouty Arthritis)",
+    "category": "chronic_conditions",
+    "keywords": [
+      "gout",
+      "high uric acid",
+      "big toe pain",
+      "urate crystals",
+      "gathiya"
+    ],
+    "intent": "chronic_care_management",
+    "patient_answer": [
+      "Rest and elevate the affected painful joint (most commonly the big toe).",
+      "Apply an ice pack wrapped in a towel for 20 minutes at a time to reduce swelling.",
+      "Drink at least 2 to 3 liters of water daily to help your kidneys flush out excess uric acid.",
+      "Avoid purine-rich foods during flare-ups: red meat, organ meats (liver/kidneys), seafood, beer, and high-fructose corn syrup.",
+      "Consult your doctor for prescribed anti-inflammatory medication (like Colchicine or NSAIDs)."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Gout Flare secondary to hyperuricemia and intra-articular monosodium urate (MSU) crystal deposition.",
+      "investigations": "Synovial fluid analysis (polarizing microscopy for negatively birefringent needle-shaped crystals). Serum Uric Acid (note: may be transiently normal during acute flare), Renal panel.",
+      "management": "First-line acute flare therapy: oral NSAIDs (e.g. Naproxen), Colchicine (1.2 mg STAT then 0.6 mg 1h later), or oral Prednisolone 30-35 mg/day. Initiate or titrate Urate-Lowering Therapy (Allopurinol / Febuxostat) with anti-inflammatory flare prophylaxis target uric acid <6.0 mg/dL.",
+      "references": [
+        "2020 American College of Rheumatology (ACR) Guideline for Management of Gout",
+        "MedlinePlus: Gout (https://medlineplus.gov/gout.html)"
+      ]
+    },
+    "staff_answer": "Assess pain score and swelling in distal extremity. Apply cold pack and confirm absence of open skin infection over the joint. Provide water.",
+    "red_flags": [
+      "High fever with red, hot, swollen joint (must rule out septic arthritis immediately)",
+      "Severe renal impairment with inability to excrete uric acid"
+    ],
+    "follow_up_questions": [
+      "Is this your first sudden attack?",
+      "Which specific joints are red and swollen?",
+      "Do you take any medications like water pills (diuretics)?"
+    ],
+    "avoid": [
+      "Do NOT consume alcohol or beer during acute attack",
+      "Do NOT start high-dose Allopurinol without flare prophylaxis"
+    ],
+    "source": "NIH MedlinePlus (https://medlineplus.gov/gout.html) & ACR Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

@@ -1,0 +1,549 @@
+"""
+Chronic conditions knowledge base module (20 entries)
+"""
+def get_chronic_conditions():
+    return [
+        {
+            "id": "chr_type2_diabetes_001",
+            "topic": "Type 2 Diabetes Mellitus (T2D)",
+            "category": "chronic_conditions",
+            "keywords": ["type 2 diabetes", "diabetes", "sugar", "madhumeh", "high blood sugar", "t2d", "blood sugar control"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Aim for a balanced diet rich in whole grains (millet, brown rice, whole oats), green vegetables, and lean pulses; avoid refined sugar, sweets, and sodas.",
+                "Engage in at least 150 minutes of moderate-intensity physical activity (like brisk walking) per week, spread over at least 3 days.",
+                "Take your prescribed oral diabetes medications (such as Metformin) consistently with meals as directed by your physician.",
+                "Check your fasting and post-meal blood sugars regularly with a home glucometer and record the numbers.",
+                "Get your HbA1c tested every 3 months; the target for most non-pregnant adults is below 7.0%."
+            ],
+            "doctor_answer": {
+                "assessment": "Type 2 Diabetes Mellitus. Assess glycemic control (HbA1c target < 7.0% individualized based on age/comorbidities), cardiovascular risk, renal function (eGFR, uACR), and microvascular complications.",
+                "investigations": "HbA1c quarterly, Fasting/PP plasma glucose, annual lipid profile, Serum Creatinine with calculated eGFR, urine Albumin-to-Creatinine Ratio (uACR), annual dilated eye exam, comprehensive diabetic foot exam with 10g monofilament.",
+                "management": "First-line pharmacotherapy: Metformin (titrate to 1000 mg BID with meals) + comprehensive lifestyle modification. If established ASCVD, heart failure, or CKD: add SGLT2 inhibitor (Empagliflozin/Dapagliflozin) or GLP-1 receptor agonist regardless of baseline HbA1c. Add second-line oral agents (DPP-4i, sulfonylurea, or basal insulin) if HbA1c remains above target.",
+                "references": ["ADA Standards of Care in Diabetes (2024)", "RSSDI (Research Society for the Study of Diabetes in India) Clinical Practice Recommendations"]
+            },
+            "staff_answer": "Priority: Triage Green unless blood sugar < 70 mg/dL (hypoglycemia) or > 300 mg/dL with symptoms (DKA/HHS). Measure capillary blood glucose. Inquire about medication adherence and last meal time.",
+            "red_flags": ["Blood sugar < 70 mg/dL with sweating, trembling, or confusion (Hypoglycemia)", "Blood sugar > 300 mg/dL with vomiting, deep rapid breathing, and abdominal pain", "Non-healing wound, blister, or black discoloration on feet or toes (Diabetic foot ulcer)", "Sudden blurry vision or dark floating spots"],
+            "follow_up_questions": ["What was your most recent HbA1c level?", "Are you experiencing increased thirst, frequent urination, or unexplained weight loss?", "Do you inspect your feet daily for small cuts or sores?"],
+            "avoid": ["Do NOT skip meals after taking insulin or sulfonylurea medications (causes severe hypoglycemia)", "Do NOT walk barefoot, even indoors (prevents unnoticed diabetic foot trauma)"],
+            "source": "American Diabetes Association (ADA) Standards of Care & RSSDI Guidelines",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, DM Endocrinology)"
+        },
+        {
+            "id": "chr_type1_diabetes_002",
+            "topic": "Type 1 Diabetes Mellitus (T1D)",
+            "category": "chronic_conditions",
+            "keywords": ["type 1 diabetes", "t1d", "juvenile diabetes", "insulin dependent", "child diabetes", "insulin therapy"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Administer your insulin regimen (basal long-acting insulin plus bolus rapid-acting insulin before meals) exactly as prescribed every single day.",
+                "Always check blood sugar before meals, at bedtime, and before physical exercise.",
+                "Learn carbohydrate counting to match your mealtime insulin dose to the amount of food you consume.",
+                "Always carry fast-acting glucose tablets or candy in your bag or pocket in case your blood sugar drops below 70 mg/dL.",
+                "Never stop taking your basal background insulin, even when you are sick, to prevent Diabetic Ketoacidosis (DKA)."
+            ],
+            "doctor_answer": {
+                "assessment": "Type 1 Diabetes Mellitus (autoimmune beta-cell destruction leading to absolute insulin deficiency). Targets: HbA1c < 7.0%, Time in Range (TIR 70-180 mg/dL) > 70% on Continuous Glucose Monitoring (CGM).",
+                "investigations": "Continuous Glucose Monitoring (CGM) or frequent self-monitoring (SMBG 4-10 times/day). Quarterly HbA1c, annual screening for celiac disease (anti-tTG IgA), autoimmune thyroid disease (TSH), annual microalbuminuria and dilated retinal exam starting 5 years post-diagnosis or puberty.",
+                "management": "Multiple daily injections (MDI: Basal insulin Glargine/Degludec once daily + Bolus insulin Aspart/Lispro before meals) or Continuous Subcutaneous Insulin Infusion (CSII / insulin pump). Provide structured education on carbohydrate counting, insulin-to-carbohydrate ratios, insulin sensitivity factor, and sick-day rules.",
+                "references": ["ISPAD (International Society for Pediatric and Adolescent Diabetes) Clinical Practice Consensus Guidelines", "ADA Standards of Care in Diabetes - Type 1"]
+            },
+            "staff_answer": "Priority: Triage Red if vomiting, tachypneic (Kussmaul breathing), or lethargic; Yellow if stable. Check bedside glucose and urine/blood ketones immediately. Never hold basal insulin without endocrine consult.",
+            "red_flags": ["Urine ketones positive with persistent nausea, vomiting, and breath smelling like fruit (DKA)", "Severe hypoglycemia unresponsive to oral sugars or with seizure/loss of consciousness", "Inability to hold down liquids for more than 4 hours"],
+            "follow_up_questions": ["What is your current basal and bolus insulin dosage?", "Have you checked your ketones recently if your blood sugar is high?", "Do you use a continuous glucose monitor (CGM) or fingerstick glucometer?"],
+            "avoid": ["NEVER omit basal insulin, even during vomiting or illness (absolute lack of insulin causes rapid DKA)", "Do NOT guess meal bolus insulin doses without checking carbohydrates"],
+            "source": "ISPAD Consensus Guidelines & American Diabetes Association",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, DM Endocrinology)"
+        },
+        {
+            "id": "chr_hypertension_003",
+            "topic": "Essential Hypertension (High Blood Pressure)",
+            "category": "chronic_conditions",
+            "keywords": ["hypertension", "high blood pressure", "high bp", "blood pressure", "uchh raktchap", "bp control"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Reduce sodium (salt) intake to less than 1 teaspoon (5 grams of salt / 2 grams of sodium) per day across all meals.",
+                "Follow the DASH eating plan: abundant vegetables, fruits, whole grains, nuts, and low-fat dairy while avoiding salty pickles, papads, and processed snacks.",
+                "Engage in 30 minutes of aerobic exercise (brisk walking, cycling, swimming) at least 5 days a week.",
+                "Limit or eliminate alcohol consumption and stop all tobacco products.",
+                "Take your prescribed blood pressure tablets every day at the same time without missing doses, even when you feel completely fine."
+            ],
+            "doctor_answer": {
+                "assessment": "Essential (Primary) Hypertension. Classify per ACC/AHA (Normal <120/<80, Elevated 120-129/<80, Stage 1 130-139/80-89, Stage 2 >=140/>=90 mmHg). Target BP: < 130/80 mmHg for most adults.",
+                "investigations": "Home BP monitoring (HBPM) or 24h Ambulatory BP Monitoring (ABPM) to rule out white-coat hypertension. Baseline: Urinalysis (proteinuria), Serum Creatinine/eGFR, Serum Electrolytes (Na, K), Fasting glucose, Lipid profile, 12-lead ECG (left ventricular hypertrophy).",
+                "management": "Stage 1 with ASCVD risk <10%: Lifestyle modification for 3-6 months. Stage 1 with ASCVD >=10% or Stage 2 HTN: Pharmacotherapy with first-line classes (ACEi/ARB, Dihydropyridine CCB, or Thiazide-like diuretic). If BP > 20/10 mmHg above goal: initiate two first-line agents of different classes (e.g. Telmisartan + Amlodipine).",
+                "references": ["ACC/AHA Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults", "ISH (International Society of Hypertension) Global Practice Guidelines"]
+            },
+            "staff_answer": "Priority: Triage Red if BP >= 180/120 mmHg with chest pain, dyspnea, or neuro symptoms (Hypertensive Crisis); Green if asymptomatic. Ensure patient sits quietly for 5 minutes with arm supported at heart level before recording BP.",
+            "red_flags": ["Blood pressure >= 180/120 mmHg with severe headache, chest pain, or visual blur (Hypertensive Emergency)", "Sudden weakness in one arm, leg, or difficulty speaking (Stroke)", "Shortness of breath and pink frothy cough (Acute pulmonary edema)"],
+            "follow_up_questions": ["What is your average home blood pressure reading?", "Are you taking your blood pressure medication consistently every day?", "Do you have any severe headaches, dizziness, or chest tightness today?"],
+            "avoid": ["Do NOT stop blood pressure medications suddenly when feeling good (can trigger rebound hypertensive crisis)", "Do NOT consume salty processed foods, papads, pickles, or salted butter"],
+            "source": "ACC/AHA Hypertension Guidelines & International Society of Hypertension",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, DM Cardiology)"
+        },
+        {
+            "id": "chr_hypercholesterolemia_004",
+            "topic": "Dyslipidemia & Hypercholesterolemia",
+            "category": "chronic_conditions",
+            "keywords": ["cholesterol", "high cholesterol", "dyslipidemia", "ldl", "triglycerides", "lipid control", "bad cholesterol"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Limit foods high in saturated and trans fats: deep-fried snacks, pastries, ghee, butter, fatty red meats, and palm oil.",
+                "Increase soluble fiber intake: eat more oats, barley, beans, lentils, flaxseeds, and leafy green vegetables, which naturally bind cholesterol in the gut.",
+                "Substitute saturated fats with heart-healthy monounsaturated and polyunsaturated fats like olive oil, mustard oil, nuts, and avocados.",
+                "Engage in regular aerobic exercise (brisk walking for 30 to 45 minutes daily) to raise your HDL ('good') cholesterol and lower triglycerides.",
+                "Take your prescribed statin tablet regularly at bedtime as advised by your doctor to lower your LDL ('bad') cholesterol."
+            ],
+            "doctor_answer": {
+                "assessment": "Dyslipidemia. Calculate 10-year Atherosclerotic Cardiovascular Disease (ASCVD) risk. Establish risk-stratified LDL-C targets: Low risk < 116 mg/dL, Moderate risk < 100 mg/dL, High risk < 70 mg/dL, Very high risk (secondary prevention) < 55 mg/dL with >=50% reduction from baseline.",
+                "investigations": "Fasting or non-fasting Lipid Panel (Total Cholesterol, LDL-C, HDL-C, Triglycerides). Baseline ALT/AST and serum creatinine. If severe hypertriglyceridemia (>500 mg/dL), evaluate for acute pancreatitis risk. Lipoprotein(a) and ApoB if intermediate/borderline risk.",
+                "management": "First-line: Moderate- to High-intensity Statin (Atorvastatin 40-80 mg or Rosuvastatin 20-40 mg daily). If LDL-C goal not achieved on maximally tolerated statin: add Ezetimibe 10 mg daily. For severe refractory hypercholesterolemia or familial hypercholesterolemia: add PCSK9 inhibitor. For severe hypertriglyceridemia (>500 mg/dL): Fenofibrate or Icosapent ethyl.",
+                "references": ["AHA/ACC/AACVPR/AAPA/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Blood Cholesterol", "ESC/EAS Guidelines for the Management of Dyslipidaemias"]
+            },
+            "staff_answer": "Priority: Triage Green. Check lipid panel results. Ask about muscle aches or stiffness (statin-associated muscle symptoms).",
+            "red_flags": ["Severe muscle pain accompanied by dark tea-colored urine (Rhabdomyolysis)", "Acute severe epigastric pain radiating to back with Triglycerides > 1000 mg/dL (Acute Pancreatitis)"],
+            "follow_up_questions": ["What was your latest LDL cholesterol and triglyceride reading?", "Do you have a personal or family history of early heart attacks before age 55 in men or 65 in women?", "Have you experienced any unexplained muscle aching since starting cholesterol medication?"],
+            "avoid": ["Do NOT stop statin therapy without discussing with your doctor (uncontrolled LDL directly builds arterial plaques)", "Do NOT consume trans-fat rich commercial bakery items"],
+            "source": "AHA/ACC Cholesterol Guidelines & European Society of Cardiology (ESC)",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, DM Cardiology)"
+        },
+        {
+            "id": "chr_hypothyroidism_005",
+            "topic": "Hypothyroidism (Underactive Thyroid)",
+            "category": "chronic_conditions",
+            "keywords": ["hypothyroidism", "thyroid", "low thyroid", "tsh high", "levothyroxine", "thyronorm", "eltroxin", "underactive thyroid"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Take your Levothyroxine tablet (e.g. Thyronorm / Eltroxin) every morning on an empty stomach with a full glass of plain water.",
+                "Wait at least 30 to 60 minutes after taking your thyroid pill before having breakfast, tea, coffee, or milk.",
+                "Separate calcium supplements, iron tablets, antacids, and soy products by at least 4 hours, as they severely block thyroid medicine absorption.",
+                "Do not change your medication dose or switch brands without consulting your doctor.",
+                "Get your TSH blood level checked every 6 to 12 weeks after a dose adjustment, and every 6 to 12 months once your dose is stable."
+            ],
+            "doctor_answer": {
+                "assessment": "Primary Hypothyroidism (Hashimoto's thyroiditis, post-ablative, post-surgical, or drug-induced). Characterized by elevated serum TSH and low/normal Free T4. Symptoms: fatigue, cold intolerance, weight gain, constipation, dry skin, menorrhagia, bradycardia.",
+                "investigations": "Serum TSH and Free T4. Anti-TPO antibodies (confirm autoimmune Hashimoto's). Lipid profile (hypothyroidism causes secondary dyslipidemia).",
+                "management": "Levothyroxine monotherapy: Full replacement dose is approximately 1.6 mcg/kg/day in young healthy adults. In elderly patients or those with coronary artery disease: start low (25-50 mcg daily) and titrate slowly every 6-8 weeks based on serum TSH target (0.5 - 2.5 mIU/L for non-elderly). Strict counseling on proper empty-stomach administration.",
+                "references": ["ATA (American Thyroid Association) Guidelines for the Treatment of Hypothyroidism", "AACE/ATA Clinical Practice Guidelines for Hypothyroidism in Adults"]
+            },
+            "staff_answer": "Priority: Triage Green unless myxedema coma suspected (hypothermia, severe bradycardia, lethargy - Triage Red). Ask specifically about timing of thyroid pill and morning tea.",
+            "red_flags": ["Severe hypothermia, confusion, profound lethargy, and facial puffiness (Myxedema Coma - Emergency)", "Heart palpitations, chest pain, or rapid irregular pulse (indicates over-replacement)", "Hypothyroidism during early pregnancy (requires immediate dose increase of 25-30% to protect fetal brain development)"],
+            "follow_up_questions": ["Do you take your thyroid pill with plain water at least 30 minutes before your morning tea or breakfast?", "What was your most recent TSH value?", "If female: Are you currently pregnant or planning a pregnancy in the near future?"],
+            "avoid": ["Do NOT take thyroid medicine with milk, tea, calcium, or iron tablets (severely blocks absorption)", "Do NOT stop thyroid medication when you feel healthy; it is lifelong replacement therapy"],
+            "source": "American Thyroid Association (ATA) Guidelines & Endocrine Society",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, DM Endocrinology)"
+        },
+        {
+            "id": "chr_hyperthyroidism_006",
+            "topic": "Hyperthyroidism & Graves' Disease (Overactive Thyroid)",
+            "category": "chronic_conditions",
+            "keywords": ["hyperthyroidism", "overactive thyroid", "graves disease", "tsh low", "thyrotoxicosis", "bulging eyes thyroid", "racing heart thyroid"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Take your prescribed antithyroid medication (such as Carbimazole or Methimazole) regularly as instructed by your endocrinologist.",
+                "Avoid excessive intake of iodine-rich foods (seaweed, kelp, iodized mineral supplements) and high-dose stimulants like caffeine.",
+                "Report immediately to an emergency room if you develop high fever and severe sore throat while on antithyroid medications (can indicate a dangerous drop in white blood cells called agranulocytosis).",
+                "Take beta-blocker tablets (like Propranolol) prescribed by your doctor to control rapid heartbeat, hand tremors, and anxiety.",
+                "Protect your eyes with sunglasses and lubricating eye drops if you experience bulging, dryness, or irritation (thyroid eye disease)."
+            ],
+            "doctor_answer": {
+                "assessment": "Hyperthyroidism / Thyrotoxicosis. Etiologies: Graves' disease (TRAb positive, diffuse toxic goiter, orbitopathy), Toxic Multinodular Goiter, Toxic Adenoma, or Subacute Thyroiditis. Characterized by suppressed TSH (<0.01 mIU/L) with elevated Free T4/T3.",
+                "investigations": "Serum TSH, Free T4, Total T3. TSH-receptor antibodies (TRAb) or Anti-TPO. Thyroid ultrasound with Doppler or Radioactive Iodine Uptake (RAIU) scan (contraindicated in pregnancy). Baseline CBC and LFTs prior to antithyroid drug initiation.",
+                "management": "Symptom relief: Beta-blockers (Propranolol 20-40 mg TID or Atenolol 25-50 mg daily). Antithyroid drugs (ATD): Carbimazole (15-40 mg daily) or Methimazole (10-30 mg daily). Propylthiouracil (PTU) preferred in 1st trimester of pregnancy. Definitive therapy: Radioactive Iodine (I-131) ablation or total thyroidectomy for relapse or toxic nodules.",
+                "references": ["ATA Guidelines for Diagnosis and Management of Hyperthyroidism and Other Causes of Thyrotoxicosis", "ETA (European Thyroid Association) Guidelines on Graves' Disease"]
+            },
+            "staff_answer": "Priority: Triage Orange/Red if high fever, severe tachycardia (>140 bpm), agitation (Thyroid Storm). Ask about sore throat or mouth ulcers in any patient taking Carbimazole/Methimazole.",
+            "red_flags": ["High fever, rapid irregular heartbeat, delirium, and extreme sweating (Thyroid Storm - Medical Emergency)", "High fever and severe sore throat on antithyroid medication (Drug-Induced Agranulocytosis)", "Double vision, severe eye pain, or inability to close eyelids completely (Severe Graves' Orbitopathy)"],
+            "follow_up_questions": ["Do you experience trembling hands, unexplained weight loss, heat intolerance, or rapid heartbeats?", "Have you had a CBC blood count checked since starting your thyroid medication?", "Have you noticed any change in the appearance of your eyes or bulging?"]
+            ,
+            "avoid": ["Do NOT ignore a sore throat or fever while taking Carbimazole/Methimazole (get an urgent CBC count)", "Do NOT take excessive kelp or iodine drops"],
+            "source": "American Thyroid Association (ATA) Hyperthyroidism Guidelines",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, DM Endocrinology)"
+        },
+        {
+            "id": "chr_asthma_maintenance_007",
+            "topic": "Bronchial Asthma (Long-Term Maintenance)",
+            "category": "chronic_conditions",
+            "keywords": ["asthma", "asthma maintenance", "inhaler", "preventer inhaler", "wheezing", "dama", "chronic asthma"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Use your daily controller inhaler (containing inhaled corticosteroid) every single day as prescribed, even on days when your chest feels completely clear.",
+                "Always use a spacer device with your metered-dose inhaler (puffer) to ensure the medication reaches deep into your lungs rather than hitting the back of your throat.",
+                "Rinse your mouth with water and spit it out after using steroid inhalers to prevent oral thrush (white fungal spots) and hoarseness.",
+                "Identify and avoid your personal asthma triggers: cigarette smoke, dust mites, pollen, pet dander, cold air, and cockroach droppings.",
+                "Always carry your rapid-acting reliever inhaler (Salbutamol) with you wherever you go for unexpected sudden breathlessness."
+            ],
+            "doctor_answer": {
+                "assessment": "Bronchial Asthma (Chronic inflammatory airway disorder with variable expiratory airflow limitation). Assess asthma control using GINA assessment (daytime symptoms, night waking, reliever frequency, activity limitation) and future risk of exacerbations.",
+                "investigations": "Spirometry with bronchodilator reversibility testing (increase in FEV1 > 12% and > 200 mL). Peak Expiratory Flow (PEF) diurnal variability. FeNO (Fractional exhaled Nitric Oxide) if available.",
+                "management": "GINA 2023 Strategy: Track 1 (preferred) uses low-dose ICS-Formoterol as both maintenance and reliever across all severities. Track 2 (alternative): daily regular maintenance ICS (e.g. Budesonide or Fluticasone) + PRN SABA reliever. Step up or step down based on symptom control review every 2-3 months. Never treat asthma with SABA monotherapy alone (increases mortality). Provide written Asthma Action Plan.",
+                "references": ["Global Initiative for Asthma (GINA) Global Strategy for Asthma Management and Prevention (2023)", "British Thoracic Society (BTS) / SIGN British Guideline on the Management of Asthma"]
+            },
+            "staff_answer": "Priority: Triage Green if well controlled; Yellow/Red if acute exacerbation. Assess inhaler technique using empty training spacer. Record resting SpO2 and PEFR.",
+            "red_flags": ["Using rescue reliever inhaler more than 2-3 times per week (indicates uncontrolled asthma)", "Waking up during the night gasping or coughing from asthma", "Peak Flow reading in the red zone (< 50% of personal best)"],
+            "follow_up_questions": ["How many times in the past month have you woken up at night because of asthma?", "Do you use a spacer device with your inhaler?", "Do you rinse your mouth after using your steroid inhaler?"],
+            "avoid": ["NEVER rely solely on blue rescue inhalers (Salbutamol) without a daily steroid controller (increases fatal asthma attacks)", "Do NOT stop controller inhalers when feeling better"],
+            "source": "GINA 2023 Global Strategy for Asthma & British Thoracic Society",
+            "review_status": "approved",
+            "reviewed_by": "Dr. S. Kulkarni (MD Pulmonology)"
+        },
+        {
+            "id": "chr_copd_008",
+            "topic": "Chronic Obstructive Pulmonary Disease (COPD)",
+            "category": "chronic_conditions",
+            "keywords": ["copd", "emphysema", "chronic bronchitis", "smokers cough", "copd inhaler", "gold copd"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Stop smoking immediately; quitting smoking is the single most effective way to slow down lung destruction in COPD.",
+                "Take your maintenance bronchodilator inhalers (LAMA / LABA) every day exactly as prescribed by your pulmonologist.",
+                "Get vaccinated annually against influenza (flu) and receive the pneumococcal pneumonia and RSV vaccines.",
+                "Participate in a pulmonary rehabilitation exercise program to strengthen breathing muscles and boost stamina.",
+                "Seek medical attention promptly if your sputum increases in volume, turns thick green or yellow, or if your breathlessness worsens."
+            ],
+            "doctor_answer": {
+                "assessment": "Chronic Obstructive Pulmonary Disease (COPD). Characterized by persistent, usually progressive airflow limitation (post-bronchodilator FEV1/FVC < 0.70). Stratify per GOLD 2023 ABCD / ABE categories based on exacerbation history and mMRC/CAT symptom scores.",
+                "investigations": "Post-bronchodilator Spirometry. Chest X-ray / High-Resolution CT Chest (rule out bronchiectasis, lung cancer, bullous emphysema). Pulse oximetry, ABG if SpO2 < 92%. Alpha-1 antitrypsin level in young or non-smokers.",
+                "management": "GOLD Group A: Single bronchodilator (LAMA or LABA). GOLD Group B: Dual long-acting bronchodilator (LAMA + LABA, e.g. Tiotropium + Olodaterol). GOLD Group E (exacerbations >=2 or >=1 hospitalization): LABA + LAMA; add Inhaled Corticosteroid (ICS) if blood eosinophils >= 300 cells/mcL. Long-Term Oxygen Therapy (LTOT >=15h/day) if PaO2 <= 55 mmHg or SpO2 <= 88%. Non-invasive ventilation (BiPAP) for acute hypercapnic exacerbations.",
+                "references": ["Global Initiative for Chronic Obstructive Lung Disease (GOLD) 2024 Report", "NICE Guideline NG115: Chronic obstructive pulmonary disease in over 16s"]
+            },
+            "staff_answer": "Priority: Triage Orange if acute worsening of dyspnea, increased purulent sputum, or SpO2 < 88%; Yellow if stable. In COPD, maintain controlled oxygen targeting SpO2 88-92% (prevent hypercapnic respiratory drive suppression).",
+            "red_flags": ["SpO2 dropping below 88% on room air", "Confusion, morning headaches, or extreme drowsiness (signs of severe CO2 retention / hypercapnia)", "Cyanosis of lips or fingertips", "Inability to speak even a few words due to air hunger"],
+            "follow_up_questions": ["What is your normal baseline oxygen saturation level at home?", "Has your phlegm changed color from clear to dark green or brown recently?", "Have you had to visit the hospital for a breathing attack in the last 12 months?"],
+            "avoid": ["Do NOT administer high-flow unregulated oxygen (target SpO2 strictly 88-92% to avoid CO2 narcosis)", "Do NOT continue smoking or expose yourself to indoor biomass chulha smoke"],
+            "source": "GOLD 2024 Global Strategy for COPD & British Thoracic Society",
+            "review_status": "approved",
+            "reviewed_by": "Dr. S. Kulkarni (MD Pulmonology)"
+        },
+        {
+            "id": "chr_gerd_chronic_009",
+            "topic": "Chronic Gastroesophageal Reflux Disease (GERD)",
+            "category": "chronic_conditions",
+            "keywords": ["gerd chronic", "chronic acidity", "acid reflux chronic", "reflux esophagitis", "barretts esophagus", "chronic heartburn"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Maintain a healthy body weight; excess abdominal weight places mechanical pressure on the stomach, forcing acid upwards.",
+                "Elevate the head of your bed by 6 inches with wooden blocks or a firm foam wedge under the mattress (extra pillows under head alone do not work).",
+                "Do not eat meals within 3 hours of going to sleep at night.",
+                "Avoid known dietary triggers: fried/fatty foods, chocolate, mint, tomato products, citrus, onions, carbonated drinks, and alcohol.",
+                "Take your prescribed Proton Pump Inhibitor (PPI like Pantoprazole or Omeprazole) 30 to 60 minutes before your first meal of the day."
+            ],
+            "doctor_answer": {
+                "assessment": "Chronic Gastroesophageal Reflux Disease (Erosive Esophagitis vs Non-Erosive Reflux Disease / NERD vs Barrett's Esophagus).",
+                "investigations": "Upper GI Endoscopy (EGD) indicated if alarm features (dysphagia, weight loss, bleeding, anemia), age > 50 with chronic symptoms (>5 years), or lack of response to PPI. 24-hour ambulatory esophageal pH-impedance monitoring if refractory or prior to antireflux surgery.",
+                "management": "Standard dose PPI (Pantoprazole 40 mg, Esomeprazole 40 mg, or Rabeprazole 20 mg once daily 30-60 min before breakfast) for 8 weeks. If partial response: optimize to twice daily dosing before breakfast and dinner. After 8 weeks, titrate to lowest effective maintenance dose. Consider anti-reflux surgery (Laparoscopic Nissen Fundoplication) or endoscopic procedures for selected patients.",
+                "references": ["ACG Clinical Guideline for the Diagnosis and Management of Gastroesophageal Reflux Disease (2022)", "AGA Clinical Practice Update on De-prescribing PPIs"]
+            },
+            "staff_answer": "Priority: Triage Green unless alarm features present. Screen for dysphagia (difficulty swallowing) and chest pain on exertion.",
+            "red_flags": ["Difficulty swallowing food or pills (Dysphagia) or painful swallowing (Odynophagia)", "Unexplained weight loss or chronic fatigue with anemia", "Vomiting blood or passing black tarry stools", "Persistent hoarseness of voice or chronic dry night cough"],
+            "follow_up_questions": ["Do you feel food getting stuck in your chest when you swallow?", "How many hours before going to bed do you eat dinner?", "Have you ever had an upper endoscopy procedure done?"]
+            ,
+            "avoid": ["Do NOT lie down flat immediately after eating meals", "Do NOT take long-term high-dose PPIs indefinitely without periodic clinical review and calcium/magnesium/B12 monitoring"],
+            "source": "American College of Gastroenterology (ACG) 2022 Guidelines",
+            "review_status": "approved",
+            "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+        },
+        {
+            "id": "chr_ckd_010",
+            "topic": "Chronic Kidney Disease (CKD)",
+            "category": "chronic_conditions",
+            "keywords": ["ckd", "chronic kidney disease", "kidney failure", "creatinine high", "egfr", "kidney disease", "protein in urine", "gurde ki bimari"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Strictly control your blood pressure (aiming below 130/80 mmHg) and blood sugar levels; these are the two main drivers of kidney deterioration.",
+                "Strictly limit dietary salt (sodium) to less than 2 grams per day (about 1 level teaspoon of table salt).",
+                "Follow a kidney-friendly diet guided by a renal dietitian: moderate protein intake and monitor high-potassium foods (bananas, coconut water, potatoes) if advised by your nephrologist.",
+                "STRICTLY AVOID all NSAID painkillers (like Brufen, Ibuprofen, Diclofenac, Naproxen, Combiflam) which directly destroy kidney filtering units.",
+                "Never miss regular blood tests for serum creatinine, electrolytes, and urine protein."
+            ],
+            "doctor_answer": {
+                "assessment": "Chronic Kidney Disease (Abnormalities of kidney structure or function present for > 3 months). Stage per KDIGO G1-G5 based on eGFR and A1-A3 based on urine Albumin-to-Creatinine Ratio (uACR). Common etiologies: Diabetic Kidney Disease, Hypertensive Nephrosclerosis, Glomerulonephritis.",
+                "investigations": "Serum Creatinine with CKD-EPI calculated eGFR, spot urine uACR, Serum Electrolytes (K, Na, Bicarbonate), Calcium, Phosphate, intact PTH, CBC (anemia of CKD), renal ultrasonography (kidney size, cortical echogenicity, hydronephrosis).",
+                "management": "Blood pressure target < 130/80 mmHg. First-line renoprotective therapy: ACE inhibitor (e.g. Ramipril) or ARB (e.g. Telmisartan) titrated to maximally tolerated dose for proteinuria (uACR >= 30 mg/g). Add SGLT2 inhibitor (Dapagliflozin 10 mg or Empagliflozin 10 mg daily) to dramatically slow CKD progression and reduce CV death. Non-steroidal MRA (Finerenone) in diabetic CKD. Dietary protein restriction (0.6-0.8 g/kg/day). Treat complications: oral sodium bicarbonate for metabolic acidosis (HCO3 < 22), Erythropoiesis-Stimulating Agents (ESA) for anemia (Hb < 10 g/dL), phosphate binders.",
+                "references": ["KDIGO 2024 Clinical Practice Guideline for the Evaluation and Management of Chronic Kidney Disease", "KDOQI Clinical Practice Guidelines for CKD"]
+            },
+            "staff_answer": "Priority: Triage Yellow / Orange if severe hyperkalemia (K > 6.0 mEq/L) or pulmonary edema; Green if stable. Record accurate BP, weight, and check lower extremity edema. Keep strictly alert to nephrotoxic drug orders.",
+            "red_flags": ["Serum potassium > 6.0 mEq/L with tall peaked T waves on ECG (Hyperkalemic Emergency)", "Severe shortness of breath when lying flat with puffy ankles (Fluid Overload / Pulmonary Edema)", "Confusion, nausea, hiccups, or pericardial friction rub (Uremic Syndrome requiring emergent dialysis)", "Sudden drop in 24-hour urine volume (< 400 mL/day)"],
+            "follow_up_questions": ["What is your latest serum creatinine and eGFR reading?", "Do you have any swelling in your feet or face in the morning?", "Are you taking any over-the-counter pain medications like Ibuprofen or Diclofenac?"],
+            "avoid": ["NEVER take NSAIDs (Ibuprofen, Diclofenac, Naproxen) in kidney disease (triggers acute-on-chronic renal shutdown)", "Do NOT consume excessive coconut water or raw juices high in potassium without nephrology clearance in advanced CKD"],
+            "source": "KDIGO 2024 Clinical Practice Guidelines & National Kidney Foundation (NKF)",
+            "review_status": "approved",
+            "reviewed_by": "Dr. A. Sharma (MD, Nephrology)"
+        },
+        {
+            "id": "chr_fatty_liver_011",
+            "topic": "Metabolic Dysfunction-Associated Steatohepatitis (MASH / NAFLD)",
+            "category": "chronic_conditions",
+            "keywords": ["fatty liver", "nafld", "mash", "nash", "liver fat", "steatosis", "sgpt sgot high", "fibroscan"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Aim for a gradual, sustained body weight reduction of 7% to 10%, which has been proven to significantly reverse liver fat and inflammation.",
+                "Adopt a Mediterranean-style dietary pattern: abundant vegetables, legumes, whole grains, nuts, and olive oil while eliminating sugary drinks and refined carbs.",
+                "Strictly eliminate sugar-sweetened beverages, sodas, packaged fruit juices, and high-fructose corn syrups.",
+                "Engage in at least 150 to 200 minutes of moderate aerobic exercise and resistance training each week.",
+                "Completely avoid or strictly limit alcohol consumption, as alcohol accelerates progression to liver fibrosis and cirrhosis."
+            ],
+            "doctor_answer": {
+                "assessment": "Metabolic Dysfunction-Associated Steatotic Liver Disease (MASLD, formerly NAFLD) / MASH. Stratify liver fibrosis risk using non-invasive scores: FIB-4 index (<1.30 low risk, >2.67 high risk of advanced fibrosis). Assess coexisting metabolic syndrome components.",
+                "investigations": "Liver Function Tests (ALT, AST, ALP, GGT), Lipid Profile, Fasting glucose & HbA1c, Viral hepatitis screen (HBsAg, Anti-HCV to exclude viral etiology). Non-invasive fibrosis assessment: FIB-4 score, Transient Elastography (FibroScan: liver stiffness measurement in kPa and CAP score for steatosis).",
+                "management": "Lifestyle intervention is foundational (hypocaloric diet with 500-1000 kcal/day deficit, weight loss goal 7-10%). Management of comorbidities: Statin therapy for dyslipidemia (safe and indicated in MASLD), Metformin / SGLT2i / GLP-1 receptor agonists (Semaglutide) for type 2 diabetes with proven hepatic benefits. Resmetirom (THR-beta agonist) in non-cirrhotic MASH with moderate-to-advanced fibrosis. Vitamin E 800 IU daily in non-diabetic biopsy-proven MASH.",
+                "references": ["AASLD Practice Guidance on Non-Alcoholic Fatty Liver Disease (2023)", "EASL-EASD-EASO Clinical Practice Guidelines on MASLD"]
+            },
+            "staff_answer": "Priority: Triage Green. Calculate FIB-4 score using patient age, AST, ALT, and platelet count. Check waist circumference and BMI.",
+            "red_flags": ["Signs of portal hypertension / decompensated cirrhosis: jaundice, ascites (fluid in abdomen), or vomiting blood", "Confusion, lethargy, or day-night sleep reversal (Hepatic encephalopathy)", "Platelet count dropping below 150,000/mcL in chronic liver disease"],
+            "follow_up_questions": ["What was your latest ultrasound report regarding liver grade (Grade 1, 2, or 3)?", "Have you had a FibroScan test to measure liver stiffness and fibrosis?", "Do you have diabetes, high blood pressure, or high cholesterol?"],
+            "avoid": ["Do NOT drink alcohol in any quantity if you have fatty liver with elevated enzymes", "Do NOT consume commercial packaged fruit juices and sodas laden with fructose"],
+            "source": "American Association for the Study of Liver Diseases (AASLD) & EASL Guidelines",
+            "review_status": "approved",
+            "reviewed_by": "Dr. A. Sharma (MD, Gastroenterology)"
+        },
+        {
+            "id": "chr_osteoarthritis_012",
+            "topic": "Osteoarthritis (Knee & Hip / Sandhivata)",
+            "category": "chronic_conditions",
+            "keywords": ["osteoarthritis", "knee osteoarthritis", "wear and tear arthritis", "sandhivata", "ghutne ghisna", "joint cartilage wear"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Engage in low-impact aerobic exercises such as swimming, stationary cycling, and water aerobics which strengthen muscles without jarring joints.",
+                "Perform daily quadriceps-strengthening exercises (like straight leg raises) to stabilize the knee cap and absorb walking shock.",
+                "Losing excess body weight reduces enormous strain: losing just 1 kg of weight relieves 4 kg of pressure off each knee joint with every step.",
+                "Apply topical pain-relieving gels (containing Diclofenac) directly onto the joint 2 to 3 times daily before taking oral painkillers.",
+                "Wear well-cushioned shoes and consider using a walking stick in the opposite hand if balance or joint pain is significant."
+            ],
+            "doctor_answer": {
+                "assessment": "Osteoarthritis (Degenerative joint disease characterized by cartilage breakdown, subchondral sclerosis, and osteophyte formation). Clinical criteria: joint pain exacerbated by use and relieved by rest, morning stiffness < 30 minutes, crepitus, and bony enlargement.",
+                "investigations": "Weight-bearing plain radiographs (AP and lateral views): joint space narrowing, subchondral sclerosis, osteophytes, subchondral cysts (Kellgren-Lawrence grading 1 to 4). Routine MRI is NOT recommended for uncomplicated OA.",
+                "management": "Core non-pharmacological therapies: Exercise therapy (quadriceps strengthening, aerobic fitness), weight management, walking aids. Pharmacological: Topical NSAIDs (Diclofenac gel) first-line for knee OA (strongly recommended over oral NSAIDs due to superior safety). Oral NSAIDs at lowest dose for short courses only if topical therapy inadequate. Intra-articular corticosteroid injections for acute inflammatory flare. Total joint arthroplasty (knee/hip replacement) for end-stage refractory disease with severe functional limitation.",
+                "references": ["OARSI Guidelines for the Non-Surgical Management of Knee, Hip, and Polyarticular Osteoarthritis", "ACR/Arthritis Foundation Guideline for the Management of Osteoarthritis"]
+            },
+            "staff_answer": "Priority: Triage Green. Assess mobility, fall risk, and assist patient with wheelchair or cane if needed. Check BMI.",
+            "red_flags": ["Acute hot, red, intensely swollen joint with fever (concern for Septic Arthritis)", "Inability to bear any weight on the joint", "Sudden knee locking where joint cannot be straightened (Meniscal flap tear)"],
+            "follow_up_questions": ["Does the joint feel stiff in the morning, and does that stiffness loosen within 30 minutes?", "Does the pain get worse with walking and improve when you sit down?", "Have you tried applying topical pain relief gels before taking oral painkillers?"],
+            "avoid": ["Do NOT take daily oral NSAID painkillers (Brufen, Diclofenac) indefinitely (causes stomach ulcers and kidney damage)", "Do NOT remain completely sedentary (causes muscle wasting and worsens joint pain)"],
+            "source": "OARSI Treatment Guidelines & American College of Rheumatology",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, Orthopedics)"
+        },
+        {
+            "id": "chr_rheumatoid_arthritis_013",
+            "topic": "Rheumatoid Arthritis (RA / Aamvata)",
+            "category": "chronic_conditions",
+            "keywords": ["rheumatoid arthritis", "ra", "autoimmune arthritis", "symmetric joint swelling", "morning stiffness joints", "aamvata", "rf positive", "anti ccp"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Consult a rheumatologist as early as possible; starting specialized medications (DMARDs) early prevents irreversible joint destruction and deformity.",
+                "Take your prescribed disease-modifying medications (such as Methotrexate) strictly on schedule; note that Methotrexate is taken once a WEEK, never daily.",
+                "Take Folic acid supplements as prescribed alongside Methotrexate to reduce mouth ulcers and nausea.",
+                "Apply gentle moist heat in the morning to relieve prolonged stiffness, and cold packs to inflamed, warm joints during flares.",
+                "Perform gentle range-of-motion hand and joint exercises daily to maintain flexibility without overstraining."
+            ],
+            "doctor_answer": {
+                "assessment": "Rheumatoid Arthritis (Chronic systemic autoimmune inflammatory polyarthritis). Hallmark: Symmetrical peripheral polyarthritis involving MCP, PIP, and wrist joints, with prolonged morning stiffness (> 60 minutes). Classify per 2010 ACR/EULAR classification criteria.",
+                "investigations": "Rheumatoid Factor (RF), Anti-Cyclic Citrullinated Peptide (Anti-CCP / ACPA, high specificity ~95-98%), baseline ESR and CRP (disease activity markers). Bilateral hand and foot radiographs (marginal erosions, periarticular osteopenia). Baseline CBC, LFTs, Serum Creatinine, Chest X-ray, Hepatitis B/C, and QuantiFERON-TB prior to DMARD/biologic initiation.",
+                "management": "Treat-to-Target (T2T) strategy targeting clinical remission or low disease activity (DAS28 < 2.6). Anchor conventional synthetic DMARD: Oral Methotrexate 15-25 mg ONCE WEEKLY + Folic Acid 5 mg weekly (taken 24-48h post-MTX). Short-course low-dose bridging glucocorticoids (Prednisone <= 10 mg/day). If target not reached in 3-6 months: add combination csDMARDs (Sulfasalazine, Hydroxychloroquine) or escalate to biologic DMARD (anti-TNF, IL-6 inhibitor, or JAK inhibitor).",
+                "references": ["ACR Guideline for the Treatment of Rheumatoid Arthritis (2021)", "EULAR Recommendations for the Management of Rheumatoid Arthritis (2022)"]
+            },
+            "staff_answer": "Priority: Triage Yellow if acute severe joint flare or steroid-induced infection; Green if stable follow-up. Check CBC and liver enzymes for patients on Methotrexate. Verify MTX is dosed weekly, NOT daily.",
+            "red_flags": ["Methotrexate taken daily by mistake (Severe fatal bone marrow toxicity / Pancytopenia Emergency)", "High fever with a single hot swollen joint in an RA patient on immunosuppressants (Superimposed Septic Joint)", "Sudden numbness, weakness, or neck pain with arm shooting pain (Cervical spine atlantoaxial subluxation)"],
+            "follow_up_questions": ["How long does your joint stiffness last in the morning (is it more than 1 hour)?", "Are you taking Methotrexate once a week or every day?", "Are the small joints on both hands swollen and tender symmetrically?"],
+            "avoid": ["NEVER TAKE METHOTREXATE DAILY (it must be taken strictly ONCE A WEEK; daily intake can be fatal)", "Do NOT stop DMARD therapy abruptly without rheumatology consultation"],
+            "source": "American College of Rheumatology (ACR) & EULAR Recommendations",
+            "review_status": "approved",
+            "reviewed_by": "Dr. A. Sharma (MD, Rheumatology)"
+        },
+        {
+            "id": "chr_atrial_fibrillation_014",
+            "topic": "Atrial Fibrillation (AFib / Irregular Heartbeat)",
+            "category": "chronic_conditions",
+            "keywords": ["atrial fibrillation", "afib", "irregular heartbeat", "palpitations", "fluttering heart", "blood thinner afib", "cha2ds2-vasc"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Take your prescribed oral blood thinner (anticoagulant such as Apixaban, Rivaroxaban, or Warfarin) every single day without skipping doses to protect against a stroke.",
+                "Avoid excessive alcohol, energy drinks, and high caffeine intake, which can trigger episodes of rapid, irregular heart flutter.",
+                "Check your pulse occasionally: note if the rhythm feels completely disorganized, skipped, and irregular ('irregularly irregular').",
+                "Take your rate-control medication (such as a beta-blocker) to keep your resting heart rate comfortable and prevent heart fatigue.",
+                "Seek immediate emergency care if you experience chest pain, breathlessness, dizziness, or sudden weakness on one side of your body."
+            ],
+            "doctor_answer": {
+                "assessment": "Atrial Fibrillation (Supraventricular tachyarrhythmia with uncoordinated atrial electrical activation). Categorize: Paroxysmal, Persistent, Long-standing Persistent, or Permanent. Assess stroke risk using CHA2DS2-VASc score and bleeding risk using HAS-BLED score.",
+                "investigations": "12-lead ECG (absent P waves, fibrillatory baseline, irregularly irregular RR intervals). Transthoracic Echocardiogram (TTE: left atrial enlargement, LV systolic function, valvular disease). Thyroid function tests (TSH to rule out thyrotoxicosis), serum electrolytes (K, Mg), CBC, renal function.",
+                "management": "Stroke Prevention: Direct Oral Anticoagulant (DOAC: Apixaban 5 mg BID, Rivaroxaban 20 mg daily, or Dabigatran 150 mg BID) preferred over Warfarin in non-valvular AF if CHA2DS2-VASc >= 2 in men or >= 3 in women. Rate control: Beta-blockers (Metoprolol, Bisoprolol) or non-dihydropyridine CCBs (Diltiazem, Verapamil) targeting resting HR < 100-110 bpm. Rhythm control (antiarrhythmics or catheter ablation) for symptomatic patients or heart failure.",
+                "references": ["ESC Guidelines for the Diagnosis and Management of Atrial Fibrillation", "AHA/ACC/ACCP/HRS Guideline for the Management of Patients With Atrial Fibrillation"]
+            },
+            "staff_answer": "Priority: Triage Orange/Red if ventricular rate > 140 bpm, SBP < 90 mmHg, or chest pain; Yellow if stable. Acquire 12-lead ECG immediately and place on continuous cardiac monitor.",
+            "red_flags": ["Sudden facial droop, arm weakness, or speech slurring (Acute Stroke - highest risk in AFib)", "Resting heart rate > 150 bpm with chest pressure or lightheadedness (Rapid Ventricular Response)", "Unusual severe bleeding, black stools, or coughing up blood while taking blood thinners"],
+            "follow_up_questions": ["What is your current blood thinner medication and do you take it consistently?", "Does your pulse feel rapid and completely irregular?", "Have you experienced any episodes of fainting or near-fainting?"]
+            ,
+            "avoid": ["Do NOT skip doses of DOAC blood thinners (their protective effect wears off within 24 hours)", "Do NOT take Aspirin or Ibuprofen together with your blood thinner without explicit cardiologist instruction (severe bleeding risk)"],
+            "source": "European Society of Cardiology (ESC) & AHA/ACC/HRS Guidelines",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, DM Cardiology)"
+        },
+        {
+            "id": "chr_heart_failure_015",
+            "topic": "Chronic Heart Failure (Congestive Heart Failure / HFrEF)",
+            "category": "chronic_conditions",
+            "keywords": ["heart failure", "chf", "congestive heart failure", "weak heart", "ejection fraction low", "pedal edema breathlessness", "hfref"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Weigh yourself every single morning after urinating and before eating; write down the weight in a logbook. If your weight jumps by 1.5 to 2 kg (3 to 4 lbs) in 2 days, call your clinic immediately (indicates dangerous water accumulation).",
+                "Strictly limit dietary salt (sodium) to less than 2 grams per day (about 1 level teaspoon of salt across all food).",
+                "Follow fluid intake limits (typically 1.5 to 2 liters daily) as recommended by your cardiologist to prevent lung congestion.",
+                "Take all your heart failure medications consistently; modern guideline medications strengthen your heart and help you live longer.",
+                "Elevate your head with 2 to 3 pillows when sleeping if you feel breathless lying flat."
+            ],
+            "doctor_answer": {
+                "assessment": "Heart Failure with Reduced Ejection Fraction (HFrEF: LVEF <= 40%) vs Preserved Ejection Fraction (HFpEF: LVEF >= 50%). Assess NYHA Functional Class I-IV and signs of congestion (elevated JVP, S3 gallop, pulmonary crackles, peripheral edema).",
+                "investigations": "2D Echocardiogram with Doppler. Serum BNP or NT-proBNP (biomarkers of myocardial wall stress). 12-lead ECG, Chest X-ray (cardiomegaly, Kerley B lines, pulmonary venous congestion), Renal function, Serum Electrolytes, Iron studies (Ferritin, TSAT).",
+                "management": "Four Pillars of Guideline-Directed Medical Therapy (GDMT) for HFrEF: 1. ARNI (Sacubitril/Valsartan 24/26 mg to 97/103 mg BID; requires 36h ACEi washout) or ACEi/ARB. 2. Evidence-based Beta-blocker (Carvedilol, Bisoprolol, or Metoprolol Succinate). 3. Mineralocorticoid Receptor Antagonist (MRA: Spironolactone 25-50 mg daily). 4. SGLT2 inhibitor (Dapagliflozin 10 mg or Empagliflozin 10 mg daily). Add Loop Diuretics (Furosemide/Torsemide) titrated for congestion relief. IV Iron (Ferric carboxymaltose) for iron deficiency.",
+                "references": ["AHA/ACC/HFSA Guideline for the Management of Heart Failure (2022)", "ESC Guidelines for the Diagnosis and Treatment of Acute and Chronic Heart Failure"]
+            },
+            "staff_answer": "Priority: Triage Red if severe acute orthopnea, pink frothy sputum, or SBP < 90 mmHg (Cardiogenic Shock / Flash Pulmonary Edema); Orange if worsening edema. Check weight, SpO2, and JVP elevation.",
+            "red_flags": ["Sudden severe breathlessness waking you from sleep gasping for air (Paroxysmal Nocturnal Dyspnea)", "Rapid weight gain of >2 kg in 48 hours accompanied by puffy ankles", "Inability to lie flat in bed without choking (Orthopnea)", "Persistent dizziness or systolic BP dropping below 85 mmHg"],
+            "follow_up_questions": ["How many pillows do you sleep on at night to breathe comfortably?", "Has your weight increased over the last few days?", "Are your ankles, calves, or abdomen more swollen than usual?"],
+            "avoid": ["Do NOT consume salty chips, pickles, salted snacks, or excess fluids", "Do NOT take NSAIDs (Ibuprofen, Diclofenac) which cause severe sodium and fluid retention and trigger acute heart failure decompensation"],
+            "source": "AHA/ACC/HFSA Heart Failure Guidelines & European Society of Cardiology",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, DM Cardiology)"
+        },
+        {
+            "id": "chr_anemia_016",
+            "topic": "Iron Deficiency Anemia (Khoon ki Kami)",
+            "category": "chronic_conditions",
+            "keywords": ["anemia", "iron deficiency", "khoon ki kami", "low hemoglobin", "ferritin low", "pale skin weakness", "iron tablets"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Take your prescribed oral iron tablet (such as Ferrous Ascorbate or Ferrous Sulfate) with a glass of water or citrus juice (rich in Vitamin C) on an empty stomach or between meals to maximize absorption.",
+                "Do NOT take iron pills with tea, coffee, milk, or calcium supplements, as these compounds severely block iron absorption by up to 80%.",
+                "Eat iron-rich foods: green leafy vegetables (spinach, fenugreek), dates, jaggery, beetroot, pomegranates, lentils, beans, eggs, and lean meats.",
+                "Expect your stools to turn dark green or black while taking iron tablets; this is a completely harmless side effect.",
+                "Continue taking iron therapy for at least 3 months after your hemoglobin normalizes to replenish your body's deep iron stores."
+            ],
+            "doctor_answer": {
+                "assessment": "Iron Deficiency Anemia (Microcytic, hypochromic anemia). Must identify underlying etiology: Menorrhagia/uterine pathology in premenopausal females; Occult gastrointestinal blood loss (peptic ulcer, colorectal malignancy, celiac disease, hookworm) in adult men and postmenopausal women.",
+                "investigations": "Complete Blood Count (CBC: low Hb, low MCV < 80 fL, low MCH), Peripheral Blood Smear, Serum Ferritin (gold standard: ferritin < 30 ng/mL diagnostic of iron deficiency), Serum Iron, Total Iron Binding Capacity (TIBC), Transferrin Saturation (TSAT < 20%). Fecal Occult Blood Test (FOBT) and Upper/Lower GI endoscopy indicated in men and postmenopausal women.",
+                "management": "Oral iron therapy: 60-100 mg of elemental iron daily (or alternate-day dosing to reduce hepcidin elevation and enhance absorption) for 3-6 months. Intravenous iron (Ferric carboxymaltose or Iron isomaltoside) indicated for oral intolerance, severe anemia (Hb < 7-8 g/dL), malabsorption (celiac/IBD), or 2nd/3rd trimester pregnancy. Treat root cause.",
+                "references": ["British Society of Gastroenterology (BSG) Guidelines for the Management of Iron Deficiency Anaemia in Adults", "WHO Guidelines on Iron Supplementation"]
+            },
+            "staff_answer": "Priority: Triage Orange if Hb < 7 g/dL with severe fatigue, tachycardia, or chest tightness; Yellow if stable. Inspect conjunctiva, tongue, and nail beds for pallor and koilonychia (spoon nails).",
+            "red_flags": ["Severe shortness of breath on minimal exertion or chest pain (High-output cardiac compromise)", "Passing black tarry stools (Melena) or vomiting blood", "Extreme dizziness, lightheadedness, or syncope upon standing", "Severe anemia in late pregnancy"],
+            "follow_up_questions": ["What was your latest Hemoglobin and Serum Ferritin reading?", "Have you noticed any black-colored stools or bleeding from hemorrhoids?", "If female: Are your menstrual periods unusually heavy or prolonged?"],
+            "avoid": ["Do NOT drink tea or coffee within 2 hours of taking your iron tablet (tannins block absorption)", "Do NOT stop iron pills as soon as you feel energetic; full bone marrow stores take months to rebuild"],
+            "source": "British Society of Gastroenterology (BSG) & WHO Nutritional Anemia Guidelines",
+            "review_status": "approved",
+            "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+        },
+        {
+            "id": "chr_gout_017",
+            "topic": "Gout & Hyperuricemia",
+            "category": "chronic_conditions",
+            "keywords": ["gout", "uric acid high", "big toe pain swelling", "hyperuricemia", "gout attack", "allopurinol", "tophi"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "During an acute flare: rest and elevate the painful joint, apply a wrapped ice pack for 15 to 20 minutes, and avoid placing any weight or blankets on it.",
+                "Drink 2.5 to 3 liters of water daily to help flush excess uric acid through your kidneys.",
+                "Limit high-purine foods: red meat, organ meats (liver, kidney), seafood, and yeast extracts.",
+                "Strictly avoid beer and spirits, as well as sugary drinks and sodas sweetened with high-fructose corn syrup.",
+                "Take your daily uric acid-lowering pill (such as Allopurinol or Febuxostat) consistently every day to prevent future attacks and kidney stones."
+            ],
+            "doctor_answer": {
+                "assessment": "Gout (Monosodium urate / MSU crystal deposition disease). Classical presentation: Acute podagra (exquisitely painful, erythematous, swollen first metatarsophalangeal joint). Chronic tophaceous gout and uric acid nephrolithiasis.",
+                "investigations": "Arthrocentesis with polarized light microscopy (gold standard: needle-shaped, negatively birefringent MSU crystals). Serum Uric Acid (note: can be falsely normal during acute flare; check 2-4 weeks post-flare). Dual-energy CT (DECT) or ultrasound (double-contour sign). Renal function (creatinine/eGFR).",
+                "management": "Acute Flare: First-line oral NSAIDs (Naproxen, Indomethacin), Colchicine (1 mg loading dose, then 0.5 mg 1 hour later; caution in renal impairment), or systemic corticosteroids (Prednisolone 30-35 mg/day for 5 days). Urate-Lowering Therapy (ULT): Allopurinol (start 100 mg daily; titrate up to 300-800 mg daily) or Febuxostat. Target Serum Uric Acid < 6.0 mg/dL (< 5.0 mg/dL if tophi present). Co-prescribe flare prophylaxis (low-dose Colchicine 0.5 mg daily) for the first 3-6 months of ULT.",
+                "references": ["ACR Guideline for the Management of Gout (2020)", "EULAR Evidence-Based Recommendations for the Management of Gout"]
+            },
+            "staff_answer": "Priority: Triage Yellow if acute severe joint pain; Green if routine follow-up. Do not touch or squeeze the acutely inflamed joint (exquisitely sensitive even to a bedsheet).",
+            "red_flags": ["Acute severe warm swelling with fever (must rule out septic arthritis by joint aspiration)", "Severe flank pain with blood in urine (Uric Acid Kidney Stone / Ureteral Colic)", "Hard chalky white nodules breaking through the skin (Infected tophi)"],
+            "follow_up_questions": ["Is the pain located at the base of your big toe?", "What was your most recent serum uric acid level?", "Did the excruciating pain wake you up abruptly in the middle of the night?"],
+            "avoid": ["Do NOT abruptly stop or start Allopurinol during the peak of an acute attack (sudden uric acid shifts prolong the flare)", "Do NOT drink beer or sugary high-fructose sodas"],
+            "source": "American College of Rheumatology (ACR) Gout Guidelines & EULAR",
+            "review_status": "approved",
+            "reviewed_by": "Dr. A. Sharma (MD, Rheumatology)"
+        },
+        {
+            "id": "chr_migraine_chronic_018",
+            "topic": "Chronic Migraine (Long-Term Prevention)",
+            "category": "chronic_conditions",
+            "keywords": ["chronic migraine", "frequent migraine", "migraine prevention", "daily headache", "propranolol migraine", "botox migraine", "headache days"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Maintain a headache diary: record every attack, potential triggers, duration, and what medication helped.",
+                "Practice regular lifestyle habits: go to sleep and wake up at consistent hours, never skip meals, and drink adequate water throughout the day.",
+                "Identify common triggers: sudden stress changes, lack of sleep, sensory overload (bright flickering lights, loud sounds), and weather shifts.",
+                "Take your daily preventive migraine medication every day as prescribed to reduce the frequency and severity of future attacks.",
+                "Strictly limit painkiller and triptan usage to no more than 2 days per week to avoid triggering rebound 'medication-overuse headaches'."
+            ],
+            "doctor_answer": {
+                "assessment": "Chronic Migraine (Headache occurring on >= 15 days/month for > 3 months, which on >= 8 days/month has features of migraine headache). Rule out Medication-Overuse Headache (MOH: regular overuse of acute headache meds for >=10-15 days/month).",
+                "investigations": "Headache diary. Brain MRI indicated if new onset, change in headache pattern, focal neurological deficits, or refractory to standard therapy.",
+                "management": "First-line oral preventives: Beta-blockers (Propranolol 40-160 mg daily), Anticonvulsants (Topiramate 50-100 mg daily or Divalproex Sodium), Tricyclic Antidepressants (Amitriptyline 10-50 mg at bedtime), or Flunarizine (5-10 mg daily). Advanced therapies: OnabotulinumtoxinA (Botox) injections every 12 weeks, or CGRP antagonists (monoclonal antibodies: Erenumab, Galcanezumab, Fremanezumab). Address coexisting sleep apnea, anxiety, or depression.",
+                "references": ["AHS (American Headache Society) Consensus Statement on Prevention of Migraine", "European Headache Federation (EHF) Guidelines on Chronic Migraine"]
+            },
+            "staff_answer": "Priority: Triage Green unless thunderclap onset or focal neuro deficits (Triage Red). Ask patient how many days per month they take painkillers.",
+            "red_flags": ["Headache reaching maximum peak intensity within 60 seconds (Thunderclap Headache)", "Headache associated with persistent fever, neck stiffness, or confusion", "New onset of weakness, numbness, speech slurring, or vision loss", "Significant change in headache pattern in a patient over 50 years old"],
+            "follow_up_questions": ["How many days in a typical month do you experience a headache?", "How many days per week do you take painkillers or acute migraine tablets?", "Do you notice specific triggers like missed meals, lack of sleep, or stress?"],
+            "avoid": ["Do NOT take acute pain relievers (triptans, paracetamol, NSAIDs) more than 10-14 days a month (leads to rebound chronic daily headache)", "Do NOT skip meals or disrupt sleep schedules"],
+            "source": "American Headache Society (AHS) Consensus Guidelines & International Headache Society",
+            "review_status": "approved",
+            "reviewed_by": "Dr. V. Menon (DM Neurology)"
+        },
+        {
+            "id": "chr_allergic_rhinitis_019",
+            "topic": "Allergic Rhinitis (Hay Fever / Nasal Allergy)",
+            "category": "chronic_conditions",
+            "keywords": ["allergic rhinitis", "nasal allergy", "hay fever", "sneezing fits", "running nose allergy", "nasal spray allergy", "itchy nose eyes"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Use your prescribed steroid nasal spray (such as Fluticasone or Mometasone) daily; point the nozzle slightly outwards towards your ear rather than at the central nasal septum.",
+                "Rinse your nasal passages with a saline nasal spray or sinus rinse bottle daily to wash away trapped pollen and dust particles.",
+                "Keep bedroom windows closed during high-pollen morning hours and use an air purifier with a HEPA filter if possible.",
+                "Wash your bedsheets and pillowcases in hot water (at least 60°C / 140°F) weekly to eliminate dust mites.",
+                "Take a non-drowsy oral antihistamine (such as Cetirizine 10 mg, Fexofenadine 120-180 mg, or Bilastine 20 mg) for quick relief of sneezing and itching."
+            ],
+            "doctor_answer": {
+                "assessment": "Allergic Rhinitis (ARIA guidelines: Intermittent vs Persistent, Mild vs Moderate-Severe). IgE-mediated inflammatory response of the nasal mucous membranes. Symptoms: paroxysmal sneezing, clear rhinorrhea, nasal congestion, itching of nose/palate/eyes.",
+                "investigations": "Clinical diagnosis. Skin Prick Testing (SPT) or serum allergen-specific IgE (ImmunoCAP) to identify specific aeroallergens (dust mites, pollens, molds, animal dander). Anterior rhinoscopy (pale, boggy, bluish nasal turbinates with watery discharge).",
+                "management": "First-line for moderate-severe or persistent symptoms: Intranasal Corticosteroid spray (INCS: Fluticasone Furoate, Mometasone Furoate, or Budesonide 1-2 sprays per nostril daily). Intranasal antihistamine + steroid combination spray (Azelastine-Fluticasone). Oral second-generation H1-antihistamines (Bilastine, Fexofenadine, Levocetirizine). Allergen Immunotherapy (SLIT / SCIT) for refractory disease.",
+                "references": ["Allergic Rhinitis and its Impact on Asthma (ARIA) Guidelines (2020 Revision)", "AAO-HNS Clinical Practice Guideline: Allergic Rhinitis"]
+            },
+            "staff_answer": "Priority: Triage Green. Demonstrate proper nasal spray technique: head tilted slightly forward, aim nozzle towards the outer eye/ear, breathe in gently, do not snort hard.",
+            "red_flags": ["Clear watery fluid dripping continuously from ONE nostril only, especially after head trauma or bending forward (Cerebrospinal Fluid / CSF Rhinorrhea)", "Unilateral nasal obstruction with foul-smelling purulent discharge or frequent nosebleeds", "Severe eye pain, swelling, or redness around the eye socket"],
+            "follow_up_questions": ["Do you use a steroid nasal spray, and do you use it consistently every day?", "Are your symptoms worse during specific seasons or year-round in the bedroom?", "Do you experience wheezing or breathlessness alongside your nasal allergy?"],
+            "avoid": ["Do NOT use over-the-counter decongestant nasal sprays (like Otrivin / Xylometazoline) for more than 3 to 5 consecutive days (causes severe rebound congestion / Rhinitis Medicamentosa)", "Do NOT spray directly at your nasal septum (can cause septal ulceration or nosebleeds)"],
+            "source": "ARIA Guidelines & American Academy of Otolaryngology-Head and Neck Surgery",
+            "review_status": "approved",
+            "reviewed_by": "Dr. S. Kulkarni (MD Pulmonology)"
+        },
+        {
+            "id": "chr_osteoporosis_020",
+            "topic": "Osteoporosis & Bone Health",
+            "category": "chronic_conditions",
+            "keywords": ["osteoporosis", "bone density", "dexa scan", "weak bones", "fragility fracture", "calcium vitamin d", "alendronate", "bone health"],
+            "intent": "chronic_condition_guidance",
+            "patient_answer": [
+                "Ensure an adequate daily calcium intake (1000 to 1200 mg daily) through dairy products (milk, curd, paneer), fortified plant milks, sesame seeds, almonds, and leafy greens.",
+                "Maintain optimal Vitamin D levels through sensible morning sun exposure or daily/weekly Vitamin D3 supplements as recommended by your physician.",
+                "Engage in weight-bearing exercises (brisk walking, light jogging, stair climbing) and resistance training 3 to 4 times a week to stimulate bone rebuilding.",
+                "Prevent home falls: install grab bars in bathrooms, remove loose throw rugs, ensure bright lighting in hallways, and wear non-skid footwear.",
+                "If prescribed a weekly bisphosphonate bone tablet (such as Alendronate): take it first thing in the morning with a full glass of plain water, and remain completely upright (do not lie down) for at least 30 minutes to protect your esophagus."
+            ],
+            "doctor_answer": {
+                "assessment": "Osteoporosis (Systemic skeletal disorder characterized by low bone mass, microarchitectural deterioration, and increased fragility fracture risk). Classify by Dual-energy X-ray Absorptiometry (DEXA): T-score >= -1.0 Normal, -1.0 to -2.5 Osteopenia, <= -2.5 Osteoporosis. Calculate 10-year fracture probability using FRAX tool.",
+                "investigations": "DEXA scan of lumbar spine and femoral neck/total hip. Secondary osteoporosis workup: Serum Calcium, Phosphate, Alkaline Phosphatase, 25-OH Vitamin D, Serum Creatinine, TSH, Serum Protein Electrophoresis (SPEP to rule out multiple myeloma in elderly), testosterone in men.",
+                "management": "Lifestyle: Adequate Calcium (1200 mg/day total diet+supplements) + Vitamin D3 (800-2000 IU/day), fall prevention. First-line anti-resorptive pharmacotherapy: Oral Bisphosphonates (Alendronate 70 mg once weekly or Risedronate 35 mg once weekly) or IV Zoledronic Acid (5 mg once yearly). Alternative for high fracture risk: Denosumab (60 mg SC every 6 months). Anabolic bone-building agents (Teriparatide or Romosozumab) for very high risk or multiple vertebral fractures.",
+                "references": ["AACE/ACE Clinical Practice Guidelines for the Diagnosis and Treatment of Postmenopausal Osteoporosis", "National Osteoporosis Guideline Group (NOGG) UK Guidelines"]
+            },
+            "staff_answer": "Priority: Triage Green unless acute severe back pain after minor movement (Vertebral Compression Fracture - Triage Yellow). Reinforce Alendronate safety instructions.",
+            "red_flags": ["Sudden severe acute back pain following minor lifting or bending (Acute Vertebral Fragility Fracture)", "Inability to stand or bear weight on hip after a minor trip or fall (Femoral Neck / Hip Fracture)", "Severe deep thigh or groin aching in patients on long-term bisphosphonates (Atypical Femoral Fracture)"],
+            "follow_up_questions": ["Have you had a DEXA bone density scan done?", "Have you ever broken a bone from a minor bump or fall from standing height?", "Do you take Calcium and Vitamin D3 supplements regularly?"],
+            "avoid": ["NEVER lie down after swallowing an Alendronate or Risedronate tablet (can cause severe corrosive esophageal ulceration)", "Do NOT smoke or drink excessive alcohol (severely poisons osteoblast bone formation)"],
+            "source": "AACE/ACE Postmenopausal Osteoporosis Guidelines & International Osteoporosis Foundation (IOF)",
+            "review_status": "approved",
+            "reviewed_by": "Dr. R. Kapoor (MD, Endocrinology)"
+        }
+    ]

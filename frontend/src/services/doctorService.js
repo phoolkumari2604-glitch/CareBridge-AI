@@ -128,20 +128,29 @@ export const doctorService = {
   // ------------------------------------------------------------
   // APPROVALS
   // ------------------------------------------------------------
-  async getApprovals() {
+  async getApprovals(params = {}) {
     try {
-      const response = await api.get("/approvals/");
-      return Array.isArray(response.data) ? response.data : [];
+      const response = await api.get("/approvals/", { params: { limit: 100, ...params } });
+      const data = response.data;
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.approvals)) return data.approvals;
+      return [];
     } catch (error) {
       console.warn("Failed to fetch approvals from /approvals/:", error?.message);
       return [];
     }
   },
 
-  async updateApproval(approvalId, status) {
+  async updateApproval(approvalId, status, rejectionReason = "") {
     if (!approvalId) throw new Error("Approval ID required");
     const normalizedStatus = status.toUpperCase();
-    const response = await api.put(`/approvals/${approvalId}?status=${normalizedStatus}`);
+    const payload = { status: normalizedStatus };
+    if (rejectionReason) {
+      payload.rejection_reason = rejectionReason;
+    }
+    const response = await api.put(`/approvals/${approvalId}`, payload, {
+      params: { status: normalizedStatus }
+    });
     return response.data;
   },
 
@@ -173,31 +182,49 @@ export const doctorService = {
     return response.data;
   },
 
+  async updateVitals(vitalId, data) {
+    if (!vitalId) throw new Error("Vital ID required");
+    const response = await api.put(`/vitals/${vitalId}`, data);
+    return response.data;
+  },
+
+  async deleteVitals(vitalId) {
+    if (!vitalId) throw new Error("Vital ID required");
+    const response = await api.delete(`/vitals/${vitalId}`);
+    return response.data;
+  },
+
   // ------------------------------------------------------------
   // HEALTH RECORDS
   // ------------------------------------------------------------
-  async getHealthRecords(patientIdOrParams) {
+  async getHealthRecords(params = {}) {
     try {
-      if (typeof patientIdOrParams === "string" && patientIdOrParams) {
-        const response = await api.get(`/health-records/${patientIdOrParams}`);
-        return Array.isArray(response.data) ? response.data : [];
+      const queryParams = typeof params === "string" ? { patient: params } : { ...params };
+      if (queryParams.patientId && !queryParams.patient) {
+        queryParams.patient = queryParams.patientId;
       }
-      const params = typeof patientIdOrParams === "object" ? patientIdOrParams : {};
-      const response = await api.get("/health-records/", { params });
+      const response = await api.get("/health-records/", { params: queryParams });
       if (Array.isArray(response.data)) return response.data;
+      if (response.data && Array.isArray(response.data.items)) return response.data.items;
       if (response.data && Array.isArray(response.data.records)) return response.data.records;
       return [];
     } catch (error) {
+      console.warn("Error fetching health records:", error?.message);
       return [];
     }
   },
 
   async getHealthRecordsSummary(params = {}) {
     try {
-      const response = await api.get("/health-records/", { params });
-      return response.data || { records: [], stats: { total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 } };
+      const queryParams = typeof params === "string" ? { patient: params } : { ...params };
+      if (queryParams.patientId && !queryParams.patient) {
+        queryParams.patient = queryParams.patientId;
+      }
+      const response = await api.get("/health-records/", { params: queryParams });
+      return response.data || { items: [], records: [], total: 0, stats: { records: 0, consultations: 0, prescriptions: 0, diagnoses: 0, checkups: 0 } };
     } catch (error) {
-      return { records: [], stats: { total: 0, consultations: 0, prescriptions: 0, diagnoses: 0 } };
+      console.warn("Error fetching health records summary:", error?.message);
+      return { items: [], records: [], total: 0, stats: { records: 0, consultations: 0, prescriptions: 0, diagnoses: 0, checkups: 0 } };
     }
   },
 
@@ -216,6 +243,53 @@ export const doctorService = {
     if (!recordId) throw new Error("Record ID required");
     const response = await api.delete(`/health-records/${recordId}`);
     return response.data;
+  },
+
+  async restoreHealthRecord(recordId) {
+    if (!recordId) throw new Error("Record ID required");
+    const response = await api.post(`/health-records/${recordId}/restore`);
+    return response.data;
+  },
+
+  async uploadRecordAttachment(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post("/health-records/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+    return response.data;
+  },
+
+  async uploadPatientDocument(patientId, file, title = "Clinical Document", recordType = "DIAGNOSTIC_REPORT") {
+    if (!patientId) throw new Error("Patient ID required");
+    const uploadRes = await this.uploadRecordAttachment(file);
+    const fileUrl = uploadRes.file_url || uploadRes.url || "";
+    const recordPayload = {
+      patient_id: patientId,
+      record_type: recordType,
+      title: title || file.name,
+      notes: `Document uploaded: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`,
+      attachments: [{
+        name: file.name,
+        url: fileUrl,
+        size: file.size,
+        type: file.type,
+      }],
+      file_url: fileUrl,
+      file_name: file.name,
+      file_size: file.size,
+    };
+    return await this.createHealthRecord(recordPayload);
+  },
+
+  async getPatientDocuments(patientId) {
+    if (!patientId) return [];
+    const records = await this.getHealthRecords({ patientId, limit: 100 });
+    return records;
+  },
+
+  async deletePatientDocument(recordId) {
+    return await this.deleteHealthRecord(recordId);
   },
 
   // ------------------------------------------------------------
@@ -392,8 +466,8 @@ export const doctorService = {
     return response.data;
   },
 
-  async refundInvoice(id) {
-    const response = await api.post(`/billing/invoices/${id}/refund`);
+  async refundInvoice(id, data = {}) {
+    const response = await api.post(`/billing/invoices/${id}/refund`, data);
     return response.data;
   },
 
@@ -444,6 +518,35 @@ export const doctorService = {
 
   async importKbEntries(entries) {
     const response = await api.post("/ai-assistant/kb/import", { entries });
+    return response.data;
+  },
+
+  async getReviewQueue(category = "") {
+    try {
+      const response = await api.get("/ai-assistant/review-queue", { params: { category } });
+      return response.data;
+    } catch (error) {
+      return { total_drafts: 0, queue: [] };
+    }
+  },
+
+  async approveKbEntry(entryId) {
+    const response = await api.post("/ai-assistant/entry/approve", { entry_id: entryId });
+    return response.data;
+  },
+
+  async editKbEntry(entryId, updates) {
+    const response = await api.post("/ai-assistant/entry/edit", { entry_id: entryId, updates });
+    return response.data;
+  },
+
+  async submitAIFeedback(feedbackData) {
+    const response = await api.post("/ai-assistant/feedback", feedbackData);
+    return response.data;
+  },
+
+  async clearAISession(sessionId) {
+    const response = await api.post("/ai-assistant/session/clear", { session_id: sessionId });
     return response.data;
   },
 };
