@@ -31,6 +31,9 @@ import {
   ThumbsUp,
   ThumbsDown,
   Flag,
+  PlusCircle,
+  Download,
+  AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";

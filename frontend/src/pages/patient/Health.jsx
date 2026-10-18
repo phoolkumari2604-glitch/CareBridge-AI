@@ -43,6 +43,7 @@ import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
 import AnatomicalHeart3D from "../../components/patient/AnatomicalHeart3D";
 import InteractiveBodyMap from "../../components/patient/InteractiveBodyMap";
+import BodyExplorer from "../../phase2-internal-organs";
 import "./Health.css";
 
 const MAX_FILES = 10;
@@ -1766,6 +1767,9 @@ function Health() {
 
       {/* INTERACTIVE BODY MAP */}
       <InteractiveBodyMap vitals={vitals} healthProfile={healthProfile} alerts={alerts} />
+
+      {/* 3D BODY SYSTEMS EXPLORER (PHASE 2 - INTERNAL ORGANS) */}
+      <BodyExplorer vitals={vitals} alerts={alerts} healthProfile={healthProfile} healthRecords={healthRecords} />
 
       {/* VITALS GRID */}
       <section className="health-section">
