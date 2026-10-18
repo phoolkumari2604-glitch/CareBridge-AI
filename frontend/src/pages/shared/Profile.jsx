@@ -69,16 +69,29 @@ function Profile() {
   const [showFaceModal, setShowFaceModal] = useState(false);
   const [faceModalMode, setFaceModalMode] = useState("enroll"); // "enroll" | "verify"
   const [cameraStream, setCameraStream] = useState(null);
+  const [faceState, setFaceState] = useState("requesting permission"); // "requesting permission" | "loading models" | "face not detected" | "multiple faces" | "ready" | "capturing" | "success" | "failed"
   const [faceStep, setFaceStep] = useState("align"); // "align" | "straight" | "blink" | "turnLeft" | "turnRight" | "success" | "failed"
   const [faceProgress, setFaceProgress] = useState(20);
   const [faceConsent, setFaceConsent] = useState(true);
   const [faceScanning, setFaceScanning] = useState(false);
+  const [faceEnrollLoading, setFaceEnrollLoading] = useState(false);
   const [faceErrorMsg, setFaceErrorMsg] = useState("");
   const [faceLiveHint, setFaceLiveHint] = useState("Align your face in the circular guide");
   const [faceMatchResult, setFaceMatchResult] = useState(null); // { score: 98.4, verified: true }
+  const [challengeCompleted, setChallengeCompleted] = useState({ blink: false, turn: false, smile: false });
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const faceDetectAnimRef = useRef(null);
+  const streamRef = useRef(null);
+  const isCancelledRef = useRef(false);
+  const isProcessingFrameRef = useRef(false);
+  const livenessBaselineRef = useRef({
+    baselineSet: false,
+    framesCount: 0,
+    initialEar: 0,
+    initialNoseRel: 0.5,
+    initialSmile: 0,
+  });
 
   // Fingerprint Modal / Action State
   const [fpLoading, setFpLoading] = useState(false);
@@ -627,14 +640,14 @@ function Profile() {
   // ============================================================
   // CAMERA & FACE VERIFICATION FLOW
   // ============================================================
-  const stopCameraStreamOnly = () => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach((track) => {
+  const stopCameraTracks = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
         try {
           track.stop();
         } catch (e) {}
       });
-      setCameraStream(null);
+      streamRef.current = null;
     }
     if (window._activeCareBridgeCameraStream) {
       window._activeCareBridgeCameraStream.getTracks().forEach((t) => {
@@ -644,205 +657,393 @@ function Profile() {
       });
       window._activeCareBridgeCameraStream = null;
     }
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((t) => {
+        try {
+          t.stop();
+        } catch (e) {}
+      });
+    }
+    setCameraStream(null);
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
   };
 
   const stopCamera = useCallback(() => {
-    stopCameraStreamOnly();
+    isCancelledRef.current = true;
     if (faceDetectAnimRef.current) {
       cancelAnimationFrame(faceDetectAnimRef.current);
       faceDetectAnimRef.current = null;
     }
+    stopCameraTracks();
     setShowFaceModal(false);
     setFaceScanning(false);
+    setFaceEnrollLoading(false);
   }, [cameraStream]);
-
-  const startCamera = async (mode = "enroll") => {
-    stopCameraStreamOnly();
-    setFaceModalMode(mode);
-    setShowFaceModal(true);
-    setFaceStep("align");
-    setFaceProgress(mode === "verify" ? 40 : 20);
-    setFaceScanning(false);
-    setFaceErrorMsg("");
-    setFaceMatchResult(null);
-    setFaceLiveHint(mode === "verify" ? "Align your face in the circular guide to verify" : "Position your face directly inside the circular reticle");
-
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error("Camera API is not supported by your browser.");
-      }
-
-      let stream = null;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
-        });
-      } catch (e1) {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      }
-
-      setCameraStream(stream);
-      window._activeCareBridgeCameraStream = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = async () => {
-          try {
-            await videoRef.current.play();
-          } catch (e) {}
-        };
-      }
-
-      // Pre-warm local face models from /models/face
-      loadFaceModels().catch((err) => console.warn("Model pre-load background warning:", err));
-    } catch (err) {
-      console.error("Camera access error:", err);
-      const name = err.name || "";
-      if (name === "NotAllowedError" || name === "PermissionDeniedError") {
-        setFaceErrorMsg("Camera access was denied. Please allow camera permissions in your browser address bar.");
-      } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
-        setFaceErrorMsg("No camera device was detected on your machine.");
-      } else if (name === "NotReadableError") {
-        setFaceErrorMsg("Camera is already in use by another program or browser tab. Please close other camera tabs.");
-      } else {
-        setFaceErrorMsg(`Unable to access camera: ${err.message || "Could not start video stream"}`);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (showFaceModal && videoRef.current && cameraStream) {
-      videoRef.current.srcObject = cameraStream;
-      videoRef.current.play().catch(() => {});
-    }
-  }, [showFaceModal, cameraStream]);
 
   // Clean up on unmount or route change
   useEffect(() => {
     return () => {
-      stopCamera();
+      isCancelledRef.current = true;
+      if (faceDetectAnimRef.current) {
+        cancelAnimationFrame(faceDetectAnimRef.current);
+      }
+      stopCameraTracks();
     };
-  }, [stopCamera]);
+  }, []);
 
-  // Guided Liveness & Verification Routine
-  const runLivenessOrVerify = async () => {
-    if (!faceConsent && faceModalMode === "enroll") {
-      alert("Please provide biometric consent before proceeding with enrollment.");
-      return;
+  const handleCameraError = (err) => {
+    console.error("[FaceID] Camera access error:", err);
+    setFaceState("failed");
+    setFaceStep("failed");
+    setFaceEnrollLoading(false);
+    const name = err.name || "";
+    if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+      setFaceErrorMsg(
+        "Camera permission was denied. Please allow camera access in your browser address bar (click the camera/lock icon in Chrome/Edge, change Camera to 'Allow', then retry)."
+      );
+    } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+      setFaceErrorMsg("No camera device was detected on your machine. Please plug in or enable your webcam.");
+    } else if (name === "NotReadableError" || name === "TrackStartError") {
+      setFaceErrorMsg(
+        "Camera is currently in use by another application or browser tab. Please close any other camera apps and retry."
+      );
+    } else if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") {
+      setFaceErrorMsg("The requested camera constraints (640x480 resolution) are not supported by your video device.");
+    } else {
+      setFaceErrorMsg(`Unable to access camera: ${err.message || "Could not start video stream"}`);
     }
-    if (!videoRef.current) return;
+  };
 
-    setFaceScanning(true);
+  const startCamera = async (mode = "enroll") => {
+    if (faceEnrollLoading) return;
+    setFaceEnrollLoading(true);
+
+    stopCameraTracks();
+    isCancelledRef.current = false;
+    isProcessingFrameRef.current = false;
+    livenessBaselineRef.current = {
+      baselineSet: false,
+      framesCount: 0,
+      initialEar: 0,
+      initialNoseRel: 0.5,
+      initialSmile: 0,
+    };
+    setChallengeCompleted({ blink: false, turn: false, smile: false });
+
+    setFaceModalMode(mode);
+    setFaceState("requesting permission");
+    setFaceStep("align");
+    setFaceProgress(15);
+    setFaceScanning(false);
     setFaceErrorMsg("");
     setFaceMatchResult(null);
+    setFaceLiveHint(
+      mode === "verify"
+        ? "Requesting camera access to verify identity..."
+        : "Requesting camera access for biometric enrollment..."
+    );
+    setShowFaceModal(true);
+
+    // 1. Secure Context Detection (HTTPS or http://localhost)
+    const isSecure =
+      typeof window !== "undefined" &&
+      (window.isSecureContext ||
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.protocol === "https:");
+
+    if (!isSecure) {
+      console.error("[FaceID] Insecure context: Camera requires HTTPS or http://localhost. Current:", window.location.origin);
+      setFaceState("failed");
+      setFaceStep("failed");
+      setFaceErrorMsg(
+        "Camera access requires a secure context (HTTPS or http://localhost). You are currently accessing the app over an insecure network connection (Dev Mode HTTP). Please open the app via http://localhost:5173 instead of a LAN IP."
+      );
+      setFaceEnrollLoading(false);
+      return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error("[FaceID] navigator.mediaDevices.getUserMedia not supported in this browser context");
+      setFaceState("failed");
+      setFaceStep("failed");
+      setFaceErrorMsg("Camera API is not supported by your browser. Please open the app in Chrome or Edge on http://localhost:5173.");
+      setFaceEnrollLoading(false);
+      return;
+    }
 
     try {
-      // 1. Ensure models are loaded locally
+      console.log("[FaceID] Step 1: Requesting camera permission with constraints: { video: { facingMode: 'user', width: 640, height: 480 } }");
+      let stream = null;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user", width: 640, height: 480 },
+        });
+      } catch (err) {
+        if (err.name === "OverconstrainedError" || err.name === "ConstraintNotSatisfiedError") {
+          console.warn("[FaceID] 640x480 user constraints overconstrained, falling back to { video: true }");
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        } else {
+          throw err;
+        }
+      }
+
+      streamRef.current = stream;
+      window._activeCareBridgeCameraStream = stream;
+      setCameraStream(stream);
+      setFaceEnrollLoading(false);
+
+      console.log(
+        "[FaceID] Step 2: Camera stream active. ID:",
+        stream.id,
+        "Tracks:",
+        stream.getVideoTracks().map((t) => ({ label: t.label, readyState: t.readyState }))
+      );
+
+      // Loading Models state
+      setFaceState("loading models");
+      setFaceLiveHint("Loading biometric facial models from /models/face...");
+      setFaceProgress(35);
+
+      console.log("[FaceID] Step 3: Loading models from /models/face...");
       await loadFaceModels();
+      console.log("[FaceID] Step 3: Face detection & recognition models loaded successfully.");
 
-      if (faceModalMode === "verify") {
-        setFaceStep("straight");
-        setFaceLiveHint("Scanning live biometric features against enrolled credential...");
-        setFaceProgress(50);
+      setFaceProgress(45);
+      setFaceLiveHint(
+        mode === "verify"
+          ? "Position your face directly inside the circular reticle to verify"
+          : "Position your face inside the circular reticle for guided liveness scan"
+      );
+    } catch (err) {
+      handleCameraError(err);
+    }
+  };
 
-        const detectResult = await detectSingleFace(videoRef.current);
-        if (!detectResult.success) {
-          setFaceStep("failed");
-          setFaceErrorMsg(detectResult.message);
-          setFaceScanning(false);
-          return;
-        }
+  // Attach stream to video preview element and wait for onloadedmetadata
+  useEffect(() => {
+    let isMounted = true;
+    if (!showFaceModal || !cameraStream || !videoRef.current) return;
 
-        setFaceProgress(75);
-        setFaceLiveHint("Matching descriptor against encrypted database record...");
+    const video = videoRef.current;
+    video.srcObject = cameraStream;
 
+    const handleLoadedMetadata = async () => {
+      if (!isMounted) return;
+      try {
+        await video.play();
+      } catch (e) {
+        console.warn("[FaceID] video.play() warning:", e);
+      }
+      console.log("[FaceID] Step 4: Video preview metadata loaded:", video.videoWidth, "x", video.videoHeight);
+      startDetectionLoop();
+    };
+
+    if (video.readyState >= 1) {
+      handleLoadedMetadata();
+    } else {
+      video.onloadedmetadata = handleLoadedMetadata;
+    }
+
+    return () => {
+      isMounted = false;
+      if (video) video.onloadedmetadata = null;
+    };
+  }, [showFaceModal, cameraStream]);
+
+  // Continuous Detection & Guided Liveness Loop via requestAnimationFrame
+  const startDetectionLoop = () => {
+    if (faceDetectAnimRef.current) {
+      cancelAnimationFrame(faceDetectAnimRef.current);
+    }
+    isCancelledRef.current = false;
+    isProcessingFrameRef.current = false;
+
+    let lastTime = 0;
+    const tick = async (timestamp) => {
+      if (isCancelledRef.current) return;
+
+      if (timestamp - lastTime >= 120 && !isProcessingFrameRef.current) {
+        lastTime = timestamp;
+        isProcessingFrameRef.current = true;
         try {
-          const res = await authAPI.verifyFace({ descriptor: detectResult.descriptor });
-          setFaceStep("success");
-          setFaceProgress(100);
-          setFaceMatchResult({
-            score: res.matchScore || 96.5,
-            verified: true,
-            message: res.message || "Identity confirmed with high confidence",
-          });
-          setFaceLiveHint(`✓ Verified! Match Confidence: ${res.matchScore || 96.5}%`);
-          setSuccessToast(`Face biometric verified successfully (${res.matchScore || 96.5}% confidence match).`);
-          setTimeout(() => setSuccessToast(""), 4500);
-
-          setTimeout(() => {
-            stopCamera();
-          }, 2000);
+          await processVideoFrame();
         } catch (err) {
-          console.error("Face verification failure:", err);
-          const detail = err.response?.data?.detail || err.message || "Face does not match enrolled credential.";
-          const score = err.response?.data?.matchScore || 42.1;
-          setFaceStep("failed");
-          setFaceProgress(100);
-          setFaceMatchResult({ score, verified: false, message: detail });
-          setFaceLiveHint(`Verification failed: ${detail}`);
-          setFaceErrorMsg(`Biometric verification rejected (${score}% match score).`);
+          console.warn("[FaceID] Frame processing warning:", err);
+        } finally {
+          isProcessingFrameRef.current = false;
         }
-        return;
       }
 
-      // Guided Liveness Check (Enrollment): Look Straight -> Blink or Turn Head -> Capture 128D Vector
-      setFaceStep("straight");
-      setFaceLiveHint("1. Look straight into the camera frame...");
+      if (!isCancelledRef.current) {
+        faceDetectAnimRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    faceDetectAnimRef.current = requestAnimationFrame(tick);
+  };
+
+  const processVideoFrame = async () => {
+    const video = videoRef.current;
+    if (!video || video.readyState < 2 || video.paused || video.ended || isCancelledRef.current) {
+      return;
+    }
+
+    const res = await detectSingleFace(video);
+    if (isCancelledRef.current) return;
+
+    // 1. No Face Detected
+    if (!res.success && res.error === "NO_FACE") {
+      setFaceState("face not detected");
+      setFaceStep("align");
+      setFaceLiveHint("Face not detected. Please position your face inside the circular frame.");
+      setFaceProgress(25);
+      livenessBaselineRef.current.baselineSet = false;
+      livenessBaselineRef.current.framesCount = 0;
+      return;
+    }
+
+    // 2. Multiple Faces Detected
+    if (!res.success && res.error === "MULTIPLE_FACES") {
+      setFaceState("multiple faces");
+      setFaceStep("failed");
+      setFaceLiveHint("Multiple faces detected! Please ensure only one person is in the frame.");
+      setFaceProgress(25);
+      livenessBaselineRef.current.baselineSet = false;
+      livenessBaselineRef.current.framesCount = 0;
+      return;
+    }
+
+    // 3. Low Confidence
+    if (!res.success && res.error === "LOW_CONFIDENCE") {
+      setFaceState("face not detected");
+      setFaceStep("align");
+      setFaceLiveHint("Low confidence detection. Please face the camera directly in good lighting.");
       setFaceProgress(30);
+      livenessBaselineRef.current.baselineSet = false;
+      livenessBaselineRef.current.framesCount = 0;
+      return;
+    }
 
-      const check1 = await detectSingleFace(videoRef.current);
-      if (!check1.success) {
-        setFaceStep("failed");
-        setFaceErrorMsg(check1.message);
-        setFaceScanning(false);
+    // 4. Single Face Detected with high confidence
+    if (res.success && res.detection) {
+      const { score, metrics, descriptor } = res;
+      const { isCenter, isBlink, isTurnedLeft, isTurnedRight, isSmile, ear, happyScore, noseRel } = metrics;
+
+      // Verification Mode
+      if (faceModalMode === "verify") {
+        setFaceState("ready");
+        setFaceStep("straight");
+        setFaceLiveHint("Face aligned! Verifying biometric descriptor against credentials...");
+        setFaceProgress(60);
+        console.log("[FaceID] Step 5: Face detected for verification with confidence score:", score);
+
+        livenessBaselineRef.current.framesCount += 1;
+        if (livenessBaselineRef.current.framesCount >= 3) {
+          await executeVerification(descriptor);
+        }
         return;
       }
 
-      await new Promise((r) => setTimeout(r, 900));
+      // Enrollment Mode with Liveness Challenge
+      const baseline = livenessBaselineRef.current;
+      if (!baseline.baselineSet) {
+        if (isCenter) {
+          baseline.framesCount += 1;
+          setFaceState("ready");
+          setFaceStep("straight");
+          setFaceProgress(50);
+          setFaceLiveHint("Face centered! Hold still for liveness challenge initialization...");
 
-      // Step 2: Liveness Check (Blink or Head Turn)
-      setFaceStep("blink");
-      setFaceLiveHint("2. Liveness Check: Blink naturally or turn your head slightly...");
-      setFaceProgress(60);
-
-      for (let i = 0; i < 5; i++) {
-        await new Promise((r) => setTimeout(r, 350));
-        const liveCheck = await detectSingleFace(videoRef.current);
-        if (liveCheck.success && liveCheck.metrics) {
-          if (liveCheck.metrics.isBlink || liveCheck.metrics.isTurnedLeft || liveCheck.metrics.isTurnedRight) {
-            break;
+          if (baseline.framesCount >= 3) {
+            baseline.baselineSet = true;
+            baseline.initialEar = ear;
+            baseline.initialNoseRel = noseRel;
+            baseline.initialSmile = happyScore;
+            console.log(
+              "[FaceID] Step 5: Face detected & centered. Score:",
+              score,
+              "Baseline metrics:",
+              { ear, noseRel, happyScore }
+            );
+            setFaceProgress(60);
+            setFaceLiveHint("Liveness Challenge: Please blink naturally, turn your head slightly, or smile 😊");
           }
+        } else {
+          setFaceState("ready");
+          setFaceStep("align");
+          setFaceLiveHint("Please center your face inside the circular reticle.");
+          setFaceProgress(35);
         }
+        return;
       }
 
-      // Step 3: Capture final stabilized frame and 128-float face descriptor
-      setFaceStep("straight");
-      setFaceLiveHint("3. Liveness confirmed! Extracting and encrypting biometric descriptor...");
-      setFaceProgress(85);
-      await new Promise((r) => setTimeout(r, 600));
+      // Baseline is established: monitor for live dynamic gesture (blink, turn head, or smile)
+      setFaceState("ready");
+      setFaceProgress(70);
 
-      const finalDetection = await detectSingleFace(videoRef.current);
-      if (!finalDetection.success) {
-        throw new Error(finalDetection.message || "Face lost during scan. Please keep your face centered.");
+      let challengePassed = false;
+      let challengeType = "";
+
+      if (isBlink || (baseline.initialEar >= 0.20 && ear < 0.19)) {
+        challengePassed = true;
+        challengeType = "Blink detected";
+        setChallengeCompleted((prev) => ({ ...prev, blink: true }));
+      } else if (isTurnedLeft || isTurnedRight || Math.abs(noseRel - baseline.initialNoseRel) >= 0.12) {
+        challengePassed = true;
+        challengeType = isTurnedLeft ? "Head turn (Left) detected" : "Head turn (Right) detected";
+        setChallengeCompleted((prev) => ({ ...prev, turn: true }));
+      } else if (isSmile || (baseline.initialSmile < 0.40 && happyScore >= 0.60)) {
+        challengePassed = true;
+        challengeType = "Smile detected";
+        setChallengeCompleted((prev) => ({ ...prev, smile: true }));
       }
 
-      const descriptor = finalDetection.descriptor;
-      // Encrypt descriptor using WebCrypto AES-GCM
+      if (challengePassed) {
+        console.log("[FaceID] Step 6: Liveness challenge passed! Type:", challengeType);
+        setFaceLiveHint(`✓ ${challengeType}! Encrypting descriptor and enrolling...`);
+        setFaceProgress(85);
+        await executeEnrollment(descriptor);
+      }
+    }
+  };
+
+  const executeEnrollment = async (descriptor) => {
+    isCancelledRef.current = true;
+    if (faceDetectAnimRef.current) {
+      cancelAnimationFrame(faceDetectAnimRef.current);
+      faceDetectAnimRef.current = null;
+    }
+
+    setFaceState("capturing");
+    setFaceStep("straight");
+    setFaceProgress(85);
+    setFaceScanning(true);
+
+    console.log("[FaceID] Step 7: Generated face descriptor length:", descriptor.length);
+
+    try {
+      // Encrypt descriptor with WebCrypto AES-GCM
       const encryptedPayload = await encryptDescriptorWithWebCrypto(descriptor);
+      console.log("[FaceID] Descriptor encrypted with WebCrypto AES-GCM-256 (no raw images stored)");
 
-      // Save encrypted descriptor in database (raw photo is never stored)
+      console.log("[FaceID] Submitting descriptor to authAPI.enrollFace...");
       const res = await authAPI.enrollFace({
         descriptor,
         encrypted_payload: encryptedPayload,
         consent: true,
       });
 
+      console.log("[FaceID] Step 8: Enrollment API response:", res);
+
+      setFaceState("success");
       setFaceStep("success");
       setFaceProgress(100);
       setFaceLiveHint("✓ Face ID successfully enrolled with encrypted descriptor!");
+
+      // Update status badge from "Not Enrolled" to "Enrolled" only after backend confirms success
       setFaceVerified(true);
       const enrolledAt = res.faceVerifiedAt || new Date().toISOString();
       setFaceVerifiedAt(enrolledAt);
@@ -856,18 +1057,122 @@ function Profile() {
           face_verified_at: enrolledAt,
         }));
       }
+      try {
+        const stored = JSON.parse(localStorage.getItem("user") || "{}");
+        stored.faceVerified = true;
+        stored.face_verified = true;
+        stored.faceVerifiedAt = enrolledAt;
+        stored.face_verified_at = enrolledAt;
+        localStorage.setItem("user", JSON.stringify(stored));
+      } catch (e) {}
 
       setSuccessToast("Face ID credential encrypted & enrolled successfully.");
       setTimeout(() => setSuccessToast(""), 4500);
 
+      // Stop all tracks immediately so the camera light turns off!
+      stopCameraTracks();
+
       setTimeout(() => {
-        stopCamera();
-      }, 1600);
+        setShowFaceModal(false);
+        setFaceScanning(false);
+      }, 1500);
     } catch (err) {
-      console.error("Biometric enrollment error:", err);
+      console.error("[FaceID] Enrollment error:", err);
+      setFaceState("failed");
       setFaceStep("failed");
       setFaceErrorMsg(err.response?.data?.detail || err.message || "Failed to enroll face biometric.");
-    } finally {
+      setFaceScanning(false);
+    }
+  };
+
+  const executeVerification = async (descriptor) => {
+    isCancelledRef.current = true;
+    if (faceDetectAnimRef.current) {
+      cancelAnimationFrame(faceDetectAnimRef.current);
+      faceDetectAnimRef.current = null;
+    }
+
+    setFaceState("capturing");
+    setFaceProgress(80);
+    setFaceScanning(true);
+
+    console.log("[FaceID] Step 7: Generated face descriptor length for verification:", descriptor.length);
+
+    try {
+      console.log("[FaceID] Submitting descriptor to authAPI.verifyFace...");
+      const res = await authAPI.verifyFace({ descriptor });
+      console.log("[FaceID] Step 8: Verify API response:", res);
+
+      const score = res.matchScore ?? 96.5;
+      const verified = Boolean(res.verified ?? true);
+
+      if (verified) {
+        setFaceState("success");
+        setFaceStep("success");
+        setFaceProgress(100);
+        setFaceMatchResult({ score, verified: true, message: res.message || "Identity confirmed with high confidence" });
+        setFaceLiveHint(`✓ Verified! Match Confidence: ${score}%`);
+        setSuccessToast(`Face biometric verified successfully (${score}% match score).`);
+        setTimeout(() => setSuccessToast(""), 4500);
+
+        // Stop all tracks immediately so the camera light turns off!
+        stopCameraTracks();
+
+        setTimeout(() => {
+          setShowFaceModal(false);
+          setFaceScanning(false);
+        }, 1800);
+      } else {
+        setFaceState("failed");
+        setFaceStep("failed");
+        setFaceProgress(100);
+        setFaceMatchResult({ score, verified: false, message: res.message || "Face does not match enrolled credential" });
+        setFaceErrorMsg(`Biometric verification rejected (${score}% match score).`);
+        setFaceScanning(false);
+      }
+    } catch (err) {
+      console.error("[FaceID] Verification error:", err);
+      const detail = err.response?.data?.detail || err.message || "Face does not match enrolled credential.";
+      const score = err.response?.data?.matchScore || 42.1;
+      setFaceState("failed");
+      setFaceStep("failed");
+      setFaceProgress(100);
+      setFaceMatchResult({ score, verified: false, message: detail });
+      setFaceErrorMsg(`Biometric verification rejected: ${detail}`);
+      setFaceScanning(false);
+    }
+  };
+
+  // Manual Trigger helper if user clicks "Start Scan" or "Verify Match" in modal
+  const runLivenessOrVerify = async () => {
+    if (!faceConsent && faceModalMode === "enroll") {
+      alert("Please provide biometric consent before proceeding with enrollment.");
+      return;
+    }
+    if (!videoRef.current) return;
+
+    if (faceState === "failed") {
+      startCamera(faceModalMode);
+      return;
+    }
+
+    setFaceScanning(true);
+    try {
+      const detectResult = await detectSingleFace(videoRef.current);
+      if (!detectResult.success) {
+        setFaceState(detectResult.state || "face not detected");
+        setFaceErrorMsg(detectResult.message);
+        setFaceScanning(false);
+        return;
+      }
+      if (faceModalMode === "verify") {
+        await executeVerification(detectResult.descriptor);
+      } else {
+        await executeEnrollment(detectResult.descriptor);
+      }
+    } catch (err) {
+      setFaceState("failed");
+      setFaceErrorMsg(err.message || "Scan failed.");
       setFaceScanning(false);
     }
   };
@@ -1805,19 +2110,39 @@ function Profile() {
                   <button
                     className="bio-enroll-btn"
                     onClick={() => startCamera("enroll")}
+                    disabled={faceEnrollLoading}
                   >
-                    <Camera size={15} />
-                    <span>Enroll Face ID</span>
+                    {faceEnrollLoading ? (
+                      <>
+                        <Loader2 size={15} className="spinner-icon" />
+                        <span>Starting Camera...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Camera size={15} />
+                        <span>Enroll Face ID</span>
+                      </>
+                    )}
                   </button>
                 ) : (
                   <>
                     <button
                       className="bio-enroll-btn"
                       onClick={() => startCamera("enroll")}
+                      disabled={faceEnrollLoading}
                       title="Re-enroll Face ID with new scan"
                     >
-                      <RefreshCw size={15} />
-                      <span>Re-enroll</span>
+                      {faceEnrollLoading ? (
+                        <>
+                          <Loader2 size={15} className="spinner-icon" />
+                          <span>Starting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw size={15} />
+                          <span>Re-enroll</span>
+                        </>
+                      )}
                     </button>
                     <button
                       className="bio-remove-btn"
@@ -1831,6 +2156,7 @@ function Profile() {
                     <button
                       className="bio-verify-btn"
                       onClick={() => startCamera("verify")}
+                      disabled={faceEnrollLoading}
                       title="Test live camera against stored encrypted facial descriptor"
                     >
                       <CheckCircle2 size={15} />
@@ -1991,6 +2317,31 @@ function Profile() {
               </button>
             </div>
 
+            {/* LIVE DETECTION STATE BAR */}
+            <div className="face-state-bar">
+              <div className={`face-state-badge state-${faceState.replace(/\s+/g, "-")}`}>
+                {["requesting permission", "loading models", "capturing"].includes(faceState) && (
+                  <Loader2 size={13} className="spinner-icon" />
+                )}
+                {["ready", "success"].includes(faceState) && (
+                  <CheckCircle2 size={13} />
+                )}
+                {["face not detected", "multiple faces", "failed"].includes(faceState) && (
+                  <AlertCircle size={13} />
+                )}
+                <span>
+                  {faceState === "requesting permission" && "Requesting Permission"}
+                  {faceState === "loading models" && "Loading Models"}
+                  {faceState === "face not detected" && "Face Not Detected"}
+                  {faceState === "multiple faces" && "Multiple Faces"}
+                  {faceState === "ready" && (faceModalMode === "verify" ? "Ready" : "Ready - Perform Challenge")}
+                  {faceState === "capturing" && "Capturing Descriptor"}
+                  {faceState === "success" && "Success"}
+                  {faceState === "failed" && "Failed"}
+                </span>
+              </div>
+            </div>
+
             {faceErrorMsg && (
               <div className="face-modal-error-banner">
                 <AlertCircle size={18} />
@@ -2010,7 +2361,7 @@ function Profile() {
               <canvas ref={canvasRef} className="face-canvas-overlay" />
 
               {/* Scanning Corner Brackets & Circular Reticle */}
-              <div className={`face-reticle-box ${faceStep}`}>
+              <div className={`face-reticle-box ${faceState.replace(/\s+/g, "-")}`}>
                 <div className="bracket top-left" />
                 <div className="bracket top-right" />
                 <div className="bracket bottom-left" />
@@ -2024,6 +2375,21 @@ function Profile() {
                 <span>{faceLiveHint}</span>
               </div>
             </div>
+
+            {/* Guided Liveness Challenge Chips */}
+            {faceModalMode === "enroll" && (faceState === "ready" || faceState === "capturing") && (
+              <div className="face-challenge-chips-row">
+                <span className={`challenge-chip ${challengeCompleted.blink ? "passed" : ""}`}>
+                  {challengeCompleted.blink ? <Check size={12} /> : null} 👁️ Blink
+                </span>
+                <span className={`challenge-chip ${challengeCompleted.turn ? "passed" : ""}`}>
+                  {challengeCompleted.turn ? <Check size={12} /> : null} ↔️ Turn Head
+                </span>
+                <span className={`challenge-chip ${challengeCompleted.smile ? "passed" : ""}`}>
+                  {challengeCompleted.smile ? <Check size={12} /> : null} 😊 Smile
+                </span>
+              </div>
+            )}
 
             {/* Match Result Display */}
             {faceMatchResult && (
@@ -2074,7 +2440,7 @@ function Profile() {
                 ) : (
                   <>
                     <Sparkles size={16} />
-                    <span>{faceModalMode === "verify" ? "Start Verification Match" : "Start Guided Liveness Scan"}</span>
+                    <span>{faceModalMode === "verify" ? "Verify Now" : "Scan Liveness Now"}</span>
                   </>
                 )}
               </button>

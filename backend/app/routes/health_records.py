@@ -225,14 +225,16 @@ def list_health_records():
         "record_type": 1,
         "medications": 1,
         "diagnosis": 1,
+        "icd10_code": 1,
         "patient_id": 1
     }))
 
     stat_records = len(all_matched)
-    stat_consultations = sum(1 for r in all_matched if r.get("record_type") == "CONSULTATION")
+    stat_consultations = sum(1 for r in all_matched if r.get("record_type") in ["CONSULTATION", "VISIT_NOTE"])
     stat_prescriptions = sum(1 for r in all_matched if r.get("record_type") == "PRESCRIPTION")
-    stat_diagnoses = sum(1 for r in all_matched if r.get("record_type") == "DIAGNOSIS" or (r.get("diagnosis") and str(r.get("diagnosis")).strip()))
+    stat_diagnoses = sum(1 for r in all_matched if r.get("record_type") in ["DIAGNOSIS", "LAB_REPORT", "IMAGING", "SCAN"] or (r.get("diagnosis") and str(r.get("diagnosis")).strip()) or (r.get("icd10_code") and str(r.get("icd10_code")).strip()))
     stat_checkups = sum(1 for r in all_matched if r.get("record_type") == "CHECKUP")
+    stat_icd10 = sum(1 for r in all_matched if (r.get("icd10_code") and str(r.get("icd10_code")).strip()))
 
     total_count = db.health_records.count_documents(base_query)
     total_pages = max(1, (total_count + limit - 1) // limit)
@@ -288,7 +290,8 @@ def list_health_records():
             "consultations": stat_consultations,
             "prescriptions": stat_prescriptions,
             "diagnoses": stat_diagnoses,
-            "checkups": stat_checkups
+            "checkups": stat_checkups,
+            "icd10_mapped": stat_icd10
         }
     }), 200
 
@@ -318,8 +321,9 @@ def create_health_record():
     if not patient:
         patient = db.patients.find_one({
             "$or": [
-                {"patient_code": str(patient_identifier)},
-                {"patient_id_code": str(patient_identifier)}
+                {"patient_code": str(patient_identifier).strip()},
+                {"patient_id_code": str(patient_identifier).strip()},
+                {"patient_code": int(patient_identifier) if str(patient_identifier).strip().isdigit() else -1}
             ]
         })
 
@@ -330,7 +334,16 @@ def create_health_record():
     if not title:
         return jsonify({"error": "Validation Error", "detail": "title is required"}), 400
 
-    record_type = (data.get("record_type") or "CONSULTATION").upper()
+    type_aliases = {
+        "LAB": "LAB_REPORT",
+        "VISIT_NOTE": "CONSULTATION",
+        "VISIT NOTE": "CONSULTATION",
+        "RX": "PRESCRIPTION",
+        "PRESCRIPTION/RX": "PRESCRIPTION",
+        "DX": "DIAGNOSIS"
+    }
+    raw_type = (data.get("record_type") or "CONSULTATION").upper().strip()
+    record_type = type_aliases.get(raw_type, raw_type)
     valid_types = ["CONSULTATION", "LAB_REPORT", "PRESCRIPTION", "SCAN", "IMAGING", "DIAGNOSIS", "CHECKUP", "DISCHARGE_SUMMARY"]
     if record_type not in valid_types:
         record_type = "CONSULTATION"
@@ -544,10 +557,20 @@ def update_health_record(record_id):
         "record_date", "doctor_name", "hospital_name"
     ]
     
+    type_aliases = {
+        "LAB": "LAB_REPORT",
+        "VISIT_NOTE": "CONSULTATION",
+        "VISIT NOTE": "CONSULTATION",
+        "RX": "PRESCRIPTION",
+        "PRESCRIPTION/RX": "PRESCRIPTION",
+        "DX": "DIAGNOSIS"
+    }
+
     for f in allowed_fields:
         if f in data:
             if f == "record_type":
-                update_data[f] = str(data[f]).upper()
+                rt = str(data[f]).upper().strip()
+                update_data[f] = type_aliases.get(rt, rt)
             elif f == "status":
                 update_data[f] = str(data[f]).lower()
             else:
@@ -603,10 +626,10 @@ def delete_health_record(record_id):
         db=db,
         user_id=user_id,
         user_role=user_role,
-        action="HEALTH_RECORD_SOFT_DELETE",
+        action="HEALTH_RECORD_DELETE",
         resource="HEALTH_RECORDS",
         resource_id=record_id,
-        details=f"Soft deleted health record '{existing.get('title')}' for patient {existing.get('patient_name')}"
+        details=f"Deleted health record '{existing.get('title')}' for patient {existing.get('patient_name')}"
     )
 
     return jsonify({

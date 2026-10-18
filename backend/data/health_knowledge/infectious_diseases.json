@@ -1,0 +1,988 @@
+[
+  {
+    "id": "inf_dengue_001",
+    "topic": "Dengue Fever",
+    "category": "infectious_diseases",
+    "keywords": [
+      "dengue",
+      "dengue bukhar",
+      "breakbone fever",
+      "low platelets",
+      "ns1",
+      "dengue fever"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Rest completely and maintain aggressive oral hydration: drink ORS, coconut water, fresh juices, and water (at least 2.5 to 3 liters daily).",
+      "Take ONLY Paracetamol (500 mg or 650 mg) for fever and severe body pain. Do not exceed 3000 mg in 24 hours.",
+      "STRICTLY AVOID Ibuprofen, Aspirin, Diclofenac, or any NSAIDs, because they dramatically increase the risk of severe internal bleeding.",
+      "Monitor for warning signs every day (usually between day 3 to 7 as fever subsides): severe abdominal pain, persistent vomiting, bleeding from nose/gums, or extreme lethargy.",
+      "Get daily blood tests (CBC / Platelet count) as directed by your physician to track platelet trends and hematocrit."
+    ],
+    "doctor_answer": {
+      "assessment": "Dengue Virus Infection (DENV 1-4). Classify per WHO: Dengue without Warning Signs, Dengue with Warning Signs, Severe Dengue (severe plasma leakage, severe hemorrhage, severe organ impairment).",
+      "investigations": "CBC with differential and hematocrit (Hct) daily. Dengue NS1 Antigen (days 1-5), Dengue IgM/IgG antibodies (day 5 onwards). LFTs and ultrasound abdomen (gallbladder wall edema, ascites, pleural effusion indicating plasma leakage).",
+      "management": "Judicious fluid management is the cornerstone of therapy. In Dengue with warning signs: IV isotonic crystalloids (0.9% Normal Saline or Ringer's Lactate) at 5-7 mL/kg/h for 1-2 hours, titrated down according to hematocrit and urine output (>0.5 mL/kg/h). Platelet transfusion is NOT routinely recommended for low platelet counts alone unless there is significant active bleeding or platelets < 10,000/mcL.",
+      "references": [
+        "WHO Guidelines for Diagnosis, Treatment, Prevention & Control of Dengue (2020)",
+        "NVBDCP (National Vector Borne Disease Control Programme, India) Dengue Guidelines"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange if warning signs present; Yellow if stable. Check BP, pulse pressure (narrow pulse pressure <= 20 mmHg indicates shock), hematocrit, and platelet count. Ensure accurate input-output charting.",
+    "red_flags": [
+      "Severe continuous abdominal pain or tenderness",
+      "Persistent vomiting (>=3 episodes in 12 hours)",
+      "Mucosal bleeding: bleeding gums, epistaxis, black melena, or heavy menstrual bleeding",
+      "Cold, clammy extremities with rapid weak pulse (Dengue Shock Syndrome)",
+      "Sudden drop in platelets accompanied by sharp rise in hematocrit (>20%)"
+    ],
+    "follow_up_questions": [
+      "What day of fever are you currently on?",
+      "Are you able to drink and hold down liquids?",
+      "Have you noticed any bleeding from your gums, nose, or in your stool?"
+    ],
+    "avoid": [
+      "Do NOT take Ibuprofen, Brufen, Aspirin, or any pain injection (NSAIDs cause severe fatal bleeding in dengue)",
+      "Do NOT perform unnecessary prophylactic platelet transfusions without active bleeding"
+    ],
+    "source": "WHO Comprehensive Guidelines for Dengue & NVBDCP India",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_malaria_002",
+    "topic": "Malaria (Plasmodium Vivax / Falciparum)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "malaria",
+      "thand lag ke bukhar",
+      "shivering fever",
+      "plasmodium",
+      "vivax",
+      "falciparum",
+      "chills rigors"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Seek medical evaluation immediately for a rapid blood test if you experience high fever with violent shivering and shaking chills.",
+      "Stay well-hydrated with clean water, ORS, and warm broths.",
+      "Take Paracetamol for fever spikes while waiting for diagnostic test results.",
+      "Take the full prescribed course of antimalarial medications without skipping doses, even after you start feeling better.",
+      "Prevent mosquito bites by sleeping under insecticide-treated bed nets, using mosquito repellents, and wearing full-length clothing."
+    ],
+    "doctor_answer": {
+      "assessment": "Malaria (Plasmodium vivax or Plasmodium falciparum). Screen immediately for signs of Severe Malaria: cerebral malaria (unconsciousness/seizures), severe anemia (Hb < 7 g/dL), acute kidney injury, pulmonary edema, jaundice.",
+      "investigations": "Thick and thin peripheral blood smear (gold standard for species and parasite density) + Rapid Diagnostic Test (RDT) for Malaria (Pf HRP2 / Pan-pLDH). CBC, LFT, serum creatinine, blood glucose.",
+      "management": "Uncomplicated P. falciparum: Artemisinin-based Combination Therapy (ACT: Artemether-Lumefantrine or Artesunate-SP) for 3 days + single dose Primaquine (0.25 mg/kg). Uncomplicated P. vivax: Chloroquine (25 mg/kg over 3 days) + Primaquine (0.25 mg/kg daily for 14 days to prevent relapse; check G6PD status first). Severe Malaria: IV Artesunate 2.4 mg/kg at 0, 12, 24 hours, then daily.",
+      "references": [
+        "WHO Guidelines for Malaria (2023)",
+        "NVBDCP National Drug Policy on Malaria (India)"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow (uncomplicated) or Red (altered sensorium/jaundice). Perform rapid malaria strip test immediately. Collect peripheral blood smear before initiating antimalarials if possible.",
+    "red_flags": [
+      "Confusion, delirium, drowsiness, or convulsions (Cerebral Malaria)",
+      "Extreme breathlessness or deep acidotic breathing",
+      "Severe jaundice with dark yellow/tea-colored urine",
+      "Inability to retain oral medications due to intractable vomiting"
+    ],
+    "follow_up_questions": [
+      "Did the fever start with severe shaking chills followed by sweating?",
+      "Have you traveled to any forest or malaria-endemic regions recently?",
+      "Have you had a blood smear or rapid malaria test done yet?"
+    ],
+    "avoid": [
+      "Do NOT delay antimalarial therapy if test is positive",
+      "Do NOT administer Primaquine to patients with G6PD deficiency without specialist monitoring (causes severe hemolysis)"
+    ],
+    "source": "WHO Guidelines for Malaria & NVBDCP India",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_typhoid_003",
+    "topic": "Typhoid Fever (Enteric Fever / Salmonella Typhi)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "typhoid",
+      "enteric fever",
+      "salmonella",
+      "typhi",
+      "step ladder fever",
+      "motijhara",
+      "widal test"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Drink ONLY boiled or commercially bottled purified water and consume freshly cooked, piping hot food.",
+      "Eat soft, easily digestible foods like khichdi, porridge, mashed potatoes, and curd.",
+      "Take Paracetamol for temperature control and drink plenty of fluids to prevent dehydration.",
+      "Complete the entire course of prescribed antibiotics strictly as instructed by your doctor, even if the fever subsides.",
+      "Wash hands thoroughly with soap and water after using the restroom and before eating to prevent spreading bacteria to family members."
+    ],
+    "doctor_answer": {
+      "assessment": "Enteric Fever (Salmonella enterica serovar Typhi or Paratyphi). Characterized by stepwise rising fever, relative bradycardia (Faget's sign), coated tongue, hepatosplenomegaly, and abdominal pain.",
+      "investigations": "Blood Culture (gold standard, highest sensitivity in week 1). CBC (look for leukopenia/anemia). Note: Widal test has low specificity and should not be used as sole diagnostic basis; paired titers showing 4-fold rise required.",
+      "management": "Uncomplicated enteric fever (outpatient): Oral Azithromycin 20 mg/kg/day (up to 1 g daily) for 7 days or Cefixime 20 mg/kg/day for 14 days (due to widespread fluoroquinolone resistance). Severe / Inpatient: IV Ceftriaxone 2 g daily for 10-14 days. Monitor for 3rd-week complications: intestinal perforation and GI hemorrhage.",
+      "references": [
+        "WHO Guidelines on the Management of Typhoid Fever",
+        "ICMR Antimicrobial Guidelines for Enteric Fever"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow. Collect blood culture before starting antibiotics. Screen for sudden abdominal guarding or peritonitis (sign of intestinal perforation). Maintain enteric precautions.",
+    "red_flags": [
+      "Sudden severe sharp abdominal pain with rigid abdomen (Intestinal Perforation)",
+      "Black tarry stools or vomiting fresh blood (GI Hemorrhage)",
+      "High prolonged fever with extreme delirium, lethargy, or coma (Typhoid state)"
+    ],
+    "follow_up_questions": [
+      "How many days have you had this continuous fever?",
+      "Have you consumed untreated water, street food, or raw salads recently?",
+      "Have you had a blood culture test performed?"
+    ],
+    "avoid": [
+      "Do NOT stop antibiotics early when fever breaks (leads to chronic carrier state and relapse)",
+      "Do NOT rely blindly on a single baseline Widal test for definitive diagnosis"
+    ],
+    "source": "ICMR Antimicrobial Stewardship Guidelines & WHO Enteric Fever Protocols",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_chikungunya_004",
+    "topic": "Chikungunya Fever",
+    "category": "infectious_diseases",
+    "keywords": [
+      "chikungunya",
+      "severe joint pain fever",
+      "chikungunya joint pain",
+      "mosquito viral joint pain"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Get plenty of rest and avoid strenuous weight-bearing activities during the acute painful phase.",
+      "Take Paracetamol (500 mg or 650 mg) every 6 hours for fever and joint discomfort.",
+      "Apply cold damp packs or gel ice wraps around swollen painful joints for 15 minutes to reduce inflammation.",
+      "Maintain high fluid intake with water, ORS, and warm soups.",
+      "Engage in gentle range-of-motion stretching once the acute fever has subsided to prevent joint stiffness."
+    ],
+    "doctor_answer": {
+      "assessment": "Chikungunya Virus Infection (Alphavirus, transmitted by Aedes mosquitoes). Triad of acute high fever, severe crippling polyarthralgia/polyarthritis (predominantly wrists, ankles, small joints of hands), and maculopapular rash.",
+      "investigations": "RT-PCR (days 1-7 of onset), Chikungunya IgM ELISA antibodies (day 5 onwards). CBC (rule out severe thrombocytopenia).",
+      "management": "Supportive therapy. Antipyretics: Paracetamol 1 g QID PRN. Once dengue is excluded and fever resolved: Short-course NSAIDs (Naproxen 500 mg BID or Celecoxib) for persistent arthralgia. Chronic arthropathy (>3 months): Consider hydroxychloroquine or low-dose methotrexate under rheumatology supervision.",
+      "references": [
+        "WHO Guidelines for Chikungunya Management",
+        "CDC Clinical Guidance: Chikungunya Virus"
+      ]
+    },
+    "staff_answer": "Priority: Triage Green/Yellow. Provide comfortable seating and assist with mobility if patient has crippling hand/knee pain. Verify that dengue has been ruled out before any NSAID administration.",
+    "red_flags": [
+      "Joints becoming hot, bright red, and purulent (secondary bacterial arthritis)",
+      "Neurological symptoms such as confusion, neck rigidity, or seizures (Chikungunya meningoencephalitis)",
+      "Severe dehydration or inability to walk safely"
+    ],
+    "follow_up_questions": [
+      "Which specific joints are hurting and are they visibly swollen?",
+      "Did you develop a red rash alongside the fever?",
+      "Has dengue been ruled out by your doctor?"
+    ],
+    "avoid": [
+      "Do NOT take NSAIDs (Brufen/Aspirin) during the initial acute febrile phase until Dengue is ruled out",
+      "Do NOT use systemic steroids in the acute viral phase"
+    ],
+    "source": "WHO Regional Office for South-East Asia Guidelines & CDC Chikungunya Guidance",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_pulmonary_tb_005",
+    "topic": "Pulmonary Tuberculosis (TB)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "tuberculosis",
+      "tb",
+      "chronic cough",
+      "coughing blood",
+      "sputum afb",
+      "nikshay",
+      "dots",
+      "night sweats",
+      "weight loss cough"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Visit a public health center, DOTS clinic, or chest physician immediately for a free sputum test (CBNAAT / GeneXpert) if you have had a cough for more than 2 weeks.",
+      "Cover your mouth and nose with a handkerchief or wear a surgical mask whenever you cough or sneeze to protect your family.",
+      "Ensure your living spaces are well-ventilated with windows open to allow plenty of fresh air and sunlight.",
+      "Eat high-protein, calorie-rich meals (eggs, milk, lentils, nuts, beans) to rebuild weight and immune strength.",
+      "NEVER miss a dose or stop taking your anti-TB medications prematurely; incomplete treatment leads to dangerous Multi-Drug Resistant TB (MDR-TB)."
+    ],
+    "doctor_answer": {
+      "assessment": "Pulmonary Tuberculosis (Mycobacterium tuberculosis). Classical presentation: productive cough > 2 weeks, hemoptysis, low-grade evening fever, drenching night sweats, and significant anorexia/weight loss.",
+      "investigations": "Sputum for Rapid Molecular Diagnostic (CBNAAT / Truenat / GeneXpert MTB/RIF for TB detection and Rifampicin resistance). Chest Radiograph (CXR: apical cavitary or infiltrate lesions). Baseline CBC, LFTs, Serum Creatinine, and HIV screening.",
+      "management": "National Tuberculosis Elimination Program (NTEP) standard regimen for drug-sensitive TB: 2 months of HRZE (Isoniazid, Rifampicin, Pyrazinamide, Ethambutol) Intensive Phase followed by 4 months of HRE Continuation Phase (fixed-dose combinations dosed by weight band). Add Pyridoxine (Vitamin B6 10-25 mg daily) to prevent isoniazid neuropathy.",
+      "references": [
+        "Central TB Division, MoHFW India: NTEP Guidelines for TB Care in India",
+        "WHO Consolidated Guidelines on Tuberculosis (2022)"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow / Infection Control. Immediately provide a triple-layer mask to the coughing patient. Direct to designated well-ventilated sputum collection area. Register patient on Ni-kshay portal.",
+    "red_flags": [
+      "Massive hemoptysis (>100-200 mL of blood coughed up in 24 hours - Life Threatening)",
+      "Severe shortness of breath or sudden unilateral chest pain (Hydropneumothorax)",
+      "Jaundice, vomiting, or dark tea-colored urine while taking anti-TB drugs (Drug-Induced Liver Injury)"
+    ],
+    "follow_up_questions": [
+      "How many weeks have you been coughing?",
+      "Have you coughed up any blood or rusty colored sputum?",
+      "Have you noticed drenching night sweats or clothing becoming very loose?"
+    ],
+    "avoid": [
+      "NEVER take fluoroquinolones (Ciprofloxacin/Levofloxacin) as empiric monotherapy for chronic cough (masks TB diagnosis and drives quinolone resistance)",
+      "Do NOT stop TB medications without physician consultation"
+    ],
+    "source": "National Tuberculosis Elimination Program (NTEP), MoHFW India & WHO TB Guidelines",
+    "review_status": "approved",
+    "reviewed_by": "Dr. S. Kulkarni (MD Pulmonology)"
+  },
+  {
+    "id": "inf_covid19_006",
+    "topic": "COVID-19 (Coronavirus Disease)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "covid",
+      "corona",
+      "covid19",
+      "loss of taste",
+      "loss of smell",
+      "sars cov 2",
+      "covid isolation"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Isolate yourself in a well-ventilated separate room and use a dedicated bathroom if possible.",
+      "Monitor your blood oxygen level (SpO2) using a pulse oximeter every 6 hours while resting.",
+      "Take Paracetamol for fever and body ache, and drink plenty of warm fluids (water, soups, ORS).",
+      "Practice proning (lying on your stomach with pillows under chest and hips) for 30 to 45 minutes to improve oxygen distribution in your lungs.",
+      "Seek immediate emergency care if your oxygen saturation drops below 94%, or if you develop chest pain or severe breathlessness."
+    ],
+    "doctor_answer": {
+      "assessment": "COVID-19 (SARS-CoV-2 infection). Stratify severity: Mild (URTI symptoms without hypoxia), Moderate (SpO2 90-93% on room air, RR 24-30), Severe (SpO2 < 90%, RR > 30).",
+      "investigations": "Rapid Antigen Test (RAT) or RT-PCR. In moderate-severe disease: CBC (lymphopenia), CRP, Ferritin, D-dimer, Chest X-ray / HRCT Chest if worsening hypoxia.",
+      "management": "Mild (home isolation): Symptomatic care with Paracetamol, oral hydration. High risk for progression: Consider oral Nirmatrelvir/Ritonavir (Paxlovid) within 5 days of onset. Moderate/Severe: Hospitalization, supplemental oxygen targeting SpO2 92-96%, Systemic Corticosteroids (Dexamethasone 6 mg IV/oral daily for up to 10 days), prophylactic low-molecular-weight heparin (LMWH). Do NOT use steroids in mild cases without hypoxia.",
+      "references": [
+        "WHO Therapeutics and COVID-19 Living Guideline",
+        "ICMR National Clinical Management Protocol for COVID-19"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange if SpO2 < 94%; Green if SpO2 >= 95%. Verify pulse oximeter reading on a warm finger. Ensure patient wears N95 mask. Isolate in respiratory triage area.",
+    "red_flags": [
+      "SpO2 dropping below 94% on room air at rest",
+      "Persistent pain or severe pressure in the chest",
+      "Inability to speak complete sentences without gasping",
+      "Confusion, blue-tinted lips, or altered level of consciousness"
+    ],
+    "follow_up_questions": [
+      "What is your current pulse oximeter SpO2 reading?",
+      "Do you have underlying conditions like diabetes, hypertension, or heart disease?",
+      "How many days has it been since symptoms started?"
+    ],
+    "avoid": [
+      "Do NOT take steroids (Dexamethasone, Prednisolone) in mild COVID-19 with normal oxygen levels (worsens viral replication and spikes blood sugar)",
+      "Do NOT take unnecessary antibiotics like Azithromycin for uncomplicated viral COVID-19"
+    ],
+    "source": "ICMR Clinical Guidance for Management of COVID-19 & WHO Therapeutics Guideline",
+    "review_status": "approved",
+    "reviewed_by": "Dr. S. Kulkarni (MD Pulmonology)"
+  },
+  {
+    "id": "inf_influenza_007",
+    "topic": "Seasonal Influenza / Flu (H1N1 / Influenza A & B)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "flu",
+      "influenza",
+      "h1n1",
+      "swine flu",
+      "seasonal flu",
+      "high fever chills cough",
+      "flu first aid"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Stay home and get plenty of rest to support your body's immune defense and prevent infecting coworkers or classmates.",
+      "Drink abundant fluids: warm broths, herbal teas, electrolyte solutions, and water.",
+      "Take Paracetamol for fever, headache, and severe body chills.",
+      "Use saline nasal spray and steam inhalation to ease nasal congestion.",
+      "High-risk individuals (pregnant women, elderly, diabetic, asthmatic) should see a doctor within 48 hours for antiviral medication."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Seasonal Influenza (Influenza A/B or pandemic H1N1). Sudden abrupt onset of high fever, severe myalgias, headache, dry cough, and prostration.",
+      "investigations": "Nasopharyngeal swab RT-PCR or rapid influenza molecular assay. CBC, CXR if suspected secondary bacterial pneumonia.",
+      "management": "Neuraminidase inhibitor: Oral Oseltamivir (Tamiflu) 75 mg BID for 5 days. Most effective when initiated within 48 hours of symptom onset; indicated regardless of timing in hospitalized, severely ill, or high-risk patients. Bacterial co-infection (e.g. S. aureus, S. pneumoniae) requires appropriate antibiotics.",
+      "references": [
+        "CDC Influenza Antiviral Medications: Summary for Clinicians",
+        "WHO Guidelines on Pharmacological Management of Pandemic Influenza"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow / Orange for high-risk individuals with tachypnea. Give surgical mask. Check SpO2 and lung sounds. Ask about annual flu vaccination.",
+    "red_flags": [
+      "Difficulty breathing or shortness of breath",
+      "Fever that improves and then returns worse with a productive cough (Secondary bacterial pneumonia)",
+      "Severe dizziness or confusion",
+      "Persistent vomiting with inability to drink fluids"
+    ],
+    "follow_up_questions": [
+      "Did the symptoms hit you abruptly like a truck within a few hours?",
+      "Are you pregnant, over 65, or do you have chronic asthma or diabetes?",
+      "How many hours or days ago did the symptoms begin?"
+    ],
+    "avoid": [
+      "NEVER give Aspirin to children or adolescents with flu-like illness (prevents Reye's Syndrome)",
+      "Do NOT take antibiotics unless secondary bacterial pneumonia is diagnosed"
+    ],
+    "source": "CDC Clinical Overview of Influenza & WHO Guidelines",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_hepatitis_ae_008",
+    "topic": "Acute Viral Hepatitis A & E (Feco-Oral Jaundice / Peeliya)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "hepatitis a",
+      "hepatitis e",
+      "jaundice",
+      "peeliya",
+      "yellow eyes",
+      "dark urine",
+      "liver infection",
+      "waterborne hepatitis"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Get adequate bed rest while feeling fatigued; avoid strenuous physical exertion.",
+      "Eat small, frequent, high-carbohydrate, easily digestible meals (sugarcane juice from hygienic source, glucose, khichdi, boiled vegetables, fruits).",
+      "Drink only boiled or purified water; avoid all outside food, street snacks, and unpasteurized juices.",
+      "STRICTLY AVOID ALL ALCOHOL consumption, as alcohol directly damages inflamed liver cells.",
+      "Consult a doctor immediately if you experience extreme drowsiness, confusion, or continuous vomiting."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Viral Hepatitis (HAV or HEV). Feco-orally transmitted. Note: HEV infection carries high mortality (up to 20-25%) due to fulminant hepatic failure in pregnant women in the third trimester.",
+      "investigations": "Liver Function Tests (markedly elevated serum transaminases ALT/AST often >1000 U/L, elevated direct bilirubin, alkaline phosphatase), Viral Serology: Anti-HAV IgM, Anti-HEV IgM. Prothrombin Time / INR (essential indicator of acute liver failure).",
+      "management": "Supportive care. No specific antiviral required for acute HAV/HEV. Avoid hepatotoxic drugs (limit paracetamol to <=2 g/day; avoid sedatives). Monitor PT/INR and sensorium regularly for early signs of Fulminant Hepatic Failure (FHF).",
+      "references": [
+        "EASL Clinical Practice Guidelines on Hepatitis A and E Virus Infection",
+        "AASLD Guidelines on Acute Liver Failure"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange if pregnant or showing flapping tremors/confusion; Yellow if stable jaundice. Check PT/INR and total bilirubin. Maintain strict enteric precautions.",
+    "red_flags": [
+      "Extreme drowsiness, day-night sleep reversal, confusion, or flapping tremor of hands (Hepatic Encephalopathy)",
+      "INR > 1.5 indicating acute hepatic coagulopathy",
+      "Infection in a pregnant woman (critical emergency risk for HEV-induced acute liver failure)",
+      "Intractable vomiting and inability to maintain hydration"
+    ],
+    "follow_up_questions": [
+      "What color is your urine and are the whites of your eyes visibly yellow?",
+      "Are you currently pregnant?",
+      "Have you consumed unpurified water or street food in the last 2 to 6 weeks?"
+    ],
+    "avoid": [
+      "STRICTLY AVOID ALL ALCOHOL",
+      "Do NOT consume untested herbal concoctions or 'jaundice tonics' which frequently trigger fatal toxic hepatitis"
+    ],
+    "source": "European Association for the Study of the Liver (EASL) & WHO Hepatitis Fact Sheets",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_hepatitis_bc_009",
+    "topic": "Chronic Viral Hepatitis B & C",
+    "category": "infectious_diseases",
+    "keywords": [
+      "hepatitis b",
+      "hepatitis c",
+      "hbsag",
+      "anti hcv",
+      "chronic hepatitis",
+      "liver cirrhosis virus"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Consult a hepatologist or gastroenterologist for viral load testing (HBV DNA / HCV RNA) and liver fibrosis evaluation.",
+      "Hepatitis C is now completely curable in over 95% of patients with a 12-week course of oral antiviral tablets.",
+      "Hepatitis B can be highly effectively controlled with daily antiviral medication to protect your liver and prevent cirrhosis.",
+      "Do not share toothbrushes, razors, nail clippers, or needles, and practice protected intercourse to prevent transmitting the virus.",
+      "Get vaccinated against Hepatitis A to provide double protection for your liver, and completely abstain from alcohol."
+    ],
+    "doctor_answer": {
+      "assessment": "Chronic Hepatitis B Virus (HBV) or Hepatitis C Virus (HCV) infection. Assess for liver cirrhosis, hepatic decompensation, and hepatocellular carcinoma (HCC).",
+      "investigations": "HBV: HBsAg, HBeAg/Anti-HBe, quantitative HBV DNA PCR. HCV: Anti-HCV, quantitative HCV RNA PCR, genotype if needed. Baseline: LFT, CBC (platelets for portal hypertension), PT/INR, Alpha-Fetoprotein (AFP), abdominal ultrasound, Transient Elastography (FibroScan).",
+      "management": "Chronic HBV: Nucleos(t)ide analogues with high barrier to resistance (Tenofovir Alafenamide 25 mg or Entecavir 0.5 mg daily) if elevated HBV DNA and elevated ALT / evidence of fibrosis. Chronic HCV: Pan-genotypic Direct-Acting Antivirals (DAA: Sofosbuvir 400 mg + Velpatasvir 100 mg daily) for 12 weeks achieves >95% SVR (cure).",
+      "references": [
+        "AASLD-IDSA Guidance: Hepatitis C: Guidance for Testing, Managing, and Treating",
+        "EASL Clinical Practice Guidelines on Hepatitis B"
+      ]
+    },
+    "staff_answer": "Priority: Triage Green unless ascites, hematemesis, or jaundice present. Screen family members and close sexual contacts of HBV positive patients for HBsAg and Hepatitis B vaccination.",
+    "red_flags": [
+      "Vomiting blood or black stools (Bleeding Esophageal Varices)",
+      "Swelling of the abdomen with fluid (Ascites)",
+      "Yellow discoloration of eyes with sudden confusion",
+      "Weight loss and right upper quadrant abdominal lump"
+    ],
+    "follow_up_questions": [
+      "Have you had a quantitative viral load test (HBV DNA or HCV RNA)?",
+      "Have you ever had an ultrasound or FibroScan of your liver?",
+      "Has your doctor screened you for Hepatitis B vaccination status among household members?"
+    ],
+    "avoid": [
+      "Do NOT drink alcohol in any quantity (accelerates cirrhosis and liver cancer development)",
+      "Do NOT share razors, nail cutters, or piercing equipment"
+    ],
+    "source": "AASLD / EASL Clinical Practice Guidelines & National Viral Hepatitis Control Program (NVHCP) India",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_cholera_010",
+    "topic": "Cholera (Vibrio Cholerae)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "cholera",
+      "rice water stool",
+      "severe watery diarrhea",
+      "vibrio",
+      "massive dehydration",
+      "haiza"
+    ],
+    "intent": "emergency",
+    "patient_answer": [
+      "Call 112 or get to an emergency hospital immediately; cholera can cause fatal dehydration within hours.",
+      "Start drinking WHO-standard Oral Rehydration Salts (ORS) solution continuously on the way to the medical center.",
+      "Drink 1 glass of ORS every few minutes; do not wait to feel thirsty.",
+      "Do NOT drink unboiled tap water, well water, or contaminated river water.",
+      "Maintain strict hand washing with soap to prevent spreading the infection to other members of the household."
+    ],
+    "doctor_answer": {
+      "assessment": "Cholera (Vibrio cholerae O1 / O139). Clinical hallmark: Sudden painless onset of profuse, watery 'rice-water' stools with fishy odor, rapid hypovolemic shock, and severe metabolic acidosis.",
+      "investigations": "Stool darkfield microscopy (darting motility), rapid cholera dipstick, stool culture on TCBS medium. Serum electrolytes, BUN, creatinine, arterial blood gas.",
+      "management": "Immediate aggressive fluid resuscitation (Plan C): IV Ringer's Lactate 100 mL/kg (30 mL/kg in first 30 min, then 70 mL/kg over 2.5 hours in adults; slower in infants). Transition to WHO ORS once awake and drinking. Antibiotics (shorten duration and excretion): Single dose oral Doxycycline 300 mg or Azithromycin 1 g oral. Zinc supplementation in children.",
+      "references": [
+        "WHO Technical Guidance: Cholera Outbreak: Assessing the Outbreak Response and Improving Preparedness",
+        "CDC Recommendations for Cholera Treatment"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red. Immediately insert two large-bore IV cannulas (16G or 18G) and hang Ringer's Lactate rapidly. Use cholera beds with a central hole and bucket to measure exact stool fluid loss. Report immediately to district surveillance.",
+    "red_flags": [
+      "Severe dehydration: unrecordable blood pressure, thready pulse, wrinkled washerwoman's hands, sunken eyes",
+      "Severe muscle cramps caused by extreme potassium and sodium loss",
+      "Anuria (complete lack of urine output)"
+    ],
+    "follow_up_questions": [
+      "What does the stool look like (is it cloudy white like rice water)?",
+      "How many large volume stools have occurred in the last few hours?",
+      "Is the patient able to drink fluids?"
+    ],
+    "avoid": [
+      "Do NOT delay IV fluid resuscitation for lab results",
+      "Do NOT administer plain 5% Dextrose alone (does not correct severe electrolyte and volume depletion)"
+    ],
+    "source": "WHO Cholera Guidelines & CDC Global Health Protocols",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_bacterial_gastroenteritis_011",
+    "topic": "Acute Bacterial Gastroenteritis & Food Poisoning",
+    "category": "infectious_diseases",
+    "keywords": [
+      "food poisoning",
+      "bacterial gastroenteritis",
+      "stomach infection",
+      "vomiting diarrhea after food",
+      "tainted food"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Drink WHO-standard ORS solution in small, frequent sips to replace water and vital minerals lost from vomiting and diarrhea.",
+      "Eat simple, bland foods like steamed rice, plain toast, bananas, and light khichdi once vomiting pauses.",
+      "Do not take antimotility medicines (like Loperamide) if you have high fever or visible blood in the stool, as this traps bacterial toxins in the intestines.",
+      "Rest adequately and allow your digestive tract time to recover.",
+      "Seek medical attention if fever exceeds 38.5°C (101.3°F), if you notice blood in your stools, or if you cannot keep liquids down."
+    ],
+    "doctor_answer": {
+      "assessment": "Bacterial Gastroenteritis / Foodborne Illness. Common culprits: Preformed enterotoxin (S. aureus, B. cereus - rapid onset 1-6 hours with vomiting), Invasive/cytotoxic bacteria (Campylobacter, Salmonella, Shigella, E. coli STEC - onset 12-72h with fever and bloody stools).",
+      "investigations": "Stool routine and microscopy for fecal leukocytes, RBCs, and parasites. Stool culture if severe illness, dysentery, or persistent symptoms.",
+      "management": "Hydration therapy (oral ORS or IV Ringer's Lactate). Antimicrobial therapy indicated for severe illness or documented invasive pathogens: Oral Ciprofloxacin 500 mg BID for 3 days or Azithromycin 500 mg daily for 3 days. Avoid fluoroquinolones if Campylobacter suspected; avoid antibiotics in suspected E. coli O157:H7 (STEC) due to increased risk of Hemolytic Uremic Syndrome (HUS).",
+      "references": [
+        "IDSA Clinical Practice Guidelines for the Diagnosis and Management of Infectious Diarrhea",
+        "ACG Clinical Guideline on Acute Diarrhea"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow. Check hydration status, vitals, and ask if multiple family members who shared the same meal became ill at the same time.",
+    "red_flags": [
+      "Stool containing visible red blood or pus (Dysentery)",
+      "High spiking fever (> 38.5°C / 101.3°F)",
+      "Severe postural lightheadedness or syncope",
+      "Signs of kidney impairment: dark urine or sudden drop in urine volume (concern for HUS)"
+    ],
+    "follow_up_questions": [
+      "Did anyone else who ate the same food become ill?",
+      "How many hours after eating did the symptoms start?",
+      "Are there streaks of blood in the stool?"
+    ],
+    "avoid": [
+      "Do NOT take Loperamide (Imodium) if fever or bloody diarrhea is present",
+      "Do NOT give antibiotics empirically if E. coli O157 / STEC is suspected"
+    ],
+    "source": "Infectious Diseases Society of America (IDSA) Diarrheal Guidelines",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_uti_cystitis_012",
+    "topic": "Urinary Tract Infection (UTI / Acute Cystitis)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "uti",
+      "urinary tract infection",
+      "urine infection",
+      "cystitis",
+      "peshab me infection",
+      "bladder infection"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Drink 2 to 3 liters of water daily to frequently flush bacteria out of your bladder.",
+      "Do not postpone urination; empty your bladder completely whenever you feel the urge and after sexual intercourse.",
+      "Apply a warm heating pad to your lower abdomen to relieve bladder cramping.",
+      "Wipe from front to back after using the toilet to avoid introducing bacteria from the rectum into the urethra.",
+      "See a doctor to get a urine test and receive targeted prescription antibiotics; avoid self-medicating with leftover pills."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Uncomplicated Cystitis (Lower UTI) vs Complicated UTI (males, pregnancy, diabetes, anatomical abnormalities, indwelling catheter) vs Acute Pyelonephritis (upper UTI). Most common pathogen: uropathogenic E. coli (75-90%).",
+      "investigations": "Urine Routine and Microscopy (pyuria >=10 WBCs/hpf, bacteriuria, positive nitrites/leukocyte esterase). Urine Culture and Antibiotic Sensitivity testing mandatory in complicated, recurrent, or treatment-failure cases.",
+      "management": "First-line uncomplicated cystitis: Oral Nitrofurantoin 100 mg BID for 5 days, or Fosfomycin Trometamol 3 g single-dose oral sachet. Alternative: Trimethoprim-Sulfamethoxazole 160/800 mg BID for 3 days (if local resistance <20%). Fluoroquinolones (Ciprofloxacin/Levofloxacin) should be reserved for pyelonephritis or complicated UTI due to collateral damage.",
+      "references": [
+        "IDSA Guidelines for the Treatment of Acute Uncomplicated Cystitis and Pyelonephritis",
+        "EAU Guidelines on Urological Infections (2023)"
+      ]
+    },
+    "staff_answer": "Priority: Triage Green unless high fever with flank tenderness (Pyelonephritis - Triage Yellow). Instruct patient on proper midstream clean-catch urine specimen collection.",
+    "red_flags": [
+      "High fever, chills, and one-sided flank or lower back pain (Acute Pyelonephritis)",
+      "Visible frank blood in urine (Gross Hematuria)",
+      "Inability to pass urine with painful palpable bladder (Urinary Retention)",
+      "UTI symptoms during pregnancy (requires urgent treatment to prevent preterm labor)"
+    ],
+    "follow_up_questions": [
+      "Do you have back or side pain, fever, or chills?",
+      "Are you pregnant?",
+      "Have you had frequent bladder infections before?"
+    ],
+    "avoid": [
+      "Do NOT take arbitrary over-the-counter antibiotics without a urine test",
+      "Do NOT delay medical care if experiencing fever or flank pain"
+    ],
+    "source": "European Association of Urology (EAU) & IDSA Guidelines",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_pneumonia_013",
+    "topic": "Community-Acquired Pneumonia (CAP)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "pneumonia",
+      "chest infection",
+      "lung infection",
+      "balgam khansi fever",
+      "curb 65",
+      "crackles lungs"
+    ],
+    "intent": "emergency",
+    "patient_answer": [
+      "Seek medical attention promptly if you have a fever accompanied by a productive cough (yellow or green phlegm), chest pain when breathing, and shortness of breath.",
+      "Rest in bed and stay well-hydrated with warm fluids to loosen sticky mucus.",
+      "Take Paracetamol for fever and chest discomfort as advised by your doctor.",
+      "Use a pulse oximeter to check your oxygen saturation (SpO2); if it dips below 94%, go to the emergency room immediately.",
+      "Complete the full course of prescribed antibiotics exactly as instructed without stopping early."
+    ],
+    "doctor_answer": {
+      "assessment": "Community-Acquired Pneumonia (CAP). Common pathogens: Streptococcus pneumoniae, Haemophilus influenzae, atypical agents (Mycoplasma, Chlamydia, Legionella). Risk-stratify using CURB-65 score (Confusion, Urea > 7 mmol/L, Respiratory rate >= 30, BP SBP < 90 or DBP <= 60, Age >= 65).",
+      "investigations": "Chest Radiograph (PA view: lobar consolidation or patchy infiltrates). CBC, CRP, Sputum Gram stain and culture, Blood cultures (in hospitalized patients), pulse oximetry, ABG if hypoxic.",
+      "management": "Outpatient (CURB-65 0-1): Amoxicillin-Clavulanate 1 g BID (or Amoxicillin 1 g TID) + Macrolide (Azithromycin 500 mg daily) or Doxycycline 100 mg BID for 5-7 days. Inpatient (CURB-65 >= 2): IV Ceftriaxone 1-2 g daily + IV Azithromycin 500 mg daily. Supplemental oxygen targeting SpO2 94-98% (88-92% in hypercapnic COPD).",
+      "references": [
+        "ATS/IDSA Guidelines for the Diagnosis and Treatment of Adults with Community-Acquired Pneumonia",
+        "BTS Clinical Guidelines for the Management of CAP in Adults"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange if SpO2 < 94% or RR >= 25/min; Yellow if stable. Check pulse oximeter, blood pressure, and mental orientation. Obtain CXR and sputum sample.",
+    "red_flags": [
+      "SpO2 < 92% on room air",
+      "Respiratory rate > 30 breaths/min",
+      "Confusion, disorientation, or drowsiness (especially in elderly patients)",
+      "Systolic BP < 90 mmHg (Septic Shock)",
+      "Coughing up significant amounts of blood"
+    ],
+    "follow_up_questions": [
+      "What is your current oxygen reading (SpO2)?",
+      "Does it hurt sharply in your chest when you take a deep breath?",
+      "What color is the phlegm you are coughing up?"
+    ],
+    "avoid": [
+      "Do NOT suppress productive cough with strong antitussive syrups (clearing secretions is vital)",
+      "Do NOT delay medical evaluation when breathing difficulty accompanies a cough"
+    ],
+    "source": "American Thoracic Society (ATS) / IDSA Guidelines & British Thoracic Society (BTS)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. S. Kulkarni (MD Pulmonology)"
+  },
+  {
+    "id": "inf_measles_014",
+    "topic": "Measles (Rubeola / Khasra)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "measles",
+      "khasra",
+      "rubeola",
+      "koplik spots",
+      "measles rash",
+      "child red rash fever"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Isolate the sick child or adult immediately; measles is one of the most highly contagious airborne viral diseases known.",
+      "Keep the patient comfortable in a dimly lit room, as bright light often causes uncomfortable eye sensitivity (photophobia).",
+      "Encourage frequent sips of liquids (water, ORS, breast milk for infants) to prevent dehydration.",
+      "Give Paracetamol for fever relief. NEVER give Aspirin to children.",
+      "Consult a doctor to administer Vitamin A supplements, which are crucial to reduce complications and protect eyesight in measles."
+    ],
+    "doctor_answer": {
+      "assessment": "Measles (Morbillivirus infection). Classical prodrome (3 C's: Cough, Coryza, Conjunctivitis) with high fever, followed by pathognomonic Koplik spots (white tiny grain-like spots on buccal mucosa opposite molars), then a maculopapular blanching rash spreading cephalocaudally (hairline downwards).",
+      "investigations": "Clinical diagnosis. Confirmation via Measles IgM serology or throat/nasopharyngeal swab for RT-PCR. Notify public health authorities.",
+      "management": "Supportive care and isolation. WHO standard Vitamin A supplementation: 200,000 IU orally daily for 2 days for children >=12 months (100,000 IU for 6-11 months, 50,000 IU for <6 months) to prevent blindness and decrease mortality. Treat secondary bacterial complications (otitis media, pneumonia) with antibiotics.",
+      "references": [
+        "WHO Measles Fact Sheet & Guidelines for Epidemic Preparedness and Response",
+        "CDC Clinical Guidance: Measles (Rubeola)"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange / Strict Airborne Isolation. Place in negative pressure isolation room if available. Healthcare staff must wear N95 respirators. Notify infection control team.",
+    "red_flags": [
+      "Rapid breathing, chest indrawing, or grunting (Pneumonia - leading cause of measles death)",
+      "Convulsions, extreme drowsiness, or neck stiffness (Measles Encephalitis)",
+      "Severe diarrhea leading to dehydration",
+      "Corneal ulceration or cloudiness (Vitamin A deficiency complication)"
+    ],
+    "follow_up_questions": [
+      "Has the person received the MMR (Measles, Mumps, Rubella) vaccine?",
+      "Did the rash start along the hairline and behind the ears before moving down the body?",
+      "Are there small white salt-like spots inside the cheeks?"
+    ],
+    "avoid": [
+      "NEVER give Aspirin to children (risk of fatal Reye's Syndrome)",
+      "Do NOT expose unvaccinated individuals or pregnant women to the patient"
+    ],
+    "source": "WHO Guidelines on Measles Management & CDC Clinical Overview",
+    "review_status": "approved",
+    "reviewed_by": "Dr. N. Joshi (MD Pediatrics)"
+  },
+  {
+    "id": "inf_chickenpox_015",
+    "topic": "Chickenpox & Shingles (Varicella-Zoster Virus)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "chickenpox",
+      "shingles",
+      "varicella",
+      "herpes zoster",
+      "chhoti mata",
+      "water blisters rash",
+      "dew drops on rose petals"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Apply calamine lotion to the itchy fluid-filled blisters to soothe irritation and speed drying.",
+      "Take lukewarm baths with baking soda or colloidal oatmeal to relieve intense itching.",
+      "Keep fingernails short and clean to prevent scratching, which causes scarring and secondary bacterial skin infections.",
+      "Take Paracetamol for fever; NEVER give Aspirin or Ibuprofen to children with chickenpox.",
+      "Isolate at home until all blisters have completely dried and formed crusty scabs (usually 5 to 7 days)."
+    ],
+    "doctor_answer": {
+      "assessment": "Varicella (Chickenpox: generalized pruritic vesicular rash in various stages of healing - 'dewdrops on rose petal') vs Herpes Zoster (Shingles: dermatomal, painful, unilateral vesicular eruption).",
+      "investigations": "Clinical diagnosis. PCR for VZV DNA from vesicle fluid or Tzanck smear if atypical or immunocompromised.",
+      "management": "Uncomplicated pediatric varicella: Symptomatic care (oral antihistamines, calamine). Avoid Ibuprofen (associated with severe invasive Group A Streptococcal necrotizing fasciitis). High-risk varicella (adults, immunocompromised, pregnant) or Herpes Zoster: Oral Acyclovir 800 mg 5 times daily for 7 days (or Valacyclovir 1000 mg TID for 7 days) initiated within 72 hours of rash onset.",
+      "references": [
+        "CDC Clinical Guidance: Chickenpox (Varicella) & Shingles (Herpes Zoster)",
+        "NICE CKS: Chickenpox & Shingles"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow / Contact and Airborne precautions. Isolate patient from pregnant women and immunocompromised individuals. Ensure all scabs are crusted before clearing for school/work.",
+    "red_flags": [
+      "Skin around the blisters becoming swollen, red, hot, and exquisitely tender (Secondary bacterial cellulitis)",
+      "Breathlessness, persistent cough, or chest pain (Varicella Pneumonia)",
+      "Unsteadiness, stumbling gait, or confusion (Varicella Cerebellar Ataxia)",
+      "Blisters appearing near or in the eye (Herpes Zoster Ophthalmicus - urgent eye risk)"
+    ],
+    "follow_up_questions": [
+      "Are all the blisters crusted over or are new fluid-filled bumps still appearing?",
+      "Is the rash on both sides of the body or strictly along a single band on one side?",
+      "Have you had the chickenpox vaccine?"
+    ],
+    "avoid": [
+      "NEVER give Aspirin (risk of Reye's Syndrome)",
+      "AVOID Ibuprofen (Brufen) during chickenpox due to increased risk of severe necrotizing skin infections",
+      "Do NOT scratch the scabs"
+    ],
+    "source": "CDC Varicella Guidelines & American Academy of Pediatrics",
+    "review_status": "approved",
+    "reviewed_by": "Dr. N. Joshi (MD Pediatrics)"
+  },
+  {
+    "id": "inf_rabies_pep_016",
+    "topic": "Rabies Post-Exposure Prophylaxis (Dog / Animal Bite)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "rabies",
+      "dog bite",
+      "cat bite",
+      "monkey bite",
+      "rabies vaccine",
+      "animal scratch",
+      "kutta kaatna"
+    ],
+    "intent": "emergency",
+    "patient_answer": [
+      "IMMEDIATELY wash the bite or scratch wound thoroughly under running tap water with soap for at least 15 continuous minutes. This single step removes up to 80% of the virus.",
+      "Apply an antiseptic like povidone-iodine (Betadine) or 70% alcohol to the wound after washing.",
+      "Proceed directly to the nearest hospital or anti-rabies vaccination clinic immediately.",
+      "Do NOT apply chili powder, lime, turmeric, mud, or herbal pastes to the wound.",
+      "Do NOT bandage, wrap tightly, or suture the wound unless absolutely necessary for severe bleeding.",
+      "Complete all doses of the modern Anti-Rabies Vaccine (ARV) on schedule (Days 0, 3, 7, and 28)."
+    ],
+    "doctor_answer": {
+      "assessment": "Animal Bite Exposure for Rabies. Classify WHO Exposure Category: Category I (touching/feeding animals, licks on intact skin - No PEP), Category II (minor scratches/abrasions without bleeding - ARV immediately), Category III (transdermal bites or scratches, licks on broken skin, mucous membrane contamination, or bat exposures - ARV + Rabies Immunoglobulin).",
+      "investigations": "No lab test needed for PEP decision; start prophylaxis immediately without waiting for animal quarantine.",
+      "management": "Wound washing for >=15 min with soap and water. Category III: Infiltrate Rabies Immunoglobulin (RIG: Human RIG 20 IU/kg or Equine RIG 40 IU/kg) into and around all wound sites; remaining volume IM. Modern Rabies Cell-Culture Vaccine (ARV: 0.5 mL IM in deltoid or intradermal Essen/Thai regimen) on Days 0, 3, 7, and 28. Administer Tetanus Toxoid booster if due. Strictly avoid suturing wounds; if unavoidable, loosely suture only after RIG infiltration.",
+      "references": [
+        "WHO Expert Consultation on Rabies (Third Report) & WHO Position Paper on Rabies Vaccines (2018)",
+        "National Guidelines for Rabies Prophylaxis, MoHFW India"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red/Orange. Escort immediately to clean running water tap and scrub wound with soap and water for 15 minutes. Check Category III status (bleeding wound = needs RIG). Prepare ARV injection and calculate RIG dose based on patient's exact body weight.",
+    "red_flags": [
+      "Deep puncture wounds with bleeding (Category III requiring RIG)",
+      "Bites located near the head, neck, face, or hands (short incubation route to brain)",
+      "Wild animal or stray dog that was unprovoked and displaying aggressive or erratic behavior",
+      "Rabies clinical onset (hydrophobia, aerophobia, agitation - almost 100% fatal once clinical symptoms begin)"
+    ],
+    "follow_up_questions": [
+      "Did the bite or scratch break the skin and bleed?",
+      "Has the wound been washed with soap under running water for 15 minutes?",
+      "Is the animal a pet that can be observed for 10 days, or a stray/wild animal?"
+    ],
+    "avoid": [
+      "Do NOT apply turmeric, chilies, lime, or kerosene to bite wounds",
+      "Do NOT suture fresh animal bite wounds primarily",
+      "Do NOT delay vaccination while attempting to observe a stray animal"
+    ],
+    "source": "WHO Rabies Vaccines Position Paper & National Center for Disease Control (NCDC) India",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Emergency Medicine)"
+  },
+  {
+    "id": "inf_scrub_typhus_017",
+    "topic": "Scrub Typhus (Orientia Tsutsugamushi)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "scrub typhus",
+      "eschar",
+      "chigger bite",
+      "tsutsugamushi",
+      "scrub typhus fever",
+      "mite bite fever"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Seek immediate medical evaluation for acute fever if you have recently walked through brush, vegetation, or rural farmland.",
+      "Check your skin carefully (especially groin, armpits, waist, and behind ears) for a painless dark scab or cigarette-burn mark called an 'eschar'.",
+      "Take Paracetamol for fever while consulting a physician.",
+      "Take the full prescribed course of Doxycycline antibiotic as directed by your doctor.",
+      "Wear protective clothing, tuck pants into socks, and apply DEET insect repellent when working in grassy fields."
+    ],
+    "doctor_answer": {
+      "assessment": "Scrub Typhus (Orientia tsutsugamushi, transmitted by larval trombiculid mites/chiggers). Acute febrile illness with headache, myalgia, lymphadenopathy, and pathognomonic 'eschar' (punched-out ulcer with black necrotic crust, present in 40-70% of cases). Complications: ARDS, hepatitis, acute kidney injury, myocarditis.",
+      "investigations": "Thorough skin examination in good lighting for eschar. Scrub Typhus IgM ELISA (gold standard serology), Weil-Felix test (OX-K agglutination, low sensitivity). CBC (thrombocytopenia, leukocytosis), LFTs, creatinine, CXR.",
+      "management": "First-line: Oral Doxycycline 100 mg BID for 7 days (dramatic defervescence typically within 24-48 hours confirms clinical diagnosis). Alternative (pregnant women and young children): Oral Azithromycin 500 mg daily for 5 days. In severe cases with organ dysfunction: IV Doxycycline or IV Azithromycin.",
+      "references": [
+        "ICMR Guidelines for Diagnosis and Management of Rickettsial Diseases in India",
+        "CDC Clinical Overview: Scrub Typhus"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow / Orange. Perform a whole-body skin exam in private cubicle looking specifically in axillae, groin, and neck folds for a characteristic black eschar.",
+    "red_flags": [
+      "Difficulty breathing or rapid respiratory rate (Scrub typhus ARDS)",
+      "Oliguria or rising creatinine (Acute Kidney Injury)",
+      "Altered sensorium or delirium (Scrub Typhus Meningoencephalitis)",
+      "Hypotension and signs of septic shock"
+    ],
+    "follow_up_questions": [
+      "Have you visited rural fields, bushes, or farms recently?",
+      "Have you noticed any black scab-like mark on your skin that doesn't hurt or itch?",
+      "Has the fever lasted more than 5 days?"
+    ],
+    "avoid": [
+      "Do NOT delay Doxycycline treatment while waiting for confirmatory serology in endemic areas",
+      "Do NOT pick or scratch off the eschar scab"
+    ],
+    "source": "ICMR Guidelines for Rickettsial Diseases & CDC Scrub Typhus Protocols",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_leptospirosis_018",
+    "topic": "Leptospirosis (Weil's Disease)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "leptospirosis",
+      "weils disease",
+      "flood fever",
+      "rat urine water",
+      "conjunctival suffusion",
+      "calf tenderness fever"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Seek medical evaluation immediately if you experience high fever with severe calf muscle pain after walking through floodwaters or waterlogged streets.",
+      "Drink plenty of water and ORS to maintain kidney hydration.",
+      "Take Paracetamol for fever and pain.",
+      "Complete the prescribed antibiotic treatment without interruption.",
+      "Avoid wading through stagnant rainwater or floodwaters, especially if you have cuts or scrapes on your feet; wear protective gumboots."
+    ],
+    "doctor_answer": {
+      "assessment": "Leptospirosis (Leptospira interrogans, transmitted via water contaminated with rodent urine). Biphasic illness: Anicteric leptospirosis (fever, intense conjunctival suffusion without purulence, severe calf tenderness) vs Icteric leptospirosis / Weil's Disease (triad of jaundice, renal failure, and hemorrhagic diathesis).",
+      "investigations": "Microscopic Agglutination Test (MAT, gold standard), Leptospira IgM ELISA. CBC (leukocytosis, thrombocytopenia), Serum Creatinine/BUN (renal failure), LFT (elevated bilirubin with mild-moderate transaminasemia), CPK, Urine routine (proteinuria, hematuria).",
+      "management": "Mild/outpatient: Oral Doxycycline 100 mg BID for 7 days or Azithromycin 500 mg daily for 7 days. Severe/Weil's Disease: IV Crystalline Penicillin G 1.5 million units IV Q6H or IV Ceftriaxone 1-2 g IV daily for 7 days. Supportive: Hemodialysis for acute renal failure; lung protective ventilation for pulmonary hemorrhage.",
+      "references": [
+        "WHO Human Leptospirosis: Guidance for Detection and Control",
+        "MoHFW National Guidelines on Leptospirosis, India"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange if jaundice, oliguria, or hemoptysis present. Inspect eyes for red conjunctival suffusion without discharge and palpate gastrocnemius (calves) for exquisite tenderness.",
+    "red_flags": [
+      "Severe jaundice with rapidly rising creatinine and low urine output (Weil's Disease)",
+      "Coughing up fresh blood or acute breathlessness (Severe Pulmonary Hemorrhagic Syndrome - High Mortality)",
+      "Cardiac arrhythmias or profound hypotension"
+    ],
+    "follow_up_questions": [
+      "Did you wade through rainwater, floods, or muddy water with bare feet?",
+      "Do you have red eyes and severe tenderness in your calf muscles?",
+      "Have you noticed your urine becoming very dark or decreasing in amount?"
+    ],
+    "avoid": [
+      "Do NOT walk barefoot in stagnant water or flood puddles",
+      "Do NOT delay hospital admission if jaundice or oliguria occurs after flood exposure"
+    ],
+    "source": "WHO Guidelines on Leptospirosis & MoHFW India Protocols",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_amoebic_dysentery_019",
+    "topic": "Amoebic Dysentery (Entamoeba Histolytica / Amoebiasis)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "amoebiasis",
+      "amoebic dysentery",
+      "blood mucus stool",
+      "pet marod",
+      "entamoeba",
+      "bloody diarrhea cramps"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Drink plenty of safe, boiled or bottled water and WHO-standard ORS solution to prevent dehydration.",
+      "Eat simple, bland, soft meals like curd rice, boiled potatoes, and bananas.",
+      "Consult a doctor to have your stool examined under a microscope and get targeted anti-parasitic treatment.",
+      "Wash hands thoroughly with soap before preparing food, eating, and after every restroom visit.",
+      "STRICTLY AVOID ALCOHOL during treatment with Metronidazole; combining them causes severe vomiting, flushing, and violent headache."
+    ],
+    "doctor_answer": {
+      "assessment": "Amoebic Dysentery (Invasive intestinal amoebiasis caused by Entamoeba histolytica). Symptoms: gradual onset of lower abdominal cramping, tenesmus, and frequent loose stools with red blood and mucus ('raspberry jam' appearance). Risk of Amoebic Liver Abscess.",
+      "investigations": "Fresh warm stool wet mount microscopy (identifying E. histolytica trophozoites with ingested RBCs - erythrophagocytosis). Stool E. histolytica antigen detection ELISA (differentiates from non-pathogenic E. dispar). Abdominal ultrasound to rule out amoebic liver abscess if right upper quadrant pain or fever.",
+      "management": "Two-step regimen: 1. Tissue amoebicide: Oral Metronidazole 400-800 mg TID for 7-10 days (or Tinidazole 2 g once daily for 3-5 days). 2. Luminal amoebicide (mandatory to eradicate cysts and prevent recurrence): Oral Paromomycin 25-35 mg/kg/day in 3 divided doses for 7 days, or Diloxanide Furoate 500 mg TID for 10 days.",
+      "references": [
+        "CDC Parasites - Amebiasis: Resources for Health Professionals",
+        "WHO Guidelines for the Control of Amoebiasis"
+      ]
+    },
+    "staff_answer": "Priority: Triage Yellow. Check stool appearance for blood and mucus. Remind patient of strict alcohol avoidance with metronidazole.",
+    "red_flags": [
+      "Severe right upper quadrant pain with high fever and shaking chills (Amoebic Liver Abscess)",
+      "Peritoneal signs: rigid abdomen or rebound tenderness (Toxic megacolon / colonic perforation)",
+      "Signs of severe dehydration with dizziness"
+    ],
+    "follow_up_questions": [
+      "Is there visible blood and jelly-like mucus in your stools?",
+      "Do you feel a painful, urgent need to pass stool even when bowel is empty (tenesmus)?",
+      "Do you have any pain in the upper right side of your belly?"
+    ],
+    "avoid": [
+      "STRICTLY AVOID ALCOHOL while taking Metronidazole or Tinidazole (triggers severe disulfiram reaction)",
+      "Do NOT take antimotility medicines (Loperamide) in dysentery"
+    ],
+    "source": "CDC Amebiasis Treatment Guidelines & WHO Treatment of Amoebiasis",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  },
+  {
+    "id": "inf_scabies_020",
+    "topic": "Scabies Infestation (Sarcoptes Scabiei)",
+    "category": "infectious_diseases",
+    "keywords": [
+      "scabies",
+      "night itching",
+      "burrows",
+      "finger web itching",
+      "rat ko khujli",
+      "sarcoptes",
+      "permethrin"
+    ],
+    "intent": "symptom_first_aid",
+    "patient_answer": [
+      "Apply 5% Permethrin dermal cream over your entire body from the neck down to the tips of your toes, ensuring complete coverage between fingers, under fingernails, groin, and soles of feet.",
+      "Leave the cream on for 8 to 14 hours (usually overnight) before washing it off in a lukewarm bath.",
+      "Repeat the Permethrin application exactly 7 days later to kill newly hatched mites.",
+      "ALL household members, bedmates, and close contacts MUST be treated simultaneously, even if they currently do not have itching.",
+      "Wash all clothing, bedsheets, blankets, and towels used in the past 4 days in hot water (at least 50°C / 122°F) and dry on high heat, or seal in a plastic bag for 72 hours."
+    ],
+    "doctor_answer": {
+      "assessment": "Scabies (Sarcoptes scabiei var. hominis ectoparasitic infestation). Hallmarks: Intense nocturnal pruritus, serpiginous burrows, erythematous papules in web spaces of fingers, wrists, axillae, umbilicus, and genitalia. Crusted (Norwegian) scabies in immunocompromised.",
+      "investigations": "Clinical diagnosis. Definitive: Dermoscopy ('delta-wing jet' sign) or skin scraping with mineral oil under light microscopy demonstrating mites, eggs, or fecal pellets (scybala).",
+      "management": "First-line: Topical Permethrin 5% cream applied from jawline to soles, left on for 8-14 hours, repeated after 7 days. Oral Ivermectin (200 mcg/kg single oral dose with food, repeated on day 8 or 14) for institutional outbreaks, crusted scabies, or topical failures. Oral antihistamines (Cetirizine 10 mg) and mild topical corticosteroid for post-scabetic pruritus (which may persist for 2-4 weeks after successful mite eradication).",
+      "references": [
+        "CDC Scabies Clinical Guidance & Treatment",
+        "IUSTI European Guideline for the Management of Scabies (2020)"
+      ]
+    },
+    "staff_answer": "Priority: Triage Green. Emphasize to the patient that every person living in the household must apply the cream on the exact same evening, otherwise reinfection will continually recur.",
+    "red_flags": [
+      "Severe crusting, thick warty scaling over palms, soles, and trunk without typical itching (Crusted Scabies - millions of mites, highly infectious)",
+      "Extensive honey-colored crusts or pus on scratching areas (Secondary bacterial impetigo / Staphylococcal infection)"
+    ],
+    "follow_up_questions": [
+      "Is the itching dramatically worse at night when you get warm in bed?",
+      "Do other members of your family or roommates also have itching?",
+      "Do you have bumps or tracks between your fingers or around your wrists?"
+    ],
+    "avoid": [
+      "Do NOT treat only the symptomatic individual while ignoring household contacts (causes immediate reinfection)",
+      "Do NOT stop washing bedsheets in hot water"
+    ],
+    "source": "CDC Scabies Guidelines & International Alliance for the Control of Scabies (IACS)",
+    "review_status": "approved",
+    "reviewed_by": "Dr. A. Sharma (MD, Internal Medicine)"
+  }
+]

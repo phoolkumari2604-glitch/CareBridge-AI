@@ -35,6 +35,37 @@ select {
   font: inherit;
 }
 
+input,
+textarea,
+select {
+  color: var(--text);
+  background-color: var(--surface-2);
+  border-color: var(--border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--primary);
+}
+
+select option {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
 button {
   cursor: pointer;
 }
@@ -90,13 +121,13 @@ p {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   padding: 1.5rem;
   transition: all 0.2s ease;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Standard Buttons */
@@ -115,23 +146,23 @@ p {
 }
 
 .btn-primary {
-  background: #0ea5a8;
-  color: #ffffff;
+  background: #0284C7;
+  color: #FFFFFF;
 }
 
 .btn-primary:hover {
-  background: #087f82;
+  background: #0369A1;
   transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
+  background: #16233F;
+  border: 1px solid #1F2D4A;
+  color: #FFFFFF;
 }
 
 .btn-secondary:hover {
-  background: var(--surface-soft);
+  background: #1F2D4A;
 }
 
 /* Status Badges */
@@ -148,6 +179,7 @@ p {
 .badge-success {
   background: var(--success-bg);
   color: var(--success);
+  border: 1px solid var(--success-border);
 }
 
 .badge-warning {
@@ -163,6 +195,7 @@ p {
 .badge-info {
   background: var(--info-bg);
   color: var(--info);
+  border: 1px solid var(--info-border);
 }
 
 /* Scrollbar */
@@ -172,14 +205,14 @@ p {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--surface-soft);
+  background: #0B1426;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: #1F2D4A;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: #64748B;
 }

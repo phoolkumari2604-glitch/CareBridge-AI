@@ -56,11 +56,16 @@ def create_app():
     # ----------------------------------------------------
     with app.app_context():
         try:
-            connect_to_mongodb()
+            db = connect_to_mongodb()
             try:
                 create_indexes()
             except Exception as e:
                 print(f"[Warning] Error creating indexes: {e}")
+            try:
+                from scripts.seed_demo_accounts import seed_demo_accounts
+                seed_demo_accounts(db)
+            except Exception as e:
+                print(f"[Warning] Could not seed demo accounts: {e}")
             print("[Success] MongoDB connected successfully.")
         except Exception as e:
             print(f"[Error] Failed to connect to MongoDB: {e}")

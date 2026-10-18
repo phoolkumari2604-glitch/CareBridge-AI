@@ -520,6 +520,35 @@ export const doctorService = {
     const response = await api.post("/ai-assistant/kb/import", { entries });
     return response.data;
   },
+
+  async getReviewQueue(category = "") {
+    try {
+      const response = await api.get("/ai-assistant/review-queue", { params: { category } });
+      return response.data;
+    } catch (error) {
+      return { total_drafts: 0, queue: [] };
+    }
+  },
+
+  async approveKbEntry(entryId) {
+    const response = await api.post("/ai-assistant/entry/approve", { entry_id: entryId });
+    return response.data;
+  },
+
+  async editKbEntry(entryId, updates) {
+    const response = await api.post("/ai-assistant/entry/edit", { entry_id: entryId, updates });
+    return response.data;
+  },
+
+  async submitAIFeedback(feedbackData) {
+    const response = await api.post("/ai-assistant/feedback", feedbackData);
+    return response.data;
+  },
+
+  async clearAISession(sessionId) {
+    const response = await api.post("/ai-assistant/session/clear", { session_id: sessionId });
+    return response.data;
+  },
 };
 
 export default doctorService;

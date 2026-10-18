@@ -13,13 +13,24 @@ export const authAPI = {
 
   // Login
   login: async (data, signal) => {
-    const response = await api.post("/auth/login", data, { signal });
+    const payload = {
+      ...data,
+      email: (data?.email || "").trim().toLowerCase(),
+    };
+    const response = await api.post("/auth/login", payload, {
+      signal,
+      withCredentials: true,
+    });
     return response.data;
   },
 
   // Admin 2FA OTP verification
   verify2FA: async ({ temp_token, otp }, signal) => {
-    const response = await api.post("/auth/login/2fa-verify", { temp_token, otp }, { signal });
+    const response = await api.post(
+      "/auth/login/2fa-verify",
+      { temp_token: (temp_token || "").trim(), otp: String(otp || "").trim() },
+      { signal, withCredentials: true }
+    );
     return response.data;
   },
 
@@ -128,8 +139,8 @@ export const authAPI = {
   // ==================================================
   // BIOMETRICS
   // ==================================================
-  enrollFace: async ({ descriptor, consent = true }) => {
-    const response = await api.post("/auth/biometrics/face/enroll", { descriptor, consent });
+  enrollFace: async ({ descriptor, encrypted_payload, consent = true }) => {
+    const response = await api.post("/auth/biometrics/face/enroll", { descriptor, encrypted_payload, consent });
     return response.data;
   },
 

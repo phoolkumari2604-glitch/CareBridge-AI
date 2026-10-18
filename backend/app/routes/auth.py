@@ -17,6 +17,17 @@ from app.services.email_service import (
     send_password_reset_email,
 )
 from app.config import ADMIN_EMAIL, ADMIN_NAME
+from app.services.login_security import (
+    ensure_utc,
+    log_dev_auth_event,
+    generate_login_challenge,
+    verify_login_challenge,
+    check_ip_and_account_lockout,
+    record_failed_login,
+    reset_login_counters,
+    attach_session_cookie,
+    CAPTCHA_THRESHOLD,
+)
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -226,16 +237,76 @@ def login():
     bootstrap_admin_if_needed(db)
     data = request.get_json() or {}
     
-    email = data.get("email", "").strip().lower()
-    password = data.get("password", "")
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+    remember_me = bool(data.get("remember_me") or data.get("rememberMe"))
+    captcha_token = (data.get("captcha_token") or "").strip()
+    captcha_answer = str(data.get("captcha_answer") or "").strip()
     
     if not email or not password:
-        return jsonify({"error": "Validation Error", "detail": "Email and password are required"}), 400
+        log_dev_auth_event("MISSING_CREDENTIALS", email or "<empty>", "Email or password missing in request")
+        return jsonify({
+            "error": "Validation Error",
+            "code": "VALIDATION_ERROR",
+            "detail": "Email and password are required"
+        }), 400
+
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        log_dev_auth_event("INVALID_EMAIL_FORMAT", email, "Email format failed validation")
+        return jsonify({
+            "error": "Validation Error",
+            "code": "INVALID_EMAIL",
+            "detail": "Please enter a valid email address"
+        }), 400
         
     user = db.users.find_one({"email": email})
+    if not user:
+        # Case-insensitive fallback if legacy record was stored with uppercase characters
+        user = db.users.find_one({"email": {"$regex": f"^{re.escape(email)}$", "$options": "i"}})
+        if user and user.get("email") != email:
+            db.users.update_one({"_id": user["_id"]}, {"$set": {"email": email}})
+            user["email"] = email
+
     now = datetime.now(timezone.utc)
     
+    # 1. Check IP and Account lockout first
+    is_locked, rem_seconds, prior_failures = check_ip_and_account_lockout(db, email, user, now)
+    if is_locked:
+        minutes_left = max(1, (rem_seconds + 59) // 60)
+        log_dev_auth_event("ACCOUNT_LOCKED", email, f"Locked for {rem_seconds}s")
+        return jsonify({
+            "error": "Too Many Requests",
+            "code": "ACCOUNT_LOCKED",
+            "locked": True,
+            "lockout_seconds": rem_seconds,
+            "remaining_attempts": 0,
+            "detail": f"Account temporarily locked due to 5 failed sign-in attempts. Please wait {minutes_left} minute(s) or reset your password."
+        }), 429
+
+    # 2. Enforce security challenge if 3+ prior failures
+    if prior_failures >= CAPTCHA_THRESHOLD:
+        if not captcha_token or not captcha_answer:
+            log_dev_auth_event("CAPTCHA_REQUIRED", email, f"Challenge required after {prior_failures} failures")
+            return jsonify({
+                "error": "Security Check Required",
+                "code": "CAPTCHA_REQUIRED",
+                "requires_captcha": True,
+                "captcha": generate_login_challenge(),
+                "detail": "Please complete the security check below to continue."
+            }), 401
+        if not verify_login_challenge(captcha_token, captcha_answer):
+            log_dev_auth_event("CAPTCHA_INVALID", email, "Incorrect security challenge response")
+            return jsonify({
+                "error": "Security Check Failed",
+                "code": "CAPTCHA_INVALID",
+                "requires_captcha": True,
+                "captcha": generate_login_challenge(),
+                "detail": "Incorrect security check answer. Please solve the new challenge."
+            }), 401
+
     if not user:
+        fail_info = record_failed_login(db, email, None, now)
+        log_dev_auth_event("USER_NOT_FOUND", email, "No matching user document in db.users")
         log_audit_action(
             db=db,
             user_id="SYSTEM",
@@ -245,72 +316,57 @@ def login():
             resource_id=email,
             details=f"Failed login attempt for non-existent user {email}"
         )
-        return jsonify({"error": "Unauthorized", "detail": "Invalid email or password"}), 401
-        
-    # Check account status
-    if user.get("status") == "inactive":
-        return jsonify({"error": "Forbidden", "detail": "This account has been deactivated. Please contact support."}), 403
-        
-    # Check lockout
-    locked_until = user.get("locked_until")
-    if locked_until:
-        if isinstance(locked_until, str):
-            try:
-                locked_until = datetime.fromisoformat(locked_until.replace("Z", "+00:00"))
-            except Exception:
-                locked_until = None
-        if locked_until and locked_until > now:
-            minutes_left = max(1, int((locked_until - now).total_seconds() / 60))
-            return jsonify({
-                "error": "Too Many Requests",
-                "detail": f"Account temporarily locked due to 5 consecutive failed attempts. Please try again in {minutes_left} minute(s)."
-            }), 429
+        return jsonify({
+            "error": "Too Many Requests" if fail_info["locked"] else "Unauthorized",
+            **fail_info
+        }), fail_info["status_code"]
 
     stored_hash = user.get("password_hash") or user.get("password")
     if not verify_password(password, stored_hash):
-        failed_attempts = user.get("failed_login_attempts", 0) + 1
-        update_doc = {"failed_login_attempts": failed_attempts}
-        
-        lockout_msg = "Invalid email or password"
-        if failed_attempts >= 5:
-            lock_time = now + timedelta(minutes=15)
-            update_doc["locked_until"] = lock_time
-            update_doc["failed_login_attempts"] = 0
-            lockout_msg = "Account locked for 15 minutes due to 5 failed login attempts."
-            log_audit_action(
-                db=db,
-                user_id=str(user["_id"]),
-                user_role=user.get("role", "PATIENT"),
-                action="ACCOUNT_LOCKED",
-                resource="AUTH",
-                resource_id=str(user["_id"]),
-                details=f"Account {email} locked for 15m after 5 failed login attempts"
-            )
-        else:
-            remaining = 5 - failed_attempts
-            lockout_msg = f"Invalid email or password. {remaining} attempt(s) remaining before temporary lockout."
-
-        db.users.update_one({"_id": user["_id"]}, {"$set": update_doc})
-        
+        fail_info = record_failed_login(db, email, user, now)
+        log_dev_auth_event(
+            "ACCOUNT_LOCKED" if fail_info["locked"] else "PASSWORD_MISMATCH",
+            email,
+            f"Password check failed (locked={fail_info['locked']})"
+        )
         log_audit_action(
             db=db,
             user_id=str(user["_id"]),
             user_role=user.get("role", "PATIENT"),
-            action="LOGIN_FAILED",
+            action="ACCOUNT_LOCKED" if fail_info["locked"] else "LOGIN_FAILED",
             resource="AUTH",
             resource_id=str(user["_id"]),
-            details=f"Failed login attempt for {email} ({failed_attempts}/5)"
+            details=f"Failed login attempt for {email}"
         )
-        return jsonify({"error": "Unauthorized", "detail": lockout_msg}), 401
+        return jsonify({
+            "error": "Too Many Requests" if fail_info["locked"] else "Unauthorized",
+            **fail_info
+        }), fail_info["status_code"]
+        
+    # Check account status after verifying password so we don't leak account state to attackers
+    account_status = (user.get("status") or "active").lower()
+    if account_status in ("inactive", "suspended"):
+        log_dev_auth_event("ACCOUNT_SUSPENDED", email, f"Account status is {account_status}")
+        return jsonify({
+            "error": "Forbidden",
+            "code": "ACCOUNT_SUSPENDED",
+            "detail": "This account has been suspended or deactivated. Please contact support@carebridge.ai."
+        }), 403
+
+    if account_status == "unverified" or user.get("require_email_verification") is True:
+        log_dev_auth_event("EMAIL_NOT_VERIFIED", email, "Account requires email verification")
+        return jsonify({
+            "error": "Forbidden",
+            "code": "EMAIL_NOT_VERIFIED",
+            "unverified_email": email,
+            "detail": "Your email address has not been verified yet. Please check your inbox or resend the verification email."
+        }), 403
         
     user_id = str(user["_id"])
-    role = user.get("role", "PATIENT").upper()
+    role = (user.get("role") or "PATIENT").strip().upper()
     
-    # Reset failed attempts upon correct password
-    db.users.update_one(
-        {"_id": user["_id"]},
-        {"$set": {"failed_login_attempts": 0, "locked_until": None}}
-    )
+    # Reset failed attempts for both user and IP upon valid authentication
+    reset_login_counters(db, user, now)
     
     # ----------------------------------------------------
     # ADMIN 2FA OTP REQUIREMENT
@@ -325,7 +381,8 @@ def login():
             {"$set": {
                 "temp_2fa_token": temp_token,
                 "admin_2fa_otp": otp_code,
-                "admin_2fa_expires": otp_expires
+                "admin_2fa_expires": otp_expires,
+                "remember_me_pref": remember_me
             }}
         )
         
@@ -349,20 +406,24 @@ def login():
         }), 200
 
     # ----------------------------------------------------
-    # REGULAR USER TOKEN ISSUANCE
+    # REGULAR USER TOKEN ISSUANCE & PROFILE SELF-HEALING
     # ----------------------------------------------------
     staff_id = get_or_create_staff_id(db, user) if role in ["STAFF", "DOCTOR"] else None
     
     now_time = datetime.now(timezone.utc)
-    db.users.update_one({"_id": user["_id"]}, {"$set": {"last_login": now_time, "lastLogin": now_time.isoformat()}})
+    db.users.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"last_login": now_time, "lastLogin": now_time.isoformat(), "role": role}}
+    )
     
+    token_ttl = timedelta(days=30) if remember_me else timedelta(hours=12)
     token_data = {
         "sub": user_id,
         "email": user["email"],
         "role": role
     }
     
-    access_token = create_access_token(data=token_data, expires_delta=timedelta(days=7))
+    access_token = create_access_token(data=token_data, expires_delta=token_ttl)
     
     log_audit_action(
         db=db,
@@ -378,16 +439,52 @@ def login():
     doctor_id = None
     if role == "PATIENT":
         pat = db.patients.find_one({"$or": [{"user_id": user_id}, {"email": email}]})
+        if not pat and user.get("name"):
+            # Fallback match by name if seeded under an alias email, or create linked patient profile
+            pat = db.patients.find_one({"name": user.get("name")})
         if pat:
             patient_id = str(pat["_id"])
+            if pat.get("user_id") != user_id or pat.get("email") != email:
+                db.patients.update_one(
+                    {"_id": pat["_id"]},
+                    {"$set": {"user_id": user_id, "email": email}}
+                )
+        else:
+            patient_code = user.get("patient_code") or user.get("patientId") or f"{secrets.randbelow(900000) + 100000}"
+            new_pat = {
+                "user_id": user_id,
+                "name": user.get("name") or "Patient",
+                "email": email,
+                "phone": user.get("phone") or "",
+                "patient_code": patient_code,
+                "patientId": patient_code,
+                "patient_id_code": f"PT-{patient_code}",
+                "age": 30,
+                "gender": "Other",
+                "blood_group": "O+",
+                "created_at": now_time,
+            }
+            ins = db.patients.insert_one(new_pat)
+            patient_id = str(ins.inserted_id)
     elif role == "DOCTOR":
         doc = db.doctors.find_one({"$or": [{"user_id": user_id}, {"email": email}]})
+        if not doc and user.get("name"):
+            clean_name = re.sub(r"^dr\.?\s*", "", user.get("name", ""), flags=re.I).strip()
+            if clean_name:
+                doc = db.doctors.find_one({"name": {"$regex": re.escape(clean_name), "$options": "i"}})
         if doc:
             doctor_id = str(doc["_id"])
+            if doc.get("user_id") != user_id:
+                db.doctors.update_one({"_id": doc["_id"]}, {"$set": {"user_id": user_id}})
             
-    return jsonify({
+    created_raw = user.get("created_at") or user.get("createdAt") or now_time
+    created_iso = created_raw.isoformat() if hasattr(created_raw, "isoformat") else str(created_raw)
+
+    resp = jsonify({
         "access_token": access_token,
         "token_type": "bearer",
+        "expires_in": int(token_ttl.total_seconds()),
+        "remember_me": remember_me,
         "user": {
             "id": user_id,
             "_id": user_id,
@@ -400,13 +497,14 @@ def login():
             "staff_id": staff_id,
             "faceVerified": bool(user.get("face_verified") or user.get("faceVerified")),
             "fingerprintVerified": bool(user.get("fingerprint_verified") or user.get("fingerprintVerified")),
-            "emailVerified": bool(user.get("email_verified", False)),
+            "emailVerified": bool(user.get("email_verified", True)),
             "lastLogin": now_time.isoformat(),
-            "createdAt": (user.get("created_at") or user.get("createdAt") or now_time).isoformat() if hasattr(user.get("created_at") or user.get("createdAt") or now_time, "isoformat") else str(user.get("created_at") or user.get("createdAt") or now_time),
+            "createdAt": created_iso,
             "patient_id": patient_id,
             "doctor_id": doctor_id
         }
-    }), 200
+    })
+    return attach_session_cookie(resp, access_token, remember_me=remember_me), 200
 
 # ============================================================
 # 2FA VERIFICATION (ADMIN)
@@ -416,8 +514,8 @@ def verify_admin_2fa():
     db = get_database()
     data = request.get_json() or {}
     
-    temp_token = data.get("temp_token", "").strip()
-    otp = str(data.get("otp", "")).strip()
+    temp_token = (data.get("temp_token") or "").strip()
+    otp = str(data.get("otp") or "").strip()
     
     if not temp_token or not otp:
         return jsonify({"error": "Validation Error", "detail": "Temporary token and 6-digit OTP are required"}), 400
@@ -427,14 +525,8 @@ def verify_admin_2fa():
         return jsonify({"error": "Unauthorized", "detail": "Invalid or expired session. Please sign in again."}), 401
         
     stored_otp = str(user.get("admin_2fa_otp", ""))
-    otp_expires = user.get("admin_2fa_expires")
+    otp_expires = ensure_utc(user.get("admin_2fa_expires"))
     now = datetime.now(timezone.utc)
-    
-    if isinstance(otp_expires, str):
-        try:
-            otp_expires = datetime.fromisoformat(otp_expires.replace("Z", "+00:00"))
-        except Exception:
-            otp_expires = None
             
     if not otp_expires or otp_expires < now:
         return jsonify({"error": "Unauthorized", "detail": "The OTP code has expired. Please request a new code."}), 401
@@ -445,6 +537,7 @@ def verify_admin_2fa():
     user_id = str(user["_id"])
     role = "ADMIN"
     now_time = datetime.now(timezone.utc)
+    remember_me = bool(user.get("remember_me_pref", False))
     
     # Clear 2FA temp state and update last login
     db.users.update_one(
@@ -458,13 +551,14 @@ def verify_admin_2fa():
         }}
     )
     
+    token_ttl = timedelta(days=30) if remember_me else timedelta(hours=12)
     token_data = {
         "sub": user_id,
         "email": user["email"],
         "role": role
     }
     
-    access_token = create_access_token(data=token_data, expires_delta=timedelta(days=7))
+    access_token = create_access_token(data=token_data, expires_delta=token_ttl)
     staff_id = get_or_create_staff_id(db, user)
     
     log_audit_action(
@@ -477,9 +571,13 @@ def verify_admin_2fa():
         details=f"Admin {user['email']} authenticated with 2FA OTP"
     )
     
-    return jsonify({
+    created_raw = user.get("created_at") or now_time
+    created_iso = created_raw.isoformat() if hasattr(created_raw, "isoformat") else str(created_raw)
+
+    resp = jsonify({
         "access_token": access_token,
         "token_type": "bearer",
+        "expires_in": int(token_ttl.total_seconds()),
         "user": {
             "id": user_id,
             "_id": user_id,
@@ -494,10 +592,11 @@ def verify_admin_2fa():
             "fingerprintVerified": bool(user.get("fingerprint_verified") or user.get("fingerprintVerified")),
             "emailVerified": True,
             "lastLogin": now_time.isoformat(),
-            "createdAt": user.get("created_at", now_time).isoformat() if hasattr(user.get("created_at"), "isoformat") else str(user.get("created_at")),
+            "createdAt": created_iso,
             "is_primary_admin": bool(user.get("is_primary_admin", False))
         }
-    }), 200
+    })
+    return attach_session_cookie(resp, access_token, remember_me=remember_me), 200
 
 # ============================================================
 # FORGOT & RESET PASSWORD

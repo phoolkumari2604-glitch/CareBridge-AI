@@ -387,7 +387,17 @@ const patientService = {
 
   async clearAIHistory(patientId) {
     const pId = patientId || this.getCurrentPatientId();
-    const res = await api.delete(`/ai-assistant/history/all/${pId}`);
+    const res = await api.delete(`/ai-assistant/history/${pId}`);
+    return res.data;
+  },
+
+  async submitAIFeedback(feedbackData) {
+    const res = await api.post("/ai-assistant/feedback", feedbackData);
+    return res.data;
+  },
+
+  async clearAISession(sessionId) {
+    const res = await api.post("/ai-assistant/session/clear", { session_id: sessionId });
     return res.data;
   },
 

@@ -3,16 +3,16 @@
 ========================================================= */
 
 .vitals-page-layout {
-  --vt-bg: #07111f;
-  --vt-card: #0d1b2e;
-  --vt-tx: #f8fafc;
-  --vt-mut: #94a3b8;
-  --vt-bd: #1e293b;
-  --vt-ac: #0284c7;
-  --vt-ac-glow: rgba(2, 132, 199, 0.25);
-  --vt-ok: #10b981;
-  --vt-bad: #ef4444;
-  --vt-warn: #f59e0b;
+  --vt-bg: #0B1426;
+  --vt-card: #111D35;
+  --vt-tx: #FFFFFF;
+  --vt-mut: #94A3B8;
+  --vt-bd: #1F2D4A;
+  --vt-ac: #0284C7;
+  --vt-ac-glow: rgba(56, 189, 248, 0.25);
+  --vt-ok: #10B981;
+  --vt-bad: #F87171;
+  --vt-warn: #FBBF24;
   color: var(--vt-tx);
   max-width: 1240px;
   margin: 0 auto;
@@ -23,16 +23,16 @@
 
 [data-theme="light"] .vitals-page-layout,
 .light .vitals-page-layout {
-  --vt-bg: #f1f5f9;
-  --vt-card: #ffffff;
-  --vt-tx: #0f172a;
-  --vt-mut: #64748b;
-  --vt-bd: #e2e8f0;
-  --vt-ac: #0284c7;
-  --vt-ac-glow: rgba(2, 132, 199, 0.12);
-  --vt-ok: #059669;
-  --vt-bad: #dc2626;
-  --vt-warn: #d97706;
+  --vt-bg: #0B1426;
+  --vt-card: #111D35;
+  --vt-tx: #FFFFFF;
+  --vt-mut: #94A3B8;
+  --vt-bd: #1F2D4A;
+  --vt-ac: #0284C7;
+  --vt-ac-glow: rgba(56, 189, 248, 0.25);
+  --vt-ok: #10B981;
+  --vt-bad: #F87171;
+  --vt-warn: #FBBF24;
 }
 
 .vitals-page-layout * {
@@ -991,14 +991,14 @@
 
 [data-theme="light"] .custom-patient-select-btn,
 .light .custom-patient-select-btn {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  background: #16233F;
+  border-color: #1F2D4A;
+  color: #FFFFFF;
 }
 
 .custom-patient-select-btn:hover {
-  border-color: #0ea5a8;
-  background: rgba(14, 165, 168, 0.08);
+  border-color: #38BDF8;
+  background: rgba(56, 189, 248, 0.08);
 }
 
 .selected-patient-preview {
@@ -1016,7 +1016,7 @@
 
 [data-theme="light"] .selected-patient-preview strong,
 .light .selected-patient-preview strong {
-  color: #0f172a;
+  color: #FFFFFF;
 }
 
 .p-id-tag {

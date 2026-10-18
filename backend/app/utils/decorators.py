@@ -8,14 +8,19 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth_header = request.headers.get("Authorization")
-        if not auth_header:
+        cookie_token = request.cookies.get("cb_access_token")
+        token = None
+
+        if auth_header:
+            parts = auth_header.split()
+            if len(parts) != 2 or parts[0].lower() != "bearer":
+                return jsonify({"error": "Invalid token format", "detail": "Invalid token format, expected 'Bearer <token>'"}), 401
+            token = parts[1]
+        elif cookie_token:
+            token = cookie_token
+        else:
             return jsonify({"error": "Authorization header is missing", "detail": "Missing Authorization header"}), 401
-        
-        parts = auth_header.split()
-        if len(parts) != 2 or parts[0].lower() != "bearer":
-            return jsonify({"error": "Invalid token format", "detail": "Invalid token format, expected 'Bearer <token>'"}), 401
-        
-        token = parts[1]
+
         try:
             payload = decode_access_token(token)
         except Exception as e:

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "loinc_fasting_glucose_sample_003",
+    "topic": "Fasting Plasma Glucose (LOINC: 1558-6)",
+    "category": "lab_tests",
+    "keywords": [
+      "fasting blood glucose",
+      "loinc 1558 6",
+      "fbs test",
+      "fasting sugar test",
+      "blood sugar khali pet"
+    ],
+    "intent": "lab_test_interpretation",
+    "patient_answer": [
+      "Measures blood sugar concentration after an overnight fast of 8 to 12 hours.",
+      "Normal fasting range: 70 to 99 mg/dL (3.9 to 5.5 mmol/L).",
+      "Prediabetes (Impaired Fasting Glucose): 100 to 125 mg/dL.",
+      "Diabetes threshold: 126 mg/dL (7.0 mmol/L) or higher on two separate test occasions.",
+      "Plain drinking water is permitted during fasting; do not drink tea, coffee, milk, or juices."
+    ],
+    "doctor_answer": {
+      "assessment": "Diagnostic threshold for impaired fasting glucose and diabetes mellitus (LOINC: 1558-6: Fasting glucose in plasma).",
+      "investigations": "Fasting Plasma Glucose (FBS), HbA1c (LOINC: 4548-4), 75g 2-hour Oral Glucose Tolerance Test (OGTT), Lipid Profile.",
+      "management": "If FBS >= 126 mg/dL confirmed: initiate lifestyle modification (diet, exercise) and evaluate eligibility for Metformin per ADA Standards of Care.",
+      "references": [
+        "American Diabetes Association (ADA) Standards of Care in Diabetes",
+        "LOINC Standard: 1558-6 Fasting Glucose"
+      ]
+    },
+    "staff_answer": "Verify patient fasting status (>=8 hours). Collect venous sample in sodium fluoride / potassium oxalate (grey-top tube) to prevent in vitro glycolysis.",
+    "red_flags": [
+      "FBS > 300 mg/dL with ketones or altered sensorium (suspect DKA / HHS)",
+      "FBS < 60 mg/dL with neuroglycopenia (shakiness, diaphoresis - give 15g fast carbs)"
+    ],
+    "follow_up_questions": [
+      "How many hours did you fast before having your blood drawn?",
+      "Do you have family history of diabetes?"
+    ],
+    "avoid": [
+      "Do NOT exercise vigorously immediately before the blood draw",
+      "Do NOT chew gum or smoke during the fasting window"
+    ],
+    "source": "LOINC Standards (Regenstrief Institute) & ADA Standards of Care",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

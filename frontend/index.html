@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark" class="dark-theme">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -8,7 +8,7 @@
     <script>
       (function() {
         try {
-          var theme = localStorage.getItem("theme") || "light";
+          var theme = localStorage.getItem("theme") || "dark";
           document.documentElement.setAttribute("data-theme", theme);
           if (theme === "dark") {
             document.documentElement.classList.add("dark-theme");

@@ -1,0 +1,988 @@
+[
+  {
+    "id": "ch_newborn_danger_signs_001",
+    "topic": "Child Health: Newborn Danger Signs (Immediate Pediatric Emergency)",
+    "category": "child_health",
+    "keywords": [
+      "newborn danger signs",
+      "baby emergency signs",
+      "sick newborn",
+      "navjat shishu khatra",
+      "neonate not feeding",
+      "floppy baby"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Rush to a neonatal intensive care unit (NICU) or emergency hospital IMMEDIATELY if your baby (under 28 days old) shows any of these critical signs:",
+      "1. Refusal to feed or unable to suck breast milk.",
+      "2. Convulsions, seizures, or sudden jerking movements of limbs.",
+      "3. Fast breathing (60 or more breaths per minute) or chest drawing in deeply with each breath.",
+      "4. High body temperature (fever >= 37.5°C / 99.5°F) or feeling unusually cold (hypothermia < 35.5°C / 95.9°F).",
+      "5. Floppy muscle tone, extreme lethargy, or child not waking up for feeds.",
+      "6. Yellow jaundice spreading to the palms of the hands and soles of the feet.",
+      "7. Pus, redness, or foul smell around the umbilical cord stump."
+    ],
+    "doctor_answer": {
+      "assessment": "Neonatal Emergency / Possible Serious Bacterial Infection (PSBI / Neonatal Sepsis). High mortality risk.",
+      "investigations": "Urgent neonatal blood culture, CBC with differential, CRP, micro-ESR, lumbar puncture (CSF analysis), blood glucose, serum bilirubin.",
+      "management": "Immediate neonatal resuscitation. Empirical IV antibiotic therapy for early/late-onset sepsis: IV Ampicillin (50-100 mg/kg/day) + Gentamicin (4-5 mg/kg/day) or Cefotaxime. Warmth (Kangaroo Mother Care / radiant warmer). Respiratory support (CPAP / oxygen).",
+      "references": [
+        "WHO Guidelines on Managing Possible Serious Bacterial Infection (PSBI) in Young Infants",
+        "National Neonatology Forum (NNF) India Protocols"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red (Immediate Neonatal Resuscitation). Place under radiant warmer. Check respiratory rate, heart rate, and capillary blood glucose.",
+    "red_flags": [
+      "Unable to suck or feed",
+      "Convulsions or twitching",
+      "Severe chest indrawing or grunting",
+      "Jaundice on palms and soles in the first 24-48 hours",
+      "Umbilical stump draining foul pus with surrounding redness"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT delay hospital transfer in a sick newborn (neonatal sepsis can prove fatal within hours)",
+      "Do NOT expose the baby to cold draughts"
+    ],
+    "source": "World Health Organization (WHO) & National Neonatology Forum (NNF) India",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_newborn_care_basics_002",
+    "topic": "Child Health: Essential Newborn Care (Warmth, Cord & Bathing)",
+    "category": "child_health",
+    "keywords": [
+      "newborn care",
+      "umbilical cord care baby",
+      "bathing newborn",
+      "navjat shishu dekhbhal",
+      "baby care first month"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Practice Kangaroo Mother Care (KMC) / skin-to-skin contact: place baby directly on mother's bare chest wrapped in warm clothes to prevent hypothermia.",
+      "Umbilical cord care: Keep the cord stump clean and completely DRY. Do NOT apply turmeric, oil, powder, or cow dung. The stump will naturally dry and fall off in 7 to 14 days.",
+      "Delay the baby's first bath for at least 24 to 48 hours after delivery (and until the cord falls off) to protect the natural protective white skin coating (vernix) and maintain warmth.",
+      "Ensure exclusive breastfeeding on demand, both day and night (at least 8 to 12 times in 24 hours).",
+      "Check baby's diapers: by day 5, a well-fed baby should have at least 6 pale wet diapers and pass soft yellowish stools daily."
+    ],
+    "doctor_answer": {
+      "assessment": "Essential Newborn Care (ENC) assessment per WHO standards.",
+      "investigations": "Daily weight tracking (weight loss should not exceed 7-10% of birth weight; regain birth weight by 10-14 days).",
+      "management": "Thermal protection (warm room, KMC). Dry cord care (chlorhexidine 7.1% application in high neonatal mortality settings per WHO). Exclusive breastfeeding. Administration of Vitamin K1 (1 mg IM) at birth to prevent Vitamin K Deficiency Bleeding (VKDB).",
+      "references": [
+        "WHO Recommendations on Newborn Health: Guidelines on Maternal, Newborn, Child and Adolescent Health",
+        "MoHFW Facility Based Newborn Care (FBNC)"
+      ]
+    },
+    "staff_answer": "Confirm Vitamin K1 administration. Demonstrate proper skin-to-skin positioning and dry cord care to parents.",
+    "red_flags": [
+      "Umbilical cord bleeding or surrounding skin becoming bright red and swollen (Omphalitis)",
+      "Severe hypothermia (< 35.5°C) with cold blue hands and feet"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT apply turmeric, oil, talcum powder, or ash to the umbilical cord stump",
+      "Do NOT give water, ghutti, or animal milk to a newborn"
+    ],
+    "source": "World Health Organization (WHO) & Ministry of Health and Family Welfare India",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_neonatal_jaundice_003",
+    "topic": "Child Health: Neonatal Jaundice (Peeliya in Newborns)",
+    "category": "child_health",
+    "keywords": [
+      "neonatal jaundice",
+      "baby jaundice",
+      "newborn yellow eyes",
+      "phototherapy baby",
+      "jaundice newborn 3 days"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Physiological jaundice is very common: appears on day 2 or 3 of life, peaks around day 4 to 5, and gradually fades on its own by 2 weeks as the baby's liver matures.",
+      "Check your baby in bright natural daylight: gently press the baby's forehead or nose; if the skin looks yellow where pressed, jaundice is present.",
+      "DANGER SIGN: If jaundice appears within the FIRST 24 HOURS of birth, or spreads down to the baby's abdomen, palms, and soles, seek emergency pediatric evaluation.",
+      "Frequent breastfeeding (every 2 to 3 hours) is crucial; breast milk promotes bowel movements that flush bilirubin out in the baby's stool.",
+      "Do NOT expose the baby to direct outdoor sunlight (can cause sunburn and dehydration); if bilirubin levels are high, hospital phototherapy under specialized blue medical lights is required."
+    ],
+    "doctor_answer": {
+      "assessment": "Neonatal Hyperbilirubinemia (Unconjugated vs Conjugated). Differentiate benign physiological jaundice from pathological hyperbilirubinemia (ABO/Rh incompatibility, G6PD deficiency, sepsis, biliary atresia). Risk of Kernicterus (bilirubin neurotoxicity / choreoathetoid cerebral palsy).",
+      "investigations": "Total and Direct Serum Bilirubin (TSB) plotted on AAP Bhutani Nomogram, Blood type and Direct Antiglobulin Test (DAT / Coombs), CBC with reticulocyte count, G6PD screen.",
+      "management": "Intensive Phototherapy (blue-green light 460-490 nm wavelength) initiated based on hour-specific risk nomograms. Adequate enteral hydration. Exchange Transfusion for acute bilirubin encephalopathy or TSB reaching exchange threshold.",
+      "references": [
+        "AAP Clinical Practice Guideline: Management of Hyperbilirubinemia in the Newborn Infant 35 or More Weeks of Gestation (2022)",
+        "National Neonatology Forum (NNF) India"
+      ]
+    },
+    "staff_answer": "Plot TSB on hour-specific nomogram. Assess cephalocaudal progression (Kramer's zones).",
+    "red_flags": [
+      "Jaundice appearing within the first 24 hours of life (always pathological)",
+      "Baby becomes lethargic, has a high-pitched cry, or arches neck/back backwards (Acute Bilirubin Encephalopathy)",
+      "Pale chalky white stools and dark urine (concern for Biliary Atresia)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT place an unclothed baby under harsh outdoor direct sunlight (causes severe hypothermia or thermal burn)",
+      "Do NOT stop breastfeeding"
+    ],
+    "source": "American Academy of Pediatrics (AAP) Guidelines & NNF India",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_developmental_milestones_004",
+    "topic": "Child Health: Child Developmental Milestones (0 to 3 Years)",
+    "category": "child_health",
+    "keywords": [
+      "milestones child",
+      "baby milestones",
+      "when does baby walk",
+      "speech delay child",
+      "child development 1 year",
+      "developmental delay"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Key milestones to watch in your baby's first 3 years:",
+      "  - 2 to 3 Months: Smiles socially at parents, follows moving objects with eyes, holds head steady.",
+      "  - 6 Months: Sits with support, rolls from stomach to back, babbles sounds ('ba-ba', 'ma-ma'), reaches for toys.",
+      "  - 9 to 12 Months: Sits independently, crawls, pulls to stand, understands 'no', says single words ('mama', 'dada'), points at objects.",
+      "  - 18 Months: Walks independently, drinks from a cup, speaks 6 to 10 words, climbs stairs with help.",
+      "  - 2 Years: Runs, kicks a ball, speaks 2-word phrases ('want milk'), follows 2-step instructions.",
+      "Every child develops at their own unique pace; however, significant delays in walking, speech, or social eye contact warrant an early pediatric assessment."
+    ],
+    "doctor_answer": {
+      "assessment": "Developmental surveillance across four domains: Gross Motor, Fine Motor, Language/Communication, and Personal-Social/Cognitive.",
+      "investigations": "Screen using standardized tools (Ages & Stages Questionnaires [ASQ-3], Denver Developmental Screening Test-II, M-CHAT-R for autism screening at 18 and 24 months).",
+      "management": "Early Intervention Services (physiotherapy, speech therapy, occupational therapy) initiated promptly during periods of maximal neuroplasticity. Audiological evaluation for any speech delay.",
+      "references": [
+        "AAP Developmental Surveillance and Screening Guidelines",
+        "CDC Milestone Tracker Guidance"
+      ]
+    },
+    "staff_answer": "Perform developmental screening using standard milestones chart. Inquire about regression of previously acquired skills.",
+    "red_flags": [
+      "Red Flag: Regression or loss of any previously acquired speech, motor, or social skill at any age",
+      "No babbling, pointing, or gestures by 12 months",
+      "No single words by 16 months or no 2-word spontaneous phrases by 24 months",
+      "Not walking independently by 18 months"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT take a 'wait and see' approach if a child loses words or eye contact (early intervention is critical)",
+      "Do NOT expose children under 2 years to television or smartphone screens"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & Centers for Disease Control and Prevention (CDC)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_pediatric_fever_management_005",
+    "topic": "Child Health: Pediatric Fever & Paracetamol Dosing",
+    "category": "child_health",
+    "keywords": [
+      "child fever",
+      "baby bukhar",
+      "infant paracetamol dose",
+      "crocin syrup dose",
+      "calpol drops dose",
+      "bachhe ka bukhar"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Fever is your child's natural immune defense fighting an infection, not a disease itself.",
+      "Keep the child lightly dressed in a comfortable, airy room; do not wrap them in heavy blankets or woolen sweaters.",
+      "Encourage plenty of fluids: breast milk, formula, ORS, or water to prevent dehydration.",
+      "Paracetamol Syrup Dosing: Strictly 10 to 15 mg per kg body weight per dose, every 4 to 6 hours as needed (maximum 4 doses in 24 hours). ALWAYS check the strength on the bottle label with a calibrated syringe or measuring cup.",
+      "Use a lukewarm damp sponge on the forehead or chest if the child is distressed by high fever; NEVER use cold water, ice, or rubbing alcohol.",
+      "SEEK IMMEDIATE PEDIATRIC CARE if: Baby is under 3 months old with any fever (>= 38°C / 100.4°F), baby is unusually sleepy/difficult to wake, has breathing trouble, or develops purple skin spots."
+    ],
+    "doctor_answer": {
+      "assessment": "Pediatric Acute Febrile Illness. Risk stratify using NICE Traffic Light system (Green, Amber, Red). Full septic workup mandatory for infants < 3 months.",
+      "investigations": "Infants < 3 months: CBC, blood culture, urinalysis + culture, LP, CXR. Children > 3 months: evaluate for localizing focus (otitis media, tonsillitis, UTI, viral exanthem).",
+      "management": "Oral Paracetamol 15 mg/kg/dose Q4-6H (max 60 mg/kg/day). Alternative: Ibuprofen 5-10 mg/kg/dose (only in infants > 6 months who are well-hydrated). Avoid alternating antipyretics routinely. Antibiotics indicated only for confirmed or highly suspected bacterial focus.",
+      "references": [
+        "NICE Guideline NG143: Fever in under 5s: assessment and initial management",
+        "Indian Academy of Pediatrics (IAP) Guidelines on Fever in Children"
+      ]
+    },
+    "staff_answer": "Weigh the child accurately. Calculate exact Paracetamol mg and mL dose based on weight, not age.",
+    "red_flags": [
+      "Age under 3 months with fever >= 38.0°C (100.4°F)",
+      "Non-blanching petechial/purpuric rash (Meningococcal Septicemia Alert - Glass Test Positive)",
+      "Stiff neck, bulging fontanelle, or continuous high-pitched whimpering cry",
+      "Lethargy (child does not look at parents or respond to voice)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "NEVER give Aspirin to children or teenagers (risk of fatal Reye's Syndrome)",
+      "Do NOT dose pediatric syrups by 'teaspoon' (always use an exact milliliter oral syringe)",
+      "Do NOT use rubbing alcohol or cold ice baths"
+    ],
+    "source": "NICE Guidelines NG143 & Indian Academy of Pediatrics (IAP)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_febrile_seizures_006",
+    "topic": "Child Health: Febrile Seizures (Fever Fits in Young Children)",
+    "category": "child_health",
+    "keywords": [
+      "febrile seizure",
+      "fever fit baby",
+      "child seizure fever",
+      "convulsion fever child",
+      "bukhar me jhatke"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "A febrile seizure is a convulsion triggered by a rapid spike in body temperature, occurring in about 3% to 5% of healthy children aged 6 months to 5 years.",
+      "WHAT TO DO DURING A SEIZURE (FIRST AID):",
+      "  1. Stay calm. Place the child gently on their SIDE in the recovery position on a soft floor to keep their airway clear and prevent choking on saliva or vomit.",
+      "  2. Remove nearby sharp, hard, or dangerous objects.",
+      "  3. Loosen tight clothing around their neck.",
+      "  4. Look at a clock and time the exact duration of the seizure.",
+      "WHAT NOT TO DO:",
+      "  - NEVER put anything in the child's mouth (no fingers, spoons, water, or onions).",
+      "  - Do NOT physically hold down, restrain, or shake the child.",
+      "Most febrile seizures stop on their own within 1 to 3 minutes without causing any brain damage. Seek emergency medical care immediately for any first-time seizure or if a seizure lasts longer than 5 minutes."
+    ],
+    "doctor_answer": {
+      "assessment": "Simple Febrile Seizure (generalized tonic-clonic, <15 min duration, does not recur within 24h, neurologically normal child) vs Complex Febrile Seizure (focal onset, prolonged >15 min, or recurrent within 24h). Must rule out CNS infection (Meningitis / Encephalitis).",
+      "investigations": "Lumbar puncture indicated if meningeal signs, bulging fontanelle, infants < 12 months with incomplete immunization, or prolonged post-ictal state. Routine EEG and neuroimaging are NOT indicated for simple febrile seizures.",
+      "management": "Acute seizure lasting > 5 minutes: abortive therapy with Intranasal Midazolam (0.2 mg/kg) or rectal Diazepam (0.5 mg/kg). Post-ictal supportive care, antipyretics for comfort, identify and treat source of fever. Reassure parents that simple febrile seizures do not cause brain damage or cognitive impairment.",
+      "references": [
+        "AAP Clinical Practice Guideline: Febrile Seizures: Guideline for the Neurodiagnostic Evaluation of the Child",
+        "IAP Guidelines on Pediatric Seizures"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red if active seizure or post-ictal lethargy. Check airway, position on side, check capillary blood glucose.",
+    "red_flags": [
+      "Seizure lasting longer than 5 minutes (Status Epilepticus Risk)",
+      "Child remains unrousable or lethargic for > 1 hour after the seizure stops",
+      "Fever accompanied by neck stiffness, purpuric spots, or bulging fontanelle (Meningitis)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "NEVER put fingers, spoons, or water into the mouth of a seizing child (causes severe airway obstruction and aspiration)",
+      "Do NOT restrain convulsing limbs"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & Indian Academy of Pediatrics",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_croup_stridor_007",
+    "topic": "Child Health: Croup & Stridor (Barking Seal Cough)",
+    "category": "child_health",
+    "keywords": [
+      "croup",
+      "barking cough child",
+      "stridor child",
+      "seal cough",
+      "noisy breathing child",
+      "laryngotracheobronchitis"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Croup is a viral infection that causes swelling around the vocal cords and windpipe, typically in children aged 6 months to 3 years.",
+      "Key signs: A distinctive, loud, harsh cough that sounds like a barking seal or dog, a hoarse voice, and symptoms that worsen dramatically in the middle of the night.",
+      "Stridor: A high-pitched squeaking or whistling noise heard when the child breathes IN.",
+      "Home first aid: Keep the child calm (crying worsens airway swelling). Sit with the child in a steamy bathroom (run hot shower with door closed) for 10 to 15 minutes, or expose them to cool, fresh night air.",
+      "SEEK EMERGENCY HOSPITAL CARE IMMEDIATELY if you hear stridor when the child is resting quietly, if the child is struggling to breathe, or if the skin sucks in around the neck or ribs."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Laryngotracheobronchitis (Croup, most commonly Parainfluenza virus types 1 and 2). Score severity using Westley Croup Score (Stridor, Intercostal retractions, Air entry, Cyanosis, Level of consciousness). Must rule out life-threatening Acute Epiglottitis, foreign body aspiration, and bacterial tracheitis.",
+      "investigations": "Clinical diagnosis. Soft tissue neck X-ray ('steeple sign' subglottic narrowing) only if atypical or suspected alternative diagnosis.",
+      "management": "Mild Croup (barking cough, no stridor at rest): Single dose oral Dexamethasone 0.15-0.6 mg/kg. Moderate-to-Severe Croup (stridor at rest, retractions): Oral/IM Dexamethasone 0.6 mg/kg + Nebulized Racemic Epinephrine (or L-epinephrine 1:1000, 0.5 mL/kg up to 5 mL). Observe for >= 2-4 hours post-nebulization for rebound.",
+      "references": [
+        "NICE Clinical Knowledge Summaries: Croup",
+        "AAP Clinical Management of Croup"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange/Red if stridor at rest or chest indrawing. Keep child calm on parent's lap; avoid distressing procedures like tongue depressors.",
+    "red_flags": [
+      "Stridor audible at rest without crying",
+      "Severe chest wall retractions, tracheal tug, or nostril flaring",
+      "Cyanosis (blue lips) or lethargy",
+      "Drooling saliva with high fever and inability to swallow (Epiglottitis Alert - DO NOT examine throat)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT force a tongue depressor into the throat of a child with severe stridor and drooling (can trigger fatal laryngospasm in epiglottitis)",
+      "Do NOT agitate the child"
+    ],
+    "source": "NICE Guidelines & American Academy of Pediatrics",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_acute_otitis_media_child_008",
+    "topic": "Child Health: Ear Infection in Children (Acute Otitis Media)",
+    "category": "child_health",
+    "keywords": [
+      "ear infection child",
+      "child earache",
+      "toddler tugging ear",
+      "ear discharge baby",
+      "acute otitis media child"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Acute middle ear infection is very common in infants and toddlers, often developing a few days after a common cold.",
+      "Key signs in babies: Tugging or rubbing the ear, excessive crying, unexplained irritability, waking up crying at night, fever, or fluid/pus draining from the ear canal.",
+      "Pain relief is the most important first step: give pediatric Paracetamol or Ibuprofen (if child > 6 months) to ease ear pain.",
+      "Place a warm, damp cloth against the outside of the ear for 10 minutes to soothe discomfort.",
+      "Consult a pediatrician for an ear exam with an otoscope to check if the eardrum is red and bulging; antibiotics may be prescribed if both ears are infected or if the baby is under 2 years old."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Otitis Media (AOM: acute onset of middle ear effusion with tympanic membrane erythema and bulging, most commonly S. pneumoniae, H. influenzae, M. catarrhalis).",
+      "investigations": "Pneumatic Otoscopy (erythematous, opaque, bulging tympanic membrane with decreased mobility).",
+      "management": "Analgesia first-line (Paracetamol / Ibuprofen). Immediate antibiotics (High-dose oral Amoxicillin 80-90 mg/kg/day divided BID for 10 days) indicated for: age < 6 months, severe illness (moderate-severe otalgia, fever >=39°C), bilateral AOM in children < 2 years, or otorrhea. Watchful waiting for 48 hours is acceptable for mild unilateral AOM in children >= 2 years.",
+      "references": [
+        "AAP Clinical Practice Guideline: The Diagnosis and Management of Acute Otitis Media",
+        "IAP Pediatric Guidelines"
+      ]
+    },
+    "staff_answer": "Examine both ears with otoscope. Check for tenderness or swelling behind the ear (mastoid).",
+    "red_flags": [
+      "Swelling, redness, and tenderness on the bone directly behind the ear (Acute Mastoiditis Emergency)",
+      "Lethargy with stiff neck (Meningitis complication)",
+      "Facial nerve palsy (drooping corner of mouth on same side)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT put warm oil, garlic juice, or cotton buds into a child's ear canal",
+      "Do NOT instill eardrops if there is fluid draining (suggests eardrum perforation)"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & Indian Academy of Pediatrics",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_colic_crying_baby_009",
+    "topic": "Child Health: Infant Colic & Excessive Crying (The Wessel Rule)",
+    "category": "child_health",
+    "keywords": [
+      "infant colic",
+      "baby crying constantly",
+      "evening crying baby",
+      "pet me gas baby",
+      "colic relief"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Infant colic is defined by the 'Rule of Threes': crying for more than 3 hours a day, more than 3 days a week, for at least 3 weeks in an otherwise completely healthy, well-fed baby.",
+      "Typically peaks around 6 weeks of age and improves dramatically on its own by 3 to 4 months.",
+      "Common signs: Crying intensifies in the late afternoon or evening; the baby clenches their fists, arches their back, and draws their knees up to their abdomen.",
+      "Soothing techniques ('The 5 S's'):",
+      "  - Swaddling snugly in a light blanket.",
+      "  - Side or stomach holding across your forearm (while awake).",
+      "  - Shushing white noise (fan, white noise sound, gentle shh in ear).",
+      "  - Swinging or gentle rhythmic rocking.",
+      "  - Sucking on a clean pacifier or breast.",
+      "Burp your baby thoroughly after every feed to release trapped swallowed air."
+    ],
+    "doctor_answer": {
+      "assessment": "Infant Colic (benign, self-limiting behavioral phenomenon). Exclude organic causes: corneal abrasion (fluorescein stain), hair tourniquet on digits/penis, incarcerated inguinal hernia, cow's milk protein allergy (CMPA), otitis media, non-accidental trauma.",
+      "investigations": "Comprehensive undressed physical exam (inspect fingers, toes, genitalia, abdomen). Laboratory tests NOT indicated in a thriving baby with normal exam.",
+      "management": "Parental reassurance and education on self-limiting nature. Soothing techniques (swaddling, white noise, motion). Ensure burping. Maternal trial of dairy elimination for 2 weeks if CMPA suspected in breastfed infants. Simethicone drops may be trialed. Assess caregiver exhaustion (counsel on Shaken Baby Syndrome prevention: place baby safely in crib and step away if feeling overwhelmed).",
+      "references": [
+        "AAP Guidance on Infant Colic and Excessive Crying",
+        "NICE Clinical Knowledge Summaries: Colic - infantile"
+      ]
+    },
+    "staff_answer": "Perform full undressed examination: inspect all 10 fingers, toes, and genitalia for hair tourniquets. Check hernias.",
+    "red_flags": [
+      "Incarcerated inguinal hernia (hard, tender swelling in the groin)",
+      "Vomiting green bile or passing blood in stool",
+      "Caregiver expressing extreme frustration, rage, or impulse to shake the baby"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "NEVER SHAKE A BABY (violently shaking a crying infant causes fatal brain bleeds and blindness / Shaken Baby Syndrome)",
+      "Do NOT give unverified gripe waters containing alcohol or high sugar"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & National Health Service (NHS)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_hand_foot_mouth_010",
+    "topic": "Child Health: Hand, Foot, and Mouth Disease (HFMD)",
+    "category": "child_health",
+    "keywords": [
+      "hfmd",
+      "hand foot mouth disease",
+      "blisters hands feet baby",
+      "mouth ulcers child",
+      "coxsackievirus child"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Hand, Foot, and Mouth Disease (HFMD) is a common, contagious viral illness caused by Coxsackievirus, mostly affecting children under 5 years.",
+      "Key signs: Painful tiny red spots or blisters inside the mouth and on the tongue, accompanied by a non-itchy red rash with small oval blisters on the palms of the hands, soles of the feet, and buttocks.",
+      "Children often refuse to eat or drink due to painful mouth ulcers; preventing dehydration is the primary goal.",
+      "Offer cold, soothing, non-acidic liquids: cold water, cold milk, curd, fruit purees, or ice cream. Avoid citrus juices and spicy foods that sting.",
+      "Give Paracetamol for mouth pain and fever.",
+      "Keep the child home from daycare or school until all blisters have dried and fever is gone (usually 7 to 10 days)."
+    ],
+    "doctor_answer": {
+      "assessment": "Hand, Foot, and Mouth Disease (Enterovirus genus, predominantly Coxsackievirus A16 and Enterovirus 71 [EV-A71]). Characterized by vesicular stomatitis and papulovesicular exanthem on palms, soles, and buttocks.",
+      "investigations": "Clinical diagnosis. RT-PCR for enterovirus only in atypical or outbreak settings.",
+      "management": "Supportive therapy: Hydration maintenance. Analgesia: Oral Paracetamol or Ibuprofen. Topical oral lidocaine is NOT recommended in young children (aspiration/toxicity risk). Monitor for rare EV-A71 complications (brainstem encephalitis, neurogenic pulmonary edema).",
+      "references": [
+        "CDC Clinical Guidance: Hand, Foot, and Mouth Disease",
+        "WHO A Guide to Clinical Management and Public Health Response for HFMD"
+      ]
+    },
+    "staff_answer": "Check hydration: examine mucous membranes and wet diaper frequency. Inspect throat and palms.",
+    "red_flags": [
+      "Signs of dehydration: dry tongue, no tears when crying, no urine for 6 hours",
+      "Neurological red flags (Enterovirus 71): myoclonic jerks, stumbling gait, extreme drowsiness, or rapid breathing"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT pop or squeeze the skin blisters (the fluid inside is loaded with virus and spreads infection)",
+      "Do NOT give citrus juices or salty foods that cause severe mouth stinging"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & World Health Organization",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_teething_baby_011",
+    "topic": "Child Health: Teething Symptoms & Safe Soothing in Babies",
+    "category": "child_health",
+    "keywords": [
+      "teething",
+      "baby teeth coming",
+      "teething fever",
+      "drooling baby",
+      "teething toys",
+      "baby biting everything"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "First teeth (usually the two lower central incisors) typically appear between 4 and 7 months of age.",
+      "Normal teething signs: Increased drooling, chewing or gnawing on hard objects, swollen tender gums, mild fussiness, and disturbed sleep.",
+      "Safe soothing techniques:",
+      "  - Give a firm rubber teething ring or clean chilled (not frozen) washcloth to chew on.",
+      "  - Gently massage baby's gums with a clean finger for 1 to 2 minutes.",
+      "  - Wipe drool frequently from the chin and neck with a soft cloth to prevent a red drool rash.",
+      "TEETHING DOES NOT CAUSE HIGH FEVER OR DIARRHEA: If your baby has a temperature of 38°C (100.4°F) or higher, or persistent watery diarrhea, it is caused by an infection, NOT teething. Consult a doctor."
+    ],
+    "doctor_answer": {
+      "assessment": "Deciduous tooth eruption. Characterized by localized gingival swelling, mild localized discomfort, and minor low-grade temperature fluctuations (< 38.0°C).",
+      "investigations": "Oral cavity inspection. If temperature >= 38.0°C or diarrhea: investigate for concurrent viral infection.",
+      "management": "Non-pharmacological soothing: Chilled rubber teething rings, clean finger gum massage. Oral Paracetamol (15 mg/kg) if significant distress. Topical teething gels containing Benzocaine or Lidocaine are STRICTLY CONTRAINDICATED (risk of fatal methemoglobinemia). Homeopathic teething tablets containing belladonna are dangerous and warned against by FDA.",
+      "references": [
+        "AAP Guidelines on Teething and Dental Health",
+        "FDA Drug Safety: Teething Gels and Methemoglobinemia"
+      ]
+    },
+    "staff_answer": "Inspect gingiva for emerging tooth buds. Warn parents against dangerous benzocaine gels.",
+    "red_flags": [
+      "Fever >= 38.0°C (100.4°F) - investigate for viral/bacterial infection",
+      "Pale, gray, or blue-colored skin/lips following application of teething gel (Methemoglobinemia Emergency)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "NEVER use teething gels containing Benzocaine or Lidocaine (causes fatal methemoglobinemia)",
+      "Do NOT use amber teething necklaces (severe strangulation and choking hazard)"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & FDA Safety Alerts",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_choking_pediatric_heimlich_012",
+    "topic": "Child Health: Pediatric Choking First Aid (Infant vs Child Heimlich)",
+    "category": "child_health",
+    "keywords": [
+      "choking child",
+      "baby choking",
+      "infant choking first aid",
+      "heimlich baby",
+      "choking first aid toddler"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "ACT IMMEDIATELY IF A CHILD IS CHOKING (cannot cough, cannot breathe, cannot cry, or turns blue):",
+      "FOR AN INFANT (UNDER 1 YEAR OLD):",
+      "  1. Lay the baby face down along your forearm, supporting their jaw with your hand, with the head tilted lower than their chest.",
+      "  2. Deliver 5 firm, distinct BACK SLAPS between the shoulder blades using the heel of your hand.",
+      "  3. Turn the baby face up along your opposite forearm (supporting head) and deliver 5 QUICK CHEST THRUSTS in the center of the chest using 2 fingers.",
+      "  4. Repeat cycle of 5 back slaps and 5 chest thrusts until the object pops out or the baby starts breathing.",
+      "FOR A CHILD OVER 1 YEAR (HEIMLICH MANEUVER):",
+      "  - Stand or kneel behind the child. Wrap arms around their waist.",
+      "  - Make a fist with one hand, place thumb-side just above their belly button.",
+      "  - Grasp your fist with other hand and pull sharply inward and upward with quick abdominal thrusts.",
+      "If the child becomes unconscious: Call 112 immediately and begin CPR (30 chest compressions, check mouth, 2 rescue breaths)."
+    ],
+    "doctor_answer": {
+      "assessment": "Foreign body airway obstruction (FBAO) in pediatric population. Acute airway emergency.",
+      "investigations": "Clinical recognition. Avoid imaging if acute complete obstruction.",
+      "management": "Infant (<1y): Alternating 5 back blows and 5 chest thrusts. Child (>1y): Subdiaphragmatic abdominal thrusts (Heimlich maneuver). If unresponsiveness supervenes: immediately commence pediatric cardiopulmonary resuscitation (CPR); look in oropharynx before rescue breaths and remove object ONLY if clearly visualized (no blind finger sweeps).",
+      "references": [
+        "AHA Guidelines for CPR and ECC: Pediatric Basic Life Support",
+        "Resuscitation Council UK Pediatric FBAO Guidelines"
+      ]
+    },
+    "staff_answer": "Immediate Code Red / Airway Emergency. Demonstrate 5 back slaps / 5 chest thrusts for infants.",
+    "red_flags": [
+      "Complete airway obstruction: inability to make any sound, silent coughing, blue cyanosis around lips",
+      "Loss of consciousness / cardiac arrest"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "NEVER perform blind finger sweeps in a child's throat (pushes object deeper into the airway)",
+      "NEVER perform abdominal Heimlich thrusts on an infant under 1 year old (damages liver/spleen)"
+    ],
+    "source": "American Heart Association (AHA) & Resuscitation Council UK",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_diaper_rash_013",
+    "topic": "Child Health: Diaper Rash Prevention & Treatment (Napkin Dermatitis)",
+    "category": "child_health",
+    "keywords": [
+      "diaper rash",
+      "nappy rash",
+      "rash in diaper area",
+      "red bottom baby",
+      "potty rash baby"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Change wet or soiled diapers immediately; prolonged contact with acidic urine and stool enzymes is the main cause of diaper dermatitis.",
+      "At every diaper change, gently clean the area using warm water and a soft cotton cloth or fragrance-free, alcohol-free wipes.",
+      "Pat the skin gently dry; never rub or scrub irritated baby skin.",
+      "Allow plenty of 'diaper-free time' every day: let your baby lie on an open mat without a diaper for 15 to 30 minutes to let fresh air heal the skin naturally.",
+      "Apply a thick protective barrier cream containing Zinc Oxide or plain petroleum jelly (Vaseline) with every diaper change to seal moisture away from the skin.",
+      "If the rash is bright fiery red with small red dots (satellite lesions) in the skin folds, it is likely a fungal yeast infection requiring an antifungal cream (like Clotrimazole) prescribed by a doctor."
+    ],
+    "doctor_answer": {
+      "assessment": "Diaper Dermatitis: Irritant Contact Dermatitis (spares inguinal creases) vs Candidal Diaper Dermatitis (involves inguinal folds with bright red erythema and satellite pustules/papules).",
+      "investigations": "Clinical inspection. KOH mount if refractory.",
+      "management": "ABCDE protocol: Air (diaper-free time), Barrier (thick Zinc Oxide paste or white petrolatum with every change), Cleansing (gentle water, pat dry), Diaper (frequent changes Q2-3H, superabsorbent gel diapers), Education. If Candidal infection: Topical Antifungal (Clotrimazole 1% or Miconazole 2% cream BID under barrier paste for 7-10 days). Hydrocortisone 1% short-term (max 2-3 days) only for severe inflammation.",
+      "references": [
+        "AAP Guidelines on Diaper Dermatitis",
+        "NICE Clinical Knowledge Summaries: Diaper Rash"
+      ]
+    },
+    "staff_answer": "Inspect inguinal skin creases to distinguish irritant dermatitis (creases spared) from Candida (creases involved).",
+    "red_flags": [
+      "Skin blistering, open oozing sores, or yellow pus crusts (Secondary bacterial Impetigo)",
+      "Diaper rash accompanied by fever"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT use scented wipes, alcohol wipes, or harsh soaps",
+      "Do NOT use potent topical steroid creams (Betamethasone, Clobetasol) on diaper skin (causes severe adrenal suppression and skin thinning)"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & British Association of Dermatologists",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_pediatric_asthma_wheezing_014",
+    "topic": "Child Health: Wheezing & Asthma in Young Children",
+    "category": "child_health",
+    "keywords": [
+      "child wheezing",
+      "baby wheezing",
+      "child asthma",
+      "toddler wheezing cold",
+      "whistling chest baby"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Wheezing is a high-pitched musical whistling sound produced when narrowed, inflamed bronchial airways vibrate during exhalation.",
+      "In young children under 3 years, wheezing is most frequently triggered by viral respiratory colds (such as RSV or rhinovirus).",
+      "If your child has prescribed rescue inhaler (Salbutamol / Asthalin): ALWAYS administer it using a child-sized spacer with a tight-fitting silicone face mask.",
+      "Administer 2 to 4 puffs (one puff at a time into the spacer, allowing the child to breathe 5 to 6 times into the mask after each puff).",
+      "SEEK EMERGENCY HOSPITAL CARE IMMEDIATELY if: Your child's chest draws in deeply under the ribs (retractions), nostrils flare with each breath, child is too breathless to speak or drink, or lips turn blue."
+    ],
+    "doctor_answer": {
+      "assessment": "Viral-Induced Wheeze (episodic) vs Multi-Trigger Wheeze / Pediatric Bronchial Asthma. Score respiratory distress (Pediatric Respiratory Assessment Measure / PRAM score).",
+      "investigations": "Pulse oximetry, CXR only if suspected foreign body aspiration, focal consolidation, or pneumothorax.",
+      "management": "Short-acting beta-2 agonist (Salbutamol 100 mcg MDI via spacer with mask: 2-6 puffs Q20 min for 1 hour depending on severity). Systemic corticosteroids (Oral Prednisolone 1-2 mg/kg for 3 days) for moderate-severe exacerbations. If recurrent: daily low-dose Inhaled Corticosteroid (ICS Budesonide/Fluticasone) or Montelukast.",
+      "references": [
+        "Global Initiative for Asthma (GINA) - Children 5 Years and Younger",
+        "British Thoracic Society (BTS) Pediatric Asthma Guideline"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange/Red if chest indrawing, tachypnea, or SpO2 < 92%. Check spacer technique.",
+    "red_flags": [
+      "Silent chest (breath sounds absent due to extreme airway closure - Imminent Respiratory Arrest)",
+      "SpO2 < 90% on room air",
+      "Inability to speak, cry, or feed due to extreme breathlessness",
+      "Exhaustion, drowsiness, or cyanosis"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "NEVER administer inhaler puffs directly into a young child's mouth without a spacer and mask (almost zero medicine reaches lungs)",
+      "Do NOT give over-the-counter cough syrups to young children"
+    ],
+    "source": "Global Initiative for Asthma (GINA) & British Thoracic Society",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_bedwetting_enuresis_015",
+    "topic": "Child Health: Bedwetting in Children (Nocturnal Enuresis)",
+    "category": "child_health",
+    "keywords": [
+      "bedwetting",
+      "nocturnal enuresis",
+      "child peeing in bed",
+      "bistar gila karna",
+      "bedwetting 6 years"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Bedwetting (Nocturnal Enuresis) is completely involuntary; children do NOT wet the bed out of laziness, spite, or bad behavior.",
+      "It is very common: about 15% of 5-year-olds and 5% of 10-year-olds regularly wet the bed, often because their bladder capacity is developing slowly or their brain does not yet wake them up from deep sleep.",
+      "Helpful home steps:",
+      "  - Encourage regular water drinking throughout the day, but limit large fluid drinks in the 2 hours before bedtime.",
+      "  - Avoid caffeine-containing drinks (chocolate milk, sodas, iced teas) in the evening.",
+      "  - Make sure your child empties their bladder right before climbing into bed.",
+      "  - Place a waterproof mattress protector on the bed and keep a nightlight on so the child can reach the bathroom easily.",
+      "NEVER punish, tease, shame, or scold a child for wetting the bed; frustration and shame only worsen anxiety and delay bladder maturation."
+    ],
+    "doctor_answer": {
+      "assessment": "Monosymptomatic Enuresis (nighttime bedwetting only in a child >= 5 years without daytime symptoms) vs Non-Monosymptomatic (associated daytime incontinence, urgency, frequency, constipation).",
+      "investigations": "Urinalysis with dipstick (rule out UTI, glycosuria for diabetes mellitus, proteinuria). Bowel history (chronic constipation is a leading treatable cause).",
+      "management": "Behavioral interventions and motivational therapy. Enuresis Alarm (most effective long-term conditioning therapy; 60-80% success). Pharmacotherapy (Desmopressin / DDAVP melt/tablets at bedtime) for rapid short-term control (camps, sleepovers) or alarm failures. Treat coexisting constipation aggressively with laxatives.",
+      "references": [
+        "ICCS (International Children's Continence Society) Standardization and Guidelines",
+        "NICE Guideline CG111: Bedwetting in under 19s"
+      ]
+    },
+    "staff_answer": "Check for daytime urinary accidents, frequency, and chronic constipation. Reassure family.",
+    "red_flags": [
+      "New-onset secondary bedwetting after being dry for > 6 months accompanied by excessive thirst and weight loss (Screen for Type 1 Diabetes Mellitus)",
+      "Daytime incontinence with painful burning urination (UTI)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "NEVER punish or shame a child for bedwetting (it is an involuntary maturation delay)",
+      "Do NOT restrict water severely during the day"
+    ],
+    "source": "International Children's Continence Society (ICCS) & NICE CG111",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_pediatric_constipation_016",
+    "topic": "Child Health: Constipation & Soiling in Children (Encopresis)",
+    "category": "child_health",
+    "keywords": [
+      "child constipation",
+      "toddler hard stool",
+      "bachhe ko kabz",
+      "pain pooping child",
+      "holding stool child",
+      "encopresis"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Childhood constipation often starts after a single painful hard bowel movement: the child becomes scared of pain and actively holds their stool in, creating a vicious cycle of larger, harder stools.",
+      "Increase daily fiber: give whole fruits with skins, oats, lentils, prunes, papayas, and vegetables.",
+      "Ensure adequate water and clear fluids throughout the day.",
+      "Establish a regular toilet sitting routine: have your child sit comfortably on the toilet for 5 to 10 minutes after morning and evening meals.",
+      "Provide a footstool under their feet so their knees are bent higher than their hips (squatting posture facilitates smooth bowel passage).",
+      "Consult a pediatrician: gentle osmotic stool softeners (like Polyethylene Glycol / PEG powder or Lactulose) are safe, non-habit forming, and needed for several months to allow the stretched rectum to heal."
+    ],
+    "doctor_answer": {
+      "assessment": "Functional Constipation (Rome IV Criteria). Differentiate functional stool withholding from organic etiologies (Hirschsprung disease, celiac disease, cystic fibrosis, spinal dysraphism).",
+      "investigations": "Digital rectal exam only if red flags. Abdominal X-ray NOT routinely recommended. Screen for Hirschsprung if delayed passage of meconium (>48 hours of birth) or severe failure to thrive.",
+      "management": "Two-phase therapy: 1. Disimpaction: High-dose oral Polyethylene Glycol (PEG 3350 with electrolytes 1-1.5 g/kg/day for 3-6 days). 2. Maintenance: PEG 0.4-0.8 g/kg/day for a minimum of 2-6 months to prevent relapse. Toilet training postprandial routine with foot support.",
+      "references": [
+        "ESPGHAN/NASPGHAN Guidelines for the Evaluation and Treatment of Functional Constipation in Children",
+        "NICE Guideline CG99"
+      ]
+    },
+    "staff_answer": "Review meconium passage history (>48h red flag for Hirschsprung). Emphasize long-term stool softener compliance.",
+    "red_flags": [
+      "History of delayed meconium passage (> 48 hours after birth) with abdominal distension and bilious vomiting (Hirschsprung Disease)",
+      "Blood in stool with weight loss",
+      "Abnormal sacral dimple or hair tuft on lower back (Spina Bifida Occulta)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT stop stool softener medicine as soon as the child passes one soft stool (causes immediate withholding relapse; must continue for months)",
+      "Do NOT use repeated invasive enemas without doctor guidance"
+    ],
+    "source": "ESPGHAN/NASPGHAN Guidelines & NICE Guideline CG99",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_vaccine_schedule_india_uip_017",
+    "topic": "Child Health: Complete Child Vaccination Schedule (India UIP & IAP)",
+    "category": "child_health",
+    "keywords": [
+      "child vaccination schedule",
+      "baby vaccine chart india",
+      "uip schedule",
+      "which vaccine when baby",
+      "tika chart",
+      "immunization schedule"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Summary of India's Universal Immunization Programme (UIP) Schedule:",
+      "  - At Birth: BCG (left arm), OPV Zero dose (oral drops), and Hepatitis B birth dose (left thigh).",
+      "  - 6 Weeks: Pentavalent-1 (left thigh), OPV-1 (oral), Rotavirus-1 (oral), fIPV-1 (right arm), and PCV-1 (right thigh).",
+      "  - 10 Weeks: Pentavalent-2 (left thigh), OPV-2 (oral), and Rotavirus-2 (oral).",
+      "  - 14 Weeks: Pentavalent-3 (left thigh), OPV-3 (oral), Rotavirus-3 (oral), fIPV-2 (right arm), and PCV-2 (right thigh).",
+      "  - 9 Months: MR-1 (Measles-Rubella, right arm), PCV Booster (right thigh), JE-1 (in endemic districts), and Vitamin A oral dose.",
+      "  - 16 to 24 Months: MR-2 (right arm), DPT 1st Booster (left thigh), OPV Booster, JE-2, and Vitamin A.",
+      "  - 5 to 6 Years: DPT 2nd Booster (left upper arm).",
+      "  - 10 & 16 Years: Td Vaccine (upper arm).",
+      "Keep your baby's Mother & Child Protection (MCP) card safe; vaccines are available free of charge at all public health centers."
+    ],
+    "doctor_answer": {
+      "assessment": "Immunization status verification and surveillance according to Government of India UIP and IAP ACVIP recommendations.",
+      "investigations": "Audit MCP card / digital CoWIN/U-WIN immunization registry records.",
+      "management": "Administer age-appropriate vaccines per schedule. Maintain cold chain (2-8°C). Educate parents on expected mild fever, Paracetamol dosing, and next appointment date.",
+      "references": [
+        "Universal Immunization Programme (UIP), MoHFW India",
+        "IAP Advisory Committee on Vaccines and Immunization Practices (ACVIP)"
+      ]
+    },
+    "staff_answer": "Review U-WIN / MCP card. Verify batch numbers and expiry. Record next appointment clearly.",
+    "red_flags": [
+      "Severe anaphylaxis following previous dose of any vaccine",
+      "Progressive untreated neurological disease (defer pertussis)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT skip scheduled vaccines due to a minor runny nose or low-grade sniffles",
+      "Do NOT discard immunization cards"
+    ],
+    "source": "Ministry of Health and Family Welfare (MoHFW) India & IAP",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_rsv_bronchiolitis_infants_018",
+    "topic": "Child Health: Bronchiolitis in Infants (RSV Infection)",
+    "category": "child_health",
+    "keywords": [
+      "bronchiolitis",
+      "rsv baby",
+      "infant chest congestion",
+      "rapid breathing baby",
+      "respiratory syncytial virus infant"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Bronchiolitis is a viral chest infection of the tiny breathing tubes (bronchioles) in infants under 2 years old, most commonly caused by Respiratory Syncytial Virus (RSV).",
+      "Begins like a common cold (stuffy nose, sneezing, mild fever), followed after 2 to 3 days by rapid breathing, wheezing, and a persistent wet cough.",
+      "Symptoms typically peak on days 4 to 5 before gradually improving over 1 to 2 weeks.",
+      "Home care: Clear baby's nose with saline nasal drops before feeds, offer frequent smaller feeds, and keep baby upright after feeding.",
+      "ANTIBIOTICS AND COUGH MEDICINES DO NOT WORK against viral bronchiolitis and should NOT be given.",
+      "SEEK IMMEDIATE EMERGENCY CARE if: Baby breathes very rapidly (>50-60 breaths/min), chest draws in under ribs, baby grunts, stops feeding, or lips turn bluish."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Viral Bronchiolitis (RSV ~75%, rhinovirus, metapneumovirus). Characterized by airway edema, mucus plug formation, and bronchiolar necrosis.",
+      "investigations": "Clinical diagnosis. Nasopharyngeal swab for viral PCR / rapid RSV antigen if hospitalized. CXR indicated only if severe atypical course or suspicion of pneumothorax.",
+      "management": "Mainstay is supportive care: Hydration maintenance (frequent small feeds, NG tube, or IV fluids) and Oxygen therapy targeting SpO2 >= 90-92%. Routine bronchodilators (Salbutamol), systemic corticosteroids, and antibiotics are NOT recommended per AAP guidelines due to lack of efficacy. High-Flow Nasal Cannula (HFNC) or CPAP for respiratory fatigue.",
+      "references": [
+        "AAP Clinical Practice Guideline: The Diagnosis, Management, and Prevention of Bronchiolitis",
+        "NICE Guideline NG9: Bronchiolitis in children"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange/Red if SpO2 < 92%, RR > 60/min, or chest retractions. Check hydration.",
+    "red_flags": [
+      "Apnea episodes (baby pauses breathing for > 15-20 seconds - common in young infants with RSV)",
+      "SpO2 < 90% on room air",
+      "Grunting respirations or central cyanosis",
+      "Unable to feed or retaining less than 50% of fluids"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT give oral antibiotics for uncomplicated viral bronchiolitis",
+      "Do NOT give over-the-counter decongestants or cough suppressants"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & NICE Guidelines NG9",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_adenoids_tonsils_snoring_019",
+    "topic": "Child Health: Enlarged Adenoids, Tonsils & Mouth Breathing in Children",
+    "category": "child_health",
+    "keywords": [
+      "adenoids",
+      "child snoring",
+      "mouth breathing child",
+      "enlarged tonsils child",
+      "sleep apnea child",
+      "child sleeping with mouth open"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Adenoids are immune gland tissues located high up behind the nose and above the roof of the mouth; when enlarged from recurring colds or allergies, they block nasal airflow.",
+      "Key signs: Child sleeps with mouth wide open, snores loudly, breathes noisily during the day, speaks with a nasal voice ('nasal twang'), and has frequent ear infections.",
+      "Pediatric Sleep Apnea: If your child snores loudly, gasps for air, tosses and turns restlessly, or pauses breathing for a few seconds during sleep, their airway is significantly obstructed.",
+      "Untreated chronic adenoid enlargement can lead to daytime sleepiness, poor school concentration, bedwetting, and long-term facial bone changes ('adenoid facies').",
+      "Consult an ENT specialist: treatments range from steroid nasal sprays and allergy management to gentle surgical removal (adenotonsillectomy)."
+    ],
+    "doctor_answer": {
+      "assessment": "Adenotonsillar Hypertrophy causing Pediatric Obstructive Sleep Apnea (OSA) / Upper Airway Resistance Syndrome.",
+      "investigations": "Lateral soft tissue neck radiograph (evaluates nasopharyngeal airway column). Overnight Polysomnography (sleep study: gold standard for pediatric OSA; Apnea-Hypopnea Index [AHI] >= 1 is abnormal in children). Audiometry (screen for otitis media with effusion).",
+      "management": "Mild symptoms: Trial of Intranasal Corticosteroid spray (Fluticasone/Mometasone) +/- Montelukast for 6-12 weeks. Moderate-to-severe OSA (AHI >= 5 or tonsillar hypertrophy with failure to thrive/enuresis): Adenotonsillectomy is first-line curative surgery.",
+      "references": [
+        "AAP Clinical Practice Guideline: Diagnosis and Management of Childhood Obstructive Sleep Apnea Syndrome",
+        "AAO-HNS Clinical Practice Guideline: Tonsillectomy in Children"
+      ]
+    },
+    "staff_answer": "Assess for mouth breathing, hyponasal speech, and observe breathing during nap. Inquire about daytime hyperactivity or sleepiness.",
+    "red_flags": [
+      "Frequent witnessed breathing pauses (apnea > 10 seconds) during sleep accompanied by gasping or choking",
+      "Pectus excavatum (chest wall caving in from chronic airway obstruction)"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT ignore chronic loud snoring in a child (sleep apnea impairs brain growth and school performance)",
+      "Do NOT use adult snoring devices in children"
+    ],
+    "source": "American Academy of Pediatrics (AAP) & AAO-HNS Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "ch_cow_milk_protein_allergy_020",
+    "topic": "Child Health: Cow's Milk Protein Allergy (CMPA) in Infants",
+    "category": "child_health",
+    "keywords": [
+      "cmpa",
+      "cows milk allergy baby",
+      "milk protein allergy infant",
+      "blood in baby poop cmpa",
+      "formula allergy baby"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Cow's Milk Protein Allergy (CMPA) is an immune reaction to the proteins found in cow's milk, affecting both formula-fed and exclusively breastfed infants (when mother consumes dairy).",
+      "Common symptoms:",
+      "  - Digestive: Blood or mucus streaks in baby's soft stools, frequent vomiting, severe painful colic, or chronic diarrhea.",
+      "  - Skin: Eczema, itchy red patches, or hives.",
+      "  - Respiratory: Wheezing, chronic runny nose, or coughing.",
+      "For exclusively breastfed babies: The mother completely eliminates all dairy products (milk, curd, ghee, paneer, butter, cheese, whey) from her diet for 2 to 4 weeks.",
+      "For formula-fed babies: Switch to a doctor-prescribed Extensively Hydrolyzed Formula (eHCF) or Amino Acid formula where proteins are broken down into tiny, non-allergic pieces.",
+      "Most children outgrow cow's milk protein allergy by 1 to 3 years of age."
+    ],
+    "doctor_answer": {
+      "assessment": "Cow's Milk Protein Allergy (IgE-mediated vs Non-IgE mediated Food Protein-Induced Allergic Proctocolitis / Enteropathy / FPIES).",
+      "investigations": "Clinical diagnosis based on elimination-challenge trial. Skin Prick Test / serum specific IgE for IgE-mediated reactions. Stool occult blood.",
+      "management": "Strict dietary elimination of all bovine milk proteins. In breastfed infants: maternal dairy elimination with Calcium (1000 mg) and Vitamin D supplementation. In formula-fed: Extensively Hydrolyzed Formula (eHCF) first-line; Amino Acid-based Formula (AAF) for severe anaphylaxis or eHCF failure. Avoid soy formula before 6 months. Re-challenge under pediatric supervision at 12 months to assess tolerance.",
+      "references": [
+        "ESPGHAN Guidelines for the Diagnosis and Management of Cow's Milk Protein Allergy in Infants",
+        "BSACI Guidelines for the Management of Egg and Cow's Milk Allergy"
+      ]
+    },
+    "staff_answer": "Inquire about microscopic or visible blood in stool. Verify weight gain trajectory.",
+    "red_flags": [
+      "Severe acute projectile vomiting, lethargy, and hypovolemic shock occurring 2 hours after milk ingestion (Food Protein-Induced Enterocolitis Syndrome / FPIES)",
+      "Anaphylactic respiratory wheezing or facial angioedema"
+    ],
+    "follow_up_questions": [
+      "What is the child's exact age and weight?",
+      "How long have these symptoms been present?",
+      "Is the child drinking liquids and passing wet diapers normally?"
+    ],
+    "avoid": [
+      "Do NOT switch to goat's milk or sheep's milk (over 90% cross-reactivity with cow's milk proteins)",
+      "Do NOT use plain soy milk for young infants under 6 months"
+    ],
+    "source": "ESPGHAN Guidelines & British Society for Allergy and Clinical Immunology (BSACI)",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

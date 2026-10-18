@@ -44,8 +44,8 @@ function CircularStat({ percentage, displayValue, label, subtext }) {
         <svg className="cb-circle-svg" width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
           <defs>
             <linearGradient id="cbTealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0d9488" />
-              <stop offset="100%" stopColor="#2dd4bf" />
+              <stop offset="0%" stopColor="#0284C7" />
+              <stop offset="100%" stopColor="#38BDF8" />
             </linearGradient>
           </defs>
           <circle
@@ -353,7 +353,7 @@ const Landing = () => {
             </Link>
 
             {/* Desktop Navigation Links */}
-            <ul className="cb-nav-links">
+            <ul className="cb-nav-links lg:gap-5 xl:gap-5">
               <li>
                 <a href="#hero" className="cb-nav-link" onClick={(e) => scrollToSection(e, "hero")}>
                   Home
@@ -397,10 +397,15 @@ const Landing = () => {
             </ul>
 
             {/* Header Right Actions */}
-            <div className="cb-header-actions">
-              <a href="tel:+18004273274" className="cb-header-phone" title="Call Clinical Support 24/7">
-                <Phone size={16} className="cb-phone-icon" />
-                <span>+1 (800) 427-3274</span>
+            <div className="cb-header-actions shrink-0">
+              <a
+                href="tel:+18004273274"
+                className="cb-header-phone shrink-0"
+                title="Call Clinical Support 24/7: +1 (800) 427-3274"
+                aria-label="Call +1 (800) 427-3274"
+              >
+                <Phone size={16} className="cb-phone-icon shrink-0" />
+                <span className="cb-phone-text whitespace-nowrap hidden xl:flex">+1 (800) 427-3274</span>
               </a>
 
               {isAuthenticated ? (
@@ -478,9 +483,9 @@ const Landing = () => {
           </ul>
 
           <div className="cb-mobile-actions">
-            <a href="tel:+18004273274" className="cb-header-phone" style={{ display: "flex", justifyContent: "center" }}>
-              <Phone size={16} className="cb-phone-icon" />
-              <span>Emergency: +1 (800) 427-3274</span>
+            <a href="tel:+18004273274" className="cb-header-phone cb-mobile-phone-link" style={{ display: "flex", justifyContent: "center" }}>
+              <Phone size={16} className="cb-phone-icon shrink-0" />
+              <span className="whitespace-nowrap">+1 (800) 427-3274</span>
             </a>
 
             {isAuthenticated ? (

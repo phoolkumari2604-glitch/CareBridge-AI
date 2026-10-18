@@ -1,0 +1,215 @@
+"""
+Drug interactions knowledge base module (15 entries)
+"""
+def get_drug_interactions():
+    interactions = [
+        ("int_aspirin_ibuprofen_001", "Aspirin + Ibuprofen / NSAIDs", ["aspirin ibuprofen interaction", "aspirin and brufen", "can i take aspirin with ibuprofen", "disprin and brufen"],
+         [
+             "Do NOT take Ibuprofen and daily low-dose Aspirin together without consulting your cardiologist.",
+             "Ibuprofen can block the heart-protecting, clot-preventing effects of Aspirin, leaving you vulnerable to heart attacks or strokes.",
+             "Combining both medications dramatically increases your risk of severe stomach bleeding, ulcers, and gastrointestinal damage.",
+             "If you require both: take your Aspirin at least 30 minutes before or 8 hours after taking Ibuprofen, or switch to Paracetamol for pain relief."
+         ],
+         {"assessment": "Pharmacodynamic and pharmacokinetic antagonism. Ibuprofen competitively binds to COX-1 enzyme, physically obstructing Aspirin from irreversibly acetylating Serine-529, abrogating cardioprotection. Synergistic GI mucosal toxicity.", "investigations": "Hemoglobin/Hematocrit, stool for occult blood.", "management": "Recommend Paracetamol or topical NSAIDs for analgesia in patients on cardioprotective Aspirin. If Ibuprofen unavoidable: take immediate-release Aspirin >=30 min before or >=8h after Ibuprofen.", "references": ["FDA Drug Safety Communication: Concomitant Use of Ibuprofen and Aspirin", "AHA Scientific Statement"]},
+         "Flag high risk of upper GI bleeding and blunted antiplatelet cardioprotection.",
+         ["Coffee-ground vomiting or black tarry stools", "Sudden chest pressure or return of angina pain"],
+         ["Do NOT take Ibuprofen immediately prior to your cardioprotective Aspirin dose", "Do NOT ignore dark stools or severe stomach pain"],
+         "FDA Drug Safety & American Heart Association", "Dr. R. Kapoor (MD, Cardiology)"),
+
+        ("int_acei_potassium_002", "ACE Inhibitors / ARBs + Potassium-Sparing Diuretics / K Supplements", ["telmisartan spironolactone", "ramipril potassium", "enalapril and potassium", "losartan spironolactone interaction"],
+         [
+             "Combining blood pressure medicines like Telmisartan, Ramipril, or Enalapril with Spironolactone or potassium supplements can dangerously spike potassium levels in your blood (hyperkalemia).",
+             "Excessively high potassium can cause fatal, irregular heart rhythms without any warning.",
+             "Never take over-the-counter potassium supplements or potassium-based low-sodium salt substitutes without regular blood monitoring by your physician.",
+             "Attend all scheduled blood tests to check your kidney function and serum electrolytes."
+         ],
+         {"assessment": "Severe hyperkalemia risk. ACEi/ARBs decrease aldosterone secretion, impairing renal potassium excretion. Spironolactone competitively antagonizes aldosterone in cortical collecting ducts, causing additive potassium retention.", "investigations": "Urgent Serum Potassium (K+), Serum Creatinine, 12-lead ECG (tall peaked T waves, prolonged PR, widened QRS).", "management": "Routine K+ monitoring at 1, 4, and 12 weeks after initiation/dose titration. If K+ > 5.5 mEq/L, reduce dose or discontinue potassium-sparing agent. If K+ > 6.0 mEq/L or ECG changes: emergency IV Calcium Gluconate, Insulin + Dextrose, and potassium binders.", "references": ["KDIGO Clinical Practice Guideline for Hypertension in CKD", "ACC/AHA Guidelines"]},
+         "Monitor serum potassium strictly; alert physician if K+ >= 5.5 mEq/L.",
+         ["Palpitations, slow irregular pulse, extreme muscle weakness or numbness", "Potassium reading > 6.0 mEq/L (Cardiac Arrest Risk)"],
+         ["Do NOT use potassium-rich 'Lite' salts or potassium supplements without prescription", "Do NOT skip routine blood lab checks"],
+         "KDIGO Clinical Practice Guidelines & ACC/AHA", "Dr. R. Kapoor (MD, Cardiology)"),
+
+        ("int_warfarin_nsaids_003", "Warfarin / Blood Thinners + NSAIDs", ["warfarin brufen", "warfarin ibuprofen", "blood thinner painkiller interaction", "eliquis painkiller", "xarelto brufen"],
+         [
+             "DANGEROUS COMBINATION: Never take NSAID painkillers (such as Ibuprofen, Brufen, Diclofenac, Naproxen, or Combiflam) while taking Warfarin, Apixaban, or Rivaroxaban.",
+             "NSAIDs directly injure the stomach lining while blood thinners prevent clotting, creating a severe and potentially fatal risk of internal stomach bleeding.",
+             "NSAIDs also impair platelet function, multiplying bleeding risks throughout the body.",
+             "Use Paracetamol for pain or fever instead, as it does not promote gastrointestinal bleeding."
+         ],
+         {"assessment": "Potent synergistic hemorrhagic risk. NSAIDs cause gastric mucosal erosions via topical irritation and systemic prostaglandin inhibition, while anticoagulants impair hemostasis, resulting in catastrophic gastrointestinal hemorrhage.", "investigations": "Urgent PT/INR, Hemoglobin/Hematocrit, blood typing.", "management": "NSAIDs are contraindicated with therapeutic anticoagulation. For pain, use Paracetamol (monitor INR if Paracetamol > 2g/day chronically) or topical analgesics. If severe bleeding occurs: reverse anticoagulation immediately (Vitamin K / 4-factor PCC for Warfarin; Andexanet alfa for FXa inhibitors).", "references": ["CHEST Guidelines for Antithrombotic Therapy", "AHA/ACC Anticoagulation Guidelines"]},
+         "Block dispensing of NSAIDs to anticoagulated patients. Substitute with Paracetamol.",
+         ["Vomiting bright red blood or coffee-ground material", "Black tarry bowel movements (Melena)", "Unusual large bruises, continuous nosebleeds, or blood in urine"],
+         ["NEVER take Ibuprofen, Diclofenac, or Aspirin with blood thinners without specialist oversight", "Do NOT ignore subtle signs of bleeding"],
+         "American College of Chest Physicians (CHEST) & AHA Guidelines", "Dr. R. Kapoor (MD, Cardiology)"),
+
+        ("int_metformin_contrast_004", "Metformin + Iodinated Radiocontrast Media", ["metformin ct scan", "metformin contrast dye", "metformin before mri ct", "glycomet contrast interaction"],
+         [
+             "If you are scheduled for a CT scan or angiogram that uses intravenous contrast dye, you must inform your doctor that you take Metformin.",
+             "Iodinated contrast dye can cause temporary acute kidney injury, which can cause Metformin to accumulate in your body and trigger a life-threatening condition called Lactic Acidosis.",
+             "Your medical team will usually instruct you to temporarily withhold Metformin on the day of the procedure and for 48 hours afterward until blood tests confirm your kidneys are functioning normally."
+         ],
+         {"assessment": "Risk of Contrast-Induced Nephropathy (CIN) leading to Metformin accumulation and Lactic Acidosis (MALA - mortality ~30-50%).", "investigations": "Baseline serum creatinine and eGFR prior to iodinated contrast administration; repeat eGFR 48 hours post-procedure.", "management": "In patients with eGFR < 60 mL/min, severe liver disease, or undergoing intra-arterial contrast: withhold Metformin prior to or at the time of procedure, and hold for >=48 hours post-procedure. Re-evaluate renal function before restarting.", "references": ["ACR (American College of Radiology) Manual on Contrast Media", "FDA Metformin Prescribing Information"]},
+         "Verify if CT scan with IV contrast is scheduled; hold Metformin and check eGFR.",
+         ["Rapid shallow breathing, muscle cramps, extreme fatigue, hypothermia, severe nausea (Lactic Acidosis)", "Acute drop in urine output post-contrast"],
+         ["Do NOT take Metformin for 48 hours after contrast procedure until kidney function is verified", "Do NOT skip the follow-up creatinine blood check"],
+         "American College of Radiology (ACR) & FDA Drug Safety Guidance", "Dr. R. Kapoor (MD, Endocrinology)"),
+
+        ("int_statins_macrolides_005", "Statins (Atorvastatin / Simvastatin) + Macrolide Antibiotics", ["atorvastatin azithromycin", "atorvastatin clarithromycin", "statin antibiotic interaction", "statin erythromycin rhabdomyolysis"],
+         [
+             "Taking certain statins (especially Simvastatin or high-dose Atorvastatin) together with antibiotics like Clarithromycin or Erythromycin can cause dangerous drug buildup.",
+             "These antibiotics block the liver enzyme that breaks down statins, causing statin levels in your blood to surge dramatically.",
+             "This sharp rise can trigger severe muscle breakdown (Rhabdomyolysis) and acute kidney failure.",
+             "Your doctor may advise you to temporarily pause your statin while completing your short antibiotic course."
+         ],
+         {"assessment": "Strong CYP3A4 inhibition by Clarithromycin/Erythromycin dramatically increases plasma concentrations of CYP3A4-metabolized statins (Simvastatin > Atorvastatin), precipitating severe Statin-Associated Muscle Symptoms (SAMS) and life-threatening Rhabdomyolysis.", "investigations": "CPK (Creatine Phosphokinase), Serum Creatinine, Urine myoglobin, LFTs.", "management": "Temporarily suspend Simvastatin, Lovastatin, or Atorvastatin during macrolide antibiotic therapy. Alternatively, use Azithromycin (minimal CYP3A4 inhibition) or Rosuvastatin/Pravastatin (non-CYP3A4 elimination).", "references": ["FDA Drug Safety Communication: Statin and Macrolide Interactions", "AHA Scientific Statement on Statin Safety"]},
+         "Temporarily hold CYP3A4-dependent statins if Clarithromycin is prescribed.",
+         ["Severe generalized muscle pain, muscle weakness, or inability to raise arms/legs", "Dark cola-colored urine (Myoglobinuria / Rhabdomyolysis)"],
+         ["Do NOT continue high-dose Atorvastatin or Simvastatin with Clarithromycin without checking", "Do NOT ignore dark urine or severe muscle soreness"],
+         "FDA Drug Safety & American Heart Association", "Dr. R. Kapoor (MD, Cardiology)"),
+
+        ("int_sildenafil_nitrates_006", "Sildenafil / Tadalafil (PDE-5 Inhibitors) + Nitrates", ["sildenafil sorbitrate", "viagra nitroglycerin", "tadalafil nitrate interaction", "chest pain medicine and viagra"],
+         [
+             "ABSOLUTELY CONTRAINDICATED / FATAL DANGER: Never take Sildenafil (Viagra) or Tadalafil (Cialis) if you use Nitroglycerin, Sorbitrate, or any nitrate heart medication.",
+             "Combining these medications causes an uncontrollable, catastrophic collapse in blood pressure (profound hypotension).",
+             "This sudden drop can cause immediate fainting, heart attack, stroke, or fatal cardiovascular collapse.",
+             "If you experience chest pain, you MUST inform paramedics or emergency room doctors if you have taken PDE-5 medications in the last 24 to 48 hours."
+         ],
+         {"assessment": "Catastrophic synergistic vasodilation. Nitrates increase cGMP production via nitric oxide, while PDE-5 inhibitors prevent cGMP degradation in vascular smooth muscle. The massive intracellular cGMP accumulation triggers refractory systemic vasodilatory shock, coronary hypoperfusion, and death.", "investigations": "Immediate continuous arterial BP monitoring, 12-lead ECG.", "management": "Nitrates are strictly contraindicated within 24 hours of Sildenafil and 48 hours of Tadalafil. If angina occurs: manage with non-nitrate agents (Beta-blockers, Morphine, Calcium channel blockers). If co-administered accidentally: Trendelenburg positioning, aggressive IV crystalloid resuscitation, and alpha-adrenergic vasopressors (Phenylephrine/Norepinephrine).", "references": ["AHA/ACC Guidelines for Management of Stable Ischemic Heart Disease", "FDA Black Box Warning"]},
+         "Immediate red-flag contraindication check. Never administer Nitroglycerin/Sorbitrate if PDE5 inhibitor used within 24-48h.",
+         ["Sudden severe unrecordable blood pressure drop", "Loss of consciousness, syncope, or cardiac arrest"],
+         ["NEVER combine PDE-5 inhibitors with Nitrates under any circumstances", "Do NOT conceal PDE-5 usage from emergency physicians during chest pain"],
+         "American Heart Association (AHA) & FDA Black Box Warning", "Dr. R. Kapoor (MD, Cardiology)"),
+
+        ("int_ssri_tramadol_007", "SSRIs (Antidepressants) + Tramadol / MAOIs", ["sertraline tramadol", "escitalopram tramadol", "antidepressant painkiller interaction", "serotonin syndrome"],
+         [
+             "Combining SSRI antidepressants (such as Escitalopram, Sertraline, or Fluoxetine) with Tramadol or certain migraine drugs can trigger a dangerous condition called Serotonin Syndrome.",
+             "Too much serotonin builds up in your brain and nervous system, leading to high fever, severe agitation, shaking, muscle stiffness, and rapid heartbeat.",
+             "Always inform your doctor about all antidepressants you take before starting any new prescription painkiller.",
+             "Seek immediate emergency medical attention if you experience shivering, confusion, or muscle twitching after taking pain medication."
+         ],
+         {"assessment": "Serotonin Syndrome (Toxicity) via additive serotonergic mechanisms. SSRIs inhibit serotonin reuptake, while Tramadol inhibits serotonin/norepinephrine reuptake and stimulates serotonin release. Hunter Serotonin Toxicity Criteria: clonus (spontaneous, inducible, ocular), agitation, diaphoresis, tremor, hyperreflexia, hyperthermia.", "investigations": "Clinical diagnosis (Hunter Criteria). Serum electrolytes, CPK (rhabdomyolysis), coagulation profile, arterial blood gas.", "management": "Discontinue all serotonergic agents immediately. Supportive care: IV fluids, active cooling (not antipyretics). Sedation with Benzodiazepines (Diazepam/Lorazepam). Antidote for moderate-to-severe toxicity: Cyproheptadine (serotonin antagonist: 12 mg initial, then 2 mg Q2H until response).", "references": ["New England Journal of Medicine: The Serotonin Syndrome", "FDA Drug Safety Communication"]},
+         "Check for co-prescribed serotonergic medications. Monitor temperature, reflexes, and pupil size.",
+         ["High body temperature (> 38.5°C / 101.3°F) with profuse sweating", "Severe tremors, uncontrollable muscle twitches, or rigid muscles", "Confusion, extreme agitation, and dilated pupils"],
+         ["Do NOT take Tramadol without disclosing your antidepressant medication", "Do NOT combine multiple serotonergic drugs without medical supervision"],
+         "NEJM Review on Serotonin Syndrome & FDA Safety Guidance", "Dr. P. Deshmukh (MD, Psychiatry)"),
+
+        ("int_levothyroxine_calcium_iron_008", "Levothyroxine + Calcium / Iron Supplements / Antacids", ["thyronorm and calcium", "levothyroxine iron interaction", "thyroid pill with milk or antacid", "eltroxin calcium"],
+         [
+             "Calcium supplements, iron tablets, antacids (aluminum/magnesium), and multivitamin minerals physically bind to Levothyroxine in your stomach, blocking its absorption by up to 50% to 80%.",
+             "This makes your thyroid medicine ineffective, causing your TSH levels to spike and your hypothyroid symptoms (exhaustion, weight gain) to return.",
+             "RULE: Take your Levothyroxine first thing in the morning with plain water, and wait at least 4 FULL HOURS before taking any calcium, iron, or antacid product."
+         ],
+         {"assessment": "Physical chelation and adsorption in the gastrointestinal tract. Polyvalent cations (Ca2+, Fe2+, Al3+, Mg2+) bind thyroxine in the acidic gastric environment, forming insoluble chelates that pass unabsorbed, inducing clinical hypothyroidism.", "investigations": "Serum TSH and Free T4 (demonstrating unexpectedly elevated TSH despite prescribed replacement dose).", "management": "Separate administration by a minimum of 4 hours. Counsel patient on morning fasting administration with plain water. Re-check TSH 6-8 weeks after proper spacing.", "references": ["American Thyroid Association (ATA) Hypothyroidism Guidelines", "Endocrine Society Clinical Practice Guidelines"]},
+         "Counsel patient strictly: 4-hour time separation between thyroid pill and calcium/iron.",
+         ["Progressive fatigue, cold intolerance, and unexpected elevation of TSH levels despite taking thyroid pills"],
+         ["Do NOT take thyroid pills together with calcium, iron, or antacids in the morning", "Do NOT take thyroid medication with milk or fortified juices"],
+         "American Thyroid Association (ATA) Clinical Guidelines", "Dr. R. Kapoor (MD, Endocrinology)"),
+
+        ("int_ciprofloxacin_antacids_009", "Ciprofloxacin + Antacids (Polyvalent Cations)", ["ciprofloxacin antacid", "cipro with digene", "ciprofloxacin and calcium", "antibiotic antacid interaction"],
+         [
+             "Taking Ciprofloxacin together with antacids (like Digene, Gelusil) or calcium/magnesium supplements severely reduces antibiotic absorption by up to 90%.",
+             "The metal ions bind directly to the antibiotic, preventing it from entering your bloodstream and causing treatment failure for serious infections.",
+             "Take Ciprofloxacin at least 2 hours BEFORE or 4 to 6 hours AFTER taking antacids, calcium, iron, or dairy products."
+         ],
+         {"assessment": "Chelation interaction. Multivalent metal cations (aluminum, magnesium, calcium, iron, zinc) form insoluble chelate complexes with the 4-keto and 3-carboxyl groups of fluoroquinolones, abolishing oral bioavailability.", "investigations": "Assess infection response.", "management": "Administer Ciprofloxacin >= 2 hours before or >= 6 hours after polyvalent cation-containing antacids or mineral supplements. Alternatively, switch to an IV formulation or non-chelating antibiotic.", "references": ["FDA Ciprofloxacin Prescribing Information", "IDSA Antimicrobial Guidelines"]},
+         "Warn patient regarding 2h before / 6h after rule with antacids and dairy.",
+         ["Worsening of the underlying bacterial infection due to complete antibiotic absorption failure"],
+         ["Do NOT take antacids or calcium at the same time as Ciprofloxacin", "Do NOT take Ciprofloxacin with large glasses of milk or yogurt alone"],
+         "FDA Prescribing Information & Infectious Diseases Society of America", "Dr. A. Sharma (MD, Internal Medicine)"),
+
+        ("int_methotrexate_nsaids_010", "Methotrexate + NSAIDs", ["methotrexate brufen", "methotrexate ibuprofen interaction", "methotrexate and painkiller", "methotrexate diclofenac"],
+         [
+             "DANGEROUS: Taking NSAID painkillers (like Ibuprofen, Diclofenac, Naproxen) with Methotrexate can cause Methotrexate to reach toxic levels in your body.",
+             "NSAIDs reduce the ability of your kidneys to eliminate Methotrexate, increasing the risk of life-threatening bone marrow destruction (loss of infection-fighting white blood cells).",
+             "Never take over-the-counter painkillers without specific clearance from your rheumatologist.",
+             "Contact your doctor immediately if you develop mouth ulcers, high fever, or unexpected bruising while taking Methotrexate."
+         ],
+         {"assessment": "Decreased renal elimination and protein displacement. NSAIDs inhibit renal prostaglandin synthesis, reducing renal blood flow and competitive tubular secretion of Methotrexate. This leads to toxic Methotrexate accumulation, severe myelosuppression (pancytopenia), acute kidney injury, and hepatotoxicity.", "investigations": "Urgent CBC with differential (monitor for leukopenia/thrombocytopenia), Serum Creatinine, LFTs, Serum Methotrexate levels if available.", "management": "Avoid co-administration, especially with high-dose methotrexate. If low-dose weekly MTX for RA requires NSAID co-therapy: ensure stable normal renal function and close CBC/creatinine monitoring. For toxicity: Leucovorin (Folinic Acid) rescue therapy immediately.", "references": ["American College of Rheumatology Guidelines", "FDA Methotrexate Black Box Warnings"]},
+         "Check CBC and creatinine. Alert rheumatologist if NSAID is co-prescribed with MTX.",
+         ["Fever, severe sore throat, and painful mouth ulcers (Neutropenia)", "Easy bleeding, bruising, or petechial rash (Thrombocytopenia)"],
+         ["Do NOT self-medicate with over-the-counter NSAIDs while taking Methotrexate", "Do NOT ignore mouth sores or fever"],
+         "American College of Rheumatology (ACR) & FDA Drug Safety", "Dr. A. Sharma (MD, Rheumatology)"),
+
+        ("int_metronidazole_alcohol_011", "Metronidazole + Alcohol (Disulfiram-Like Reaction)", ["metrogyl and alcohol", "flagyl alcohol interaction", "can i drink beer with metronidazole", "alcohol metronidazole vomiting"],
+         [
+             "STRICTLY FORBIDDEN: Do not consume ANY alcohol (including beer, wine, whiskey, or alcohol-containing cough syrups) while taking Metronidazole.",
+             "Combining alcohol with Metronidazole triggers a severe 'Disulfiram-like' reaction: violent vomiting, severe throbbing headache, rapid heart pounding, facial flushing, and chest tightness.",
+             "This reaction can happen even with small amounts of alcohol.",
+             "Maintain complete alcohol abstinence throughout your entire treatment course and for at least 48 HOURS after swallowing your final pill."
+         ],
+         {"assessment": "Disulfiram-like (Antabuse) reaction. Metronidazole inhibits aldehyde dehydrogenase (ALDH), leading to toxic accumulation of acetaldehyde following alcohol ingestion. Symptoms: severe nausea, projectile vomiting, flushing, tachycardia, hypotension, and diaphoresis.", "investigations": "Clinical evaluation, 12-lead ECG if palpitations or hypotension.", "management": "Strict prohibition of all ethanol during therapy and for >=48 hours post-completion. For acute reaction: IV fluid resuscitation, antiemetics (Ondansetron), monitor hemodynamics.", "references": ["CDC Sexually Transmitted Infections Treatment Guidelines", "WHO Model Formulary"]},
+         "Reinforce 100% complete alcohol abstinence during and 48 hours post-treatment.",
+         ["Profound vomiting, severe dizziness, hypotensive collapse, or cardiac arrhythmias following alcohol ingestion"],
+         ["STRICTLY AVOID ALL ALCOHOL during and 48 hours after treatment", "Do NOT use alcohol-containing mouthwashes or cough syrups"],
+         "CDC Treatment Guidelines & WHO Model Formulary", "Dr. A. Sharma (MD, Internal Medicine)"),
+
+        ("int_clopidogrel_omeprazole_012", "Clopidogrel + Omeprazole", ["clopidogrel omeprazole", "plavix omez interaction", "clopidogrel and pantoprazole", "blood thinner and acidity tablet"],
+         [
+             "Omeprazole significantly reduces the antiplatelet, clot-preventing power of Clopidogrel (Plavix).",
+             "Omeprazole blocks the specific liver enzyme (CYP2C19) needed to convert Clopidogrel into its active form, leaving your stent or heart at higher risk of clots.",
+             "If you take Clopidogrel and need an acidity medicine, ask your doctor to switch you to Pantoprazole, which does not interfere with Clopidogrel."
+         ],
+         {"assessment": "Competitive CYP2C19 inhibition. Clopidogrel is a prodrug requiring hepatic biotransformation by CYP2C19 into its active thiol metabolite. Omeprazole is a potent CYP2C19 inhibitor, significantly reducing active metabolite levels and increasing platelet aggregation and stent thrombosis risk.", "investigations": "Platelet function testing if indicated.", "management": "Avoid Omeprazole and Esomeprazole in patients taking Clopidogrel. Use Pantoprazole (minimal CYP2C19 inhibition) or H2-receptor antagonists (Famotidine) if gastric acid suppression is indicated.", "references": ["FDA Drug Safety Communication: Clopidogrel and Omeprazole", "AHA/ACC Focused Update on Dual Antiplatelet Therapy"]},
+         "Review PPI prescription with Clopidogrel: switch Omeprazole to Pantoprazole.",
+         ["Recurrent angina, chest pressure, or signs of stent thrombosis in heart patients"],
+         ["Do NOT take Omeprazole with Clopidogrel when Pantoprazole is available", "Do NOT stop Clopidogrel without cardiologist approval"],
+         "FDA Drug Safety & American College of Cardiology (ACC)", "Dr. R. Kapoor (MD, Cardiology)"),
+
+        ("int_digoxin_amiodarone_013", "Digoxin + Amiodarone", ["digoxin amiodarone interaction", "digoxin and amiodarone", "digoxin toxicity amiodarone", "heart rhythm pill interaction"],
+         [
+             "Amiodarone slows the clearance of Digoxin, doubling its concentration in your bloodstream.",
+             "This sharp increase can cause dangerous Digoxin toxicity: yellow-tinted or halo vision, severe nausea, vomiting, confusion, and fatal slow or irregular heartbeats.",
+             "When starting Amiodarone, your cardiologist will typically reduce your Digoxin dose by 50% and closely monitor your blood levels.",
+             "Report nausea, vomiting, or visual color changes to your doctor immediately."
+         ],
+         {"assessment": "P-glycoprotein (P-gp) and renal clearance inhibition. Amiodarone inhibits P-gp mediated renal tubular secretion and non-renal clearance of Digoxin, increasing serum Digoxin concentrations by 70% to 100%, precipitating life-threatening Digoxin toxicity.", "investigations": "Serum Digoxin level (therapeutic range 0.5-0.9 ng/mL; toxicity typically >2.0 ng/mL), Serum Potassium and Magnesium, 12-lead ECG (bidirectional VT, junctional tachycardia, high-degree AV block, scoop ST depression).", "management": "Empirically reduce Digoxin maintenance dose by 50% when initiating Amiodarone. Monitor serum Digoxin level 7-14 days post-initiation. Treat toxicity: correct hypokalemia, administer Digoxin Immune Fab (DigiFab) for life-threatening arrhythmias.", "references": ["ACC/AHA Guidelines for the Management of Heart Failure", "FDA Prescribing Information"]},
+         "Check if Digoxin dose was halved when Amiodarone was started. Monitor heart rate.",
+         ["Yellow-green halos around lights, vomiting, confusion, severe bradycardia (Digoxin Toxicity - Emergency)", "Heart rate < 45 bpm"],
+         ["Do NOT take full-dose Digoxin with Amiodarone without blood level monitoring", "Do NOT ignore sudden visual disturbances or nausea"],
+         "ACC/AHA Heart Failure Guidelines & FDA Drug Safety", "Dr. R. Kapoor (MD, Cardiology)"),
+
+        ("int_lithium_nsaids_thiazides_014", "Lithium + NSAIDs / Thiazide Diuretics", ["lithium ibuprofen", "lithium brufen", "lithium thiazide interaction", "lithium toxicity painkiller"],
+         [
+             "Taking NSAID painkillers (like Ibuprofen, Diclofenac, Naproxen) or water pills (like Hydrochlorothiazide) causes Lithium to build up to toxic levels in your body.",
+             "NSAIDs and diuretics decrease the ability of your kidneys to flush out Lithium.",
+             "Lithium toxicity causes severe coarse hand tremors, unsteady walking (ataxia), slurred speech, confusion, and potential permanent kidney or brain damage.",
+             "Always use Paracetamol for pain relief if you take Lithium, and never take diuretics without frequent blood lithium monitoring."
+         ],
+         {"assessment": "Renal tubular reabsorption alteration and reduced GFR. NSAIDs inhibit renal prostaglandins, reducing renal blood flow and lithium clearance by up to 40%. Thiazide diuretics induce sodium depletion in the proximal tubule, stimulating compensatory proximal reabsorption of Lithium, spiking serum Lithium levels.", "investigations": "Urgent 12-hour trough Serum Lithium level (therapeutic window 0.6-1.0 mEq/L; toxicity > 1.5 mEq/L, severe > 2.0 mEq/L), BUN, Serum Creatinine, Electrolytes.", "management": "NSAIDs and thiazides are generally contraindicated with Lithium. Use Paracetamol for analgesia. For acute toxicity: aggressive IV 0.9% Normal Saline hydration to promote excretion; Hemodialysis for Lithium > 4.0 mEq/L (or > 2.5 mEq/L with severe neurologic signs or renal failure).", "references": ["APA Practice Guidelines for the Treatment of Patients With Bipolar Disorder", "FDA Lithium Prescribing Information"]},
+         "Flag strictly. Never co-prescribe NSAIDs with Lithium without psychiatric consult. Monitor tremors.",
+         ["Coarse shaking of hands, stumbling gait, slurred speech, confusion, seizures (Lithium Toxicity - Emergency)"],
+         ["Do NOT take Ibuprofen or NSAID painkillers with Lithium", "Do NOT start diuretic water pills without adjusting lithium dose"],
+         "American Psychiatric Association (APA) & FDA Safety Guidelines", "Dr. P. Deshmukh (MD, Psychiatry)"),
+
+        ("int_theophylline_ciprofloxacin_015", "Theophylline + Ciprofloxacin", ["theophylline ciprofloxacin interaction", "deriphyllin ciprofloxacin", "theophylline antibiotic interaction", "asthma tablet ciprofloxacin"],
+         [
+             "Ciprofloxacin strongly inhibits the breakdown of Theophylline (or Deriphyllin) in your liver, causing Theophylline levels in your blood to surge by up to 100%.",
+             "Toxic theophylline levels can trigger severe persistent vomiting, rapid irregular heartbeats, tremors, and life-threatening seizures.",
+             "Inform your doctor if you take asthma/COPD tablets before starting Ciprofloxacin; an alternative antibiotic should be selected."
+         ],
+         {"assessment": "Potent CYP1A2 inhibition. Ciprofloxacin inhibits hepatic cytochrome P450 1A2, reducing theophylline metabolic clearance by 30-50% and doubling serum theophylline concentrations into the toxic range (>20 mcg/mL).", "investigations": "Serum Theophylline level (therapeutic 10-15 mcg/mL), 12-lead ECG, Serum Potassium (hypokalemia), continuous cardiac monitoring.", "management": "Avoid co-administration. Select an alternative antibiotic (e.g., Azithromycin, Ceftriaxone) that does not inhibit CYP1A2. If combination unavoidable: reduce theophylline dose by 50% and monitor serum levels daily.", "references": ["FDA Theophylline Prescribing Information", "ATS Guidelines"]},
+         "Check for co-prescribed Deriphyllin/Theophylline when Ciprofloxacin is ordered.",
+         ["Intractable nausea, severe palpitations, agitation, seizures (Theophylline Toxicity - Medical Emergency)", "Ventricular arrhythmias"],
+         ["Do NOT combine Theophylline with Ciprofloxacin without dose adjustment and blood monitoring", "Do NOT ignore sudden severe tremors or heart racing"],
+         "FDA Prescribing Information & American Thoracic Society", "Dr. S. Kulkarni (MD, Pulmonology)")
+    ]
+
+    out = []
+    for iid, topic, kw, p_ans, doc_a, staff_m, red_f, avoid_l, src, rev in interactions:
+        out.append({
+            "id": iid,
+            "topic": f"Drug Interaction: {topic}",
+            "category": "drug_interactions",
+            "keywords": kw,
+            "intent": "drug_interaction",
+            "patient_answer": p_ans,
+            "doctor_answer": doc_a,
+            "staff_answer": staff_m,
+            "red_flags": red_f,
+            "follow_up_questions": ["What exact medications are you currently taking together?", "Did your doctor prescribe both medications simultaneously?", "Are you experiencing any new or unusual symptoms like nausea, dizziness, or bruising?"],
+            "avoid": avoid_l,
+            "source": src,
+            "review_status": "approved",
+            "reviewed_by": rev
+        })
+    return out

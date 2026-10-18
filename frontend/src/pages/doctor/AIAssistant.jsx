@@ -122,7 +122,8 @@ export default function DoctorAIAssistant() {
   const [kbConditions, setKbConditions] = useState([]);
   const [kbDrugs, setKbDrugs] = useState([]);
   const [kbUnmatched, setKbUnmatched] = useState([]);
-  const [kbActiveTab, setKbActiveTab] = useState("conditions"); // conditions | drugs | unmatched | new
+  const [reviewQueue, setReviewQueue] = useState([]);
+  const [kbActiveTab, setKbActiveTab] = useState("conditions"); // conditions | drugs | unmatched | review_queue | new
   const [kbSearch, setKbSearch] = useState("");
   const [newKbTitle, setNewKbTitle] = useState("");
   const [newKbAliases, setNewKbAliases] = useState("");
@@ -422,18 +423,33 @@ export default function DoctorAIAssistant() {
   // Load Knowledge Base Data
   const loadKbData = useCallback(async () => {
     try {
-      const [conds, drugs, unmatched] = await Promise.all([
+      const [conds, drugs, unmatched, queueRes] = await Promise.all([
         doctorService.getKbConditions(),
         doctorService.getKbDrugs(),
         doctorService.getUnmatchedQueries(),
+        doctorService.getReviewQueue(),
       ]);
       setKbConditions(conds);
       setKbDrugs(drugs);
       setKbUnmatched(unmatched);
+      setReviewQueue(queueRes?.queue || []);
     } catch (e) {
       console.warn("KB data fetch error:", e);
     }
   }, []);
+
+  const handleApproveQueueEntry = async (entryId) => {
+    try {
+      await doctorService.approveKbEntry(entryId);
+      showToast(`Protocol ${entryId} approved successfully!`);
+      const q = await doctorService.getReviewQueue();
+      setReviewQueue(q?.queue || []);
+      const conds = await doctorService.getKbConditions();
+      setKbConditions(conds);
+    } catch (e) {
+      showToast("Failed to approve protocol entry", "error");
+    }
+  };
 
   useEffect(() => {
     if (kbModalOpen) {
@@ -1332,6 +1348,13 @@ export default function DoctorAIAssistant() {
                 Unmatched Queries ({kbUnmatched.length})
               </button>
               <button
+                className={`kb-tab ${kbActiveTab === "review_queue" ? "active" : ""}`}
+                onClick={() => setKbActiveTab("review_queue")}
+                style={{ position: "relative" }}
+              >
+                Review Queue ({reviewQueue.length})
+              </button>
+              <button
                 className={`kb-tab new-btn ${kbActiveTab === "new" ? "active" : ""}`}
                 onClick={() => setKbActiveTab("new")}
               >
@@ -1435,7 +1458,86 @@ export default function DoctorAIAssistant() {
                 </div>
               )}
 
-              {/* 4. Add New Protocol Form */}
+              {/* 4. Peer-Review Queue Tab */}
+              {kbActiveTab === "review_queue" && (
+                <div className="kb-review-queue-list">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                    <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8" }}>
+                      Entries awaiting senior physician sign-off before official deployment.
+                    </p>
+                    <button
+                      type="button"
+                      className="refresh-btn"
+                      onClick={loadKbData}
+                      style={{ padding: "4px 10px", fontSize: "12px", background: "rgba(56, 189, 248, 0.1)", border: "1px solid rgba(56, 189, 248, 0.3)", color: "#38bdf8", borderRadius: "6px", cursor: "pointer" }}
+                    >
+                      <RefreshCw size={12} /> Refresh Queue
+                    </button>
+                  </div>
+
+                  {reviewQueue.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>
+                      <CheckCircle2 size={32} style={{ color: "#34d399", marginBottom: "8px" }} />
+                      <p>All knowledge base entries are peer-reviewed and approved!</p>
+                    </div>
+                  ) : (
+                    <div className="kb-conditions-list" style={{ maxHeight: "400px", overflowY: "auto" }}>
+                      {reviewQueue.map((item) => (
+                        <div key={item.id} className="kb-cond-card" style={{ borderLeft: "3px solid #f59e0b", marginBottom: "10px", padding: "12px", background: "rgba(15, 23, 42, 0.6)", borderRadius: "8px" }}>
+                          <div className="kb-cond-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <div>
+                              <strong>{item.topic}</strong>
+                              <span className="kb-slug" style={{ marginLeft: "8px", fontSize: "11px", color: "#64748b" }}>ID: {item.id}</span>
+                              <span style={{ fontSize: "11px", color: "#38bdf8", marginLeft: "8px" }}>[{item.category}]</span>
+                            </div>
+                            <span className="kb-status-badge draft" style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24", padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "700" }}>
+                              DRAFT
+                            </span>
+                          </div>
+
+                          <div style={{ marginTop: "8px", fontSize: "13px", color: "#cbd5e1" }}>
+                            <strong>Clinical Assessment / Guidance:</strong>
+                            <p style={{ margin: "4px 0", color: "#94a3b8" }}>
+                              {item.doctor_answer?.assessment || item.summary || (Array.isArray(item.patient_answer) ? item.patient_answer[0] : item.patient_answer)}
+                            </p>
+                          </div>
+
+                          <div className="kb-aliases-tags" style={{ marginTop: "6px", fontSize: "12px", color: "#64748b" }}>
+                            <span>Source: </span>
+                            <span style={{ color: "#93c5fd" }}>{item.source}</span>
+                          </div>
+
+                          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "10px" }}>
+                            <button
+                              type="button"
+                              className="approve-btn"
+                              onClick={() => handleApproveQueueEntry(item.id)}
+                              style={{
+                                background: "#10b981",
+                                color: "#ffffff",
+                                border: "none",
+                                padding: "6px 14px",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px"
+                              }}
+                            >
+                              <CheckCircle2 size={13} />
+                              Approve Entry
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 5. Add New Protocol Form */}
               {kbActiveTab === "new" && (
                 <div className="kb-new-form">
                   <div className="form-group">

@@ -1,0 +1,992 @@
+[
+  {
+    "id": "srh_sti_symptoms_testing_001",
+    "topic": "Sexual Health: Sexually Transmitted Infections (STIs) Overview & Testing",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "sti symptoms",
+      "std testing",
+      "sex infection symptoms",
+      "std symptoms",
+      "safe sex screening",
+      "gupt rog janch"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Sexually transmitted infections (STIs) are very common bacterial, viral, or parasitic infections passed through vaginal, anal, or oral sexual contact.",
+      "Many STIs have ZERO noticeable symptoms initially, especially in women; you or your partner can have an STI without knowing it.",
+      "Common signs to watch for:",
+      "  - Unusual discharge from the penis or vagina (yellow, green, foul-smelling, or cloudy).",
+      "  - Pain, burning, or stinging sensation while urinating.",
+      "  - Sores, blisters, bumps, or ulcers around the genitals, anus, or mouth.",
+      "  - Lower abdominal or pelvic pain, or pain during sexual intercourse.",
+      "  - Unusual vaginal bleeding between periods or after sex.",
+      "Routine STI testing is confidential, routine, and judgment-free; most bacterial STIs (like chlamydia and gonorrhea) are easily cured with simple antibiotics."
+    ],
+    "doctor_answer": {
+      "assessment": "Screening and diagnostic evaluation for Sexually Transmitted Infections (STIs). Syndromic management vs laboratory-based pathogen identification.",
+      "investigations": "Urine Nucleic Acid Amplification Testing (NAAT) for Chlamydia trachomatis and Neisseria gonorrhoeae, Serological screening for HIV (4th gen Ag/Ab combo), Syphilis (Treponemal / RPR), and Hepatitis B (HBsAg).",
+      "management": "Etiology-specific antimicrobial therapy. Mandatory partner notification and simultaneous treatment. Abstinence from sexual activity until 7 days post-completion of treatment and symptom resolution.",
+      "references": [
+        "CDC Sexually Transmitted Infections Treatment Guidelines (2021)",
+        "WHO Guidelines for the Management of Symptomatic Sexually Transmitted Infections"
+      ]
+    },
+    "staff_answer": "Provide confidential, non-judgmental triage. Offer testing for HIV, Syphilis, and Hepatitis B alongside primary complaint.",
+    "red_flags": [
+      "Genital ulcer with painless induration (Primary Syphilis chancre)",
+      "Severe lower abdominal tenderness with cervical motion tenderness and fever (Pelvic Inflammatory Disease)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT engage in sexual contact until full treatment is completed and partner is treated",
+      "Do NOT feel shame or delay testing (STIs are common, curable medical conditions)"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & World Health Organization",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_safe_sex_barrier_002",
+    "topic": "Sexual Health: Safe Sex Practices & Dual Protection",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "safe sex",
+      "condom use",
+      "how to use a condom",
+      "prevent stis",
+      "dual protection contraception"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Safe sex protects both partners from sexually transmitted infections (STIs) and prevents unintended pregnancy.",
+      "Male latex or polyurethane condoms are the ONLY contraceptive method scientifically proven to protect against both pregnancy AND STIs (Dual Protection).",
+      "CORRECT CONDOM USAGE STEPS:",
+      "  1. Check the expiration date on the packet and check for the air cushion feel.",
+      "  2. Open the wrapper carefully with your fingers; NEVER use teeth, scissors, or sharp fingernails.",
+      "  3. Pinch the tip (reservoir) of the condom to squeeze out trapped air (trapped air causes condoms to pop during intercourse).",
+      "  4. Unroll the condom all the way down the erect penis to the base before any genital contact.",
+      "  5. Use only water-based or silicone lubricants; NEVER use oil-based products (Vaseline, baby oil, cooking oil, lotions) which dissolve latex within 60 seconds.",
+      "  6. After ejaculation, hold the base of the condom firmly while pulling out to prevent slippage."
+    ],
+    "doctor_answer": {
+      "assessment": "Barrier contraception and harm-reduction counseling for STI/HIV transmission and pregnancy prevention.",
+      "investigations": "Assess patient knowledge of correct barrier technique and lubricant compatibility.",
+      "management": "Counsel on consistent and correct condom usage. Educate on lubricant safety (water-based or silicone with latex; avoid petroleum/oil products). Emphasize Dual Protection strategy (LARC + Condom for optimal pregnancy and STI prevention).",
+      "references": [
+        "CDC Sexually Transmitted Infections Treatment Guidelines - Prevention",
+        "WHO Condom Programming Guidelines"
+      ]
+    },
+    "staff_answer": "Demonstrate correct condom unrolling on penile anatomical model. Provide free condoms.",
+    "red_flags": [
+      "Condom breakage or slippage during intercourse with an individual of unknown HIV status (requires Post-Exposure Prophylaxis / PEP within 72 hours)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "NEVER reuse a condom (strictly single-use)",
+      "Do NOT use oil-based lubricants like Vaseline, butter, or coconut oil with latex condoms (causes rapid latex breakdown)"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & World Health Organization",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_chlamydia_gonorrhea_003",
+    "topic": "Sexual Health: Chlamydia & Gonorrhea (Bacterial STIs)",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "chlamydia",
+      "gonorrhea",
+      "penis discharge burning",
+      "burning urination after sex",
+      "sujak",
+      "gonococcal urethritis"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Chlamydia and Gonorrhea are common bacterial STIs that infect the urethra, cervix, rectum, and throat.",
+      "Symptoms in men: Burning pain while urinating, white/yellow/green discharge from the tip of the penis, or pain/swelling in the testicles.",
+      "Symptoms in women: Often completely silent (over 70% have no symptoms); can cause burning urination, increased vaginal discharge, or bleeding between periods.",
+      "DANGER OF UNTREATED INFECTIONS: In women, untreated chlamydia or gonorrhea can travel up into the uterus and fallopian tubes, causing Pelvic Inflammatory Disease (PID), permanent scarring, and infertility.",
+      "Both infections are curable: modern treatment uses targeted prescription antibiotics.",
+      "BOTH PARTNERS MUST BE TREATED at the exact same time; avoid all sexual contact for 7 days after completing antibiotics."
+    ],
+    "doctor_answer": {
+      "assessment": "Acute Urethritis in men / Mucopurulent Cervicitis in women (Neisseria gonorrhoeae vs Chlamydia trachomatis). High co-infection rate.",
+      "investigations": "First-catch urine NAAT (men) or vaginal/endocervical swab NAAT (women). Gram stain of urethral discharge (Gram-negative intracellular diplococci confirms gonorrhea).",
+      "management": "Uncomplicated Urogenital Gonorrhea: Ceftriaxone 500 mg IM single dose (1 g if weight >= 150 kg). If chlamydial infection not excluded: add Doxycycline 100 mg orally BID for 7 days. Chlamydia monotherapy: Doxycycline 100 mg BID for 7 days (or Azithromycin 1 g single oral dose in pregnancy). Partner treatment mandatory. Retest at 3 months for re-infection.",
+      "references": [
+        "CDC STI Treatment Guidelines (2021) - Gonococcal and Chlamydial Infections",
+        "WHO Guidelines for the Treatment of Neisseria gonorrhoeae"
+      ]
+    },
+    "staff_answer": "Collect first-void urine (patient must not have urinated for at least 1 hour). Ensure partner treatment.",
+    "red_flags": [
+      "High fever with severe lower abdominal pain and cervical motion tenderness (Pelvic Inflammatory Disease)",
+      "Acute painful swollen scrotum (Epididymo-orchitis)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT have sex until both you and your partner complete all antibiotics and wait 7 full days",
+      "Do NOT self-treat with random leftover antibiotics (drives cephalosporin resistance)"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & World Health Organization",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_hiv_aids_prep_pep_004",
+    "topic": "Sexual Health: HIV Basics, Testing, PrEP & Emergency PEP",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "hiv",
+      "aids",
+      "prep",
+      "pep",
+      "hiv test",
+      "hiv exposure",
+      "window period hiv",
+      "antiretroviral"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "HIV (Human Immunodeficiency Virus) attacks the body's immune system, specifically CD4 white blood cells that fight infections.",
+      "With modern Antiretroviral Therapy (ART), HIV is now a manageable chronic condition: people taking daily treatment live long, healthy, full lives and achieve an undetectable viral load.",
+      "U = U (Undetectable = Untransmittable): When a person with HIV takes daily medication and maintains an undetectable viral load, they CANNOT sexually transmit HIV to their partners.",
+      "EMERGENCY PEP (Post-Exposure Prophylaxis): If you had unprotected sex with an HIV-positive person, had a condom break, or experienced a needle stick, PEP medications must be started WITHIN 72 HOURS (ideally within 2 to 24 hours) to prevent HIV from establishing in your body. It is a 28-day course.",
+      "PrEP (Pre-Exposure Prophylaxis): A daily pill taken by HIV-negative individuals at high ongoing risk that reduces the risk of contracting HIV by over 99%.",
+      "Routine HIV testing is fast, confidential, and fingerstick rapid tests provide results in 20 minutes."
+    ],
+    "doctor_answer": {
+      "assessment": "HIV Infection Screening, Prevention (PrEP/PEP), and Antiretroviral Management.",
+      "investigations": "4th-generation HIV-1/2 Antigen/Antibody combination immunoassay (window period ~18-45 days), HIV viral load (RNA PCR), CD4 count, Hepatitis B and C screening, Renal function (serum creatinine) prior to Tenofovir.",
+      "management": "Post-Exposure Prophylaxis (PEP): Initiate <= 72 hours post-exposure: Tenofovir Disoproxil Fumarate (TDF) + Emtricitabine (FTC) + Dolutegravir (DTG) once daily for 28 days. Pre-Exposure Prophylaxis (PrEP): Daily oral TDF/FTC or TAF/FTC with quarterly HIV testing. Confirmed HIV: Immediate ART initiation regardless of CD4 count ('Test and Treat' policy).",
+      "references": [
+        "CDC US Public Health Service Guidelines: Preexposure and Postexposure Prophylaxis for HIV",
+        "WHO Consolidated Guidelines on HIV Prevention, Testing, Treatment"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red/Orange for post-exposure within 72h. Time is critical; initiate 28-day PEP immediately.",
+    "red_flags": [
+      "Potential HIV exposure occurring within the past 72 hours (Emergency PEP window closes at 72 hours)",
+      "Opportunistic infections: severe cryptococcal meningitis, pneumocystis pneumonia (PJP), or high fever in advanced HIV"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT wait beyond 72 hours to seek PEP after a potential exposure (efficacy drops drastically)",
+      "Do NOT share needles or injection equipment"
+    ],
+    "source": "CDC Guidelines on HIV PrEP/PEP & World Health Organization (WHO)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_syphilis_stages_care_005",
+    "topic": "Sexual Health: Syphilis Stages, Sores & Penicillin Cure",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "syphilis",
+      "chancre",
+      "painless genital sore",
+      "vdrl",
+      "rpr",
+      "syphilis rash palms",
+      "aatshak"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Syphilis is a curable bacterial infection caused by Treponema pallidum that progresses through distinct clinical stages if left untreated.",
+      "Primary Stage: A single, completely PAINLESS, firm, round sore (called a Chancre) appears where the bacteria entered the body (genitals, anus, or lips). Because it does not hurt, it often goes unnoticed and heals on its own, but the bacteria remain active in the blood.",
+      "Secondary Stage (2 to 8 weeks later): A non-itchy rough red or brown rash appears, classically on the PALMS of the hands and SOLES of the feet, along with fever, swollen glands, and mouth sores.",
+      "Latent & Tertiary Stage: If untreated, the infection hides silently for years before attacking the brain, nerves, eyes, and heart.",
+      "CURE: Syphilis is completely curable with Benzathine Penicillin G injections prescribed by a doctor.",
+      "All pregnant women should be screened early for syphilis to prevent congenital syphilis, which causes severe fetal harm or stillbirth."
+    ],
+    "doctor_answer": {
+      "assessment": "Syphilis (Treponema pallidum spirochetal infection). Stage: Primary (chancre), Secondary (mucocutaneous lesions, condyloma lata, palmoplantar rash), Latent (early <1 year vs late >1 year), Tertiary (gummatous, cardiovascular, neurosyphilis).",
+      "investigations": "Nontreponemal serology (RPR or VDRL: quantitative titers for monitoring treatment response) + Treponemal confirmatory test (FTA-ABS, TP-PA, or automated EIA/CIA). Lumbar puncture indicated if neurological/ocular signs or treatment failure.",
+      "management": "Primary, Secondary, or Early Latent (<1 year): Benzathine Penicillin G 2.4 million units IM single dose. Late Latent (>1 year) or Unknown Duration: Benzathine Penicillin G 2.4 million units IM once weekly for 3 consecutive weeks (total 7.2 million units). Neurosyphilis: Aqueous Crystalline Penicillin G 18-24 million units IV daily for 10-14 days. If penicillin allergy: Desensitization (mandatory in pregnancy) or Doxycycline 100 mg BID for 14-28 days.",
+      "references": [
+        "CDC Sexually Transmitted Infections Treatment Guidelines (2021) - Syphilis",
+        "WHO Guidelines for the Treatment of Treponema pallidum (Syphilis)"
+      ]
+    },
+    "staff_answer": "Inspect palms and soles. Verify quantitative RPR/VDRL baseline titer. Screen for penicillin allergy.",
+    "red_flags": [
+      "Neurological symptoms (headache, confusion, altered gait, sudden vision loss) with positive syphilis serology (Neurosyphilis/Ocular Syphilis)",
+      "Syphilis infection in pregnancy (immediate penicillin treatment required to prevent congenital syphilis)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT assume a healed genital sore means the infection is gone (the bacteria have spread deeper into the bloodstream)",
+      "Do NOT use non-penicillin alternatives in pregnant women without formal allergy desensitization"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & World Health Organization",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_genital_herpes_hsv_006",
+    "topic": "Sexual Health: Genital Herpes (HSV-1 & HSV-2)",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "genital herpes",
+      "hsv",
+      "herpes blisters genitals",
+      "painful bumps private parts",
+      "herpes outbreak",
+      "hsv 2"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Genital herpes is a common viral infection caused by Herpes Simplex Virus (HSV-2 or HSV-1).",
+      "First outbreak symptoms: Clusters of small, painful fluid-filled blisters on or around the genitals or anus that break open into tender, shallow ulcers, accompanied by fever, body aches, and swollen groin glands.",
+      "After the first episode, the virus remains dormant in nerve roots and can reactivate periodically, causing milder, shorter recurrences (often preceded by tingling or itching).",
+      "Antiviral medications (such as Valacyclovir or Acyclovir) taken at the very first tingling sign of an outbreak speed healing, reduce pain, and shorten the episode.",
+      "Daily suppressive therapy (taking a low-dose antiviral pill every day) is available for people with frequent outbreaks, reducing recurrences by 70-80% and lowering transmission risk.",
+      "Avoid all sexual contact during active outbreaks (when blisters, sores, or tingling are present) to protect your partner."
+    ],
+    "doctor_answer": {
+      "assessment": "Genital Herpes Simplex Virus infection (HSV-2 predominantly; increasing genital HSV-1 from oral-genital contact). Differentiate primary episode from recurrent outbreak.",
+      "investigations": "Type-specific HSV PCR from active vesicular lesion fluid (gold standard). Type-specific glycoprotein G (gG) serology (HSV-1 vs HSV-2 IgG).",
+      "management": "Primary Episode: Oral Valacyclovir 1000 mg BID for 7-10 days, or Acyclovir 400 mg TID for 7-10 days. Recurrent Outbreak (episodic therapy initiated <=24h of onset): Valacyclovir 500 mg BID for 3 days or 1000 mg once daily for 5 days. Daily Suppressive Therapy (for >=6 recurrences/year): Valacyclovir 500-1000 mg once daily. In pregnancy: suppressive Acyclovir from 36 weeks gestation to prevent neonatal herpes transmission.",
+      "references": [
+        "CDC STI Treatment Guidelines (2021) - Genital HSV",
+        "IUSTI European Guideline for the Management of Genital Herpes"
+      ]
+    },
+    "staff_answer": "Examine lesions with gloves. Advise warm salt water baths and loose cotton clothing.",
+    "red_flags": [
+      "Active genital herpes lesions in a woman at onset of labor (Cesarean delivery indicated to prevent fatal neonatal herpes encephalitis)",
+      "Urinary retention from severe vulvar herpes pain"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT engage in sexual intimacy when blisters, sores, or prodromal tingling are present",
+      "Do NOT pop or squeeze herpes blisters (spreads viral shedding)"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & IUSTI European Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_genital_warts_hpv_007",
+    "topic": "Sexual Health: Genital Warts (HPV 6 & 11) & Care",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "genital warts",
+      "hpv warts",
+      "bumps on private parts",
+      "condyloma acuminata",
+      "cauliflower bumps genitals"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Genital warts are flesh-colored, pink, or brownish soft growths that appear on the skin around the genitals and anus, caused by low-risk strains of Human Papillomavirus (primarily HPV types 6 and 11).",
+      "They can look like tiny smooth bumps, flat patches, or raised rough clusters that resemble miniature cauliflower.",
+      "They are generally painless, though they can sometimes cause mild itching, burning, or bleeding during intercourse.",
+      "Important reassurance: The HPV strains that cause visible external warts (types 6 and 11) do NOT cause cervical or genital cancer.",
+      "Treatment options performed by a doctor include freezing with liquid nitrogen (cryotherapy), chemical acid application (TCA), minor excision, or prescription patient-applied creams (such as Imiquimod 5% cream).",
+      "Prevention: The HPV vaccine (Gardasil 9) provides powerful protection against the strains that cause genital warts."
+    ],
+    "doctor_answer": {
+      "assessment": "Condylomata Acuminata (Anogenital Warts, caused by low-risk non-oncogenic HPV types 6 and 11). Differentiate from Condyloma Lata of secondary syphilis, molluscum contagiosum, and skin tags.",
+      "investigations": "Clinical examination in good lighting. Biopsy indicated only if atypical, pigmented, indurated, ulcerated, or unresponsive to therapy.",
+      "management": "Patient-applied: Imiquimod 5% cream (applied at bedtime 3 times/week for up to 16 weeks) or Podofilox 0.5% solution. Clinician-applied: Cryotherapy with liquid nitrogen (Q1-2W), Trichloroacetic acid (TCA 80-90% weekly), or surgical excision / electrocautery for large bulk lesions. Note: treatments remove visible lesions but do not eradicate latent viral reservoir.",
+      "references": [
+        "CDC Sexually Transmitted Infections Treatment Guidelines (2021) - Anogenital Warts",
+        "BASHH UK National Guidelines on Anogenital Warts"
+      ]
+    },
+    "staff_answer": "Inspect perianal and genital regions. Differentiate from syphilitic condyloma lata (order serology if questionable).",
+    "red_flags": [
+      "Rapidly growing, ulcerating, or deeply indurated mass (concern for Buschke-Lowenstein tumor / verrucous carcinoma)",
+      "Massive lesions obstructing birth canal during pregnancy"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT use over-the-counter foot or hand wart removers on delicate genital skin (causes severe chemical burns)",
+      "Do NOT cut or slice warts off at home"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & British Association for Sexual Health and HIV (BASHH)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_pelvic_inflammatory_disease_008",
+    "topic": "Sexual Health: Pelvic Inflammatory Disease (PID)",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "pid",
+      "pelvic inflammatory disease",
+      "pelvic infection",
+      "lower belly pain after sex",
+      "infected fallopian tubes",
+      "pelvic infection women"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Pelvic Inflammatory Disease (PID) is a serious bacterial infection of a woman's reproductive organs (uterus, fallopian tubes, and ovaries), typically caused when untreated STIs (chlamydia or gonorrhea) travel upward from the vagina.",
+      "Key symptoms:",
+      "  - Continuous dull aching or sharp pain in the lower abdomen and pelvis.",
+      "  - Unusual, foul-smelling vaginal discharge.",
+      "  - Pain during or immediately after sexual intercourse.",
+      "  - Bleeding between periods or after sex.",
+      "  - Fever, chills, and painful, frequent urination.",
+      "SEEK PROMPT MEDICAL TREATMENT: Prompt antibiotic treatment cures the infection and prevents permanent fallopian tube scarring, which can cause lifelong chronic pelvic pain, ectopic pregnancy, and infertility.",
+      "Your sexual partner MUST also be treated with antibiotics simultaneously to prevent immediate reinfection."
+    ],
+    "doctor_answer": {
+      "assessment": "Pelvic Inflammatory Disease (PID). Spectrum of inflammatory disorders of upper female genital tract (endometritis, salpingitis, tubo-ovarian abscess, pelvic peritonitis). CDC minimum clinical criteria: lower abdominal/pelvic pain with cervical motion tenderness, uterine tenderness, or adnexal tenderness.",
+      "investigations": "NAAT for N. gonorrhoeae and C. trachomatis, Pelvic Ultrasound (evaluates for dilated fallopian tubes, fluid in cul-de-sac, or Tubo-Ovarian Abscess [TOA]), CBC, ESR/CRP, pregnancy test (rule out ectopic).",
+      "management": "Outpatient regimen (mild-moderate): Ceftriaxone 500 mg IM single dose + Doxycycline 100 mg orally BID for 14 days + Metronidazole 500 mg orally BID for 14 days. Inpatient admission criteria (IV Ceftriaxone + Doxycycline + Metronidazole): pregnant, tubo-ovarian abscess, high fever, severe nausea/vomiting, or failing outpatient oral therapy after 72 hours.",
+      "references": [
+        "CDC STI Treatment Guidelines (2021) - Pelvic Inflammatory Disease",
+        "ACOG Practice Bulletin on Pelvic Inflammatory Disease"
+      ]
+    },
+    "staff_answer": "Priority: Triage Orange/Red based on peritoneal signs and temperature. Verify pregnancy test immediately.",
+    "red_flags": [
+      "High fever with palpable, exquisitely tender adnexal mass (Tubo-Ovarian Abscess requiring hospitalization and possible drainage)",
+      "Rigid board-like abdomen with rebound tenderness (Pelvic Peritonitis Emergency)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT delay antibiotic therapy while waiting for lab culture results (early treatment preserves fertility)",
+      "Do NOT stop the 14-day antibiotic course early"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & ACOG Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_fertility_basics_ovulation_009",
+    "topic": "Sexual Health: Fertility Basics, Ovulation Tracking & Conception",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "fertility basics",
+      "ovulation tracking",
+      "how to get pregnant",
+      "fertile window",
+      "ovulation test",
+      "garbhdharan"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "The 'Fertile Window' is the approximately 6-day timeframe during each menstrual cycle (the 5 days leading up to ovulation plus the day of ovulation itself) when pregnancy is possible.",
+      "Sperm can survive inside the female reproductive tract for up to 5 days, whereas a released egg survives for only 12 to 24 hours.",
+      "In a regular 28-day cycle, ovulation typically occurs around Day 14 (about 14 days BEFORE the next period begins).",
+      "Signs of approaching ovulation:",
+      "  - Cervical mucus changes: becomes clear, slippery, stretchy, and lubricative (resembling raw egg white).",
+      "  - Mild lower abdominal twinge on one side (Mittelschmerz).",
+      "  - Positive home Ovulation Predictor Kit (LH surge urine test strip).",
+      "Best timing for conception: Have intercourse every 1 to 2 days during your fertile window (especially the 2 to 3 days right before ovulation).",
+      "Start taking daily Folic Acid (400 to 500 mcg) at least 1 month before trying to conceive to protect early embryonic spinal development."
+    ],
+    "doctor_answer": {
+      "assessment": "Preconception Fertility Evaluation and Ovulatory Tracking. Identify optimal coital timing and evaluate ovulatory regularity.",
+      "investigations": "Menstrual cycle diary. Home urinary Luteinizing Hormone (LH) surge detection kits. Basal Body Temperature (BBT) charting. Mid-luteal phase Serum Progesterone (tested 7 days prior to expected menses; >3 ng/mL confirms ovulation).",
+      "management": "Recommend intercourse every 1-2 days during the 6-day fertile window terminating on day of ovulation. Preconception Folic Acid (400-500 mcg/day). Both partners: achieve healthy BMI, stop smoking, eliminate alcohol, and minimize high-heat exposures for men (saunas, hot tubs, tight briefs).",
+      "references": [
+        "ASRM (American Society for Reproductive Medicine) Optimizing Natural Fertility Guidelines",
+        "NICE Guideline CG156: Fertility problems: assessment and treatment"
+      ]
+    },
+    "staff_answer": "Inquire about cycle length and consistency. Verify daily folic acid supplementation.",
+    "red_flags": [
+      "Infertility definition: Failure to conceive after 12 months of regular unprotected intercourse (or after 6 months if female partner is aged 35 or older - requires fertility workup)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT use commercial saliva or vaginal lubricants that are toxic to sperm (use sperm-friendly lubricants if needed)",
+      "Do NOT schedule intercourse to once a week (infrequent intercourse leads to aged sperm and misses fertile window)"
+    ],
+    "source": "American Society for Reproductive Medicine (ASRM) & NICE Guideline CG156",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_male_infertility_semen_analysis_010",
+    "topic": "Sexual Health: Male Fertility Basics & Semen Analysis",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "male fertility",
+      "semen analysis",
+      "sperm count",
+      "low sperm count",
+      "semen test",
+      "male infertility test"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Infertility affects couples equally: male factor issues contribute to approximately 40% to 50% of all infertility cases.",
+      "A Semen Analysis is the essential, painless first diagnostic test for male fertility, evaluating four primary parameters:",
+      "  1. Semen Volume: Normal is at least 1.5 mL.",
+      "  2. Sperm Concentration (Count): Normal is at least 15 million sperm per mL.",
+      "  3. Sperm Motility (Movement): At least 40% of sperm should be moving actively, and at least 32% swimming straight forward.",
+      "  4. Sperm Morphology (Shape): At least 4% of sperm should have normal anatomical shape (Kruger strict criteria).",
+      "Preparation for testing: Abstain from sexual intercourse and ejaculation for strictly 2 to 7 days before collecting the sample.",
+      "Lifestyle habits that boost sperm health: Stop smoking and tobacco, avoid excessive alcohol, maintain a healthy weight, keep laptops off your lap, avoid hot tubs/saunas, and eat antioxidant-rich foods."
+    ],
+    "doctor_answer": {
+      "assessment": "Male Factor Infertility (Azoospermia, Oligozoospermia, Asthenozoospermia, Teratozoospermia). Evaluate for Varicocele, testicular failure, endocrine disorders (hypogonadism), and genetic causes (Klinefelter, Y-chromosome microdeletions).",
+      "investigations": "Semen Analysis according to WHO Laboratory Manual (6th edition, 2021; two separate samples 2-4 weeks apart). If abnormal: Serum FSH, LH, Total Testosterone, Prolactin, Scrotal Doppler Ultrasound (varicocele), and genetic karyotyping if severe oligozoospermia (<5M/mL).",
+      "management": "Lifestyle optimization. Surgical repair of clinical varicocele (subinguinal microsurgical varicocelectomy). Assisted Reproductive Technology (Intrauterine Insemination / IVF with Intracytoplasmic Sperm Injection [ICSI]) for moderate-severe male factor.",
+      "references": [
+        "WHO Laboratory Manual for the Examination and Processing of Human Semen (6th Edition)",
+        "AUA/ASRM Guideline: Diagnosis and Treatment of Infertility in Men"
+      ]
+    },
+    "staff_answer": "Confirm abstinence duration (strictly 2 to 7 days) before scheduling semen collection.",
+    "red_flags": [
+      "Complete Azoospermia (zero sperm in ejaculate - requires endocrine and genetic workup)",
+      "Severe testicular pain with hard testicular mass (rule out testicular neoplasm)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT keep laptops directly resting on the scrotum or soak in hot baths (heat severely damages spermatogenesis)",
+      "Do NOT collect semen sample in standard latex condoms (latex and lubricants kill sperm)"
+    ],
+    "source": "American Urological Association (AUA) & World Health Organization (WHO)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_erectile_dysfunction_basics_011",
+    "topic": "Sexual Health: Erectile Dysfunction (ED) & Cardiovascular Health",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "erectile dysfunction",
+      "ed",
+      "impotence",
+      "erection problem",
+      "viagra safe use",
+      "male sexual health"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Erectile Dysfunction (ED) is the consistent inability to achieve or maintain an erection firm enough for satisfactory sexual intercourse.",
+      "ED IS A WINDOW TO THE HEART: The penile arteries are much smaller (1-2 mm) than coronary heart arteries (3-4 mm); penile artery narrowing from cholesterol and high blood pressure often appears 3 to 5 years BEFORE a heart attack or stroke occurs.",
+      "Common causes: Diabetes, hypertension, high cholesterol, smoking, obesity, low testosterone, performance anxiety, and medications (like certain blood pressure pills).",
+      "Lifestyle treatments: Brisk walking for 30 minutes daily, quitting smoking, losing belly fat, and managing blood sugar significantly improves erectile function.",
+      "Prescription medications (like Sildenafil / Viagra or Tadalafil / Cialis) are safe and effective when prescribed by a doctor.",
+      "CRITICAL FATAL WARNING: NEVER take Sildenafil or Tadalafil if you take nitrate heart medications (like Sorbitrate or Nitroglycerin); combining them triggers a fatal collapse in blood pressure."
+    ],
+    "doctor_answer": {
+      "assessment": "Erectile Dysfunction. Assess etiology: Vasculogenic (endothelial dysfunction / early marker of CAD), Neurogenic, Hormonal (hypogonadism), Psychogenic, or Medication-induced.",
+      "investigations": "IIEF-5 score (International Index of Erectile Function). Cardiovascular risk assessment. Fasting Glucose, HbA1c, Lipid Profile, Morning Total Testosterone (checked before 10 AM on two occasions). Penile Duplex Doppler if indicated.",
+      "management": "Lifestyle modification and cardiovascular risk factor optimization. First-line: Oral PDE-5 Inhibitors (Sildenafil 25-100 mg PRN 1h before coitus, or Tadalafil 10-20 mg PRN / 5 mg daily). Second-line: Vacuum erection devices, intraurethral alprostadil, intracavernosal injections. Third-line: Inflatable penile prosthesis surgery. STRICT CONTRAINDICATION: Nitrates.",
+      "references": [
+        "AUA Clinical Guideline: Erectile Dysfunction",
+        "EAU Guidelines on Sexual and Reproductive Health"
+      ]
+    },
+    "staff_answer": "Screen for cardiovascular symptoms and exercise tolerance. Verify patient is NOT taking nitrates.",
+    "red_flags": [
+      "Patient taking Nitrates (Nitroglycerin/Sorbitrate) requesting PDE-5 inhibitors (ABSOLUTE CONTRAINDICATION / LETHAL)",
+      "Sudden ED in a young male with saddle anesthesia and bowel/bladder dysfunction (Cauda Equina)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "NEVER combine Sildenafil or Tadalafil with Nitroglycerin or Sorbitrate heart medications",
+      "Do NOT buy unverified herbal sex tonics or vitality supplements online (frequently adulterated with dangerous illegal drug quantities)"
+    ],
+    "source": "American Urological Association (AUA) & European Association of Urology (EAU)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_premature_ejaculation_techniques_012",
+    "topic": "Sexual Health: Premature Ejaculation (PE) & Behavioral Techniques",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "premature ejaculation",
+      "pe",
+      "early discharge",
+      "jaldi nikal jana",
+      "lasting longer bed",
+      "ejaculation control"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Premature Ejaculation (PE) is defined as ejaculation that consistently occurs within approximately 1 minute of penetration, accompanied by an inability to delay ejaculation and personal distress.",
+      "It is the single most common male sexual concern, affecting up to 30% of men at some point in their lives, and is highly treatable.",
+      "EFFECTIVE BEHAVIORAL TECHNIQUES:",
+      "  - The 'Start-Stop' Technique: Stimulate until you feel close to the point of ejaculatory inevitability, completely stop all stimulation for 30 seconds until the surge subsides, and then resume. Repeat 3 times before ejaculating.",
+      "  - The 'Squeeze' Technique: When close to ejaculation, have your partner firmly squeeze the head of the penis (at the ridge between the head and shaft) for 10 to 20 seconds to suppress the ejaculatory reflex.",
+      "Pelvic floor (Kegel) exercises strengthen the bulbocavernosus muscle to help you consciously control the ejaculatory response.",
+      "Medical treatments: A doctor can prescribe short-acting SSRIs (like Dapoxetine taken 1-3 hours before intercourse) or mild desensitizing lidocaine sprays to enhance stamina."
+    ],
+    "doctor_answer": {
+      "assessment": "Premature Ejaculation: Lifelong (primary: IELT < 1 min since first sexual encounter) vs Acquired (secondary: gradual reduction in IELT, often associated with ED, prostatitis, or anxiety).",
+      "investigations": "Detailed psychosexual history, Intravaginal Ejaculatory Latency Time (IELT). Screen for comorbid erectile dysfunction and prostatitis.",
+      "management": "Behavioral therapy (start-stop and squeeze techniques, pelvic floor muscle training). Pharmacotherapy: On-demand rapid-acting SSRI (Dapoxetine 30-60 mg taken 1-3h prior to intercourse) or daily off-label SSRI (Paroxetine, Sertraline). Topical local anesthetics (Lidocaine/Prilocaine spray applied 10-15 min prior; must wash off or use condom to avoid partner vaginal numbness).",
+      "references": [
+        "ISSM (International Society for Sexual Medicine) Guidelines for the Diagnosis and Treatment of Premature Ejaculation",
+        "AUA Guidelines on Premature Ejaculation"
+      ]
+    },
+    "staff_answer": "Inquire about estimated ejaculatory latency time (IELT). Reassure patient that PE is very common and treatable.",
+    "red_flags": [
+      "Severe secondary premature ejaculation accompanied by severe burning urination and pelvic pain (Chronic Prostatitis)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT use excessive numbing creams without washing off or using a condom (causes partner vaginal numbness)",
+      "Do NOT consume unprescribed pills from unregulated street vendors"
+    ],
+    "source": "International Society for Sexual Medicine (ISSM) & American Urological Association",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_vaginal_dryness_dyspareunia_013",
+    "topic": "Sexual Health: Vaginal Dryness & Painful Intercourse (Dyspareunia)",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "vaginal dryness",
+      "painful sex",
+      "dyspareunia",
+      "pain during intercourse",
+      "sex hurts",
+      "dry vagina sex"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Painful sexual intercourse (Dyspareunia) or persistent vaginal dryness is very common and should never be suffered in silence.",
+      "Common causes: Lack of sufficient arousal and foreplay, postpartum breastfeeding hormones (low estrogen), perimenopause and menopause, vaginal yeast infections, and pelvic muscle tension (Vaginismus).",
+      "Immediate practical relief:",
+      "  - Use generous amounts of water-based or silicone lubricants right before and during intercourse.",
+      "  - Use a regular vaginal moisturizer (applied 2 to 3 times a week, independent of sex) to restore moisture and elasticity to vaginal tissues.",
+      "  - Take extended time for gentle foreplay to allow natural arousal fluids to lubricate the vagina.",
+      "For menopausal women: Low-dose local vaginal estrogen creams or tablets (prescribed by a gynecologist) restore natural thickness, acidity, and moisture to vaginal tissues with minimal absorption into the rest of the body.",
+      "Consult a gynecologist or pelvic floor physical therapist if pain is deep in the pelvis or persists."
+    ],
+    "doctor_answer": {
+      "assessment": "Dyspareunia (superficial entry pain vs deep pelvic thrusting pain) and Genitourinary Syndrome of Menopause (GSM). Differentiate atrophic vaginitis, vulvodynia, vaginismus, and endometriosis.",
+      "investigations": "Gentle pelvic examination (evaluate vulvar vestibular erythema, vaginal mucosal rugae, vaginal pH > 5.0 in atrophy, pelvic floor hypertonicity, cervical motion tenderness).",
+      "management": "Non-hormonal: Vaginal moisturizers (polycarbophil, hyaluronic acid) applied regularly + silicone/water-based lubricants during coitus. Atrophic vaginitis (GSM): Local low-dose Vaginal Estrogen therapy (Estradiol 10 mcg tablet or Estriol cream 2-3 times/week). Vaginismus: Pelvic floor physical therapy, progressive vaginal dilators. Deep dyspareunia: Workup for endometriosis or adenomyosis.",
+      "references": [
+        "ACOG Practice Bulletin on Female Sexual Dysfunction",
+        "NAMS Genitourinary Syndrome of Menopause Position Statement"
+      ]
+    },
+    "staff_answer": "Inquire whether pain is at the entrance (superficial) or deep in the pelvis. Check menopausal status.",
+    "red_flags": [
+      "Deep pelvic pain with fever and abnormal bleeding (PID or Endometriosis flare)",
+      "Post-coital bleeding or visible ulcer on vulva"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT use petroleum jelly (Vaseline), cooking oils, or saliva as sexual lubricants (they disrupt vaginal pH and damage condoms)",
+      "Do NOT force painful intercourse (triggers protective pelvic muscle spasm)"
+    ],
+    "source": "American College of Obstetricians and Gynecologists (ACOG) & NAMS",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_pubic_lice_crabs_014",
+    "topic": "Sexual Health: Pubic Lice (Crabs / Phthiriasis)",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "pubic lice",
+      "crabs",
+      "lice in private parts",
+      "itching pubic hair",
+      "phthiriasis pubis"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Pubic lice ('Crabs') are tiny parasitic insects (Phthirus pubis) that attach to coarse body hair, predominantly in the pubic and groin area, and feed on blood.",
+      "Spread primarily through sexual and intimate physical contact, or occasionally through sharing contaminated bedsheets, blankets, and towels.",
+      "Key signs: Intense, severe itching in the genital and pubic hair area, visible tiny crab-like insects crawling on hair shafts, small oval white/tan eggs (nits) glued to the base of hairs, and tiny bluish skin spots from bites.",
+      "TREATMENT PROCEDURE: Apply 1% Permethrin lotion or 1% Lindane-free shampoo to all pubic hair and surrounding skin, leave on for 10 minutes, and rinse thoroughly.",
+      "Use a fine-toothed nit comb to remove dead lice and attached eggs from hair shafts.",
+      "ALL SEXUAL PARTNERS from the past month must be treated simultaneously to prevent reinfection.",
+      "Wash all bedsheets, underwear, and towels in hot water (at least 50°C / 122°F) and dry on high heat."
+    ],
+    "doctor_answer": {
+      "assessment": "Pediculosis Pubis (Pubic lice infestation). Often coexists with other sexually transmitted infections.",
+      "investigations": "Clinical examination under magnification or dermoscopy (demonstrates characteristic crab-like lice and nits cemented to hair shafts). Mandatory full STI screening (HIV, Syphilis, Gonorrhea, Chlamydia).",
+      "management": "Topical Permethrin 1% lotion applied to affected areas and washed off after 10 minutes. Repeat application in 9-10 days if live lice remain. Machine wash clothing and bedding in hot water (>= 50°C) or seal in plastic bags for 2 weeks. Simultaneous partner treatment.",
+      "references": [
+        "CDC STI Treatment Guidelines (2021) - Pediculosis Pubis",
+        "IUSTI European Guideline for the Management of Pediculosis Pubis"
+      ]
+    },
+    "staff_answer": "Inspect pubic and perianal hair with penlight. Offer comprehensive STI screening panel.",
+    "red_flags": [
+      "Secondary bacterial impetigo or cellulitis from intense excoriation scratching"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT apply pubic lice insecticides to eyelashes or eyebrows (use ophthalmic petroleum jelly instead)",
+      "Do NOT share clothing or bedding until treatment is complete"
+    ],
+    "source": "Centers for Disease Control and Prevention (CDC) & IUSTI European Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_pap_smear_hpv_results_015",
+    "topic": "Sexual Health: Understanding Abnormal Pap Smear & HPV Results",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "abnormal pap smear",
+      "hpv positive result",
+      "asc-us pap smear",
+      "cervical dysplasia",
+      "colposcopy"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Getting an 'abnormal' Pap smear or 'HPV positive' test result can be alarming, but it does NOT mean you have cervical cancer.",
+      "Almost all sexually active adults contract HPV at some point in their lives; in over 90% of cases, your body's immune system clears the virus naturally within 1 to 2 years.",
+      "What common Pap smear results mean:",
+      "  - ASC-US: Atypical Squamous Cells of Undetermined Significance (borderline mild changes, often caused by simple vaginal irritation or infection).",
+      "  - LSIL (Low-Grade Lesion): Mild changes caused by an active HPV infection; usually monitored closely as it frequently clears on its own.",
+      "  - HSIL (High-Grade Lesion): More significant pre-cancerous cellular changes that require treatment to prevent cancer.",
+      "Next steps: Depending on your age and HPV status, your gynecologist will recommend either repeating the test in 12 months or performing a Colposcopy (a gentle, illuminated examination of the cervix with a magnifying lens).",
+      "Attending your recommended follow-up appointments prevents abnormal cells from ever advancing to cancer."
+    ],
+    "doctor_answer": {
+      "assessment": "Cervical Cytology and Molecular hrHPV Testing Interpretation according to Bethesda System and ASCCP Risk-Based Management Guidelines.",
+      "investigations": "Review cytology report and hrHPV genotyping (HPV 16 and 18 carry highest immediate CIN 3+ risk). Colposcopy with directed punch biopsy and Endocervical Curettage (ECC) if indicated.",
+      "management": "Manage according to ASCCP risk thresholds (immediate risk of CIN 3+ >= 4% warrants colposcopy; risk >= 60% warrants immediate excisional treatment). Histologically confirmed CIN 2/3: Loop Electrosurgical Excision Procedure (LEEP) or Cold Knife Conization. Annual post-treatment surveillance.",
+      "references": [
+        "ASCCP Risk-Based Management Consensus Guidelines for Abnormal Cervical Cancer Screening Tests and Cancer Precursors",
+        "USPSTF Cervical Cancer Guidelines"
+      ]
+    },
+    "staff_answer": "Review cytology grade and HPV 16/18 genotype. Reassure patient that abnormal Pap does not equal cancer.",
+    "red_flags": [
+      "High-grade squamous intraepithelial lesion (HSIL) or atypical glandular cells (AGC) requiring urgent colposcopy",
+      "Visible macroscopic cervical exophytic mass"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT panic or assume an abnormal Pap means you have cancer",
+      "Do NOT skip follow-up colposcopy or surveillance appointments"
+    ],
+    "source": "American Society for Colposcopy and Cervical Pathology (ASCCP) & USPSTF",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_bph_prostate_health_016",
+    "topic": "Sexual Health: Benign Prostatic Hyperplasia (BPH) & Prostate Health",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "bph",
+      "enlarged prostate",
+      "prostate symptoms",
+      "weak urine stream male",
+      "waking up to pee bph",
+      "psa test prostate"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Benign Prostatic Hyperplasia (BPH) is a non-cancerous enlargement of the prostate gland that occurs naturally in over 50% of men over age 50 and 80% of men over age 70.",
+      "The prostate sits like a donut around the urethra; as it enlarges, it compresses the urinary pipe, causing:",
+      "  - Weak, slow, or interrupted urine stream.",
+      "  - Difficulty starting urination (hesitancy) and straining to pass urine.",
+      "  - Frequent daytime urination and waking up multiple times at night to pee (nocturia).",
+      "  - A feeling that your bladder never completely empties.",
+      "Lifestyle relief: Limit fluids in the 2 hours before bedtime, avoid caffeine and alcohol in the evening, and 'double void' (urinate, wait 30 seconds, and try again).",
+      "Medical treatments: A doctor can prescribe medications like Alpha-blockers (Tamsulosin) to relax the prostate muscles within days, and 5-ARIs (Finasteride) to shrink the prostate over months."
+    ],
+    "doctor_answer": {
+      "assessment": "Benign Prostatic Hyperplasia (BPH) / Lower Urinary Tract Symptoms (LUTS). Quantify severity using International Prostate Symptom Score (IPSS: 0-7 mild, 8-19 moderate, 20-35 severe).",
+      "investigations": "Digital Rectal Examination (DRE: assesses prostate size, symmetry, and excludes hard malignant nodules), Urinalysis (rule out UTI/hematuria), Serum Prostate-Specific Antigen (PSA: baseline and cancer screening), Post-Void Residual (PVR) volume via ultrasound, Uroflowmetry.",
+      "management": "Mild LUTS (IPSS < 8): Watchful waiting and fluid management. Moderate-to-Severe (IPSS >= 8): Alpha-1 adrenergic antagonist (Tamsulosin 0.4 mg or Silodosin 8 mg daily at bedtime) + 5-alpha reductase inhibitor (Finasteride 5 mg or Dutasteride 0.5 mg daily for prostate volume > 30 cc). Surgical intervention (TURP / Laser Enucleation) for refractory retention, recurrent UTIs, bladder stones, or renal insufficiency.",
+      "references": [
+        "AUA Clinical Guideline: Management of Lower Urinary Tract Symptoms Attributed to BPH",
+        "EAU Guidelines on Management of Non-Neurogenic Male LUTS"
+      ]
+    },
+    "staff_answer": "Administer IPSS questionnaire. Perform DRE. Check post-void residual volume on ultrasound.",
+    "red_flags": [
+      "Acute complete urinary retention: excruciating suprapubic pain with full palpable bladder (STAT Urethral Catheterization)",
+      "Painless gross visible blood in urine (requires workup for bladder/prostate malignancy)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT take over-the-counter cold decongestants or antihistamines (they constrict bladder neck and trigger sudden acute urinary retention)",
+      "Do NOT restrict daytime fluids severely"
+    ],
+    "source": "American Urological Association (AUA) & European Association of Urology (EAU)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_vasectomy_female_sterilization_017",
+    "topic": "Sexual Health: Permanent Contraception: Vasectomy vs Tubal Ligation",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "vasectomy",
+      "tubal ligation",
+      "permanent birth control",
+      "naspandi",
+      "female sterilization",
+      "male sterilization"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Permanent contraception (surgical sterilization) is an irreversible birth control option for individuals or couples who are completely certain they do not want any future biological children.",
+      "VASECTOMY (Male Sterilization):",
+      "  - A quick, minor, 15-minute outpatient procedure performed under local numbing injection.",
+      "  - The two tiny tubes (vas deferens) that carry sperm from the testicles are snipped and sealed through a tiny puncture ('No-Scalpel Vasectomy').",
+      "  - It does NOT affect sex drive, testosterone hormones, erections, orgasms, or ejaculate volume (sperm makes up less than 2% of semen).",
+      "  - IMPORTANT: You are NOT sterile immediately; you must use backup contraception until a semen test at 3 months confirms zero sperm.",
+      "TUBAL LIGATION (Female Sterilization):",
+      "  - Laparoscopic surgery under general anesthesia where the fallopian tubes are clipped, sealed, or removed.",
+      "  - Effective immediately, but carries higher surgical and anesthesia risks than vasectomy.",
+      "Vasectomy is simpler, safer, faster, more effective, and has a much quicker recovery than female sterilization."
+    ],
+    "doctor_answer": {
+      "assessment": "Permanent Surgical Contraception Counseling and Eligibility Assessment.",
+      "investigations": "Pre-operative assessment. For vasectomy: Post-Vasectomy Semen Analysis (PVSA) at 12 weeks and >= 20 ejaculations post-procedure (clearance requires azoospermia or <100,000 non-motile sperm).",
+      "management": "No-Scalpel Vasectomy (NSV) under local anesthesia. Laparoscopic Tubal Ligation (bipolar coagulation, Falope ring, or bilateral salpingectomy) under general anesthesia. Mandatory informed consent with counseling on irreversibility.",
+      "references": [
+        "AUA Vasectomy Guideline",
+        "ACOG Practice Bulletin on Benefits and Risks of Sterilization"
+      ]
+    },
+    "staff_answer": "Verify informed written consent. Emphasize mandatory 3-month post-vasectomy semen check before stopping barrier contraception.",
+    "red_flags": [
+      "Hematoma or severe swelling of scrotum post-vasectomy",
+      "Unprotected intercourse prior to 3-month clearance semen test resulting in pregnancy"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT assume vasectomy is effective immediately (takes ~20 ejaculations / 3 months to clear stored sperm)",
+      "Do NOT undergo permanent sterilization if there is any hesitation or marital pressure"
+    ],
+    "source": "American Urological Association (AUA) & ACOG Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_sexual_consent_healthy_relationships_018",
+    "topic": "Sexual Health: Sexual Consent & Communication in Healthy Relationships",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "sexual consent",
+      "healthy sexual relationship",
+      "consent basics",
+      "intimate communication"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Consent is the clear, voluntary, enthusiastic, and ongoing agreement between partners to engage in any sexual activity.",
+      "THE PRINCIPLES OF CONSENT (F.R.I.E.S.):",
+      "  - Freely Given: Given without pressure, guilt, manipulation, fear, or power imbalances.",
+      "  - Reversible: Anyone can change their mind and stop at any time, even if they said yes earlier or engaged in sex before.",
+      "  - Informed: Both partners know what is going to happen (including condom use and STI status).",
+      "  - Enthusiastic: Expressed with genuine desire, not silence, hesitation, or resignation.",
+      "  - Specific: Saying yes to kissing does NOT mean consenting to intercourse.",
+      "Intoxication Rule: A person who is incapacitated by alcohol, sleeping pills, or drugs CANNOT legally or ethically give consent.",
+      "Healthy communication: Talking openly with your partner about desires, boundaries, protection, and comfort creates a deeply fulfilling, safe sexual life."
+    ],
+    "doctor_answer": {
+      "assessment": "Psychosexual counseling on affirmative consent, relationship safety, and intimate partner violence (IPV) screening.",
+      "investigations": "Screen for Intimate Partner Violence (HITS tool: Hurt, Insult, Threaten, Scream).",
+      "management": "Psychoeducation on mutual affirmative consent. Provide resources for domestic violence and sexual assault support (National Commission for Women Helpline: 7827170170, Emergency 112).",
+      "references": [
+        "WHO Clinical and Policy Guidelines: Responding to Intimate Partner Violence and Sexual Violence Against Women",
+        "CDC Intimate Partner Violence Prevention Guidance"
+      ]
+    },
+    "staff_answer": "Provide private, confidential screening. Assess immediate safety from intimate partner violence.",
+    "red_flags": [
+      "Acute sexual assault presenting within 72 hours (Immediate medical evaluation, forensic preservation, STI prophylaxis, emergency contraception, and crisis counseling)",
+      "Active domestic violence threats"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "NEVER assume silence or absence of resistance means consent",
+      "Do NOT engage in sexual contact with an intoxicated person"
+    ],
+    "source": "World Health Organization (WHO) & Centers for Disease Control and Prevention",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_testicular_exam_lumps_019",
+    "topic": "Sexual Health: Testicular Health & Self-Examination",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "testicular lump",
+      "testicle self exam",
+      "lump in balls",
+      "testicular cancer check",
+      "swollen testicle",
+      "andoshoth"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Testicular cancer is the most common cancer in young men aged 15 to 35, but when caught early, it has a cure rate of over 95%.",
+      "Every young man should perform a simple 1-minute testicular self-check once a month, ideally after a warm shower or bath when the scrotal skin is relaxed.",
+      "HOW TO PERFORM A SELF-CHECK:",
+      "  1. Support each testicle with one hand and gently roll it between your thumb and fingers of both hands.",
+      "  2. Feel for any hard pea-sized lump, painless swelling, or change in firmness.",
+      "  3. Learn your normal anatomy: At the back and top of each testicle is a soft, tender, cord-like structure called the Epididymis; this is normal and healthy.",
+      "It is completely normal for one testicle (usually the left) to hang slightly lower than the other.",
+      "ANY hard, firm, painless lump or sudden swelling in a testicle must be examined by a doctor with an ultrasound immediately.",
+      "SUDDEN TESTICULAR PAIN EMERGENCY: If you experience sudden, severe, excruciating pain in one testicle, go to the emergency room IMMEDIATELY (Testicular Torsion can destroy the testicle within 6 hours if blood flow is cut off)."
+    ],
+    "doctor_answer": {
+      "assessment": "Scrotal Mass / Pain Evaluation: Testicular Neoplasm (firm, non-tender intratesticular mass), Epididymitis/Orchitis, Hydrocele, Varicocele, Spermatocele, Testicular Torsion (surgical emergency).",
+      "investigations": "Urgent Scrotal High-Resolution Ultrasound with Color Doppler (differentiates intratesticular mass from extratesticular fluid/cysts; assesses testicular perfusion). Serum tumor markers: AFP, beta-hCG, LDH.",
+      "management": "Intratesticular mass: Radical inguinal orchiectomy (trans-scrotal biopsy is contraindicated due to tumor seeding). Testicular Torsion: Emergent surgical exploration and bilateral orchiopexy within 6 hours. Epididymo-orchitis: Ceftriaxone 500 mg IM + Doxycycline 100 mg BID for 10 days.",
+      "references": [
+        "AUA Guideline on Diagnosis and Treatment of Early Stage Testicular Cancer",
+        "EAU Guidelines on Testicular Cancer"
+      ]
+    },
+    "staff_answer": "Priority: Triage Red for acute sudden severe scrotal pain (Testicular Torsion - 6h salvage window).",
+    "red_flags": [
+      "Sudden severe unilateral testicular pain and high-riding horizontal testicle (Testicular Torsion - STAT Surgical Emergency)",
+      "Hard, painless, non-transilluminating intratesticular lump"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "NEVER ignore a painless lump in the testicle",
+      "Do NOT delay emergency care for sudden testicle pain (delay leads to testicular necrosis and removal)"
+    ],
+    "source": "American Urological Association (AUA) & European Association of Urology (EAU)",
+    "review_status": "draft",
+    "reviewed_by": null
+  },
+  {
+    "id": "srh_pruritus_ani_genital_itching_020",
+    "topic": "Sexual Health: Genital & Perianal Itching (Pruritus Ani / Vulvae)",
+    "category": "sexual_reproductive_health",
+    "keywords": [
+      "genital itching",
+      "itching private parts",
+      "pruritus ani",
+      "anal itching",
+      "itching around anus",
+      "vulvar itching"
+    ],
+    "intent": "chronic_condition_guidance",
+    "patient_answer": [
+      "Itching in the genital or perianal area is extremely common and is usually caused by skin irritation, fungal yeast infections, moisture, or hemorrhoids.",
+      "Common causes:",
+      "  - Moisture and friction: Sweating, tight synthetic underwear, and sitting for long periods.",
+      "  - Chemical irritation: Scented body washes, perfumed toilet paper, laundry detergents, or harsh soaps.",
+      "  - Fungal infections: Candida yeast infection (thrush) or Tinea cruris (jock itch).",
+      "  - Pinworms (Enterobius): Very common in families with children, causing intense anal itching especially at night.",
+      "Home care relief:",
+      "  - Wash gently with plain lukewarm water; pat dry with a soft clean towel; never scrub vigorously.",
+      "  - Wear loose, 100% breathable cotton underwear and change it twice daily if sweating.",
+      "  - Apply plain petroleum jelly or zinc oxide paste to protect the skin from acidic moisture.",
+      "Consult a doctor: A proper visual exam will determine if an antifungal, mild steroid, or deworming tablet is needed."
+    ],
+    "doctor_answer": {
+      "assessment": "Pruritus Ani / Pruritus Vulvae. Etiologies: Contact dermatitis, candidiasis, tinea cruris, pinworm (Enterobius vermicularis), lichen sclerosus, hemorrhoids, fecal soiling.",
+      "investigations": "Visual skin inspection, tape test for pinworm ova (scotch tape test in early morning), fungal scraping KOH mount, screen for diabetes.",
+      "management": "Hygiene optimization: Wash with water only, pat dry, barrier ointments. If candidiasis: Clotrimazole cream. If pinworms: Albendazole 400 mg single oral dose, repeated in 2 weeks for all household members. If lichen sclerosus: Ultra-potent topical corticosteroid (Clobetasol propionate 0.05% ointment).",
+      "references": [
+        "ASCRS Clinical Practice Guideline for the Management of Pruritus Ani",
+        "British Association of Dermatologists Guidelines"
+      ]
+    },
+    "staff_answer": "Inspect perianal and vulvar skin. Ask about nocturnal itching and household members.",
+    "red_flags": [
+      "White atrophic porcelain-like patches with architectural distortion around vulva/anus (Lichen Sclerosus - requires biopsy to rule out malignancy)",
+      "Severe spreading perianal redness with high fever (Fournier's Gangrene Emergency)"
+    ],
+    "follow_up_questions": [
+      "What specific symptoms are you experiencing?",
+      "How long have they been present?",
+      "Is there any pain, unusual discharge, or sores?"
+    ],
+    "avoid": [
+      "Do NOT scratch the area (creates an itch-scratch-damage cycle)",
+      "Do NOT use scented feminine sprays, medicated wipes, or harsh soaps"
+    ],
+    "source": "American Society of Colon and Rectal Surgeons (ASCRS) & BAD Guidelines",
+    "review_status": "draft",
+    "reviewed_by": null
+  }
+]

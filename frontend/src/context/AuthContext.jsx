@@ -10,8 +10,25 @@ import api from "../services/api";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem("user");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
+
+  const loginUser = (userData, accessToken) => {
+    if (accessToken) {
+      localStorage.setItem("access_token", accessToken);
+    }
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    }
+  };
 
   // Restore session when application starts
   useEffect(() => {
@@ -35,9 +52,11 @@ export function AuthProvider({ children }) {
       } catch (error) {
         console.error("Session restore failed:", error);
 
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user");
-        setUser(null);
+        if (error.response?.status === 401) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("user");
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -49,18 +68,14 @@ export function AuthProvider({ children }) {
   // Login
   const login = async (email, password) => {
     const response = await api.post("/auth/login", {
-      email,
+      email: (email || "").trim().toLowerCase(),
       password,
     });
 
-    const { access_token, user } = response.data;
+    const { access_token, user: loggedInUser } = response.data;
+    loginUser(loggedInUser, access_token);
 
-    localStorage.setItem("access_token", access_token);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    setUser(user);
-
-    return user;
+    return loggedInUser;
   };
 
   // Logout
@@ -74,7 +89,7 @@ export function AuthProvider({ children }) {
   };
 
   const isAuthenticated = Boolean(
-    localStorage.getItem("access_token")
+    user || localStorage.getItem("access_token")
   );
 
   return (
@@ -82,6 +97,7 @@ export function AuthProvider({ children }) {
       value={{
         user,
         setUser,
+        loginUser,
         role: user?.role,
         login,
         logout,

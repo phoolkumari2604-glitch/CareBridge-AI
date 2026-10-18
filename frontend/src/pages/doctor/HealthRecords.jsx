@@ -52,24 +52,42 @@ const ICD10_DATABASE = [
   { code: "E78.5", name: "Hyperlipidemia, unspecified", label: "Hyperlipidemia, unspecified", category: "Metabolic" },
   { code: "K29.70", name: "Gastritis, unspecified, without bleeding", label: "Gastritis, unspecified, without bleeding", category: "Gastrointestinal" },
   { code: "R05.9", name: "Cough, unspecified", label: "Cough, unspecified", category: "Symptom" },
-  { code: "I25.10", name: "Atherosclerotic heart disease of native coronary artery", label: "Atherosclerotic heart disease", category: "Cardiovascular" },
-  { code: "J06.9", name: "Acute upper respiratory infection, unspecified", label: "Acute upper respiratory infection", category: "Respiratory" },
-  { code: "M54.5", name: "Low back pain, unspecified", label: "Low back pain", category: "Musculoskeletal" },
-  { code: "Z00.00", name: "General adult medical examination without abnormal findings", label: "General adult examination", category: "General" }
+  { code: "J18.9", name: "Pneumonia, unspecified organism", label: "Pneumonia, unspecified organism", category: "Respiratory" },
+  { code: "I25.10", name: "Atherosclerotic heart disease without angina", label: "Atherosclerotic heart disease without angina", category: "Cardiovascular" },
+  { code: "N39.0", name: "Urinary tract infection, site not specified", label: "Urinary tract infection, site not specified", category: "Renal" },
+  { code: "D64.9", name: "Anemia, unspecified", label: "Anemia, unspecified", category: "Hematology" },
+  { code: "G43.909", name: "Migraine, unspecified, not intractable", label: "Migraine, unspecified, not intractable", category: "Neurology" },
+  { code: "E55.9", name: "Vitamin D deficiency, unspecified", label: "Vitamin D deficiency, unspecified", category: "Metabolic" },
+  { code: "J02.9", name: "Acute pharyngitis, unspecified", label: "Acute pharyngitis, unspecified", category: "Respiratory" },
+  { code: "M54.50", name: "Low back pain, unspecified", label: "Low back pain, unspecified", category: "Musculoskeletal" }
 ];
-const ICD10_SUGGESTIONS = ICD10_DATABASE;
 
-const DRUG_SUGGESTIONS = [
-  { name: "Telmisartan", dose: "40 mg", freq: "OD", class: "Antihypertensive (ARB)" },
-  { name: "Amlodipine Besylate", dose: "5 mg", freq: "OD", class: "Calcium Channel Blocker" },
-  { name: "Metformin Hydrochloride", dose: "500 mg", freq: "BD", class: "Antidiabetic (Biguanide)" },
-  { name: "Atorvastatin", dose: "10 mg", freq: "HS", class: "Lipid-lowering Statin" },
-  { name: "Budesonide / Formoterol", dose: "200/6 mcg", freq: "BD", class: "Inhaler / Corticosteroid" },
-  { name: "Levothyroxine Sodium", dose: "50 mcg", freq: "OD", class: "Thyroid Hormone" },
-  { name: "Pantoprazole", dose: "40 mg", freq: "OD", class: "Proton Pump Inhibitor (PPI)" },
-  { name: "Metoprolol Succinate ER", dose: "25 mg", freq: "OD", class: "Beta Blocker" },
-  { name: "Apixaban", dose: "5 mg", freq: "BD", class: "Oral Anticoagulant" }
-];
+const toDDMMYYYY = (isoStr) => {
+  if (!isoStr) return "";
+  const parts = String(isoStr).split("T")[0].split("-");
+  if (parts.length === 3) {
+    return `${parts[2].padStart(2, "0")}/${parts[1].padStart(2, "0")}/${parts[0]}`;
+  }
+  return isoStr;
+};
+
+const toISODate = (dmyStr) => {
+  if (!dmyStr) return "";
+  const parts = String(dmyStr).trim().split(/[/.-]/);
+  if (parts.length === 3) {
+    const d = parts[0].padStart(2, "0");
+    const m = parts[1].padStart(2, "0");
+    let y = parts[2];
+    if (y.length === 2) y = `20${y}`;
+    const day = parseInt(d, 10);
+    const month = parseInt(m, 10);
+    const year = parseInt(y, 10);
+    if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1970 && year <= 2100) {
+      return `${year}-${m}-${d}`;
+    }
+  }
+  return "";
+};
 
 function MiniSparkline({ data = [], color = "#0d9488" }) {
   if (!data || data.length < 2) return null;
@@ -106,473 +124,304 @@ function MiniSparkline({ data = [], color = "#0d9488" }) {
   );
 }
 
-function formatToDDMMYYYY(isoStr) {
-  if (!isoStr) return "";
-  const parts = String(isoStr).split("T")[0].split("-");
-  if (parts.length === 3) {
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-  }
-  return isoStr;
-}
-
-function DateRangePicker({ from, to, onChange, onClear }) {
+/**
+ * Custom Styled Date-Range Picker
+ * Dropdown calendar with start/end selection, dark mode support, mobile friendly,
+ * clear dd/mm/yyyy format, and prevention of end date before start date.
+ */
+function DateRangePicker({ dateRange, onChange, onClear, activePreset }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
-  const getInitialViewDate = () => {
-    if (from) {
-      const d = new Date(from);
-      if (!isNaN(d.getTime())) return d;
+  const today = new Date();
+  const [viewDate, setViewDate] = useState(() => {
+    if (dateRange.from) {
+      const d = new Date(dateRange.from);
+      if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), 1);
     }
-    return new Date();
-  };
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
 
-  const [viewDate, setViewDate] = useState(getInitialViewDate);
-  const [selectingStep, setSelectingStep] = useState("start");
-  const [tempFrom, setTempFrom] = useState(from || "");
-  const [tempTo, setTempTo] = useState(to || "");
-  const [hoverDate, setHoverDate] = useState("");
+  const [tempFrom, setTempFrom] = useState(dateRange.from || "");
+  const [tempTo, setTempTo] = useState(dateRange.to || "");
+  const [selectingPhase, setSelectingPhase] = useState("start");
+  const [manualFromText, setManualFromText] = useState(toDDMMYYYY(dateRange.from));
+  const [manualToText, setManualToText] = useState(toDDMMYYYY(dateRange.to));
+  const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
-    setTempFrom(from || "");
-    setTempTo(to || "");
-    if (from) {
-      const d = new Date(from);
-      if (!isNaN(d.getTime())) setViewDate(d);
-    }
-  }, [from, to]);
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsOpen(false);
-        setSelectingStep("start");
+    setTempFrom(dateRange.from || "");
+    setTempTo(dateRange.to || "");
+    setManualFromText(toDDMMYYYY(dateRange.from));
+    setManualToText(toDDMMYYYY(dateRange.to));
+    setValidationError("");
+    if (dateRange.from) {
+      const d = new Date(dateRange.from);
+      if (!isNaN(d.getTime())) {
+        setViewDate(new Date(d.getFullYear(), d.getMonth(), 1));
       }
     }
-    function handleEsc(e) {
-      if (e.key === "Escape") {
+  }, [dateRange.from, dateRange.to]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
-        setSelectingStep("start");
       }
     }
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleEsc);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-        document.removeEventListener("keydown", handleEsc);
-      };
     }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const viewYear = viewDate.getFullYear();
-  const viewMonth = viewDate.getMonth();
-
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-  const handlePrevMonth = (e) => {
+  const prevMonth = (e) => {
     e.stopPropagation();
-    setViewDate(new Date(viewYear, viewMonth - 1, 1));
+    setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
-  const handleNextMonth = (e) => {
+  const nextMonth = (e) => {
     e.stopPropagation();
-    setViewDate(new Date(viewYear, viewMonth + 1, 1));
+    setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const firstDayIndex = new Date(year, month, 1).getDay(); // 0 is Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const calendarCells = [];
-  const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
-  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-    calendarCells.push({
-      day: prevMonthDays - i,
-      isCurrentMonth: false,
-      dateStr: ""
-    });
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const mm = String(viewMonth + 1).padStart(2, "0");
-    const dd = String(d).padStart(2, "0");
-    calendarCells.push({
-      day: d,
-      isCurrentMonth: true,
-      dateStr: `${viewYear}-${mm}-${dd}`
-    });
-  }
-  const remaining = (7 - (calendarCells.length % 7)) % 7;
-  for (let n = 1; n <= remaining; n++) {
-    calendarCells.push({
-      day: n,
-      isCurrentMonth: false,
-      dateStr: ""
-    });
-  }
+  const handleDayClick = (dayNum) => {
+    const mStr = String(month + 1).padStart(2, "0");
+    const dStr = String(dayNum).padStart(2, "0");
+    const clickedISO = `${year}-${mStr}-${dStr}`;
+    setValidationError("");
 
-  const handleDayClick = (dateStr) => {
-    if (!dateStr) return;
-
-    if (selectingStep === "start" || (tempFrom && tempTo)) {
-      setTempFrom(dateStr);
+    if (selectingPhase === "start" || (tempFrom && tempTo)) {
+      setTempFrom(clickedISO);
       setTempTo("");
-      setSelectingStep("end");
+      setManualFromText(toDDMMYYYY(clickedISO));
+      setManualToText("");
+      setSelectingPhase("end");
     } else {
-      // Prevent an end date before start date
-      if (dateStr < tempFrom) {
-        setTempFrom(dateStr);
-        setTempTo("");
-        setSelectingStep("end");
-      } else {
-        setTempTo(dateStr);
-        setSelectingStep("start");
-        onChange({ from: tempFrom, to: dateStr });
-        setIsOpen(false);
+      // Selecting end date: strictly prevent end date before start date
+      if (clickedISO < tempFrom) {
+        setValidationError("End date cannot be earlier than start date.");
+        return;
+      }
+      setTempTo(clickedISO);
+      setManualToText(toDDMMYYYY(clickedISO));
+      setSelectingPhase("start");
+    }
+  };
+
+  const handleManualFromInput = (e) => {
+    const val = e.target.value;
+    setManualFromText(val);
+    setValidationError("");
+    const iso = toISODate(val);
+    if (iso) {
+      setTempFrom(iso);
+      if (tempTo && iso > tempTo) {
+        setValidationError("Start date cannot be after end date.");
       }
     }
+  };
+
+  const handleManualToInput = (e) => {
+    const val = e.target.value;
+    setManualToText(val);
+    setValidationError("");
+    const iso = toISODate(val);
+    if (iso) {
+      if (tempFrom && iso < tempFrom) {
+        setValidationError("End date cannot be earlier than start date.");
+      } else {
+        setTempTo(iso);
+      }
+    }
+  };
+
+  const handleApply = (e) => {
+    e.stopPropagation();
+    let finalFrom = tempFrom;
+    let finalTo = tempTo;
+
+    if (manualFromText && !finalFrom) {
+      finalFrom = toISODate(manualFromText);
+    }
+    if (manualToText && !finalTo) {
+      finalTo = toISODate(manualToText);
+    }
+
+    if (finalFrom && finalTo && finalTo < finalFrom) {
+      setValidationError("End date cannot be earlier than start date.");
+      return;
+    }
+
+    onChange({ from: finalFrom, to: finalTo });
+    setIsOpen(false);
   };
 
   const handleClear = (e) => {
     e.stopPropagation();
     setTempFrom("");
     setTempTo("");
-    setSelectingStep("start");
+    setManualFromText("");
+    setManualToText("");
+    setValidationError("");
     onClear();
     setIsOpen(false);
   };
 
-  const handleApply = (e) => {
-    e.stopPropagation();
-    if (tempFrom) {
-      const finalTo = tempTo || tempFrom;
-      onChange({ from: tempFrom, to: finalTo });
-    } else {
-      onClear();
-    }
-    setIsOpen(false);
-  };
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const dayHeaders = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
-  const displayLabel = useMemo(() => {
-    if (from && to) {
-      return `${formatToDDMMYYYY(from)} – ${formatToDDMMYYYY(to)}`;
-    }
-    if (from) {
-      return `From ${formatToDDMMYYYY(from)}`;
-    }
-    if (to) {
-      return `Up to ${formatToDDMMYYYY(to)}`;
-    }
-    return "All Dates (dd/mm/yyyy)";
-  }, [from, to]);
+  let displayLabel = "All Dates (dd/mm/yyyy)";
+  if (dateRange.from && dateRange.to) {
+    displayLabel = `${toDDMMYYYY(dateRange.from)} — ${toDDMMYYYY(dateRange.to)}`;
+  } else if (dateRange.from) {
+    displayLabel = `From ${toDDMMYYYY(dateRange.from)}`;
+  } else if (dateRange.to) {
+    displayLabel = `Up to ${toDDMMYYYY(dateRange.to)}`;
+  }
 
-  const hasActiveRange = Boolean(from || to);
+  const hasSelectedRange = Boolean(dateRange.from || dateRange.to);
 
   return (
-    <div className="custom-date-range-picker" ref={containerRef}>
+    <div className="date-range-picker-container" ref={containerRef}>
       <button
         type="button"
-        className={`date-picker-trigger ${isOpen ? "is-open" : ""} ${hasActiveRange ? "has-range" : ""}`}
+        className={`date-picker-trigger-btn ${isOpen ? "is-open" : ""} ${hasSelectedRange ? "has-range" : ""}`}
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        title="Select Date Range (dd/mm/yyyy)"
+        aria-label="Select date range filter in dd/mm/yyyy"
       >
-        <Calendar size={15} className="picker-cal-icon" aria-hidden="true" />
-        <span className="picker-trigger-label">{displayLabel}</span>
-        {hasActiveRange && (
+        <Calendar size={14} className="calendar-icon text-teal" aria-hidden="true" />
+        <span className="trigger-display-text">{displayLabel}</span>
+        {hasSelectedRange && (
           <span
             role="button"
-            tabIndex={0}
-            className="picker-clear-btn"
-            onClick={handleClear}
-            title="Clear date filter"
-            aria-label="Clear date filter"
+            className="btn-trigger-clear"
+            title="Clear date range filter"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClear(e);
+            }}
           >
             <X size={13} />
           </span>
         )}
-        <ChevronDown size={14} className="picker-chevron-icon" aria-hidden="true" />
+        <ChevronDown size={14} className={`chevron-indicator ${isOpen ? "rotate" : ""}`} aria-hidden="true" />
       </button>
 
       {isOpen && (
-        <div className="date-picker-dropdown" role="dialog" aria-label="Date Range Calendar">
-          <div className="calendar-header">
+        <div className="date-picker-popover-card" role="dialog" aria-label="Date range calendar">
+          <div className="picker-header-inputs">
+            <div className="input-field-group">
+              <label>From (dd/mm/yyyy)</label>
+              <input
+                type="text"
+                placeholder="dd/mm/yyyy"
+                value={manualFromText}
+                onChange={handleManualFromInput}
+                maxLength={10}
+              />
+            </div>
+            <span className="inputs-sep">to</span>
+            <div className="input-field-group">
+              <label>To (dd/mm/yyyy)</label>
+              <input
+                type="text"
+                placeholder="dd/mm/yyyy"
+                value={manualToText}
+                onChange={handleManualToInput}
+                maxLength={10}
+              />
+            </div>
+          </div>
+
+          {validationError && (
+            <div className="picker-error-banner" role="alert">
+              <ShieldAlert size={14} />
+              <span>{validationError}</span>
+            </div>
+          )}
+
+          <div className="calendar-month-bar">
             <button
               type="button"
-              className="cal-nav-btn"
-              onClick={handlePrevMonth}
+              className="btn-month-nav"
+              onClick={prevMonth}
+              title="Previous month"
               aria-label="Previous month"
             >
               <ChevronLeft size={16} />
             </button>
-            <span className="cal-month-title">
-              {monthNames[viewMonth]} {viewYear}
-            </span>
+            <strong className="month-heading">
+              {monthNames[month]} {year}
+            </strong>
             <button
               type="button"
-              className="cal-nav-btn"
-              onClick={handleNextMonth}
+              className="btn-month-nav"
+              onClick={nextMonth}
+              title="Next month"
               aria-label="Next month"
             >
               <ChevronRight size={16} />
             </button>
           </div>
 
-          <div className="calendar-instruction">
-            {selectingStep === "start" || (tempFrom && tempTo)
-              ? "1. Click start date"
-              : "2. Click end date (auto-prevents before start)"}
+          <div className="calendar-weekdays-row" aria-hidden="true">
+            {dayHeaders.map((dh) => (
+              <span key={dh} className="weekday-header">
+                {dh}
+              </span>
+            ))}
           </div>
 
-          <div className="calendar-weekdays">
-            <span>Su</span>
-            <span>Mo</span>
-            <span>Tu</span>
-            <span>We</span>
-            <span>Th</span>
-            <span>Fr</span>
-            <span>Sa</span>
-          </div>
+          <div className="calendar-days-grid" role="grid">
+            {Array.from({ length: firstDayIndex }).map((_, padIdx) => (
+              <span key={`pad-${padIdx}`} className="calendar-day-pad" aria-hidden="true" />
+            ))}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1;
+              const mStr = String(month + 1).padStart(2, "0");
+              const dStr = String(day).padStart(2, "0");
+              const dayISO = `${year}-${mStr}-${dStr}`;
 
-          <div className="calendar-grid">
-            {calendarCells.map((cell, idx) => {
-              if (!cell.isCurrentMonth) {
-                return (
-                  <span key={idx} className="cal-cell cal-cell-empty">
-                    {cell.day}
-                  </span>
-                );
-              }
-
-              const isStart = cell.dateStr === tempFrom;
-              const isEnd = cell.dateStr === tempTo;
-              const isInRange =
-                tempFrom && tempTo && cell.dateStr > tempFrom && cell.dateStr < tempTo;
-              const isHoveredInRange =
-                selectingStep === "end" &&
-                tempFrom &&
-                !tempTo &&
-                hoverDate &&
-                cell.dateStr > tempFrom &&
-                cell.dateStr <= hoverDate;
+              const isStart = tempFrom === dayISO;
+              const isEnd = tempTo === dayISO;
+              const isInRange = tempFrom && tempTo && dayISO > tempFrom && dayISO < tempTo;
+              const isBeforeStart = selectingPhase === "end" && tempFrom && dayISO < tempFrom;
+              const isToday =
+                `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}` === dayISO;
 
               return (
                 <button
-                  key={idx}
+                  key={day}
                   type="button"
-                  className={`cal-cell cal-cell-day ${
-                    isStart ? "is-start" : ""
-                  } ${isEnd ? "is-end" : ""} ${
-                    isInRange ? "is-in-range" : ""
-                  } ${isHoveredInRange ? "is-hover-range" : ""}`}
-                  onClick={() => handleDayClick(cell.dateStr)}
-                  onMouseEnter={() => {
-                    if (selectingStep === "end" && tempFrom) {
-                      setHoverDate(cell.dateStr);
-                    }
-                  }}
-                  onMouseLeave={() => setHoverDate("")}
+                  className={`calendar-day-cell ${isStart ? "is-start" : ""} ${isEnd ? "is-end" : ""} ${isInRange ? "is-in-range" : ""} ${isToday ? "is-today" : ""} ${isBeforeStart ? "is-disabled-before" : ""}`}
+                  onClick={() => handleDayClick(day)}
+                  disabled={isBeforeStart}
+                  title={isBeforeStart ? "End date cannot be earlier than start date" : toDDMMYYYY(dayISO)}
                 >
-                  {cell.day}
+                  {day}
                 </button>
               );
             })}
           </div>
 
-          <div className="calendar-manual-inputs">
-            <div className="manual-input-col">
-              <label>Start Date (dd/mm/yyyy):</label>
-              <input
-                type="date"
-                value={tempFrom}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setTempFrom(val);
-                  if (tempTo && val > tempTo) {
-                    setTempTo(val);
-                  }
-                }}
-              />
-            </div>
-            <div className="manual-input-col">
-              <label>End Date (dd/mm/yyyy):</label>
-              <input
-                type="date"
-                min={tempFrom || undefined}
-                value={tempTo}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (tempFrom && val < tempFrom) {
-                    setTempTo(tempFrom);
-                  } else {
-                    setTempTo(val);
-                  }
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="calendar-footer">
-            <button
-              type="button"
-              className="btn-cal-clear"
-              onClick={handleClear}
-            >
-              Clear (All Time)
+          <div className="picker-popover-footer">
+            <button type="button" className="btn-picker-clear" onClick={handleClear}>
+              Clear
             </button>
-            <button
-              type="button"
-              className="btn-cal-apply"
-              onClick={handleApply}
-            >
-              Apply Filter
+            <button type="button" className="btn-picker-apply" onClick={handleApply}>
+              Apply Range
             </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SearchableICD10({ value, onChange, onAutoFillDiagnosis }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const popoverRef = useRef(null);
-
-  const selectedItem = useMemo(() => {
-    return ICD10_DATABASE.find((c) => c.code === value) || null;
-  }, [value]);
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (popoverRef.current && !popoverRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    }
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isOpen]);
-
-  const filteredItems = useMemo(() => {
-    const q = searchTerm.toLowerCase().trim();
-    if (!q) return ICD10_DATABASE;
-    return ICD10_DATABASE.filter(
-      (item) =>
-        item.code.toLowerCase().includes(q) ||
-        item.name.toLowerCase().includes(q) ||
-        (item.category && item.category.toLowerCase().includes(q))
-    );
-  }, [searchTerm]);
-
-  const handleSelectItem = (item) => {
-    onChange(item.code);
-    if (onAutoFillDiagnosis) {
-      onAutoFillDiagnosis(item.name);
-    }
-    setIsOpen(false);
-    setSearchTerm("");
-  };
-
-  const handleClear = (e) => {
-    e.stopPropagation();
-    onChange("");
-    setSearchTerm("");
-  };
-
-  return (
-    <div className="searchable-icd10-container" ref={popoverRef}>
-      {value && selectedItem ? (
-        <div className="icd10-selected-pill" onClick={() => setIsOpen(true)}>
-          <span className="icd10-code-badge">{selectedItem.code}</span>
-          <span className="icd10-name-text">{selectedItem.name}</span>
-          {selectedItem.category && (
-            <span className="icd10-cat-tag">{selectedItem.category}</span>
-          )}
-          <button
-            type="button"
-            className="btn-clear-icd10"
-            onClick={handleClear}
-            title="Clear ICD-10 classification"
-            aria-label="Clear ICD-10"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      ) : (
-        <div
-          className={`icd10-input-wrapper ${isOpen ? "is-focused" : ""}`}
-          onClick={() => setIsOpen(true)}
-        >
-          <Search size={15} className="icd10-search-icon" aria-hidden="true" />
-          <input
-            type="text"
-            placeholder="Search ICD-10 code (e.g. I10, hypertension, asthma)..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setIsOpen(true);
-            }}
-            onFocus={() => setIsOpen(true)}
-            aria-expanded={isOpen}
-          />
-          {searchTerm && (
-            <button
-              type="button"
-              className="btn-clear-icd10"
-              onClick={() => setSearchTerm("")}
-              aria-label="Clear ICD-10 search"
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-      )}
-
-      {isOpen && (
-        <div className="icd10-dropdown-popover" role="listbox">
-          <div className="icd10-popover-header">
-            <span>Select ICD-10 Clinical Classification</span>
-            <span className="icd10-count">{filteredItems.length} available</span>
-          </div>
-          <div className="icd10-items-list">
-            {filteredItems.length === 0 ? (
-              <div className="icd10-no-results">
-                <p>No predefined ICD-10 matches for "{searchTerm}".</p>
-                {searchTerm.trim() && (
-                  <button
-                    type="button"
-                    className="btn-use-custom-icd"
-                    onClick={() => {
-                      onChange(searchTerm.trim().toUpperCase());
-                      setIsOpen(false);
-                    }}
-                  >
-                    Use "{searchTerm.trim().toUpperCase()}" as custom code
-                  </button>
-                )}
-              </div>
-            ) : (
-              filteredItems.map((item) => (
-                <div
-                  key={item.code}
-                  className={`icd10-item-option ${value === item.code ? "is-selected" : ""}`}
-                  onClick={() => handleSelectItem(item)}
-                  role="option"
-                  aria-selected={value === item.code}
-                >
-                  <div className="icd10-opt-top">
-                    <span className="icd10-opt-code">{item.code}</span>
-                    <span className="icd10-opt-category">{item.category}</span>
-                  </div>
-                  <div className="icd10-opt-name">{item.name}</div>
-                </div>
-              ))
-            )}
           </div>
         </div>
       )}
@@ -596,7 +445,7 @@ export default function HealthRecords() {
   const comboboxRef = useRef(null);
 
   const [records, setRecords] = useState([]);
-  const [stats, setStats] = useState({ records: 0, consultations: 0, prescriptions: 0, diagnoses: 0, checkups: 0 });
+  const [stats, setStats] = useState({ records: 0, consultations: 0, prescriptions: 0, diagnoses: 0, checkups: 0, icd10_mapped: 0 });
   const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
@@ -604,26 +453,31 @@ export default function HealthRecords() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastSyncedTime, setLastSyncedTime] = useState(new Date().toLocaleTimeString("en-GB"));
-  const [newRecordsAvailable, setNewRecordsAvailable] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [dateRange, setDateRange] = useState({ from: initialFrom, to: initialTo });
-  const [activePreset, setActivePreset] = useState(initialFrom || initialTo ? "" : "All");
+  // Default range is "All" (never hardcoded old date)
+  const [activePreset, setActivePreset] = useState(initialFrom || initialTo ? null : "All");
   const [viewMode, setViewMode] = useState("table");
   const [uploadingFile, setUploadingFile] = useState(false);
   const searchInputRef = useRef(null);
 
-  const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [expandedRowId, setExpandedRowId] = useState(null);
   const [drawerRecord, setDrawerRecord] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
+  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
   const [editingRecordId, setEditingRecordId] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ICD-10 Search Combobox state inside modal
+  const [icdSearchText, setIcdSearchText] = useState("");
+  const [icdDropdownOpen, setIcdDropdownOpen] = useState(false);
+  const icdComboboxRef = useRef(null);
 
   const [formData, setFormData] = useState({
     patient_id: "",
@@ -631,7 +485,6 @@ export default function HealthRecords() {
     title: "",
     diagnosis: "",
     icd10_code: "",
-    doctor_name: "",
     medications: [],
     notes: "",
     status: "final",
@@ -640,6 +493,11 @@ export default function HealthRecords() {
     attachments: []
   });
 
+  const doctorDisplayName = user?.name
+    ? (user.name.startsWith("Dr.") ? user.name : `Dr. ${user.name}`)
+    : "Dr. Ananya Sharma";
+
+  // Click outside patient combobox
   useEffect(() => {
     function handleClickOutside(event) {
       if (comboboxRef.current && !comboboxRef.current.contains(event.target)) {
@@ -650,6 +508,20 @@ export default function HealthRecords() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Click outside ICD combobox
+  useEffect(() => {
+    function handleIcdOutside(e) {
+      if (icdComboboxRef.current && !icdComboboxRef.current.contains(e.target)) {
+        setIcdDropdownOpen(false);
+      }
+    }
+    if (icdDropdownOpen) {
+      document.addEventListener("mousedown", handleIcdOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleIcdOutside);
+  }, [icdDropdownOpen]);
+
+  // Keyboard shortcut '/' to search
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === "/" && document.activeElement !== searchInputRef.current) {
@@ -657,7 +529,7 @@ export default function HealthRecords() {
         searchInputRef.current?.focus();
       } else if (e.key === "Escape") {
         setComboboxOpen(false);
-        setDatePickerOpen(false);
+        setIcdDropdownOpen(false);
         if (searchQuery) setSearchQuery("");
       }
     }
@@ -665,6 +537,7 @@ export default function HealthRecords() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [searchQuery]);
 
+  // Sync URL patient param
   useEffect(() => {
     const urlPid = searchParams.get("patient") || searchParams.get("patientId");
     if (urlPid && urlPid !== selectedPatientId) {
@@ -673,6 +546,7 @@ export default function HealthRecords() {
     }
   }, [searchParams, selectedPatientId]);
 
+  // Fetch real patients list
   const fetchPatients = useCallback(async () => {
     try {
       const data = await doctorService.getPatients({ limit: 100 });
@@ -696,6 +570,7 @@ export default function HealthRecords() {
     );
   }, [patients, selectedPatientId]);
 
+  // Fetch health records with active filters
   const fetchRecords = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
@@ -718,7 +593,6 @@ export default function HealthRecords() {
         setStats(data.stats);
       }
       setLastSyncedTime(new Date().toLocaleTimeString("en-GB"));
-      setNewRecordsAvailable(false);
     } catch (err) {
       console.error("Failed to fetch health records:", err);
     } finally {
@@ -731,6 +605,7 @@ export default function HealthRecords() {
     fetchRecords();
   }, [fetchRecords]);
 
+  // Auto-sync polling every 30s
   useEffect(() => {
     const interval = setInterval(() => {
       fetchRecords(true);
@@ -753,10 +628,16 @@ export default function HealthRecords() {
     setSearchParams(newParams);
   };
 
+  // Preset Chips click handler
   const handlePresetSelect = (preset) => {
     setActivePreset(preset);
     const today = new Date();
-    const format = (d) => d.toISOString().split("T")[0];
+    const format = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    };
 
     let fromStr = "";
     let toStr = format(today);
@@ -791,9 +672,10 @@ export default function HealthRecords() {
     setSearchParams(newParams);
   };
 
+  // Manual date change from custom date-range picker: clears chip highlight!
   const handleDateRangeChange = ({ from, to }) => {
     setDateRange({ from, to });
-    setActivePreset(""); // clears preset highlight when dates are chosen manually
+    setActivePreset(null); // Clear chip highlight
     setCurrentPage(1);
 
     const newParams = new URLSearchParams(searchParams);
@@ -803,25 +685,15 @@ export default function HealthRecords() {
   };
 
   const handleDateRangeClear = () => {
-    setDateRange({ from: "", to: "" });
-    setActivePreset("All"); // highlights All chip
-    setCurrentPage(1);
-
-    const newParams = new URLSearchParams(searchParams);
-    newParams.delete("from");
-    newParams.delete("to");
-    setSearchParams(newParams);
+    handlePresetSelect("All");
   };
 
   const handleResetFilters = () => {
     setSearchQuery("");
     setTypeFilter("all");
-    setSelectedPatientId("all");
-    setActivePreset("All");
-    setDateRange({ from: "", to: "" });
+    handleSelectPatient("all");
+    handlePresetSelect("All");
     setCurrentPage(1);
-    const newParams = new URLSearchParams();
-    setSearchParams(newParams);
   };
 
   const filteredPatients = useMemo(() => {
@@ -842,9 +714,16 @@ export default function HealthRecords() {
     return { recent, critical, all: filteredPatients };
   }, [filteredPatients]);
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const filteredIcdList = useMemo(() => {
+    const q = (icdSearchText || "").toLowerCase().trim();
+    if (!q) return ICD10_DATABASE.slice(0, 10);
+    return ICD10_DATABASE.filter(
+      (item) =>
+        item.code.toLowerCase().includes(q) ||
+        item.name.toLowerCase().includes(q) ||
+        (item.category || "").toLowerCase().includes(q)
+    );
+  }, [icdSearchText]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -877,41 +756,55 @@ export default function HealthRecords() {
     setModalMode("create");
     setEditingRecordId(null);
     setFormErrors({});
-    const defaultPid = currentPatientObj?.patient_code || (patients[0]?.patient_code || "");
+    setIcdSearchText("");
+    setIcdDropdownOpen(false);
+
+    const defaultPatient =
+      selectedPatientId !== "all"
+        ? selectedPatientId
+        : (patients[0]?.patient_code || "");
+
     setFormData({
-      patient_id: defaultPid,
+      patient_id: defaultPatient,
       record_type: "DIAGNOSIS",
       title: "",
       diagnosis: "",
       icd10_code: "",
-      doctor_name: user?.name || "Dr. Ananya Sharma",
-      record_date: new Date().toISOString().split("T")[0],
-      notes: "",
       medications: [],
-      attachments: [],
+      notes: "",
       status: "final",
-      is_abnormal: false
+      is_abnormal: false,
+      record_date: new Date().toISOString().split("T")[0],
+      attachments: []
     });
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (rec) => {
     setModalMode("edit");
-    setEditingRecordId(rec._id || rec.id);
+    const recId = rec._id || rec.id;
+    setEditingRecordId(recId);
     setFormErrors({});
+    setIcdSearchText(rec.icd10_code ? `${rec.icd10_code} - ${rec.diagnosis || ""}` : "");
+    setIcdDropdownOpen(false);
+
+    let mappedType = (rec.record_type || "DIAGNOSIS").toUpperCase();
+    if (mappedType === "LAB") mappedType = "LAB_REPORT";
+    if (mappedType === "SCAN") mappedType = "IMAGING";
+    if (mappedType === "VISIT_NOTE") mappedType = "CONSULTATION";
+
     setFormData({
-      patient_id: rec.patient_code || (rec.patient_id ? String(rec.patient_id).slice(-6) : ""),
-      record_type: rec.record_type || "DIAGNOSIS",
+      patient_id: rec.patient_code || rec.patient_id || "",
+      record_type: mappedType,
       title: rec.title || "",
       diagnosis: rec.diagnosis || "",
       icd10_code: rec.icd10_code || "",
-      doctor_name: rec.doctor_name || user?.name || "Dr. Ananya Sharma",
-      record_date: rec.record_date || (rec.created_at ? rec.created_at.split("T")[0] : new Date().toISOString().split("T")[0]),
-      notes: rec.notes || rec.description || "",
       medications: Array.isArray(rec.medications) ? rec.medications : [],
-      attachments: Array.isArray(rec.attachments) ? rec.attachments : (rec.file_url ? [{ file_name: rec.file_name || "Document", file_url: rec.file_url }] : []),
+      notes: rec.notes || rec.description || "",
       status: rec.status || "final",
-      is_abnormal: Boolean(rec.is_abnormal)
+      is_abnormal: Boolean(rec.is_abnormal),
+      record_date: (rec.record_date || "").split("T")[0] || new Date().toISOString().split("T")[0],
+      attachments: Array.isArray(rec.attachments) ? rec.attachments : []
     });
     setIsModalOpen(true);
   };
@@ -920,34 +813,41 @@ export default function HealthRecords() {
     setModalMode("create");
     setEditingRecordId(null);
     setFormErrors({});
+    setIcdSearchText(rec.icd10_code ? `${rec.icd10_code} - ${rec.diagnosis || ""}` : "");
+    setIcdDropdownOpen(false);
+
+    let mappedType = (rec.record_type || "DIAGNOSIS").toUpperCase();
+    if (mappedType === "LAB") mappedType = "LAB_REPORT";
+    if (mappedType === "SCAN") mappedType = "IMAGING";
+    if (mappedType === "VISIT_NOTE") mappedType = "CONSULTATION";
+
     setFormData({
-      patient_id: rec.patient_code || (rec.patient_id ? String(rec.patient_id).slice(-6) : ""),
-      record_type: rec.record_type || "DIAGNOSIS",
+      patient_id: rec.patient_code || rec.patient_id,
+      record_type: mappedType,
       title: `Copy of ${rec.title}`,
       diagnosis: rec.diagnosis || "",
       icd10_code: rec.icd10_code || "",
-      doctor_name: user?.name || "Dr. Ananya Sharma",
       medications: Array.isArray(rec.medications) ? rec.medications : [],
       notes: rec.notes || rec.description || "",
       status: "draft",
       is_abnormal: Boolean(rec.is_abnormal),
       record_date: new Date().toISOString().split("T")[0],
-      attachments: rec.attachments || []
+      attachments: Array.isArray(rec.attachments) ? rec.attachments : []
     });
     setIsModalOpen(true);
   };
 
   const handleDeleteRecord = async (recId) => {
     if (!recId) return;
-    const ok = window.confirm(
-      "Are you sure you want to delete this clinical health record? This action will be logged in the audit trail."
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this clinical health record? An audit entry will be recorded."
     );
-    if (!ok) return;
+    if (!confirmed) return;
 
     try {
       await doctorService.deleteHealthRecord(recId);
       setToastMessage({
-        text: "Health record deleted successfully.",
+        text: "Clinical health record deleted successfully.",
         canUndo: true,
         recId: recId
       });
@@ -960,7 +860,7 @@ export default function HealthRecords() {
   const handleUndoDelete = async (recId) => {
     try {
       await doctorService.restoreHealthRecord(recId);
-      setToastMessage({ text: "Health record restored.", canUndo: false });
+      setToastMessage({ text: "Clinical health record restored successfully.", canUndo: false });
       fetchRecords(true);
     } catch (err) {
       console.error("Failed to restore record:", err);
@@ -971,16 +871,13 @@ export default function HealthRecords() {
     e.preventDefault();
     const errs = {};
     if (!formData.patient_id) {
-      errs.patient_id = "Please select a verified patient.";
+      errs.patient_id = "Please select a patient.";
     }
-    if (!formData.title.trim()) {
+    if (!formData.title || !formData.title.trim()) {
       errs.title = "Record title is required.";
     }
-    if (!formData.record_type) {
-      errs.record_type = "Record type is required.";
-    }
     if (!formData.record_date) {
-      errs.record_date = "Date of encounter is required.";
+      errs.record_date = "Encounter date is required.";
     }
 
     if (Object.keys(errs).length > 0) {
@@ -992,21 +889,9 @@ export default function HealthRecords() {
     try {
       const cleanMeds = (formData.medications || []).filter((m) => m.name && m.name.trim());
       const payload = {
-        patient_id: formData.patient_id,
-        record_type: formData.record_type,
-        title: formData.title.trim(),
-        diagnosis: formData.diagnosis.trim() || formData.title.trim(),
-        icd10_code: formData.icd10_code || "",
-        doctor_name: user?.name || formData.doctor_name || "Dr. Ananya Sharma",
-        record_date: formData.record_date,
-        notes: formData.notes.trim(),
-        description: formData.notes.trim(),
-        medications: cleanMeds,
-        attachments: formData.attachments || [],
-        file_url: formData.attachments?.[0]?.file_url || null,
-        file_name: formData.attachments?.[0]?.file_name || null,
-        status: formData.status || "final",
-        is_abnormal: Boolean(formData.is_abnormal)
+        ...formData,
+        doctor_name: doctorDisplayName,
+        medications: cleanMeds
       };
 
       if (modalMode === "create") {
@@ -1018,7 +903,7 @@ export default function HealthRecords() {
       }
 
       setIsModalOpen(false);
-      await fetchRecords(true);
+      fetchRecords(true); // Instant refresh of records and counters!
     } catch (err) {
       alert("Submission error: " + (err.response?.data?.detail || err.message));
     } finally {
@@ -1026,62 +911,80 @@ export default function HealthRecords() {
     }
   };
 
+  // CSV Export strictly exporting the filtered records
   const handleExportCSV = () => {
     if (!records || records.length === 0) {
-      alert("No records to export with the current filters.");
+      setToastMessage({ text: "No filtered records to export." });
       return;
     }
 
-    const rows = records.map((r) => ({
-      Record_ID: r._id || r.id,
-      Patient_Name: r.patient_name || "",
-      Patient_ID: r.patient_code || (r.patient_id ? String(r.patient_id).slice(-6) : ""),
-      Record_Type: r.record_type || "",
-      Title: r.title || "",
-      Diagnosis: r.diagnosis || "",
-      ICD10_Code: r.icd10_code || "",
-      Doctor: r.doctor_name || user?.name || "Dr. Ananya Sharma",
-      Encounter_Date: r.record_date || (r.created_at ? r.created_at.split("T")[0] : ""),
-      Status: r.status || "final"
-    }));
+    const headers = [
+      "Record ID",
+      "Encounter Date",
+      "Patient Name",
+      "Patient ID (6-digit)",
+      "Record Type",
+      "Title",
+      "Diagnosis",
+      "ICD-10 Code",
+      "Medications",
+      "Doctor",
+      "Status",
+      "Notes"
+    ];
 
-    const header = Object.keys(rows[0]).join(",");
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [
-        header,
-        ...rows.map((row) =>
-          Object.values(row)
-            .map((val) => `"${String(val).replace(/"/g, '""')}"`)
-            .join(",")
-        )
-      ].join("\n");
-    const encodedUri = encodeURI(csvContent);
+    const escapeCSV = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const csvRows = records.map((r) => {
+      const medsStr = Array.isArray(r.medications)
+        ? r.medications.map((m) => `${m.name} ${m.dose || ""} (${m.frequency || ""})`).join("; ")
+        : "";
+      return [
+        escapeCSV(r._id || r.id),
+        escapeCSV(r.record_date || r.recorded_at || ""),
+        escapeCSV(r.patient_name || ""),
+        escapeCSV(r.patient_code || ""),
+        escapeCSV(r.record_type || ""),
+        escapeCSV(r.title || ""),
+        escapeCSV(r.diagnosis || ""),
+        escapeCSV(r.icd10_code || ""),
+        escapeCSV(medsStr),
+        escapeCSV(r.doctor_name || ""),
+        escapeCSV(r.status || ""),
+        escapeCSV(r.notes || r.description || "")
+      ].join(",");
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...csvRows].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `CareBridge_Health_Records_${new Date().toISOString().split("T")[0]}.csv`
-    );
+    link.href = url;
+    const dateStr = new Date().toISOString().split("T")[0];
+    link.setAttribute("download", `CareBridge_Health_Records_${dateStr}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setToastMessage({ text: `Exported ${records.length} filtered records to CSV.` });
   };
-
 
   // Helper renderers
   const renderRecordTypeBadge = (type) => {
-    const t = (type || "").toLowerCase();
+    const t = (type || "").toUpperCase();
     const map = {
-      consultation: { label: "Consultation", cls: "badge-consultation", icon: Stethoscope },
-      diagnosis: { label: "Diagnosis", cls: "badge-diagnosis", icon: Activity },
-      prescription: { label: "Prescription", cls: "badge-prescription", icon: Pill },
-      checkup: { label: "Checkup", cls: "badge-checkup", icon: ShieldAlert },
-      lab_report: { label: "Lab Report", cls: "badge-lab", icon: Activity },
-      lab: { label: "Lab", cls: "badge-lab", icon: Activity },
-      imaging: { label: "Imaging", cls: "badge-imaging", icon: Layers },
-      scan: { label: "Imaging Scan", cls: "badge-imaging", icon: Layers },
-      visit_note: { label: "Visit Note", cls: "badge-consultation", icon: Stethoscope }
+      CONSULTATION: { label: "Visit Note", cls: "badge-consultation", icon: Stethoscope },
+      DIAGNOSIS: { label: "Diagnosis", cls: "badge-diagnosis", icon: Activity },
+      PRESCRIPTION: { label: "Prescription", cls: "badge-prescription", icon: Pill },
+      LAB_REPORT: { label: "Lab Report", cls: "badge-checkup", icon: FileText },
+      LAB: { label: "Lab Report", cls: "badge-checkup", icon: FileText },
+      IMAGING: { label: "Imaging", cls: "badge-checkup", icon: Layers },
+      SCAN: { label: "Imaging", cls: "badge-checkup", icon: Layers },
+      CHECKUP: { label: "Checkup", cls: "badge-checkup", icon: ShieldAlert }
     };
     const conf = map[t] || { label: type || "Record", cls: "badge-consultation", icon: FileText };
     const IconComp = conf.icon;
@@ -1102,10 +1005,11 @@ export default function HealthRecords() {
   };
 
   const renderTypeIcon = (type) => {
-    const t = (type || "").toLowerCase();
-    if (t === "consultation") return <Stethoscope size={16} />;
-    if (t === "diagnosis") return <Activity size={16} />;
-    if (t === "prescription") return <Pill size={16} />;
+    const t = (type || "").toUpperCase();
+    if (t === "CONSULTATION" || t === "VISIT_NOTE") return <Stethoscope size={16} />;
+    if (t === "DIAGNOSIS") return <Activity size={16} />;
+    if (t === "PRESCRIPTION") return <Pill size={16} />;
+    if (t === "IMAGING" || t === "SCAN") return <Layers size={16} />;
     return <FileText size={16} />;
   };
 
@@ -1124,7 +1028,10 @@ export default function HealthRecords() {
     }
   };
 
-  // ── Render ──
+  const hasActiveFilters = Boolean(
+    searchQuery.trim() || typeFilter !== "all" || dateRange.from || dateRange.to || selectedPatientId !== "all"
+  );
+
   return (
     <div className="health-records-container" role="main" aria-label="Clinical Health Records Portal">
       {/* ── Top Header Bar ── */}
@@ -1323,7 +1230,7 @@ export default function HealthRecords() {
             </div>
             <div className="meta-cell">
               <span className="meta-lbl">Primary Doctor</span>
-              <strong className="meta-val">{currentPatientObj.primary_doctor || "Dr. Ananya Sharma"}</strong>
+              <strong className="meta-val">{currentPatientObj.primary_doctor || doctorDisplayName}</strong>
             </div>
           </div>
           <button
@@ -1356,7 +1263,7 @@ export default function HealthRecords() {
             </div>
           </div>
           <div className="card-foot">
-            <span className="delta positive">↑ 12% vs last month</span>
+            <span className="delta positive">Live Database</span>
             <span className="period-tag">IST Real-time</span>
           </div>
         </div>
@@ -1368,7 +1275,7 @@ export default function HealthRecords() {
           tabIndex={0}
         >
           <div className="card-top">
-            <span className="card-title">Consultations</span>
+            <span className="card-title">Visit Notes</span>
             <Stethoscope size={18} className="card-icon" aria-hidden="true" />
           </div>
           <div className="card-middle">
@@ -1378,7 +1285,7 @@ export default function HealthRecords() {
             </div>
           </div>
           <div className="card-foot">
-            <span className="delta positive">↑ 8% vs last month</span>
+            <span className="delta positive">Encounters</span>
             <span className="period-tag">OPD visits</span>
           </div>
         </div>
@@ -1422,20 +1329,20 @@ export default function HealthRecords() {
             </div>
           </div>
           <div className="card-foot">
-            <span className="delta positive">ICD-10 mapped</span>
+            <span className="delta positive">ICD-10 mapped ({stats.icd10_mapped || stats.diagnoses})</span>
             <span className="period-tag">EHR Verified</span>
           </div>
         </div>
       </section>
 
-      {/* ── Toolbar: Search, Filters, Range Picker & View Toggle ── */}
+      {/* ── Toolbar: Search, Filters, Styled Range Picker & View Toggle ── */}
       <section className="records-toolbar" aria-label="Filters and controls">
         <div className="toolbar-search-box">
           <Search size={16} className="search-icon" aria-hidden="true" />
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search records, diagnoses, ICD-10, medications... (Press '/' to focus)"
+            placeholder="Search records by title, patient, diagnosis, ICD-10... (Press '/' to focus)"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -1471,15 +1378,15 @@ export default function HealthRecords() {
             >
               <option value="all">All Types</option>
               <option value="diagnosis">Diagnoses</option>
-              <option value="prescription">Prescriptions / Rx</option>
+              <option value="prescription">Prescriptions</option>
               <option value="lab_report">Lab Reports</option>
               <option value="imaging">Imaging</option>
-              <option value="consultation">Visit Notes / Consultations</option>
+              <option value="consultation">Visit Notes</option>
               <option value="checkup">Checkups</option>
             </select>
           </div>
 
-          {/* Date Range Preset Selector */}
+          {/* Date Range Preset Selector Chips */}
           <div className="date-preset-pills" role="radiogroup" aria-label="Date range presets">
             {["Today", "7d", "30d", "This month", "This year", "All"].map((preset) => (
               <button
@@ -1493,12 +1400,12 @@ export default function HealthRecords() {
             ))}
           </div>
 
-          {/* Custom Styled Date Range Picker with Dropdown Calendar */}
+          {/* Custom Styled Date Range Picker */}
           <DateRangePicker
-            from={dateRange.from}
-            to={dateRange.to}
+            dateRange={dateRange}
             onChange={handleDateRangeChange}
             onClear={handleDateRangeClear}
+            activePreset={activePreset}
           />
 
           {/* Export CSV Button */}
@@ -1536,46 +1443,40 @@ export default function HealthRecords() {
         </div>
       </section>
 
-      {/* ── Main Records Content Area ── */}
-      <section className="records-main-content">
-        {/* Results Bar with Result Count and Active Filters */}
-        <div className="records-results-bar">
-          <div className="results-count-wrapper">
-            <span className="results-count-text">
-              Showing <strong>{records.length}</strong> of <strong>{totalRecords}</strong> clinical records
+      {/* ── Results Count and Reset Filters Bar ── */}
+      <div className="records-summary-counter-bar">
+        <div className="counter-left">
+          <span className="results-count-text">
+            Showing <strong>{records.length}</strong> {records.length === 1 ? "record" : "records"}
+            {totalRecords > records.length ? ` of ${totalRecords} total` : ""}
+            {selectedPatientId !== "all" && currentPatientObj ? ` for ${currentPatientObj.name} (#${currentPatientObj.patient_code})` : ""}
+          </span>
+          {typeFilter !== "all" && (
+            <span className="filter-pill-tag">
+              Type: {typeFilter}
+              <button type="button" onClick={() => setTypeFilter("all")}>
+                <X size={11} />
+              </button>
             </span>
-            {typeFilter !== "all" && (
-              <span className="active-filter-pill">
-                Type: {typeFilter}
-                <button type="button" onClick={() => setTypeFilter("all")} aria-label="Clear type filter">
-                  <X size={12} />
-                </button>
-              </span>
-            )}
-            {(dateRange.from || dateRange.to) && (
-              <span className="active-filter-pill">
-                Range: {formatToDDMMYYYY(dateRange.from) || "start"} – {formatToDDMMYYYY(dateRange.to) || "end"}
-                <button type="button" onClick={handleDateRangeClear} aria-label="Clear date range">
-                  <X size={12} />
-                </button>
-              </span>
-            )}
-            {searchQuery && (
-              <span className="active-filter-pill">
-                "{searchQuery}"
-                <button type="button" onClick={() => setSearchQuery("")} aria-label="Clear search">
-                  <X size={12} />
-                </button>
-              </span>
-            )}
-          </div>
-          {(searchQuery || typeFilter !== "all" || selectedPatientId !== "all" || dateRange.from || dateRange.to) && (
-            <button type="button" className="btn-reset-filters-link" onClick={handleResetFilters}>
-              <RefreshCw size={13} /> Reset all filters
-            </button>
+          )}
+          {(dateRange.from || dateRange.to) && (
+            <span className="filter-pill-tag">
+              Date: {toDDMMYYYY(dateRange.from) || "Any"} — {toDDMMYYYY(dateRange.to) || "Any"}
+              <button type="button" onClick={handleDateRangeClear}>
+                <X size={11} />
+              </button>
+            </span>
           )}
         </div>
+        {hasActiveFilters && (
+          <button type="button" className="btn-reset-filters-inline" onClick={handleResetFilters}>
+            <RefreshCw size={12} /> Reset filters
+          </button>
+        )}
+      </div>
 
+      {/* ── Main Records Content Area ── */}
+      <section className="records-main-content">
         {loading ? (
           <div className="loading-state-card">
             <RefreshCw size={32} className="spin text-teal" />
@@ -1585,11 +1486,17 @@ export default function HealthRecords() {
           <div className="empty-state-card">
             <FileText size={48} className="empty-icon" />
             <h3>No clinical health records found</h3>
-            <p>No records match your active search query, date range, or record type filters.</p>
+            <p>
+              {hasActiveFilters
+                ? "No records match the current filters or date range."
+                : "No clinical health records found in registry."}
+            </p>
             <div className="empty-state-actions">
-              <button type="button" className="btn-reset-filters" onClick={handleResetFilters}>
-                <RefreshCw size={15} /> Reset filters
-              </button>
+              {hasActiveFilters && (
+                <button type="button" className="btn-reset-filters" onClick={handleResetFilters}>
+                  <RefreshCw size={14} /> Reset filters
+                </button>
+              )}
               <button type="button" className="btn-create-record" onClick={handleOpenCreateModal}>
                 <Plus size={16} /> Create Record
               </button>
@@ -1666,7 +1573,7 @@ export default function HealthRecords() {
                             <span className="text-muted">—</span>
                           )}
                         </td>
-                        <td className="doctor-cell">{r.doctor_name || "Dr. Ananya Sharma"}</td>
+                        <td className="doctor-cell">{r.doctor_name || doctorDisplayName}</td>
                         <td>{renderStatusBadge(r.status)}</td>
                         <td style={{ textAlign: "right" }}>
                           <div className="row-actions-group">
@@ -1736,7 +1643,7 @@ export default function HealthRecords() {
                               <div className="acc-column attachments-col">
                                 <h4>Audit Trail &amp; Meta</h4>
                                 <div className="audit-meta-line">
-                                  <span>Author: {r.doctor_name || "Dr. Ananya Sharma"}</span>
+                                  <span>Author: {r.doctor_name || doctorDisplayName}</span>
                                   <span>Created: {formatDateIST(r.created_at)}</span>
                                   <span>Status: {r.status || "final"}</span>
                                 </div>
@@ -1779,6 +1686,7 @@ export default function HealthRecords() {
                           className="btn-icon-action"
                           onClick={() => setDrawerRecord(r)}
                           title="Open in side drawer"
+                          aria-label="View record details"
                         >
                           <Eye size={15} />
                         </button>
@@ -1787,14 +1695,16 @@ export default function HealthRecords() {
                           className="btn-icon-action"
                           onClick={() => handleOpenEditModal(r)}
                           title="Edit record"
+                          aria-label="Edit record"
                         >
                           <Edit3 size={15} />
                         </button>
                         <button
                           type="button"
                           className="btn-icon-action delete"
-                          onClick={() => handleDeleteRecord(r._id || r.id)}
+                          onClick={() => handleDeleteRecord(recordId)}
                           title="Delete record"
+                          aria-label="Delete record"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -1820,7 +1730,7 @@ export default function HealthRecords() {
                     )}
                     {r.notes && <p className="timeline-notes">{r.notes}</p>}
                     <div className="timeline-footer">
-                      <span>Doctor: {r.doctor_name || "Dr. Ananya Sharma"}</span>
+                      <span>Doctor: {r.doctor_name || doctorDisplayName}</span>
                       {renderStatusBadge(r.status)}
                     </div>
                   </div>
@@ -1954,9 +1864,9 @@ export default function HealthRecords() {
                           <strong>{m.name}</strong>
                         </div>
                         <div className="med-specs">
-                          <span>Dose: {m.dose}</span>
-                          <span>Freq: {m.frequency}</span>
-                          <span>Duration: {m.duration}</span>
+                          <span>Dose: {m.dose || "—"}</span>
+                          <span>Freq: {m.frequency || "—"}</span>
+                          <span>Duration: {m.duration || "—"}</span>
                         </div>
                       </div>
                     ))}
@@ -1984,7 +1894,7 @@ export default function HealthRecords() {
                             <div>
                               <strong className="att-name">{att.file_name || "Clinical_Report.pdf"}</strong>
                               <span className="att-size">
-                                {att.size_bytes ? `${Math.round(att.size_bytes / 1024)} KB` : "140 KB"} • PDF Document
+                                {att.size_bytes ? `${Math.round(att.size_bytes / 1024)} KB` : "Document"}
                               </span>
                             </div>
                           </div>
@@ -2008,7 +1918,7 @@ export default function HealthRecords() {
                         <FileText size={18} className="att-icon" />
                         <div>
                           <strong className="att-name">{drawerRecord.file_name || "Clinical_Report.pdf"}</strong>
-                          <span className="att-size">PDF Document</span>
+                          <span className="att-size">Document</span>
                         </div>
                       </div>
                       <a
@@ -2036,7 +1946,7 @@ export default function HealthRecords() {
                   </div>
                   <div>
                     <span className="lbl">Supervising Doctor:</span>
-                    <span>{drawerRecord.doctor_name || "Dr. Ananya Sharma"}</span>
+                    <span>{drawerRecord.doctor_name || doctorDisplayName}</span>
                   </div>
                   <div>
                     <span className="lbl">System Created:</span>
@@ -2078,28 +1988,31 @@ export default function HealthRecords() {
                 className="btn-close-drawer-foot"
                 onClick={() => setDrawerRecord(null)}
               >
-                Close Drawer
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Create / Edit Record Modal ── */}
+      {/* ── Unified Create / Edit Modal ── */}
       {isModalOpen && (
-        <div className="modal-backdrop">
+        <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}>
           <div
-            className="modal-container"
+            className="modal-container modal-unified-layout"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
               <div>
-                <h2 id="modal-title">{modalMode === "edit" ? "Edit Clinical Health Record" : "Create Clinical Health Record"}</h2>
-                <span className="step-counter">
-                  Authenticated EHR Entry • 6-Digit Verified Patient
-                </span>
+                <h2 id="modal-title">
+                  {modalMode === "edit" ? "Edit Clinical Health Record" : "Create Clinical Health Record"}
+                </h2>
+                <p className="modal-subtitle">
+                  Authenticated clinical entry • Verified 6-digit patient chart • Instant database sync
+                </p>
               </div>
               <button
                 type="button"
@@ -2112,12 +2025,12 @@ export default function HealthRecords() {
             </div>
 
             <form onSubmit={handleSubmitModal}>
-              <div className="modal-body">
-                <div className="modal-form-grid">
-                  {/* Field 1: Patient (showing 6-digit IDs only) */}
+              <div className="modal-body modal-scrollable-body">
+                {/* Row 1: Patient Selection & Record Type */}
+                <div className="form-grid-2col">
                   <div className="form-group">
                     <label htmlFor="form-patient-select">
-                      Patient Chart <span className="req">*</span>
+                      Patient <span className="req">*</span>
                     </label>
                     <select
                       id="form-patient-select"
@@ -2129,10 +2042,10 @@ export default function HealthRecords() {
                     >
                       <option value="">-- Choose verified patient (6-digit ID) --</option>
                       {patients.map((p) => {
-                        const code6 = p.patient_code || String(p.id || p._id).slice(-6);
+                        const code = String(p.patient_code || p.patient_id_code || "").padStart(6, "0");
                         return (
-                          <option key={p._id || p.id} value={code6}>
-                            {p.name} (#{code6}) - {p.gender || "M"}, {p.age || 40}y
+                          <option key={p._id || p.id} value={code}>
+                            {p.name} (ID: #{code})
                           </option>
                         );
                       })}
@@ -2140,7 +2053,6 @@ export default function HealthRecords() {
                     {formErrors.patient_id && <p className="form-error-msg">{formErrors.patient_id}</p>}
                   </div>
 
-                  {/* Field 2: Record Type */}
                   <div className="form-group">
                     <label htmlFor="form-record-type">
                       Record Type <span className="req">*</span>
@@ -2151,22 +2063,24 @@ export default function HealthRecords() {
                       onChange={(e) => setFormData((prev) => ({ ...prev, record_type: e.target.value }))}
                     >
                       <option value="DIAGNOSIS">Diagnosis</option>
-                      <option value="PRESCRIPTION">Prescription / Rx</option>
+                      <option value="PRESCRIPTION">Prescription/Rx</option>
                       <option value="LAB_REPORT">Lab</option>
                       <option value="IMAGING">Imaging</option>
                       <option value="CONSULTATION">Visit Note</option>
                     </select>
                   </div>
+                </div>
 
-                  {/* Field 3: Title */}
+                {/* Row 2: Title & Encounter Date */}
+                <div className="form-grid-2col">
                   <div className="form-group">
                     <label htmlFor="form-record-title">
-                      Record Title / Summary <span className="req">*</span>
+                      Title <span className="req">*</span>
                     </label>
                     <input
                       id="form-record-title"
                       type="text"
-                      placeholder="e.g. Hypertension Follow-up & Medication Review"
+                      placeholder="e.g. Essential Hypertension Clinical Evaluation"
                       value={formData.title}
                       onChange={(e) => {
                         setFormData((prev) => ({ ...prev, title: e.target.value }));
@@ -2176,7 +2090,6 @@ export default function HealthRecords() {
                     {formErrors.title && <p className="form-error-msg">{formErrors.title}</p>}
                   </div>
 
-                  {/* Field 4: Encounter Date */}
                   <div className="form-group">
                     <label htmlFor="form-record-date">
                       Encounter Date <span className="req">*</span>
@@ -2185,121 +2098,188 @@ export default function HealthRecords() {
                       id="form-record-date"
                       type="date"
                       value={formData.record_date}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, record_date: e.target.value }))}
+                      onChange={(e) => {
+                        setFormData((prev) => ({ ...prev, record_date: e.target.value }));
+                        if (formErrors.record_date) setFormErrors((prev) => ({ ...prev, record_date: null }));
+                      }}
                     />
                     {formErrors.record_date && <p className="form-error-msg">{formErrors.record_date}</p>}
                   </div>
+                </div>
 
-                  {/* Field 5: ICD-10 Code (Searchable) */}
+                {/* Row 3: Supervising Doctor & Record Status */}
+                <div className="form-grid-2col">
                   <div className="form-group">
-                    <label>ICD-10 Code Classification (Searchable)</label>
-                    <SearchableICD10
-                      value={formData.icd10_code}
-                      onChange={(code) => setFormData((prev) => ({ ...prev, icd10_code: code }))}
-                      onAutoFillDiagnosis={(name) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          diagnosis: prev.diagnosis || name,
-                          title: prev.title || name
-                        }));
-                      }}
-                    />
+                    <label>Doctor (Auto-Assigned)</label>
+                    <div className="doctor-badge-field">
+                      <Stethoscope size={16} className="doctor-badge-icon" />
+                      <span className="doctor-badge-name">{doctorDisplayName}</span>
+                      <span className="doctor-auth-pill">Authenticated</span>
+                    </div>
                   </div>
 
-                  {/* Field 6: Doctor (Auto from logged-in doctor) */}
                   <div className="form-group">
-                    <label>Attending / Supervising Doctor</label>
-                    <div className="doctor-auto-field">
-                      <Stethoscope size={16} className="text-teal" />
-                      <span>{user?.name || formData.doctor_name || "Dr. Ananya Sharma"}</span>
-                      <span className="doctor-badge-tag">Logged-in Doctor</span>
-                    </div>
+                    <label htmlFor="form-status">Record Status</label>
+                    <select
+                      id="form-status"
+                      value={formData.status}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
+                    >
+                      <option value="final">Final (Committed &amp; Verified)</option>
+                      <option value="draft">Draft (Preliminary notes)</option>
+                      <option value="amended">Amended (Correction applied)</option>
+                    </select>
                   </div>
                 </div>
 
-                {/* Field 7: Clinical Notes */}
-                <div className="form-group" style={{ marginTop: "1rem" }}>
-                  <label htmlFor="form-notes">Clinical Notes &amp; Findings</label>
+                {/* Row 4: Searchable ICD-10 Code Classification */}
+                <div className="form-group icd-combobox-group" ref={icdComboboxRef}>
+                  <div className="label-with-clear">
+                    <label htmlFor="modal-icd-search">
+                      ICD-10 Code Classification <span className="helper-hint">(Searchable by code or condition)</span>
+                    </label>
+                    {formData.icd10_code && (
+                      <button
+                        type="button"
+                        className="btn-clear-icd-link"
+                        onClick={() => {
+                          setFormData((prev) => ({ ...prev, icd10_code: "" }));
+                          setIcdSearchText("");
+                        }}
+                      >
+                        Clear ICD-10
+                      </button>
+                    )}
+                  </div>
+                  <div className="icd-input-wrapper">
+                    <Search size={15} className="icd-search-icon" aria-hidden="true" />
+                    <input
+                      id="modal-icd-search"
+                      type="text"
+                      placeholder="Type ICD-10 code or condition (e.g. I10, diabetes, asthma)..."
+                      value={icdSearchText}
+                      onChange={(e) => {
+                        setIcdSearchText(e.target.value);
+                        setIcdDropdownOpen(true);
+                      }}
+                      onFocus={() => setIcdDropdownOpen(true)}
+                      autoComplete="off"
+                    />
+                    {formData.icd10_code && (
+                      <span className="selected-icd-chip">
+                        <span className="chip-code">{formData.icd10_code}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, icd10_code: "" }));
+                            setIcdSearchText("");
+                          }}
+                          aria-label="Remove code"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    )}
+                  </div>
+
+                  {icdDropdownOpen && (
+                    <div className="icd-dropdown-menu" role="listbox">
+                      {filteredIcdList.length === 0 ? (
+                        <div className="icd-no-match">
+                          <span>No predefined match for "{icdSearchText}"</span>
+                          <button
+                            type="button"
+                            className="btn-use-custom-icd"
+                            onClick={() => {
+                              const codeVal = icdSearchText.trim().toUpperCase();
+                              setFormData((prev) => ({ ...prev, icd10_code: codeVal }));
+                              setIcdDropdownOpen(false);
+                            }}
+                          >
+                            Set "{icdSearchText.trim().toUpperCase()}" as code
+                          </button>
+                        </div>
+                      ) : (
+                        filteredIcdList.map((item) => (
+                          <div
+                            key={item.code}
+                            className={`icd-option-row ${formData.icd10_code === item.code ? "is-selected" : ""}`}
+                            role="option"
+                            aria-selected={formData.icd10_code === item.code}
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                icd10_code: item.code,
+                                diagnosis: prev.diagnosis ? prev.diagnosis : item.name,
+                                title: prev.title ? prev.title : `${item.name} Assessment`
+                              }));
+                              setIcdSearchText(`${item.code} - ${item.name}`);
+                              setIcdDropdownOpen(false);
+                            }}
+                          >
+                            <span className="icd-code-badge">{item.code}</span>
+                            <span className="icd-desc">{item.name}</span>
+                            <span className="icd-cat">{item.category}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Row 5: Clinical Diagnosis / Impression */}
+                <div className="form-group">
+                  <label htmlFor="form-diagnosis">Clinical Diagnosis / Impression</label>
+                  <input
+                    id="form-diagnosis"
+                    type="text"
+                    placeholder="e.g. Essential Hypertension without chronic kidney disease"
+                    value={formData.diagnosis}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, diagnosis: e.target.value }))}
+                  />
+                </div>
+
+                {/* Row 6: Clinical Notes & Observations */}
+                <div className="form-group">
+                  <label htmlFor="form-notes">Clinical Notes &amp; Observations</label>
                   <textarea
                     id="form-notes"
-                    rows={4}
-                    placeholder="Enter detailed clinical impressions, examination findings, dietary guidance, or next review instructions..."
+                    rows={3}
+                    placeholder="Detail clinical observations, symptoms, physical findings, dietary advice, or follow-up instructions..."
                     value={formData.notes}
                     onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
                   />
                 </div>
 
-                {/* Field 8: File Attachment */}
-                <div className="form-group" style={{ marginTop: "1rem" }}>
-                  <label>Clinical Document Attachments (PDF / Scans / Images)</label>
-                  <div className="file-upload-box">
-                    <label className="file-upload-label">
-                      <Upload size={18} />
-                      <span>{uploadingFile ? "Uploading document..." : "Click or drag to attach PDF, PNG, or JPG"}</span>
-                      <input
-                        type="file"
-                        accept=".pdf,.png,.jpg,.jpeg,.docx"
-                        onChange={handleFileUpload}
-                        disabled={uploadingFile}
-                        style={{ display: "none" }}
-                      />
-                    </label>
-                    {formData.attachments && formData.attachments.length > 0 && (
-                      <div className="modal-attachments-chips">
-                        {formData.attachments.map((att, attI) => (
-                          <div key={attI} className="modal-att-chip">
-                            <FileText size={14} />
-                            <span>{att.file_name}</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  attachments: prev.attachments.filter((_, i) => i !== attI)
-                                }));
-                              }}
-                              aria-label="Remove attachment"
-                            >
-                              <X size={12} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Optional Prescribed Medications Section */}
-                <div className="form-group" style={{ marginTop: "1rem" }}>
+                {/* Row 7: Prescribed Medications (Dynamic Section) */}
+                <div className="form-group meds-section-box">
                   <div className="meds-header-line">
                     <label>Prescribed Medications ({formData.medications?.length || 0})</label>
                     <button
                       type="button"
                       className="btn-add-med"
-                      onClick={() =>
+                      onClick={() => {
                         setFormData((prev) => ({
                           ...prev,
                           medications: [
-                            ...prev.medications,
+                            ...(prev.medications || []),
                             { name: "", dose: "", frequency: "Once daily (OD)", duration: "30 days", drug_class: "General" }
                           ]
-                        }))
-                      }
+                        }));
+                      }}
                     >
                       <Plus size={14} /> Add Medication
                     </button>
                   </div>
 
-                  {(!formData.medications || formData.medications.length === 0) ? (
-                    <p className="no-meds-msg">No medications added. Click "+ Add Medication" if prescribing drugs.</p>
-                  ) : (
+                  {formData.medications && formData.medications.length > 0 ? (
                     <div className="meds-form-list">
                       {formData.medications.map((med, index) => (
                         <div key={index} className="med-row-card">
                           <div className="med-row-inputs">
                             <input
                               type="text"
-                              placeholder="Medication Name (e.g. Telmisartan)"
+                              placeholder="Drug name (e.g. Amlodipine)"
                               value={med.name}
                               onChange={(e) => {
                                 const updated = [...formData.medications];
@@ -2309,7 +2289,7 @@ export default function HealthRecords() {
                             />
                             <input
                               type="text"
-                              placeholder="Dose (e.g. 40 mg)"
+                              placeholder="Dose (e.g. 5 mg)"
                               value={med.dose}
                               onChange={(e) => {
                                 const updated = [...formData.medications];
@@ -2319,7 +2299,7 @@ export default function HealthRecords() {
                             />
                             <input
                               type="text"
-                              placeholder="Frequency (e.g. OD)"
+                              placeholder="Freq (e.g. OD)"
                               value={med.frequency}
                               onChange={(e) => {
                                 const updated = [...formData.medications];
@@ -2346,39 +2326,58 @@ export default function HealthRecords() {
                               setFormData((prev) => ({ ...prev, medications: updated }));
                             }}
                             title="Remove medication"
+                            aria-label="Remove medication"
                           >
                             <Trash2 size={16} />
                           </button>
                         </div>
                       ))}
                     </div>
+                  ) : (
+                    <p className="no-meds-hint">No medications prescribed. Click "+ Add Medication" to add Rx regimens.</p>
                   )}
                 </div>
 
-                {/* Status & Abnormal Toggle */}
-                <div className="modal-form-grid" style={{ marginTop: "1rem" }}>
-                  <div className="form-group">
-                    <label htmlFor="form-status">Record Status</label>
-                    <select
-                      id="form-status"
-                      value={formData.status}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
-                    >
-                      <option value="final">Final (Verified &amp; Committed)</option>
-                      <option value="draft">Draft (Preliminary notes)</option>
-                      <option value="amended">Amended (Correction applied)</option>
-                    </select>
-                  </div>
-                  <div className="form-group" style={{ justifyContent: "center" }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", marginTop: "1.5rem" }}>
+                {/* Row 8: Clinical Document Attachments */}
+                <div className="form-group">
+                  <label>Clinical Document Attachments (PDF / Scans / Images)</label>
+                  <div className="file-upload-box">
+                    <label className="file-upload-label">
+                      <Upload size={18} />
+                      <span>{uploadingFile ? "Uploading document..." : "Click or drag to attach PDF, scan, or lab report"}</span>
                       <input
-                        type="checkbox"
-                        checked={formData.is_abnormal}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, is_abnormal: e.target.checked }))}
-                        style={{ width: "auto" }}
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                        onChange={handleFileUpload}
+                        disabled={uploadingFile}
+                        style={{ display: "none" }}
                       />
-                      <span>Mark as Abnormal / Critical Finding</span>
                     </label>
+                    {formData.attachments && formData.attachments.length > 0 && (
+                      <div className="modal-attachments-chips">
+                        {formData.attachments.map((att, attI) => (
+                          <div key={attI} className="modal-att-chip">
+                            <FileText size={14} />
+                            <span className="att-chip-name">{att.file_name}</span>
+                            <span className="att-chip-size">
+                              {att.size_bytes ? `${Math.round(att.size_bytes / 1024)} KB` : ""}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  attachments: prev.attachments.filter((_, i) => i !== attI)
+                                }));
+                              }}
+                              aria-label="Remove attachment"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2386,13 +2385,12 @@ export default function HealthRecords() {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn-modal-back"
+                  className="btn-modal-cancel"
                   onClick={() => setIsModalOpen(false)}
                   disabled={isSubmitting}
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
                   className="btn-modal-submit"
@@ -2401,12 +2399,12 @@ export default function HealthRecords() {
                   {isSubmitting ? (
                     <>
                       <Loader2 size={16} className="spin mr-2" />
-                      <span>Saving...</span>
+                      <span>Saving Record...</span>
                     </>
                   ) : modalMode === "edit" ? (
                     "Save Changes"
                   ) : (
-                    "Commit Record"
+                    "Create Record"
                   )}
                 </button>
               </div>
@@ -2415,7 +2413,7 @@ export default function HealthRecords() {
         </div>
       )}
 
-      {/* ── Undo Toast ── */}
+      {/* ── Undo Toast Notification ── */}
       {toastMessage && (
         <div className="toast-notification" role="status" aria-live="polite">
           <span>{toastMessage.text}</span>

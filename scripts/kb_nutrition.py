@@ -1,0 +1,306 @@
+"""
+Nutrition knowledge base module (20 entries)
+Covers diabetes, hypertension, kidney disease, anemia, pregnancy, child growth, weight loss, foods to avoid per condition.
+"""
+def get_nutrition():
+    nut = [
+        ("nut_diabetes_diet_001", "Diet for Type 2 Diabetes & Blood Sugar Control", ["diabetes diet", "sugar patient food", "diabetic meal plan", "what to eat in diabetes", "low glycemic food", "diabetic diet india"],
+         [
+             "Follow the 'Diabetes Plate Method': fill 1/2 of your plate with non-starchy vegetables (spinach, cucumber, cabbage, gourd, bhindi), 1/4 with lean proteins (lentils/dal, paneer, sprouts, eggs, fish), and 1/4 with high-fiber whole carbs (millets, brown rice, whole wheat roti).",
+             "Choose low-glycemic index (GI) grains like ragi, jowar, bajra, oats, and barley instead of refined white maida and polished white rice.",
+             "Include 25 to 35 grams of dietary fiber daily; fiber slows carbohydrate absorption and prevents sharp glucose spikes after meals.",
+             "Avoid all direct sugars, jaggery, honey, sweets, carbonated sodas, packaged juices, and bakery pastries.",
+             "Eat small, regular meals at fixed hours; avoid prolonged skipping of meals followed by heavy feasting."
+         ],
+         {"assessment": "Medical Nutrition Therapy (MNT) for Diabetes Mellitus.", "investigations": "Continuous Glucose Monitoring (CGM) or pre/post-prandial SMBG, lipid profile, HbA1c.", "management": "Individualized macronutrient distribution: 45-50% complex low-GI carbs, 20-25% protein (1.0-1.2 g/kg/day), 25-30% healthy fats. Limit saturated fats to <7% and eliminate trans fats. Target 5-7% weight reduction if overweight.", "references": ["ADA Standards of Care in Diabetes: Facilitating Positive Health Behaviors and Well-being", "ICMR Dietary Guidelines for Indians"]},
+         "Review meal plate composition and snack timing. Check SMBG log.",
+         ["Severe post-meal hyperglycemia > 250 mg/dL", "Hypoglycemia episodes following missed meals on insulin/sulfonylurea"],
+         ["Do NOT replace sugar with unlimited jaggery or honey (both rapidly spike blood glucose)", "Do NOT drink fruit juices (consume whole fruit with fiber in moderation)"],
+         "American Diabetes Association (ADA) & ICMR Dietary Guidelines for Indians", "draft", None),
+
+        ("nut_hypertension_dash_002", "DASH Diet for High Blood Pressure (Hypertension)", ["dash diet", "high bp diet", "blood pressure diet", "salt restriction bp", "hypertension food"],
+         [
+             "Strictly reduce salt (sodium) intake to less than 1 level teaspoon (5 grams of salt / 2000 mg of sodium) per day across all cooking.",
+             "Adopt the DASH (Dietary Approaches to Stop Hypertension) eating plan: abundant vegetables, fruits, whole grains, beans, and low-fat dairy.",
+             "Increase potassium-rich natural foods (spinach, bananas, tomatoes, oranges, beans) which help your blood vessel walls relax and flush out excess sodium (only if your kidneys are healthy).",
+             "Avoid salty snacks: commercial namkeens, potato chips, pickles, papads, canned soups, processed cheeses, and salted butter.",
+             "Limit cooking oil to 3 to 4 teaspoons (15-20 mL) per person per day, choosing heart-healthy oils like mustard, olive, or groundnut oil."
+         ],
+         {"assessment": "DASH diet implementation for primary and secondary hypertension control. Proven to lower SBP by 8 to 14 mmHg.", "investigations": "Serum electrolytes (Na, K), Serum Creatinine (ensure adequate eGFR before potassium loading).", "management": "Sodium restriction (<2000 mg/day; optimal <1500 mg/day). Dietary potassium target 3500-5000 mg/day from whole foods. Saturated fat <6% of total energy. Moderate alcohol restriction.", "references": ["AHA/ACC Hypertension Guidelines - Nonpharmacological Interventions", "NHLBI DASH Eating Plan"]},
+         "Assess daily salt intake, hidden sodium in pickles/papads, and potassium sources.",
+         ["Extreme sodium restriction causing hyponatremia in frail elderly on thiazide diuretics", "High potassium foods taken by advanced CKD patients (Hyperkalemia risk)"],
+         ["Do NOT add extra raw salt to your plate over cooked food", "Do NOT consume salty commercial pickles, sauces, or processed namkeens"],
+         "AHA/ACC Guidelines & National Heart, Lung, and Blood Institute (NHLBI)", "draft", None),
+
+        ("nut_ckd_renal_diet_003", "Kidney Disease Diet (CKD Stages 3-5 Non-Dialysis)", ["kidney diet", "ckd food", "renal diet", "low protein kidney diet", "low potassium kidney food", "creatinine high diet"],
+         [
+             "Control dietary protein: consume moderate, high-quality protein (around 0.6 to 0.8 grams per kg body weight daily) to reduce toxic nitrogenous waste buildup in the blood.",
+             "Strictly limit salt (sodium) to less than 2 grams per day (under 1 teaspoon salt) to prevent fluid swelling and severe high blood pressure.",
+             "Monitor and restrict high-potassium foods if blood potassium is elevated: avoid coconut water, bananas, mangoes, potatoes (unless leached), oranges, and spinach.",
+             "Limit high-phosphorus foods: packaged foods with phosphate additives, dark colas, processed cheeses, and excessive organ meats to protect your bones.",
+             "Follow individual fluid limits specified by your nephrologist; do not force-drink gallons of water (damaged kidneys cannot excrete excess fluid)."
+         ],
+         {"assessment": "Renal Medical Nutrition Therapy for Chronic Kidney Disease.", "investigations": "Serum Creatinine/eGFR, Serum Electrolytes (K, Na, Bicarbonate), Serum Phosphorus, Calcium, Albumin, uACR.", "management": "Protein restriction: 0.55-0.60 g/kg/day (or 0.28-0.43 g/kg with keto-acid analogues) in non-dialysis CKD stage 3-5. Sodium < 2 g/day. Phosphorus 800-1000 mg/day. Potassium restriction (<3 g/day) tailored to serum K+.", "references": ["KDOQI Clinical Practice Guideline for Nutrition in CKD (2020 Update)", "KDIGO Guidelines"]},
+         "Verify patient's CKD stage and serum potassium before advising on fruits or fluids.",
+         ["Serum Potassium > 5.5 mEq/L (Severe Hyperkalemia Risk)", "Fluid overload with puffy ankles and breathlessness (Pulmonary Edema)"],
+         ["Do NOT drink coconut water if you have kidney disease (extremely high in potassium, can stop the heart)", "Do NOT use low-sodium salt substitutes (they replace sodium with potassium)"],
+         "KDOQI Clinical Practice Guidelines for Nutrition in CKD & KDIGO", "draft", None),
+
+        ("nut_iron_anemia_004", "Diet for Iron Deficiency Anemia (Khoon ki Kami)", ["anemia diet", "iron rich food", "hemoglobin badhane ka khana", "low hemoglobin food", "iron diet india"],
+         [
+             "Eat plant-based (non-heme) iron sources daily: spinach, fenugreek (methi), drumstick leaves (moringa), lentils, chickpeas, beetroot, dates, raisins, and jaggery.",
+             "Pair iron-rich foods with Vitamin C (lemon juice, amla/Indian gooseberry, oranges, guavas, tomatoes); Vitamin C triples iron absorption in your gut.",
+             "If you eat non-vegetarian foods: eggs, chicken, and fish provide heme iron, which is absorbed 2 to 3 times more efficiently than plant iron.",
+             "Cook in traditional cast-iron pans or skillets; small amounts of beneficial dietary iron naturally leach into the cooked food.",
+             "NEVER drink tea, coffee, or milk with your main meals; wait at least 1 to 2 hours (tannins, phytates, and calcium severely block iron absorption)."
+         ],
+         {"assessment": "Nutritional management of microcytic hypochromic iron deficiency anemia.", "investigations": "CBC (Hb, MCV, MCH), Serum Ferritin, Transferrin Saturation, Total Iron Binding Capacity.", "management": "Dietary enhancement of bioavailable iron + oral iron supplementation (elemental iron 60-100 mg/day). Co-ingestion of ascorbic acid (>=50-100 mg). Separate calcium and polyphenol intake by >= 2 hours.", "references": ["WHO Guideline: Daily Iron Supplementation in Adult Women and Adolescent Girls", "ICMR National Institute of Nutrition (NIN) Guidelines"]},
+         "Ask about tea/coffee habits with meals. Screen for heavy menstrual bleeding or GI loss.",
+         ["Severe anemia (Hb < 7.0 g/dL) requiring IV iron or transfusion rather than diet alone", "Melena (black stools) indicating active GI bleeding"],
+         ["Do NOT drink chai or coffee immediately with lunch or dinner (blocks up to 80% of iron)", "Do NOT rely on diet alone if severe clinical anemia is diagnosed"],
+         "World Health Organization (WHO) & ICMR National Institute of Nutrition (NIN)", "draft", None),
+
+        ("nut_pregnancy_diet_005", "Antenatal Nutrition & Pregnancy Diet", ["pregnancy diet", "food in pregnancy", "garbhavastha aahar", "what to eat in pregnancy", "pregnant woman nutrition", "folic acid pregnancy food"],
+         [
+             "Take 400 to 500 mcg of Folic Acid daily from before conception through the first 12 weeks of pregnancy to prevent neural tube birth defects (spina bifida).",
+             "Add approximately 300 to 350 extra nutrient-dense calories per day in the 2nd and 3rd trimesters: extra eggs, milk, curd, paneer, nuts, pulses, and sprouted grains.",
+             "Ensure adequate Calcium (1000-1200 mg daily) and Iron (27-30 mg daily) through balanced meals and prescribed antenatal supplements.",
+             "Stay well-hydrated: drink 8 to 10 glasses of clean water daily to support amniotic fluid volume and prevent urinary tract infections and constipation.",
+             "STRICTLY AVOID: Raw or undercooked eggs/meats, unpasteurized milk or soft cheeses (Listeria risk), raw papaya, unwashed raw vegetables, and all alcohol and smoking."
+         ],
+         {"assessment": "Maternal-fetal nutritional optimization and gestational weight gain monitoring per IOM/ACOG guidelines.", "investigations": "Baseline CBC, Ferritin, Fasting Blood Glucose / OGTT at 24-28 weeks, TSH, Urine routine.", "management": "Folic acid 400-500 mcg/day (5 mg/day if high-risk neural tube defect history or epilepsy). Iron 30-60 mg elemental iron + Calcium 1000 mg/day starting 2nd trimester (space apart). Target gestational weight gain based on pre-pregnancy BMI (11.5-16 kg for normal BMI).", "references": ["ACOG Practice Bulletin: Nutrition During Pregnancy", "ICMR Dietary Guidelines for Indian Pregnant Women"]},
+         "Check gestational age, pre-pregnancy BMI, and ensure iron and calcium tablets are taken at different times of day.",
+         ["Severe persistent vomiting with weight loss and ketonuria (Hyperemesis Gravidarum)", "Abnormal glucose challenge test indicating Gestational Diabetes Mellitus (GDM)"],
+         ["STRICTLY AVOID ALL ALCOHOL (causes Fetal Alcohol Spectrum Disorder)", "Do NOT consume unpasteurized raw dairy or undercooked street food"],
+         "American College of Obstetricians and Gynecologists (ACOG) & ICMR-NIN", "draft", None),
+
+        ("nut_infant_young_child_feeding_006", "Infant Feeding & Complementary Weaning (IYCF Guidelines)", ["baby feeding", "weaning baby", "complementary feeding", "annaprashan", "what to feed 6 month baby", "breastfeeding nutrition"],
+         [
+             "Exclusive breastfeeding is strongly recommended for the first 6 completed months of life; no water, formula, or other foods are needed during this period.",
+             "Start complementary feeding at exactly 6 completed months while continuing frequent breastfeeding up to 2 years and beyond.",
+             "Begin with smooth, semi-solid mashed foods: mashed dal-rice with a teaspoon of ghee, mashed banana, boiled mashed potato, ragi porridge, or vegetable purees.",
+             "Gradually increase texture and diversity: introduce 4 food groups daily (cereals, pulses, dairy/eggs, vegetables/fruits).",
+             "NEVER give honey to infants under 1 year of age (risk of life-threatening infant botulism). Do NOT add extra salt or refined sugar to infant food before 1 year."
+         ],
+         {"assessment": "Infant and Young Child Feeding (IYCF) assessment based on WHO/UNICEF standards.", "investigations": "Plot WHO Growth Charts (Weight-for-age, Length-for-age, Weight-for-length z-scores).", "management": "Counsel on exclusive breastfeeding for first 6 months. Timely initiation of safe, adequate complementary foods at 6 months (minimum dietary diversity >= 4 of 7 food groups; minimum meal frequency 2-3 times/day at 6-8 months, 3-4 times at 9-23 months).", "references": ["WHO/UNICEF Guidelines for Infant and Young Child Feeding", "National Guidelines on IYCF, MoHFW India"]},
+         "Check age in completed months. Verify growth curve on MCP card. Inquire about food consistency (thick enough not to slide off spoon).",
+         ["Severe acute malnutrition (Weight-for-height < -3 SD or bilateral pitting pedal edema)", "Infant unable to swallow or vomiting all feeds"],
+         ["NEVER give honey to a baby under 12 months of age (causes fatal Infant Botulism)", "Do NOT give plain thin watery broths (low caloric density)"],
+         "WHO/UNICEF IYCF Guidelines & Ministry of Women and Child Development India", "draft", None),
+
+        ("nut_weight_loss_obesity_007", "Healthy Sustainable Weight Loss & Calorie Deficit", ["weight loss diet", "how to lose weight", "fat loss diet", "vajan ghatane ka tarika", "calorie deficit", "healthy diet weight loss"],
+         [
+             "Aim for a safe, gradual, and sustainable weight loss of 0.5 to 1 kg (1 to 2 lbs) per week, which preserves muscle mass and prevents rebound regain.",
+             "Create a modest daily calorie deficit of 500 calories below your body's maintenance needs through a combination of healthy eating and exercise.",
+             "Fill half your plate with non-starchy vegetables and leafy greens at lunch and dinner; they provide high volume and fiber with very few calories.",
+             "Prioritize protein in every meal (eggs, paneer, tofu, lentils, chicken, fish) to preserve metabolism and keep you feeling full longer.",
+             "Avoid crash starvation diets, detox teas, and commercial fat-burner pills; they cause muscle loss, gallstones, and metabolic slowdown."
+         ],
+         {"assessment": "Assessment of Overweight/Obesity (Asian BMI >= 23 Overweight, >= 25 Obese). Screen for secondary causes (hypothyroidism, Cushing's) and metabolic complications.", "investigations": "Fasting lipid profile, Fasting glucose & HbA1c, TSH, LFTs (MASLD screen), waist-to-hip ratio.", "management": "Structured energy deficit: 500-750 kcal/day deficit. High-protein (1.2-1.5 g/kg ideal body weight), high-fiber diet. Aerobic exercise >= 150-300 min/week plus resistance training 2-3x/week. Behavioral lifestyle modification.", "references": ["AHA/ACC/TOS Guideline for the Management of Overweight and Obesity in Adults", "Endocrine Society Clinical Practice Guidelines"]},
+         "Measure BMI, waist circumference, and BP. Set realistic target (5-10% weight loss over 6 months).",
+         ["Rapid unexplained weight loss > 5 kg in 1 month without dieting (concern for malignancy/hyperthyroidism)", "Severe caloric restriction with fainting or cardiac arrhythmias"],
+         ["Do NOT skip meals to starve yourself (triggers nighttime bingeing and slows thyroid metabolism)", "Do NOT use unverified OTC fat burner pills"],
+         "AHA/ACC/The Obesity Society Guidelines & Endocrine Society", "draft", None),
+
+        ("nut_fatty_liver_diet_008", "Diet for Fatty Liver (MASLD / NAFLD)", ["fatty liver diet", "food for fatty liver", "reverse fatty liver food", "steatosis diet", "liver fat food"],
+         [
+             "Adopt a Mediterranean-style dietary pattern: olive oil, mustard oil, abundant green leafy vegetables, lentils, whole grains, nuts, and fish.",
+             "Strictly eliminate sugar-sweetened beverages: sodas, packaged fruit juices, sweetened teas, and sports drinks containing high-fructose corn syrup.",
+             "Fructose is metabolized exclusively by the liver and is directly converted into liver fat; cutting sugary drinks is the fastest way to reduce liver steatosis.",
+             "Limit saturated fats (ghee, butter, deep-fried snacks, fatty red meats, full-cream dairy) and replace them with heart-healthy monounsaturated fats.",
+             "STRICTLY AVOID ALL ALCOHOL, which adds direct toxic chemical stress to fat-loaded liver cells."
+         ],
+         {"assessment": "Nutritional management of Metabolic Dysfunction-Associated Steatohepatitis (MASH / NAFLD).", "investigations": "ALT, AST, Lipid panel, Fasting glucose, FIB-4 index, Transient Elastography (FibroScan).", "management": "Weight loss target of 7-10% to reverse hepatic steatohepatitis and fibrosis. Caloric restriction (500-1000 kcal/day deficit). Elimination of added fructose and industrial trans fats. Mediterranean dietary composition. Complete abstinence from ethanol.", "references": ["AASLD Practice Guidance on NAFLD", "EASL-EASD-EASO Clinical Practice Guidelines on MASLD"]},
+         "Screen for daily intake of sugary beverages and commercial fruit juices. Check waist circumference.",
+         ["Decompensated cirrhosis signs: jaundice, ascites, or hematemesis", "AST/ALT persistently > 3x upper limit of normal"],
+         ["Do NOT drink sodas, sweetened juices, or packaged fruit drinks (fructose directly drives liver fat)", "Do NOT drink alcohol in any quantity"],
+         "American Association for the Study of Liver Diseases (AASLD) & EASL Guidelines", "draft", None),
+
+        ("nut_gout_purines_009", "Low-Purine Diet for Gout & High Uric Acid", ["gout diet", "high uric acid food", "uric acid food to avoid", "purine diet", "gout meal plan"],
+         [
+             "Strictly avoid very high-purine foods: organ meats (liver, kidneys, brain), red meats (mutton, beef), and seafood (anchovies, sardines, mackerel, shrimp).",
+             "Strictly avoid beer and grain spirits; beer is loaded with purines and alcohol severely blocks uric acid excretion by your kidneys.",
+             "Eliminate sodas, packaged juices, and sweets containing high-fructose corn syrup, which biochemically drives rapid uric acid production in body cells.",
+             "Drink 2.5 to 3 liters of water daily to assist your kidneys in continuously flushing out uric acid crystals.",
+             "Enjoy low-fat dairy products (milk, curd, yogurt) and coffee in moderation, which have been scientifically proven to help lower uric acid levels."
+         ],
+         {"assessment": "Nutritional management of hyperuricemia and crystal-proven gout.", "investigations": "Serum Urate, 24-hour urinary uric acid if indicated, Serum Creatinine.", "management": "Restrict high-purine animal protein. Eliminate alcohol (especially beer) and high-fructose corn syrup. Encourage low-fat dairy and adequate hydration. Maintain co-prescribed urate-lowering pharmacotherapy (Allopurinol).", "references": ["ACR Guideline for the Management of Gout", "EULAR Evidence-Based Recommendations for Gout"]},
+         "Inquire about beer consumption and intake of mutton/organ meats. Verify hydration.",
+         ["Acute hot, exquisitely tender first metatarsophalangeal joint (Acute Gouty Podagra)", "Uric acid kidney stones causing severe flank colic"],
+         ["Do NOT drink beer or sugary high-fructose sodas", "Do NOT consume organ meats or excessive mutton"],
+         "American College of Rheumatology (ACR) Gout Guidelines", "draft", None),
+
+        ("nut_gerd_acid_reflux_010", "Diet for Acid Reflux, GERD & Acidity", ["acidity diet", "gerd food to avoid", "heartburn diet", "acid reflux food plan", "khatti dakar food"],
+         [
+             "Eat smaller, more frequent meals throughout the day rather than two huge, heavy meals.",
+             "Never lie down flat for at least 2 to 3 hours immediately after eating dinner; give gravity time to keep stomach acid down.",
+             "Avoid common dietary acid triggers: deep-fried oily foods, spicy chili, raw onions, garlic, tomatoes, citrus fruits (lemons, oranges), chocolate, and peppermint.",
+             "Avoid carbonated sparkling drinks, black coffee, and alcohol, which relax the lower esophageal sphincter valve.",
+             "Choose soothing foods: oats, bananas, melons, steamed vegetables, plain khichdi, and non-citrus fruits."
+         ],
+         {"assessment": "Dietary modification for Gastroesophageal Reflux Disease (GERD) and Non-Erosive Reflux Disease (NERD).", "investigations": "Upper GI endoscopy if alarm features (dysphagia, weight loss, GI bleeding).", "management": "Avoid recumbency within 3 hours postprandially. Weight loss in overweight/obese patients. Elevate head of bed by 15 cm. Eliminate individual symptom triggers (caffeine, chocolate, high-fat meals, mint).", "references": ["ACG Clinical Guideline for the Diagnosis and Management of GERD", "AGA Clinical Practice Updates"]},
+         "Ask about dinner-to-bed interval and late-night snacking. Check for dysphagia.",
+         ["Difficulty or pain when swallowing food (Dysphagia/Odynophagia - Alarm Flag)", "Vomiting blood or black stools"],
+         ["Do NOT eat large heavy dinners right before sleeping", "Do NOT consume raw citrus, vinegar, or black coffee on an empty stomach"],
+         "American College of Gastroenterology (ACG) & AGA Guidelines", "draft", None),
+
+        ("nut_constipation_fiber_011", "High-Fiber Diet for Constipation & Colon Health", ["fiber diet", "constipation food", "kabz ka khana", "high fiber foods india", "isabgol husk", "roughage diet"],
+         [
+             "Gradually increase your dietary fiber intake to 25 to 30 grams per day by eating whole grains, oats, barley, lentils, beans, peas, and chia seeds.",
+             "Eat whole unpeeled fruits (apples, pears, plums, guavas) and raw vegetables rather than drinking strained juices.",
+             "Prunes, figs (anjeer), and papayas contain natural sorbitol and enzymes that stimulate gentle, natural bowel contractions.",
+             "Drink 8 to 10 glasses of water throughout the day; fiber requires ample water to form soft, bulky, easy-to-pass stools.",
+             "If needed, natural bulk-forming psyllium husk (Isabgol: 1 to 2 tablespoons in a large glass of warm water or milk at bedtime) can provide gentle relief."
+         ],
+         {"assessment": "Nutritional management of chronic functional constipation.", "investigations": "Review fluid intake and daily fiber grams. Exclude secondary causes (hypothyroidism, medications, obstruction).", "management": "Target 25-30 g/day total dietary fiber (soluble and insoluble). Soluble bulk-forming supplement (Psyllium husk / Ispaghula) with adequate fluid intake (>= 2 L/day). Regular physical activity to enhance colonic transit.", "references": ["AGA Institute Technical Review on Constipation", "World Gastroenterology Organisation (WGO) Practice Guidelines"]},
+         "Emphasize increasing water intake alongside fiber (fiber without water worsens fecal impaction).",
+         ["Complete obstipation (unable to pass stool and gas) with severe vomiting (Bowel Obstruction)", "Rectal bleeding or sudden change in bowel habits in adults > 50y"],
+         ["Do NOT take dry fiber powder or psyllium husk without drinking plenty of water (can cause choking or intestinal blockage)", "Do NOT rely permanently on harsh chemical laxatives"],
+         "American Gastroenterological Association (AGA) & WGO Guidelines", "draft", None),
+
+        ("nut_diarrhea_recovery_brat_012", "Diet for Diarrhea Recovery (BRAT & Rehydration)", ["diarrhea diet", "loose motion food", "dast me kya khaye", "brat diet", "food during diarrhea", "recovery food diarrhea"],
+         [
+             "Priority number one: Replace lost fluids and salts with WHO Oral Rehydration Solution (ORS), coconut water, clear salted rice kanji, and water.",
+             "When ready to eat solids, choose bland, easily digestible foods (the BRAT diet: Bananas, Rice/Khichdi, Applesauce, and plain Toast).",
+             "Curd (fresh yogurt) contains beneficial probiotics (Lactobacillus) that help restore healthy gut bacteria and speed intestinal healing.",
+             "Avoid dairy milk, butter, cheese, and cream temporarily, as viral or bacterial diarrhea causes temporary lactose intolerance.",
+             "Avoid spicy curries, deep-fried snacks, artificial sweeteners, caffeine, and raw salads until your stool completely firms up."
+         ],
+         {"assessment": "Dietary management during and immediately following acute infectious diarrhea.", "investigations": "Assess hydration status (WHO Plan A, B, C). Stool microscopy if dysentery.", "management": "Continuous oral rehydration therapy (WHO ORS). Early resumption of age-appropriate bland, low-fat, low-residue diet (complex carbohydrates, lean poultry, yogurt). Temporary avoidance of lactose and hyperosmolar simple sugars.", "references": ["WHO/UNICEF Guidelines on Clinical Management of Acute Diarrhea", "ACG Clinical Guideline on Acute Diarrheal Infections"]},
+         "Check for signs of dehydration. Confirm correct WHO ORS packet reconstitution (1 packet in 1 liter clean water).",
+         ["Visible blood in stool with high fever (Dysentery)", "Signs of severe dehydration: unrecordable BP, sunken eyes, skin pinch > 2 seconds"],
+         ["Do NOT starve the patient during diarrhea (early feeding speeds intestinal mucosal repair)", "Do NOT consume commercial sodas or sugary fruit drinks (hyperosmolar sugars worsen diarrhea)"],
+         "World Health Organization (WHO) & American College of Gastroenterology", "draft", None),
+
+        ("nut_celiac_gluten_free_013", "Gluten-Free Diet for Celiac Disease", ["celiac diet", "gluten free diet", "gluten allergy food", "wheat allergy diet", "wheat free food india"],
+         [
+             "Strictly eliminate ALL foods containing gluten: wheat (gehun), barley (jau), rye, and contaminated oats.",
+             "Gluten is found in common everyday foods: roti, paratha, bread, naan, biscuits, pasta, suji (semolina), maida, sevaiyan, and beer.",
+             "Enjoy naturally gluten-free grains: rice, corn/maize (makka), millets (ragi, jowar, bajra), amaranth (rajgira), buckwheat (kuttu), and arrowroot.",
+             "Read packaged food labels carefully: watch for hidden gluten in soy sauce, processed gravies, salad dressings, and spice mixes.",
+             "Prevent kitchen cross-contamination: use separate tawa/skillets, toasters, and utensils for gluten-free cooking."
+         ],
+         {"assessment": "Lifelong strict gluten-free diet (GFD) for biopsy-proven Celiac Disease (autoimmune enteropathy triggered by dietary gluten).", "investigations": "Anti-tissue Transglutaminase (anti-tTG IgA), total serum IgA, duodenal biopsy (Marsh classification). Repeat anti-tTG at 6-12 months to monitor dietary compliance.", "management": "Complete exclusion of all wheat, barley, rye, and non-certified oats. Nutritional supplementation for deficiencies (iron, folate, calcium, vitamin D, vitamin B12). Consultation with a specialized celiac dietitian.", "references": ["ACG Clinical Guidelines: Diagnosis and Management of Celiac Disease", "ESPGHAN Guidelines for Diagnosing Coeliac Disease"]},
+         "Confirm biopsy or serological diagnosis before advising lifelong GFD. Check for micronutrient deficiencies.",
+         ["Refractory celiac disease with severe malabsorption, weight loss, and recurrent ulcers", "Accidental severe gluten ingestion causing acute enteropathy"],
+         ["Do NOT start a gluten-free diet BEFORE undergoing diagnostic blood tests and biopsy (masks the diagnosis)", "Do NOT ignore cross-contamination from shared toaster or cooking surfaces"],
+         "American College of Gastroenterology (ACG) & ESPGHAN Guidelines", "draft", None),
+
+        ("nut_osteoporosis_bone_014", "Diet for Bone Health & Osteoporosis (Calcium & Vit D)", ["osteoporosis diet", "calcium rich food", "bone health food", "calcium diet india", "weak bones food"],
+         [
+             "Consume 1000 to 1200 mg of dietary Calcium daily: 2 to 3 servings of dairy (milk, curd, paneer), fortified plant milk, sesame seeds (til), ragi, almonds, and dark leafy greens.",
+             "Incorporate Ragi (finger millet) into your rotis and porridges; ragi is one of the richest plant sources of calcium (over 340 mg per 100g).",
+             "Ensure adequate Vitamin D3 through morning sun exposure (15-20 minutes) and doctor-prescribed supplements to enable intestinal calcium absorption.",
+             "Include dietary Magnesium, Zinc, and Vitamin K (found in green leafy vegetables, seeds, and nuts) which form the bone protein matrix.",
+             "Limit excessive caffeine, carbonated colas, and heavy alcohol intake, which promote urinary calcium excretion."
+         ],
+         {"assessment": "Nutritional management of low bone mineral density, osteopenia, and osteoporosis.", "investigations": "DEXA scan, Serum Calcium, 25-OH Vitamin D, Serum Creatinine, Alkaline Phosphatase.", "management": "Dietary calcium target 1000-1200 mg/day (prefer dietary over high-dose pills to minimize vascular calcification risk). Vitamin D3 supplementation 800-2000 IU/day. Protein intake 1.0-1.2 g/kg/day to support bone matrix.", "references": ["NOF (National Osteoporosis Foundation) Clinician's Guide", "International Osteoporosis Foundation (IOF) Guidelines"]},
+         "Calculate dietary calcium intake before adding supplements. Review 25-OH Vitamin D levels.",
+         ["Acute severe back pain following minor bend (Acute Vertebral Fracture)", "Hypercalcemia (Calcium > 11.0 mg/dL) with confusion and constipation"],
+         ["Do NOT take high-dose calcium pills (>1200 mg) all in a single dose (split into 500 mg doses for absorption)", "Do NOT consume excessive dark colas (phosphoric acid leaches bone calcium)"],
+         "International Osteoporosis Foundation (IOF) & National Osteoporosis Foundation", "draft", None),
+
+        ("nut_heart_healthy_cholesterol_015", "Heart-Healthy Mediterranean Diet for Cholesterol & Heart Disease", ["heart diet", "cholesterol lowering food", "heart healthy meal", "cardiac diet", "artery health food"],
+         [
+             "Replace saturated and trans fats (ghee, butter, palm oil, deep-fried snacks, fatty red meat) with heart-healthy unsaturated fats (olive oil, mustard oil, nuts, seeds, avocados).",
+             "Eat foods rich in soluble fiber (oats, barley, beans, lentils, flaxseeds, apples); soluble fiber traps cholesterol particles in the digestive tract and drags them out of the body.",
+             "Consume a handful (30 grams) of unsalted nuts daily (walnuts, almonds), which are packed with plant omega-3 fatty acids and antioxidants.",
+             "Incorporate fatty fish (salmon, mackerel, sardines) twice a week, or plant-based omega-3 sources like chia seeds and walnuts.",
+             "Eat at least 5 servings of colorful fruits and vegetables daily; their plant sterols and polyphenols reduce arterial inflammation."
+         ],
+         {"assessment": "Cardiovascular risk reduction through cardioprotective dietary patterns (Mediterranean and AHA Diet).", "investigations": "Fasting lipid profile (Total, LDL-C, HDL-C, Triglycerides), hs-CRP, 10-year ASCVD risk calculation.", "management": "Saturated fat < 5-6% of total calories. Eliminate industrial trans fatty acids. Plant stanols/sterols 2 g/day. Viscous soluble fiber 10-25 g/day. Polyunsaturated and monounsaturated fatty acids replacing saturated fats.", "references": ["AHA Dietary Guidance to Improve Cardiovascular Health", "ESC/EAS Guidelines for the Management of Dyslipidaemias"]},
+         "Assess daily intake of saturated fats, bakery trans-fats, and fried snacks. Check LDL-C goal.",
+         ["LDL-C > 190 mg/dL requiring intensive statin therapy in addition to diet", "Severe hypertriglyceridemia > 500 mg/dL"],
+         ["Do NOT consume foods containing partially hydrogenated vegetable oils (commercial bakery items)", "Do NOT rely on diet alone if secondary prevention statin therapy is prescribed"],
+         "American Heart Association (AHA) & European Society of Cardiology (ESC)", "draft", None),
+
+        ("nut_pcos_diet_016", "Diet for PCOS & Insulin Resistance", ["pcos diet", "pcod food", "insulin resistance diet", "pcos weight loss food", "hormone balance diet"],
+         [
+             "Focus on low-glycemic, anti-inflammatory whole foods to combat underlying insulin resistance, the primary driver of PCOS symptoms.",
+             "Choose complex unrefined carbohydrates: millets, quinoa, brown rice, steel-cut oats, and legumes instead of white bread, maida, and polished rice.",
+             "Pair every carbohydrate with lean protein or healthy fats (e.g., apple slices with peanut butter, or dal with vegetables) to flatten blood sugar curves.",
+             "Incorporate anti-inflammatory spices: turmeric (haldi), cinnamon (dalchini), ginger, and green tea to help regulate insulin sensitivity.",
+             "Strictly avoid sugary sweets, pastries, sodas, and ultra-processed junk food, which spike androgen hormones and worsen facial hair and acne."
+         ],
+         {"assessment": "Nutritional management of Polycystic Ovary Syndrome (PCOS) and associated metabolic/insulin resistance phenotype.", "investigations": "Fasting glucose and insulin (HOMA-IR), HbA1c, Lipid panel, Total and Free Testosterone, DHEAS, Pelvic Ultrasound.", "management": "Target 5-10% weight loss in overweight patients (significantly restores ovulatory cycles). Low-GI, high-fiber, anti-inflammatory dietary pattern. Inositol supplementation (Myo-inositol to D-chiro-inositol in 40:1 ratio) can be considered. Regular aerobic and resistance training.", "references": ["International Evidence-Based Guideline for the Assessment and Management of PCOS", "Androgen Excess and PCOS Society Guidelines"]},
+         "Review menstrual cycle history, hirsutism/acne severity, and fasting glucose/insulin.",
+         ["Acanthosis nigricans (velvety dark patches on neck/axillae indicating severe insulin resistance)", "Sudden abnormal uterine bleeding"],
+         ["Do NOT follow extreme zero-carb starvation diets (causes hormonal rebound and cortisol spikes)", "Do NOT consume sugary sodas and packaged desserts"],
+         "International PCOS Guideline Network & Androgen Excess and PCOS Society", "draft", None),
+
+        ("nut_elderly_malnutrition_017", "Nutrition in Elderly & Preventing Sarcopenia (Muscle Loss)", ["elderly diet", "senior citizen nutrition", "sarcopenia diet", "weakness in old age food", "muscle loss elderly food"],
+         [
+             "Increase daily protein intake (1.0 to 1.2 grams per kg body weight) to counteract age-related muscle wasting (sarcopenia) and prevent fall injuries.",
+             "Distribute protein evenly across all 3 meals: eggs or paneer at breakfast, dal/chicken/fish at lunch, and milk or legumes at dinner.",
+             "If chewing is difficult due to dental issues: provide soft, moist, nutrient-dense foods (khichdi with ghee, soft paneer bhurji, mashed dal, stewed fruits, smoothies).",
+             "Ensure adequate hydration: older adults have a blunted thirst sensation; schedule water, buttermilk, or clear soups every 2 hours throughout the day.",
+             "Pair protein-rich nutrition with gentle resistance exercises (chair squats, light hand weights) to rebuild leg strength and balance."
+         ],
+         {"assessment": "Nutritional assessment in geriatric population. Screen for sarcopenia, dysphagia, and involuntary weight loss.", "investigations": "Mini Nutritional Assessment (MNA), Serum Albumin, CBC, Serum B12, 25-OH Vitamin D, Handgrip strength test.", "management": "High-protein diet (1.2-1.5 g/kg/day in acute/chronic illness). Oral Nutritional Supplements (ONS) between meals if oral intake <75% of requirements. Vitamin D3 1000-2000 IU/day. Address dentition, taste changes, and polypharmacy.", "references": ["ESPEN Guidelines on Clinical Nutrition and Hydration in Geriatrics", "PROT-AGE Study Group Recommendations"]},
+         "Administer MNA screening. Assess swallowing safety and dentition.",
+         ["Involuntary weight loss > 5% in 3 months or > 10% in 6 months", "Coughing or choking during liquid feeds (Dysphagia aspiration risk)"],
+         ["Do NOT restrict protein in healthy elderly individuals (older adults require MORE protein per kg than young adults to maintain muscle)", "Do NOT ignore sudden loss of appetite"],
+         "European Society for Clinical Nutrition and Metabolism (ESPEN) & PROT-AGE", "draft", None),
+
+        ("nut_tuberculosis_recovery_018", "High-Protein Nutritional Support for Tuberculosis Recovery", ["tb diet", "tuberculosis food", "weight gain in tb", "nikshay poshan food", "nutrition during tb treatment"],
+         [
+             "A high-protein, calorie-dense diet is essential during TB treatment to repair lung tissue damage, rebuild lost weight, and strengthen your immune defense.",
+             "Eat protein-rich foods with every meal: eggs, whole milk, curd, paneer, lentils, chickpeas, soybeans, chicken, and fish.",
+             "Consume healthy fats and energy-dense foods: add a spoonful of ghee or butter to khichdi, eat roasted peanuts, almonds, walnuts, and bananas.",
+             "Take your prescribed daily Pyridoxine (Vitamin B6 10-25 mg) supplement to prevent nerve tingling and numbness caused by the TB medicine Isoniazid.",
+             "STRICTLY AVOID ALL ALCOHOL and smoking; combining alcohol with anti-TB medications triggers severe, potentially fatal drug-induced liver failure."
+         ],
+         {"assessment": "Nutritional assessment in active pulmonary and extrapulmonary tuberculosis (TB cachexia / wasting syndrome).", "investigations": "Monthly weight monitoring, BMI, baseline and serial LFTs (ALT/AST, Bilirubin), CBC, Serum Albumin.", "management": "Energy requirement: 35-40 kcal/kg ideal body weight/day. Protein requirement: 1.2-1.5 g/kg/day. Micronutrient supplementation (Vitamin A, B-complex including Pyridoxine, C, D, E, Zinc, Selenium). Link patient to Nikshay Poshan Yojana for financial nutritional support.", "references": ["WHO Guideline: Nutritional Care and Support for Patients with Tuberculosis", "Central TB Division, MoHFW India: Guidance Document on Nutritional Care"]},
+         "Weigh patient monthly. Link to direct benefit transfer (Nikshay Poshan Yojana). Emphasize absolute alcohol avoidance.",
+         ["Jaundice, vomiting, or dark tea-colored urine (Drug-Induced Liver Injury from anti-TB drugs)", "Progressive weight loss despite anti-TB therapy"],
+         ["STRICTLY AVOID ALCOHOL (combining with Rifampicin/Isoniazid destroys liver cells)", "Do NOT stop eating when nauseous; take small frequent meals"],
+         "World Health Organization (WHO) & Central TB Division, MoHFW India", "draft", None),
+
+        ("nut_migraine_diet_triggers_019", "Dietary Triggers & Nutrition for Migraine Prevention", ["migraine diet", "migraine food triggers", "headache food to avoid", "tyramine migraine", "caffeine migraine"],
+         [
+             "RULE NUMBER ONE: Never skip meals or delay eating; sudden dips in blood glucose are one of the most powerful and common triggers for acute migraine attacks.",
+             "Identify and track potential dietary triggers using a headache food diary: aged cheeses (cheddar, parmesan rich in tyramine), processed meats with nitrates, MSG, and chocolate.",
+             "Be mindful of caffeine: small amounts can relieve headaches, but irregular caffeine spikes and sudden caffeine withdrawal trigger rebound migraines. Keep daily intake consistent.",
+             "Avoid artificial sweeteners (like aspartame) and alcoholic drinks, especially red wine and beer which contain sulfites and histamines.",
+             "Stay well-hydrated throughout the day: drink at least 2 to 2.5 liters of water daily, as mild dehydration frequently initiates head pain."
+         ],
+         {"assessment": "Nutritional and lifestyle trigger identification for migraine prophylaxis.", "investigations": "Headache and dietary trigger diary for 4 to 8 weeks.", "management": "Regular meal scheduling (avoid fasting/skipping meals). Adequate hydration (>= 2 L/day). Trial elimination of suspected dietary triggers (tyramine-rich aged foods, nitrates, MSG, aspartame, alcohol). Evidence-based nutraceuticals: Magnesium Glycinate/Citrate (400-600 mg/day), Riboflavin / Vitamin B2 (400 mg/day), Coenzyme Q10 (100-300 mg/day).", "references": ["American Headache Society (AHS) Guidelines", "International Headache Society Recommendations"]},
+         "Review food diary for missed meals and caffeine withdrawal patterns.",
+         ["Thunderclap sudden severe headache reaching peak in 1 minute", "Headache accompanied by fever, neck rigidity, or focal neurologic deficit"],
+         ["Do NOT skip breakfast or fast for prolonged hours if prone to migraines", "Do NOT abruptly stop heavy daily coffee consumption (triggers severe withdrawal migraine)"],
+         "American Headache Society (AHS) & International Headache Society", "draft", None),
+
+        ("nut_food_allergies_anaphylaxis_020", "Food Allergies & Anaphylaxis Prevention", ["food allergy", "peanut allergy", "milk allergy", "egg allergy", "shellfish allergy", "food allergy symptoms"],
+         [
+             "Common food allergens include peanuts, tree nuts, cow's milk, eggs, wheat, soy, fish, and shellfish.",
+             "Always read ingredient labels on packaged foods meticulously; look for advisory statements like 'May contain traces of nuts or milk'.",
+             "Recognize mild allergic symptoms: hives, itchy skin rash, swelling of lips or eyelids, runny nose, or mild stomach cramps.",
+             "RECOGNIZE SEVERE ANAPHYLAXIS (MEDICAL EMERGENCY): Swelling of the tongue or throat, hoarse voice, difficulty breathing, wheezing, dizziness, or fainting.",
+             "If anaphylaxis occurs: inject your Epinephrine Auto-Injector (EpiPen) into the outer mid-thigh immediately and call 112 emergency services without delay."
+         ],
+         {"assessment": "IgE-mediated Food Allergy vs Non-IgE Food Intolerance / Celiac Disease. Risk assessment for fatal food-induced anaphylaxis.", "investigations": "Serum food-specific IgE (ImmunoCAP), Skin Prick Testing under specialist allergy supervision. Oral Food Challenge (gold standard, strictly conducted in hospital setting with resuscitation equipment).", "management": "Complete strict avoidance of confirmed allergen. Prescription of Epinephrine Auto-Injector (0.3 mg for adults, 0.15 mg for children 15-30 kg) with written Anaphylaxis Emergency Action Plan. Educate patient/school on cross-contact prevention.", "references": ["EAACI Guidelines on Food Allergy and Anaphylaxis", "WAO (World Allergy Organization) Anaphylaxis Guidelines"]},
+         "Verify patient carries twin-pack Epinephrine auto-injector at all times. Check expiry date.",
+         ["Stridor, tongue/airway swelling, wheezing, or hypotensive collapse within minutes of food ingestion (Anaphylaxis - STAT Epinephrine)", "Biphasic anaphylactic recurrence"],
+         ["Do NOT hesitate to inject Epinephrine if airway or breathing is involved", "Do NOT test suspected food allergens at home without medical supervision"],
+         "European Academy of Allergy and Clinical Immunology (EAACI) & World Allergy Organization", "draft", None)
+    ]
+
+    out = []
+    for nid, topic, kw, p_ans, doc_a, staff_m, red_f, avoid_l, src, rev_st, rev_by in nut:
+        out.append({
+            "id": nid,
+            "topic": f"Nutrition & Diet: {topic}",
+            "category": "nutrition",
+            "keywords": kw,
+            "intent": "chronic_condition_guidance",
+            "patient_answer": p_ans,
+            "doctor_answer": doc_a,
+            "staff_answer": staff_m,
+            "red_flags": red_f,
+            "follow_up_questions": ["What is your current medical condition and daily dietary routine?", "Do you have any food intolerances, allergies, or cultural dietary preferences?", "Are you taking any medications that interact with food or potassium/sodium?"],
+            "avoid": avoid_l,
+            "source": src,
+            "review_status": rev_st,
+            "reviewed_by": rev_by
+        })
+    return out
