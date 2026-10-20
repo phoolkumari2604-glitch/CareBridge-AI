@@ -4,19 +4,23 @@ import { AlertCircle, RefreshCw, Activity } from "lucide-react";
 export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, remountKey: 0 };
   }
 
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, errorInfo) {
-    console.error("CareBridge BodyExplorer Phase 2 caught an error:", error, errorInfo);
+  componentDidCatch(error, info) {
+    console.error(error, info?.componentStack || info);
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState((prevState) => ({
+      hasError: false,
+      error: null,
+      remountKey: (prevState.remountKey || 0) + 1,
+    }));
   };
 
   render() {
@@ -88,7 +92,11 @@ export class ErrorBoundary extends React.Component {
       );
     }
 
-    return this.props.children;
+    return (
+      <React.Fragment key={this.state.remountKey}>
+        {this.props.children}
+      </React.Fragment>
+    );
   }
 }
 

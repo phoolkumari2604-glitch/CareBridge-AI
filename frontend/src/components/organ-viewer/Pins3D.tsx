@@ -76,10 +76,12 @@ const SinglePin: React.FC<SinglePinProps> = ({
   // Reusable vector objects to avoid per-frame GC allocations
   const worldPos = useMemo(() => new THREE.Vector3(), []);
   const camDir = useMemo(() => new THREE.Vector3(), []);
-  const normalVec = useMemo(
-    () => new THREE.Vector3(...marker.normal).normalize(),
-    [marker.normal]
-  );
+  const normalVec = useMemo(() => {
+    if (Array.isArray(marker.normal) && marker.normal.length >= 3) {
+      return new THREE.Vector3(...marker.normal).normalize();
+    }
+    return new THREE.Vector3(0, 0, 1);
+  }, [marker.normal]);
 
   // Trigger camera fly-to when selected from outside
   useEffect(() => {
@@ -132,7 +134,14 @@ const SinglePin: React.FC<SinglePinProps> = ({
   };
 
   return (
-    <group ref={pinGroupRef} position={marker.position}>
+    <group
+      ref={pinGroupRef}
+      position={
+        Array.isArray(marker.position) && marker.position.length >= 3
+          ? marker.position
+          : [0, 0, 1]
+      }
+    >
       {/* 3D Pin Core Mesh */}
       <mesh
         ref={meshRef}
