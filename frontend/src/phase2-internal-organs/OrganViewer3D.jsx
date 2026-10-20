@@ -18,6 +18,7 @@ import {
 import { getOrganConfig } from "./organs.config.js";
 import { useAuth } from "../context/AuthContext";
 import patientService from "../services/patientService";
+import ThreeOrganViewer, { toViewerMarkers } from "../components/organ-viewer";
 
 export function OrganViewer3D({
   organId,
@@ -26,6 +27,7 @@ export function OrganViewer3D({
   onSelectOrgan,
   onOpenPanel,
   patientId = null,
+  patientData = {},
 }) {
   const { user } = useAuth();
   const isDoctor = (user?.role || "").toUpperCase() === "DOCTOR";
@@ -57,6 +59,7 @@ export function OrganViewer3D({
   const config = getOrganConfig(organId);
   const organKey = organId || "kidneys";
   const isBrain = organKey === "brain";
+  const isIntestines = organKey === "intestines";
 
   // State for Problem Markers & 4 Clinical Boxes
   const [findings, setFindings] = useState([]);
@@ -236,6 +239,10 @@ export function OrganViewer3D({
       ? "/assets/organs/brain-realistic.png"
       : organKey === "lungs"
       ? "/assets/organs/lungs-realistic.png"
+      : organKey === "pancreas"
+      ? "/assets/organs/pancreas-realistic.png"
+      : organKey === "intestines"
+      ? "/assets/organs/intestines-realistic.png"
       : config?.imageSrc || `/assets/organs/${organKey}.jpg`;
 
   // Status Color & Animation Class Resolution
@@ -495,34 +502,52 @@ export function OrganViewer3D({
 
   return (
     <div className="organ-viewer-composite-container">
-      {/* ── 1. MAIN 3D / IMAGE VIEWPORT ── */}
-      <div
-        ref={containerRef}
-        className={`organ-3d-viewport ${isBrain ? "brain-viewport-container" : ""} ${isDragging ? "is-orbiting" : ""}`}
-        tabIndex={0}
-        role="region"
-        aria-label={`Realistic Clinical Media Viewer of ${config?.name || "Organ"}.`}
-        onWheel={handleWheel}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        style={{
-          cursor: isDoctor
-            ? isAddingPin
-              ? "crosshair"
+      {/* ── 1. MAIN 3D / IMAGE VIEWPORT (Three.js WebGL for Lungs, 2D fallback/preserved for revert) ── */}
+      {organKey === "lungs" ? (
+        <ThreeOrganViewer
+          organ="lungs"
+          markers={toViewerMarkers(findings)}
+          selectedMarkerId={selectedPinId}
+          onSelectMarker={(id) => {
+            const found = findings.find((f) => String(f.id) === String(id));
+            if (found) {
+              handleSelectPoint(found);
+            } else {
+              setSelectedPinId(id);
+            }
+          }}
+          respRate={patientData?.vitals?.respiratory_rate || config?.breathingRate || 16}
+          isLive={true}
+        />
+      ) : (
+        /* Legacy Viewport Card (Preserved for non-lungs and easy reversion) */
+        <div
+          ref={containerRef}
+          className={`organ-3d-viewport ${isBrain ? "brain-viewport-container" : ""} ${isDragging ? "is-orbiting" : ""}`}
+          tabIndex={0}
+          role="region"
+          aria-label={`Realistic Clinical Media Viewer of ${config?.name || "Organ"}.`}
+          onWheel={handleWheel}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          style={{
+            cursor: isDoctor
+              ? isAddingPin
+                ? "crosshair"
+                : zoomScale > 1.0
+                ? isDragging
+                  ? "grabbing"
+                  : "grab"
+                : "default"
               : zoomScale > 1.0
               ? isDragging
                 ? "grabbing"
                 : "grab"
-              : "default"
-            : zoomScale > 1.0
-            ? isDragging
-              ? "grabbing"
-              : "grab"
-            : "default",
-          backgroundColor: "#030712",
-        }}
-      >
+              : "default",
+            backgroundColor: "#030712",
+          }}
+        >
         {/* Background & Particles */}
         <div className={`organ-media-wrapper ${isBrain ? "brain-moving-bg" : ""}`}>
           {isBrain && (
@@ -548,9 +573,9 @@ export function OrganViewer3D({
             }}
             onClick={handleImageClick}
           >
-            {/* Stage maintaining 1:1 aspect ratio matching the kidney cross section image without stretching/cropping */}
+            {/* Stage maintaining aspect ratio matching the realistic organ image without stretching/cropping */}
             <div
-              className="organ-image-stage"
+              className={`organ-image-stage ${isIntestines ? "intestines-stage" : ""}`}
               style={{
                 position: "relative",
                 display: "flex",
@@ -558,12 +583,12 @@ export function OrganViewer3D({
                 justifyContent: "center",
                 maxWidth: "100%",
                 maxHeight: "100%",
-                aspectRatio: "1 / 1",
-                width: "100%",
+                aspectRatio: isIntestines ? "3 / 4" : "1 / 1",
+                width: isIntestines ? "auto" : "100%",
                 height: "100%",
               }}
             >
-              {/* Slow pulsing glow behind the kidney (2.5s ease-in-out infinite, color follows status) */}
+              {/* Slow pulsing glow behind the organ (2.5s ease-in-out infinite, color follows status) */}
               {!reducedMotion && (
                 <div
                   className={`organ-behind-glow ${statusGlowClass}`}
@@ -606,6 +631,11 @@ export function OrganViewer3D({
                 {/* Subtle Neural Activity Shimmer across Brain Surface every 5s */}
                 {isBrain && !reducedMotion && (
                   <div className="brain-neural-shimmer-overlay" aria-hidden="true" />
+                )}
+
+                {/* Subtle Peristaltic Gut Movement Wave across Intestine Coils */}
+                {isIntestines && !reducedMotion && (
+                  <div className="intestines-peristalsis-wave" aria-hidden="true" />
                 )}
               </div>
 
@@ -790,6 +820,7 @@ export function OrganViewer3D({
           </div>
         )}
       </div>
+      )}
 
       {/* ── DOCTOR PIN MODAL (ADD / EDIT PIN) ── */}
       {pinModal && isDoctor && (

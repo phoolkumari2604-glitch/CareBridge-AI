@@ -387,6 +387,51 @@
   }
 }
 
+/* ==========================================================================
+   INTESTINES: SUBTLE PERISTALTIC GUT MOVEMENT WAVE & PORTRAIT STAGE
+   ========================================================================== */
+.intestines-peristalsis-wave {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(245, 158, 11, 0.0) 25%,
+    rgba(251, 191, 36, 0.12) 48%,
+    rgba(254, 243, 199, 0.18) 50%,
+    rgba(251, 191, 36, 0.12) 52%,
+    rgba(245, 158, 11, 0.0) 75%,
+    transparent 100%
+  );
+  background-size: 100% 200%;
+  animation: intestines-peristalsis 6s ease-in-out infinite;
+  mix-blend-mode: screen;
+  z-index: 3;
+}
+
+@keyframes intestines-peristalsis {
+  0% {
+    background-position: 0% -100%;
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    background-position: 0% 100%;
+    opacity: 0.15;
+  }
+}
+
+.organ-image-stage.intestines-stage {
+  aspect-ratio: 3 / 4;
+  max-height: 100%;
+}
+
 /* BRAIN LIVE BADGE: black pill with red dot blinking every 1.2s */
 .brain-live-pill-badge {
   display: inline-flex;
@@ -437,6 +482,8 @@
   .live-dot-indicator,
   .pain-point-core,
   .pain-point-ripple,
+  .brain-neural-shimmer-overlay,
+  .intestines-peristalsis-wave,
   .organ-pin-marker,
   .organ-pin-core,
   .organ-pin-ripple,
