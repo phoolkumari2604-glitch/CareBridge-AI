@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import { useAuth } from "../../context/AuthContext";
+import BodyExplorer from "../../phase2-internal-organs";
 import "./HealthRecords.css";
 
 const ICD10_DATABASE = [
@@ -1243,6 +1244,17 @@ export default function HealthRecords() {
           </button>
         </section>
       )}
+
+      {/* ── 3D Internal Organs & Problem Pins Visualizer (Doctor & Patient Shared) ── */}
+      <section style={{ margin: "20px 0" }} aria-label="Interactive Organ Viewer and Clinical Problem Markers">
+        <BodyExplorer
+          vitals={currentPatientObj?.vitals || {}}
+          alerts={currentPatientObj?.alerts || []}
+          healthProfile={currentPatientObj}
+          healthRecords={records}
+          activePatientId={currentPatientObj?.patient_code || currentPatientObj?._id || currentPatientObj?.id || selectedPatientId}
+        />
+      </section>
 
       {/* ── 4 Reactive Stat Cards ── */}
       <section className="stat-cards-grid" aria-label="Clinical Metrics Overview">

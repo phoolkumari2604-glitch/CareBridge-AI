@@ -549,6 +549,29 @@ export const doctorService = {
     const response = await api.post("/ai-assistant/session/clear", { session_id: sessionId });
     return response.data;
   },
+
+  // ------------------------------------------------------------
+  // ORGAN CLINICAL FINDINGS & ACTION PLAN
+  // ------------------------------------------------------------
+  async getOrganFindings(patientId, organKey) {
+    const response = await api.get(`/health-records/patient/${patientId}/organ-findings/${organKey}`);
+    return response.data;
+  },
+
+  async saveOrganFindings(patientId, organKey, payload) {
+    const response = await api.put(`/health-records/patient/${patientId}/organ-findings/${organKey}`, payload);
+    return response.data;
+  },
+
+  async getOrganChat(patientId, organKey) {
+    const response = await api.get(`/health-records/patient/${patientId}/organ-chat/${organKey}`);
+    return response.data;
+  },
+
+  async sendOrganChatMessage(patientId, organKey, text) {
+    const response = await api.post(`/health-records/patient/${patientId}/organ-chat/${organKey}`, { text });
+    return response.data;
+  },
 };
 
 export default doctorService;

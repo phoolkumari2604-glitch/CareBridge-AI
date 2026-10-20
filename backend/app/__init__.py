@@ -22,6 +22,7 @@ from app.routes import (
     notification_bp,
     audit_bp,
     billing_bp,
+    medicine_assistant_bp,
 )
 
 def create_app():
@@ -124,6 +125,9 @@ def create_app():
         app.register_blueprint(bp, url_prefix=f"/api{prefix}", name=f"api_{p_clean}")
         # Register under /<prefix> for direct backward compatibility
         app.register_blueprint(bp, url_prefix=prefix, name=f"root_{p_clean}")
+
+    # Register medicine assistant (handles both /assistant/... and /api/assistant/...)
+    app.register_blueprint(medicine_assistant_bp)
 
     # ----------------------------------------------------
     # GLOBAL ERROR HANDLERS

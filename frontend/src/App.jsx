@@ -5,6 +5,9 @@ import { Routes, Route } from "react-router-dom";
 // ==================================================
 import Landing from "./pages/public/Landing";
 import Login from "./pages/public/Login";
+import DoctorLogin from "./pages/public/DoctorLogin";
+import PatientLogin from "./pages/public/PatientLogin";
+import StaffLogin from "./pages/public/StaffLogin";
 import Register from "./pages/public/Register";
 import ForgotPassword from "./pages/public/ForgotPassword";
 import ResetPassword from "./pages/public/ResetPassword";
@@ -47,6 +50,8 @@ import LiveQueue from "./pages/patient/LiveQueue";
 import Health from "./pages/patient/Health";
 import AIAssistant from "./pages/patient/AIAssistant";
 import Notifications from "./pages/patient/Notifications";
+import MedicineAssistant from "./pages/patient/MedicineAssistant";
+import SourcesAttribution from "./pages/patient/SourcesAttribution";
 
 // ==================================================
 // DOCTOR PAGES
@@ -82,6 +87,9 @@ function App() {
       ================================================== */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/doctor-login" element={<DoctorLogin />} />
+      <Route path="/patient-login" element={<PatientLogin />} />
+      <Route path="/staff-login" element={<StaffLogin />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
@@ -89,6 +97,8 @@ function App() {
       <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/sources" element={<SourcesAttribution />} />
+      <Route path="/sources-attribution" element={<SourcesAttribution />} />
 
       {/* ==================================================
           SHARED PUBLIC / ERROR
@@ -130,6 +140,9 @@ function App() {
           <Route path="/patient/queue" element={<LiveQueue />} />
           <Route path="/patient/health" element={<Health />} />
           <Route path="/patient/ai-assistant" element={<AIAssistant />} />
+          <Route path="/patient/medicine-assistant" element={<MedicineAssistant />} />
+          <Route path="/patient/sources-attribution" element={<SourcesAttribution />} />
+          <Route path="/assistant" element={<MedicineAssistant />} />
           <Route path="/patient/notifications" element={<Notifications />} />
 
           {/* ==================================================

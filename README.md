@@ -95,3 +95,15 @@ npm run dev
 - [x] DPDP Act 2023 compliant Terms of Service (`/terms`) and Privacy Policy (`/privacy`).
 - [x] OpenStreetMap tile layer integration on hospital radar map with 460px height.
 - [x] Support contact `phoolkumari2603@gmail.com` linked throughout footers and emails.
+
+---
+
+## Non-Commercial Educational Status & Dataset Licensing
+
+> [!IMPORTANT]
+> **CareBridge AI is a non-commercial, educational student research project.**
+> Several datasets integrated into the Medicine Assistant module are provided strictly under Academic and Non-Commercial licenses (specifically **DDInter** under CC BY-NC-SA 4.0, **WHO Model List of Essential Medicines** under CC BY-NC-SA 3.0 IGO, and **SIDER 4.1 / OFFSIDES** under CC BY-NC-SA 4.0).
+> 
+> **Commercial Conversion Rule**:
+> If this project ever transitions into a commercial venture or commercial deployment, **all non-commercial datasets must be completely purged from the codebase, database, and cache first**, and replaced with fully licensed commercial alternatives. Consult [LICENSES.md](LICENSES.md) and `/data/sources.json` for full attribution and licensing details.
+

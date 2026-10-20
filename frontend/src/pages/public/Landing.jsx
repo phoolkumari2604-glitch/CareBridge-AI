@@ -11,6 +11,8 @@ import {
   ChevronRight,
   CheckCircle2,
   Stethoscope,
+  User,
+  IdCard,
   Brain,
   Bone,
   Smile,
@@ -404,8 +406,8 @@ const Landing = () => {
                 title="Call Clinical Support 24/7: +1 (800) 427-3274"
                 aria-label="Call +1 (800) 427-3274"
               >
-                <Phone size={16} className="cb-phone-icon shrink-0" />
-                <span className="cb-phone-text whitespace-nowrap hidden xl:flex">+1 (800) 427-3274</span>
+                <Phone size={15} className="cb-phone-icon shrink-0" />
+                <span className="cb-phone-text whitespace-nowrap">+1 (800) 427-3274</span>
               </a>
 
               {isAuthenticated ? (
@@ -414,9 +416,37 @@ const Landing = () => {
                 </Link>
               ) : (
                 <>
-                  <Link to="/login" className="cb-btn-login-doctor" title="Clinician & Staff Sign In">
-                    <Stethoscope size={16} /> Doctor Login
-                  </Link>
+                  <div className="cb-login-pill-group" role="group" aria-label="Portal logins">
+                    <Link
+                      to="/patient-login"
+                      className="cb-login-pill-item"
+                      title="Patient Portal"
+                      aria-label="Patient Portal"
+                    >
+                      <User size={15} className="cb-login-pill-icon" />
+                      <span className="cb-login-pill-label">Patient</span>
+                    </Link>
+                    <span className="cb-login-pill-divider" aria-hidden="true" />
+                    <Link
+                      to="/doctor-login"
+                      className="cb-login-pill-item"
+                      title="Doctor Portal"
+                      aria-label="Doctor Portal"
+                    >
+                      <Stethoscope size={15} className="cb-login-pill-icon" />
+                      <span className="cb-login-pill-label">Doctor</span>
+                    </Link>
+                    <span className="cb-login-pill-divider" aria-hidden="true" />
+                    <Link
+                      to="/staff-login"
+                      className="cb-login-pill-item"
+                      title="Staff Portal"
+                      aria-label="Staff Portal"
+                    >
+                      <IdCard size={15} className="cb-login-pill-icon" />
+                      <span className="cb-login-pill-label">Staff</span>
+                    </Link>
+                  </div>
 
                   <Link to="/register" className="cb-btn-book-header">
                     <Calendar size={16} /> Book Appointment
@@ -494,9 +524,33 @@ const Landing = () => {
               </Link>
             ) : (
               <>
-                <Link to="/login" className="cb-btn-login-doctor" onClick={() => setMobileMenuOpen(false)}>
-                  <Stethoscope size={16} /> Doctor Login
-                </Link>
+                <div className="cb-mobile-logins-group" role="group" aria-label="Portal logins">
+                  <Link
+                    to="/patient-login"
+                    className="cb-mobile-login-row"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User size={18} className="shrink-0" />
+                    <span>Patient Login</span>
+                  </Link>
+                  <Link
+                    to="/doctor-login"
+                    className="cb-mobile-login-row"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Stethoscope size={18} className="shrink-0" />
+                    <span>Doctor Login</span>
+                  </Link>
+                  <Link
+                    to="/staff-login"
+                    className="cb-mobile-login-row"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <IdCard size={18} className="shrink-0" />
+                    <span>Staff Login</span>
+                  </Link>
+                </div>
+
                 <Link to="/register" className="cb-btn-book-header" onClick={() => setMobileMenuOpen(false)}>
                   <Calendar size={16} /> Book Appointment
                 </Link>

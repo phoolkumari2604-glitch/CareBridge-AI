@@ -790,6 +790,53 @@
   color: var(--cb-login-text-primary);
 }
 
+/* Portal Tag & Switcher */
+.cb-login-portal-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 999px;
+  color: #38bdf8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-left: auto;
+}
+
+.cb-login-portal-switcher {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(22, 35, 63, 0.5);
+  border: 1px solid var(--cb-login-border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  color: var(--cb-login-text-secondary);
+}
+
+.cb-login-switcher-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cb-login-switcher-links a {
+  color: var(--cb-login-primary);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.82rem;
+}
+
+.cb-login-switcher-links a:hover {
+  text-decoration: underline;
+}
+
 /* Bottom Copyright Bar */
 .cb-login-bottom-bar {
   width: 100%;

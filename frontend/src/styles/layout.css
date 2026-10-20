@@ -187,6 +187,8 @@
   background: #111D35;
   border-right: 1px solid #1F2D4A;
   z-index: 900;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .sidebar-section-title {

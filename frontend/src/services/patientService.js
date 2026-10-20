@@ -459,8 +459,28 @@ const patientService = {
     return res.data;
   },
 
-  async staffQueueAction(action, tokenId, doctorId) {
-    const res = await api.post("/queue/staff-action", { action, token_id: tokenId, doctor_id: doctorId });
+  // Organ Clinical Findings & Action Plan Methods
+  async getOrganFindings(patientId, organKey) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.get(`/health-records/patient/${pId}/organ-findings/${organKey}`);
+    return res.data;
+  },
+
+  async saveOrganFindings(patientId, organKey, payload) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.put(`/health-records/patient/${pId}/organ-findings/${organKey}`, payload);
+    return res.data;
+  },
+
+  async getOrganChat(patientId, organKey) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.get(`/health-records/patient/${pId}/organ-chat/${organKey}`);
+    return res.data;
+  },
+
+  async sendOrganChatMessage(patientId, organKey, text) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.post(`/health-records/patient/${pId}/organ-chat/${organKey}`, { text });
     return res.data;
   },
 };

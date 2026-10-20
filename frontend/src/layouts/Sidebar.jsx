@@ -19,6 +19,8 @@ import {
   Users,
   DollarSign,
   Receipt,
+  Pill,
+  Database,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -69,6 +71,11 @@ function Sidebar({ open, isOpen, onClose }) {
       label: "AI Assistant",
       path: "/patient/ai-assistant",
       icon: Bot,
+    },
+    {
+      label: "Medicine Assistant",
+      path: "/patient/medicine-assistant",
+      icon: Pill,
     },
     {
       label: "Notifications",

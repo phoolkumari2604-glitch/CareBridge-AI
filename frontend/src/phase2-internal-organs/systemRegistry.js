@@ -15,7 +15,7 @@ registry.set("internal-organs", {
   name: "Internal Organs",
   phase: "Phase 2",
   description: "Visceral digestive, endocrine, and metabolic organ systems",
-  organIds: ["brain", "stomach", "pancreas", "thyroid", "intestines"],
+  organIds: ["kidneys", "brain", "stomach", "pancreas", "thyroid", "intestines"],
 });
 
 /**

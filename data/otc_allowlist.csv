@@ -1,0 +1,15 @@
+ingredient,drug_class,default_otc,status,notes
+paracetamol,Analgesic / Antipyretic,TRUE,needs pharmacist review,First-line antipyretic for mild pain and fever
+ibuprofen,NSAID / Analgesic,TRUE,needs pharmacist review,Common OTC NSAID; contraindicated in pregnancy and active ulcers
+cetirizine,Second-generation Antihistamine,TRUE,needs pharmacist review,OTC allergic rhinitis and urticaria relief
+loratadine,Second-generation Antihistamine,TRUE,needs pharmacist review,Non-sedating antihistamine for sneezing and runny nose
+oral rehydration salts,Electrolyte Rehydration Formulation,TRUE,needs pharmacist review,WHO-formulation for dehydration and acute diarrhea
+dextromethorphan,Antitussive,TRUE,needs pharmacist review,Dry hacking non-productive cough relief
+guaifenesin,Expectorant,TRUE,needs pharmacist review,Loosens bronchial mucus and phlegm
+antacid,Gastric Acid Neutralizer,TRUE,needs pharmacist review,Aluminium and Magnesium hydroxide antacid suspensions
+famotidine,H2 Receptor Antagonist,TRUE,needs pharmacist review,Reduces gastric acid secretion for heartburn and dyspepsia
+loperamide,Antimotility Agent,TRUE,needs pharmacist review,Symptomatic relief of uncomplicated acute diarrhea in adults
+throat lozenge,Pharyngeal Demulcent / Antiseptic,TRUE,needs pharmacist review,Amylmetacresol and Dichlorobenzyl alcohol throat pastilles
+saline nasal spray,Nasal Decongestant / Saline,TRUE,needs pharmacist review,Non-medicated isotonic nasal moisturizer
+povidone iodine,Topical Antiseptic,TRUE,needs pharmacist review,Minor cuts abrasions and superficial wound protection
+clotrimazole,Topical Antifungal,TRUE,needs pharmacist review,Superficial tinea athlete foot and fungal skin rash

@@ -1,0 +1,21 @@
+Medicine Name,Composition,Uses,Side_effects,Manufacturer,Price_INR,Pack_Size,Dosage_Form
+Crocin 650 Advance Tablet,Paracetamol (650mg),"Fever, Mild to Moderate Pain","Nausea, Allergic skin reaction",GlaxoSmithKline Pharmaceuticals Ltd,32.50,15 tablets,Tablet
+Dolo 650 Tablet,Paracetamol (650mg),"Fever, Headache, Body Pain","Nausea, Gastric discomfort",Micro Labs Ltd,31.00,15 tablets,Tablet
+Combiflam Tablet,Ibuprofen (400mg) + Paracetamol (325mg),"Pain relief, Fever, Muscle ache","Heartburn, Nausea, Peptic discomfort",Sanofi India Ltd,45.00,20 tablets,Tablet
+Alerid 10mg Tablet,Cetirizine (10mg),"Allergic rhinitis, Sneezing, Runny nose","Sleepiness, Drowsiness, Dry mouth",Cipla Ltd,19.80,10 tablets,Tablet
+Lorfast 10mg Tablet,Loratadine (10mg),"Allergic symptoms, Watery eyes, Sneezing","Headache, Fatigue",Cadila Pharmaceuticals Ltd,42.00,10 tablets,Tablet
+Electral ORS Powder,Oral Rehydration Salts (21.8g),"Dehydration, Fluid restoration, Diarrhea","None reported with proper dilution",FDC Ltd,22.45,21.8g sachet,Powder Sachet
+Benadryl DR Syrup,Dextromethorphan Hydrobromide (15mg/5ml),"Dry non-productive cough","Dizziness, Lightheadedness",Johnson & Johnson Ltd,125.00,100 ml,Syrup
+Grilinctus-BM Syrup,Guaifenesin (100mg/5ml) + Terbutaline (2.5mg/5ml),"Productive chesty cough, Bronchial congestion","Tremor, Palpitation, Nausea",Franco-Indian Pharmaceuticals,105.00,100 ml,Syrup
+Digene Mint Antacid Gel,Aluminium Hydroxide (300mg) + Magnesium Hydroxide (150mg) + Simethicone (25mg),"Heartburn, Acidity, Indigestion, Gas","Constipation, Diarrhea",Abbott India Ltd,138.00,200 ml,Gel Suspension
+Famocid 20 Tablet,Famotidine (20mg),"Acid peptic disease, GERD, Heartburn","Headache, Dizziness",Sun Pharmaceutical Industries Ltd,14.50,14 tablets,Tablet
+Eldoper 2mg Capsule,Loperamide (2mg),"Acute non-specific diarrhea","Abdominal cramps, Drowsiness",Micro Labs Ltd,28.00,10 capsules,Capsule
+Strepsils Honey & Lemon Lozenges,Amylmetacresol (0.6mg) + Dichlorobenzyl Alcohol (1.2mg),"Sore throat irritation, Pharyngeal discomfort","Minor oral numbness",Reckitt Benckiser India Ltd,35.00,8 lozenges,Lozenge
+Betadine 5% Ointment,Povidone Iodine (5% w/w),"Minor cuts, Abrasions, Wound infection prevention","Local skin irritation",Win-Medicare Pvt Ltd,65.00,20 g tube,Ointment
+Candid 1% Cream,Clotrimazole (1% w/w),"Fungal skin infections, Ringworm, Athlete foot","Local burning sensation, Redness",Glenmark Pharmaceuticals Ltd,85.00,30 g tube,Cream
+Augmentin 625 Duo Tablet,Amoxycillin (500mg) + Clavulanic Acid (125mg),"Bacterial infections (Prescription Only)","Diarrhea, Nausea, Vomiting",GlaxoSmithKline Pharmaceuticals Ltd,204.00,10 tablets,Tablet
+Azithral 500 Tablet,Azithromycin (500mg),"Bacterial respiratory infections (Prescription Only)","Abdominal pain, Nausea",Alembic Pharmaceuticals Ltd,120.00,5 tablets,Tablet
+Wysolone 10mg Tablet,Prednisolone (10mg),"Inflammatory conditions, Corticosteroid (Prescription Only)","Weight gain, Increased appetite",Pfizer Ltd,12.50,15 tablets,Tablet
+Calmpose 5mg Tablet,Diazepam (5mg),"Anxiety, Sedative, Schedule H/X (Prescription Only)","Drowsiness, Dependency risk",Sun Pharmaceutical Industries Ltd,18.00,10 tablets,Tablet
+Nise Tablet,Nimesulide (100mg),"Acute inflammatory pain (Schedule H)","Hepatotoxicity warning, Nausea",Dr Reddy's Laboratories Ltd,75.00,15 tablets,Tablet
+Ciprobid 500 Tablet,Ciprofloxacin (500mg),"Fluoroquinolone antibiotic (Prescription Only)","Joint pain, Tendinitis risk",Zydus Healthcare Ltd,44.00,10 tablets,Tablet

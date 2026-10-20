@@ -1,0 +1,768 @@
+/* ============================================================
+   CAREBRIDGE AI - DOCTOR DASHBOARD UPGRADE
+   Upgraded Stat Cards Grid & Active Physiological Alerts Panel
+   Palette: Dark Navy (#0B1426, #111D35), Red Glow (#ef4444, #dc2626),
+            Cyan (#38bdf8, #0284c7), Amber (#f59e0b), Emerald (#10b981)
+   ============================================================ */
+
+/* ============================================================
+   1. STAT CARDS GRID (.stat-grid)
+   ============================================================ */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+/* Base Card */
+.stat-card {
+  background: #111d35;
+  border: 1px solid #1f2d4a;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease,
+              background 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.55), 0 6px 12px -2px rgba(0, 0, 0, 0.4);
+}
+
+.stat-card.active-kpi {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px #38bdf8, 0 8px 24px rgba(2, 132, 199, 0.3);
+}
+
+/* Modifiers */
+/* 1. Live Registry Card */
+.stat-card--live {
+  border-color: #1f3558;
+}
+
+.stat-card--live:hover {
+  border-color: #38bdf8;
+}
+
+.stat-card--live .stat-card__icon {
+  background: rgba(2, 132, 199, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.stat-card--live .stat-card__badge {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* 2. Critical Vital Alerts Card (Dark red gradient + soft pulsing glow) */
+.stat-card--critical {
+  background: linear-gradient(145deg, rgba(185, 28, 28, 0.32) 0%, rgba(17, 29, 53, 0.95) 75%);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2), 0 6px 18px rgba(0, 0, 0, 0.4);
+  animation: pulse-critical-glow 2.5s ease-in-out infinite;
+}
+
+.stat-card--critical:hover {
+  border-color: #ef4444;
+  box-shadow: 0 14px 30px -4px rgba(239, 68, 68, 0.35), 0 0 24px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes pulse-critical-glow {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.18), 0 6px 18px rgba(0, 0, 0, 0.4);
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 26px rgba(239, 68, 68, 0.38), 0 8px 22px rgba(0, 0, 0, 0.5);
+    border-color: rgba(239, 68, 68, 0.85);
+  }
+}
+
+.stat-card--critical .stat-card__icon {
+  background: rgba(239, 68, 68, 0.22);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+
+.stat-card--critical .stat-card__badge {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+
+.stat-card--critical .stat-card__value {
+  color: #ef4444;
+  text-shadow: 0 0 14px rgba(239, 68, 68, 0.35);
+}
+
+/* 3. Needs Clinical Review Card (Watch) */
+.stat-card--watch {
+  border-color: #3b3223;
+}
+
+.stat-card--watch:hover {
+  border-color: #f59e0b;
+}
+
+.stat-card--watch .stat-card__icon {
+  background: rgba(245, 158, 11, 0.18);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.stat-card--watch .stat-card__badge {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.stat-card--watch .stat-card__value {
+  color: #f59e0b;
+}
+
+/* 4. Normal Baseline Card */
+.stat-card--normal {
+  border-color: #1a3832;
+}
+
+.stat-card--normal:hover {
+  border-color: #10b981;
+}
+
+.stat-card--normal .stat-card__icon {
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.stat-card--normal .stat-card__badge {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.stat-card--normal .stat-card__value {
+  color: #10b981;
+}
+
+/* Structure inside .stat-card */
+.stat-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.stat-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card__badge {
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.stat-card__value {
+  font-size: 2.15rem;
+  font-weight: 850;
+  line-height: 1.1;
+  color: #f8fafc;
+  font-feature-settings: "tnum";
+  margin-bottom: 0.25rem;
+}
+
+.stat-card__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.stat-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(31, 45, 74, 0.8);
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ============================================================
+   2. ACTIVE HIGH-PRIORITY ALERTS PANEL (.alert-panel)
+   ============================================================ */
+.alert-panel {
+  background: #0d162a;
+  border: 1.5px solid rgba(239, 68, 68, 0.7);
+  border-radius: 16px;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15), 0 12px 36px -4px rgba(0, 0, 0, 0.65);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Header */
+.alert-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 1.1rem 1.5rem;
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.16) 0%, rgba(13, 22, 42, 0.5) 100%);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.alert-panel__title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.alert-panel__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.alert-panel__title-group .pulse-alarm-icon {
+  color: #ef4444;
+  animation: alarm-wiggle 2s infinite ease-in-out;
+}
+
+@keyframes alarm-wiggle {
+  0%, 100% { transform: scale(1); }
+  10%, 30% { transform: scale(1.15) rotate(-6deg); }
+  20%, 40% { transform: scale(1.15) rotate(6deg); }
+  50% { transform: scale(1); }
+}
+
+/* .pill Badge */
+.alert-panel .pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.45);
+}
+
+/* Controls */
+.alert-panel__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+/* Ghost Buttons (.btn-ghost) */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+.btn-ghost.muted {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* Sound Permission Bar (.sound-banner) */
+.sound-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.5rem;
+  background: rgba(59, 130, 246, 0.12);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.25);
+  font-size: 0.8rem;
+  color: #93c5fd;
+}
+
+.sound-banner__left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sound-banner__action {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.sound-banner__action:hover {
+  background: #1d4ed8;
+}
+
+/* Alert List Container */
+.alert-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Patient Alert Card (.patient-alert) */
+.patient-alert {
+  background: rgba(17, 29, 53, 0.75);
+  border: 1px solid rgba(31, 45, 74, 0.95);
+  border-left: 4px solid #ef4444;
+  border-radius: 12px;
+  padding: 1.15rem 1.35rem;
+  margin: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.patient-alert:hover {
+  background: rgba(17, 29, 53, 0.95);
+}
+
+.patient-alert--acknowledged {
+  opacity: 0.65;
+  border-left-color: #10b981;
+}
+
+/* Top Row */
+.patient-alert__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.patient-alert__identity {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+/* Pulsing Tag (.tag-critical) */
+.tag-critical {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  animation: pulse-critical-tag 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-critical-tag {
+  0%, 100% {
+    background: rgba(239, 68, 68, 0.22);
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    background: rgba(239, 68, 68, 0.38);
+    border-color: rgba(239, 68, 68, 0.85);
+  }
+}
+
+.patient-alert__name {
+  font-size: 1.02rem;
+  font-weight: 750;
+  color: #ffffff;
+}
+
+/* Info Chips (.chip-info) */
+.chip-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #16233f;
+  border: 1px solid #1f2d4a;
+  color: #94a3b8;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.patient-alert__time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+/* Vitals Container (.vitals) */
+.vitals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+/* Vital Chip (.vital-chip) */
+.vital-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.38);
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+.vital-chip--warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.38);
+}
+
+.vital-chip__name {
+  font-weight: 700;
+  color: #fca5a5;
+}
+
+.vital-chip--warning .vital-chip__name {
+  color: #fcd34d;
+}
+
+.vital-chip__value {
+  font-weight: 850;
+  font-family: monospace;
+  font-size: 0.92rem;
+  color: #ffffff;
+}
+
+.vital-chip__range {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.vital-chip__arrow {
+  display: inline-flex;
+  align-items: center;
+}
+
+.vital-chip__arrow--rising {
+  color: #ef4444;
+}
+
+.vital-chip__arrow--falling {
+  color: #38bdf8;
+}
+
+.vital-chip__time {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-left: auto;
+}
+
+/* Clinical Assessment (.assessment) */
+.assessment {
+  background: rgba(11, 20, 38, 0.85);
+  border-left: 3px solid #f59e0b;
+  border-radius: 8px;
+  padding: 0.65rem 0.95rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.assessment__lead {
+  font-weight: 750;
+  color: #fbbf24;
+  margin-right: 0.35rem;
+}
+
+.assessment__text {
+  color: #e2e8f0;
+}
+
+/* Actions Toolbar (.actions) */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+/* Action Buttons (.btn) */
+.actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.05rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+
+/* .btn--ack */
+.actions .btn--ack {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.actions .btn--ack:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+/* .btn--ai */
+.actions .btn--ai {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.actions .btn--ai:hover {
+  background: rgba(99, 102, 241, 0.28);
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
+/* .btn--main */
+.actions .btn--main {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0ea5e9;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
+}
+
+.actions .btn--main:hover {
+  background: #0369a1;
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.5);
+}
+
+.actions .ack-audit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Expander Bar */
+.alert-panel__expander {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  background: rgba(15, 23, 42, 0.85);
+  border-top: 1px solid rgba(239, 68, 68, 0.25);
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.alert-panel__expander:hover {
+  background: rgba(15, 23, 42, 1);
+  color: #ffffff;
+}
+
+/* ============================================================
+   3. RESPONSIVE LAYOUT (Desktop, Tablet, Mobile)
+   ============================================================ */
+@media (max-width: 900px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .alert-panel__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .alert-panel__controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .sound-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .patient-alert {
+    margin: 0.75rem;
+    padding: 1rem;
+  }
+
+  .patient-alert__top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .patient-alert__time {
+    margin-left: 0;
+  }
+
+  /* Full-width vital chips on mobile */
+  .vitals {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .vitals .vital-chip {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
+  }
+
+  /* Full-width action buttons on mobile */
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .actions .btn {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+
+  .actions .ack-audit-badge {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   4. ACCESSIBILITY & PREFERS-REDUCED-MOTION
+   ============================================================ */
+/* Focus-visible outlines */
+button:focus-visible,
+a:focus-visible,
+.stat-card:focus-visible,
+.btn-ghost:focus-visible,
+.alert-panel__expander:focus-visible {
+  outline: 2px solid #38bdf8 !important;
+  outline-offset: 3px !important;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .stat-card--critical {
+    animation: none !important;
+  }
+
+  .stat-card:hover {
+    transform: none !important;
+  }
+
+  .tag-critical {
+    animation: none !important;
+  }
+
+  .pulse-alarm-icon {
+    animation: none !important;
+  }
+
+  .actions .btn--main:hover {
+    transform: none !important;
+  }
+}

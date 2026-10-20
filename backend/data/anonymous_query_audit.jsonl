@@ -1,0 +1,83 @@
+{"query_id": "5471d73dc2b7", "timestamp": "2026-10-19T13:08:46.147143+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "018e585adb70", "timestamp": "2026-10-19T13:08:46.172649+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "fd5d4b0635ce", "timestamp": "2026-10-19T13:08:46.203186+00:00", "symptoms_evaluated": ["body pain"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "92ee2a81b013", "timestamp": "2026-10-19T13:08:46.251181+00:00", "symptoms_evaluated": ["fever"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "68ad7912a076", "timestamp": "2026-10-19T13:08:46.554982+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 4}
+{"query_id": "63f8bdfb3a33", "timestamp": "2026-10-19T13:08:46.569412+00:00", "symptoms_evaluated": ["runny_nose", "sneezing"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "5872bb6d1ee5", "timestamp": "2026-10-19T13:08:46.585373+00:00", "symptoms_evaluated": ["dry_cough"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "ee8108c7a9b4", "timestamp": "2026-10-19T13:08:46.596610+00:00", "symptoms_evaluated": ["wet_cough"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "ce0c09bedac3", "timestamp": "2026-10-19T13:08:46.604984+00:00", "symptoms_evaluated": ["heartburn"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "e562a1174ad5", "timestamp": "2026-10-19T13:08:46.639732+00:00", "symptoms_evaluated": ["sore_throat"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "1e4e9ebd822f", "timestamp": "2026-10-19T13:08:46.650614+00:00", "symptoms_evaluated": ["minor_cut"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "bc5fe6f7ade1", "timestamp": "2026-10-19T13:08:46.663112+00:00", "symptoms_evaluated": ["skin_rash_itchy"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "2f1df990fcd0", "timestamp": "2026-10-19T13:08:46.675162+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "94d1dcb08a01", "timestamp": "2026-10-19T13:08:46.689109+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "1b0eb1f04f03", "timestamp": "2026-10-19T13:08:46.704513+00:00", "symptoms_evaluated": ["fever", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "b5ce21426ab9", "timestamp": "2026-10-19T13:08:46.717043+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "e4da8b6af67b", "timestamp": "2026-10-19T13:08:46.730834+00:00", "symptoms_evaluated": ["fever", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "68de3f8cc0d0", "timestamp": "2026-10-19T13:08:46.751741+00:00", "symptoms_evaluated": ["runny_nose", "nasal_congestion"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "cbcb89b5b443", "timestamp": "2026-10-19T13:08:46.762512+00:00", "symptoms_evaluated": ["mild_dehydration"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "818ae39bc86d", "timestamp": "2026-10-19T13:08:46.812281+00:00", "symptoms_evaluated": ["headache", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "1feef111d6f1", "timestamp": "2026-10-19T13:08:46.841323+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "4ba6817574eb", "timestamp": "2026-10-19T13:08:46.871908+00:00", "symptoms_evaluated": ["heartburn"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "98d90d2c698d", "timestamp": "2026-10-19T13:08:46.891336+00:00", "symptoms_evaluated": ["runny_nose", "sneezing"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "81301f1d2108", "timestamp": "2026-10-19T13:15:46.809778+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "9ed4cfbc5b54", "timestamp": "2026-10-19T13:15:46.821162+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "2b12f6a5bb7c", "timestamp": "2026-10-19T13:15:46.831237+00:00", "symptoms_evaluated": ["body pain"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "b4360b5a42c3", "timestamp": "2026-10-19T13:15:46.849729+00:00", "symptoms_evaluated": ["fever"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "898c527bd204", "timestamp": "2026-10-19T13:15:46.862842+00:00", "symptoms_evaluated": ["body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "a08aaae9ddbd", "timestamp": "2026-10-19T13:15:46.875395+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 4}
+{"query_id": "6f6c2abf768c", "timestamp": "2026-10-19T13:15:46.895053+00:00", "symptoms_evaluated": ["runny_nose", "sneezing"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "3e543be5570a", "timestamp": "2026-10-19T13:15:46.908162+00:00", "symptoms_evaluated": ["dry_cough"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "9b17b5b535a4", "timestamp": "2026-10-19T13:15:46.926269+00:00", "symptoms_evaluated": ["wet_cough"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "0e09bb440ac6", "timestamp": "2026-10-19T13:15:46.937346+00:00", "symptoms_evaluated": ["heartburn"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "dbc0c63096cb", "timestamp": "2026-10-19T13:15:46.949118+00:00", "symptoms_evaluated": ["loose_motion"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "48c996da83dc", "timestamp": "2026-10-19T13:15:46.965158+00:00", "symptoms_evaluated": ["sore_throat"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "6d059b1ce05f", "timestamp": "2026-10-19T13:15:46.976796+00:00", "symptoms_evaluated": ["minor_cut"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "0df5a9a42bb5", "timestamp": "2026-10-19T13:15:46.987179+00:00", "symptoms_evaluated": ["skin_rash_itchy"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "40df480bb915", "timestamp": "2026-10-19T13:15:46.998185+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "577c9033c014", "timestamp": "2026-10-19T13:15:47.013008+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "c41068e23ddd", "timestamp": "2026-10-19T13:15:47.031507+00:00", "symptoms_evaluated": ["fever", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "1095b34b2b11", "timestamp": "2026-10-19T13:15:47.042008+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "73b484cfa4bd", "timestamp": "2026-10-19T13:15:47.056696+00:00", "symptoms_evaluated": ["fever", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "96a352597835", "timestamp": "2026-10-19T13:15:47.077154+00:00", "symptoms_evaluated": ["runny_nose", "nasal_congestion"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "2fb8dc8f18b3", "timestamp": "2026-10-19T13:15:47.089741+00:00", "symptoms_evaluated": ["mild_dehydration"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "fe173a39062c", "timestamp": "2026-10-19T13:15:47.106789+00:00", "symptoms_evaluated": ["headache", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "714b019ac6d3", "timestamp": "2026-10-19T13:15:47.116495+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "b2b7b28aaee6", "timestamp": "2026-10-19T13:15:47.129376+00:00", "symptoms_evaluated": ["heartburn"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "ba18b37c43e2", "timestamp": "2026-10-19T13:15:47.145306+00:00", "symptoms_evaluated": ["runny_nose", "sneezing"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "09c3590eb757", "timestamp": "2026-10-19T13:16:48.181151+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 4}
+{"query_id": "5da4f73a303e", "timestamp": "2026-10-19T13:16:48.191894+00:00", "symptoms_evaluated": ["chest pain", "sweating"], "status": "emergency_triaged", "red_flag": true, "suggestions_count": 0}
+{"query_id": "29584f0919ed", "timestamp": "2026-10-19T13:16:48.223441+00:00", "symptoms_evaluated": ["headache", "fever"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "5735b29466de", "timestamp": "2026-10-19T13:16:48.235112+00:00", "symptoms_evaluated": ["body pain", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "f50a6b823a56", "timestamp": "2026-10-19T13:16:48.247430+00:00", "symptoms_evaluated": ["fever"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "0d9757becc26", "timestamp": "2026-10-19T13:16:48.256925+00:00", "symptoms_evaluated": ["joint pain", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "f8a41d305490", "timestamp": "2026-10-19T13:16:50.733555+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 4}
+{"query_id": "1e16dd4c2c9d", "timestamp": "2026-10-19T13:16:50.758314+00:00", "symptoms_evaluated": ["fever"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "b6fbee696ba6", "timestamp": "2026-10-19T13:16:50.771282+00:00", "symptoms_evaluated": ["fever", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "8286d956fcdc", "timestamp": "2026-10-19T13:16:50.795439+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "19ad95a7507c", "timestamp": "2026-10-19T13:16:50.802507+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "2fca060044ef", "timestamp": "2026-10-19T13:16:50.810616+00:00", "symptoms_evaluated": ["body pain"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "aa0a98c56330", "timestamp": "2026-10-19T13:16:50.829709+00:00", "symptoms_evaluated": ["fever"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "70289bc6779f", "timestamp": "2026-10-19T13:16:50.840979+00:00", "symptoms_evaluated": ["body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "d22c76c52aef", "timestamp": "2026-10-19T13:16:50.858099+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 4}
+{"query_id": "41cdb5aeb1fb", "timestamp": "2026-10-19T13:16:50.881244+00:00", "symptoms_evaluated": ["runny_nose", "sneezing"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "c12ee360115e", "timestamp": "2026-10-19T13:16:50.892487+00:00", "symptoms_evaluated": ["dry_cough"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "f8cc149e82e8", "timestamp": "2026-10-19T13:16:50.903860+00:00", "symptoms_evaluated": ["wet_cough"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "b0135d6635b8", "timestamp": "2026-10-19T13:16:50.915659+00:00", "symptoms_evaluated": ["heartburn"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "c571c5ddef5d", "timestamp": "2026-10-19T13:16:50.926371+00:00", "symptoms_evaluated": ["loose_motion"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "63762cfe088a", "timestamp": "2026-10-19T13:16:50.938270+00:00", "symptoms_evaluated": ["sore_throat"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "a3e67731d316", "timestamp": "2026-10-19T13:16:50.948240+00:00", "symptoms_evaluated": ["minor_cut"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "37f0190e8e62", "timestamp": "2026-10-19T13:16:50.958059+00:00", "symptoms_evaluated": ["skin_rash_itchy"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "fe5cebee4eb7", "timestamp": "2026-10-19T13:16:50.969853+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "4964c1bbdefa", "timestamp": "2026-10-19T13:16:50.982070+00:00", "symptoms_evaluated": ["fever", "headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "5baa43ad7a8f", "timestamp": "2026-10-19T13:16:50.993572+00:00", "symptoms_evaluated": ["fever", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "722e5945d94c", "timestamp": "2026-10-19T13:16:51.004747+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "f2b907b4dac7", "timestamp": "2026-10-19T13:16:51.020423+00:00", "symptoms_evaluated": ["fever", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "218a1256633a", "timestamp": "2026-10-19T13:16:51.041322+00:00", "symptoms_evaluated": ["runny_nose", "nasal_congestion"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "1f7fedbf1a9c", "timestamp": "2026-10-19T13:16:51.049902+00:00", "symptoms_evaluated": ["mild_dehydration"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "1deb8a879362", "timestamp": "2026-10-19T13:16:51.065713+00:00", "symptoms_evaluated": ["headache", "body_ache"], "status": "evaluated", "red_flag": false, "suggestions_count": 3}
+{"query_id": "d1c65db3475b", "timestamp": "2026-10-19T13:16:51.077701+00:00", "symptoms_evaluated": ["headache"], "status": "evaluated", "red_flag": false, "suggestions_count": 1}
+{"query_id": "3ed01507d263", "timestamp": "2026-10-19T13:16:51.094749+00:00", "symptoms_evaluated": ["heartburn"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}
+{"query_id": "092cf3618d5e", "timestamp": "2026-10-19T13:16:51.109152+00:00", "symptoms_evaluated": ["runny_nose", "sneezing"], "status": "evaluated", "red_flag": false, "suggestions_count": 5}
+{"query_id": "1430599b0b0b", "timestamp": "2026-10-19T15:51:39.573027+00:00", "symptoms_evaluated": ["fever / pyrexia"], "status": "evaluated", "red_flag": false, "suggestions_count": 2}

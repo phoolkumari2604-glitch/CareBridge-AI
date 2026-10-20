@@ -29,6 +29,7 @@ import {
   formatRelativeTime,
 } from "../../../utils/vitalThresholds";
 import "./activePhysiologicalAlerts.css";
+import "../../../pages/doctor/dashboard-upgrade.css";
 
 /**
  * Web Audio API synthesized medical alarm chime
@@ -335,26 +336,23 @@ Physician: Verified on Doctor Monitoring Console
 
   return (
     <div className="active-physiological-alerts-container">
-      {/* Visual Pulsing Red Border Alert Box */}
-      <section
-        className={`critical-alerts-section-enhanced ${actionablePatients.length > 0 ? "pulse-active" : ""}`}
-        aria-live="assertive"
-      >
-        {/* Header Strip */}
-        <div className="alerts-enhanced-header">
-          <div className="header-title-group">
+      {/* Upgraded Alert Panel */}
+      <section className="alert-panel" aria-live="assertive">
+        {/* Header */}
+        <div className="alert-panel__header">
+          <div className="alert-panel__title-group">
             <ShieldAlert size={20} className="pulse-alarm-icon" />
-            <h3>Active High-Priority Physiological Alerts</h3>
-            <span className="alert-counter-badge">
+            <h3 className="alert-panel__title">Active High-Priority Physiological Alerts</h3>
+            <span className="pill">
               {actionablePatients.length} Actionable
             </span>
             {toastMessage && <div className="alert-feedback-toast">{toastMessage}</div>}
           </div>
 
-          <div className="header-controls-group">
+          <div className="alert-panel__controls">
             {/* Audio Mute / Unmute Toggle */}
             <button
-              className={`btn-audio-toggle ${isAudioMuted ? "muted" : ""}`}
+              className={`btn-ghost ${isAudioMuted ? "muted" : ""}`}
               onClick={toggleAudioMute}
               title={isAudioMuted ? "Unmute alert alarm chime" : "Silence alert alarm chime"}
               type="button"
@@ -366,7 +364,7 @@ Physician: Verified on Doctor Monitoring Console
             {/* Acknowledge All Button */}
             {actionablePatients.length > 1 && (
               <button
-                className="btn-ack-all"
+                className="btn-ghost"
                 onClick={handleAcknowledgeAll}
                 type="button"
                 title="Acknowledge all active alerts"
@@ -377,28 +375,28 @@ Physician: Verified on Doctor Monitoring Console
             )}
 
             {/* Link to Full Notifications */}
-            <Link to="/doctor/notifications" className="all-alerts-link">
+            <Link to="/doctor/notifications" className="btn-ghost">
               <span>View All Notifications</span>
               <ChevronRight size={15} />
             </Link>
           </div>
         </div>
 
-        {/* Audio Permission Banner (First-time browser sound policy) */}
+        {/* Sound Permission Bar (.sound-banner) */}
         {showPermissionBanner && !hasAudioPermission && !isAudioMuted && (
-          <div className="audio-permission-banner">
-            <div className="banner-left">
+          <div className="sound-banner">
+            <div className="sound-banner__left">
               <Volume2 size={14} />
               <span>Browser audio requires permission to play emergency telemetry chimes.</span>
             </div>
-            <button className="btn-banner-action" onClick={handleEnableAudio} type="button">
+            <button className="sound-banner__action" onClick={handleEnableAudio} type="button">
               Enable Sound
             </button>
           </div>
         )}
 
         {/* Alerts Cards List */}
-        <div className="critical-alerts-list-enhanced">
+        <div className="alert-panel__list">
           {displayedPatients.map((pat) => {
             const pid = pat._id || pat.id;
             const ackData = acknowledgedMap[pid];
@@ -414,74 +412,75 @@ Physician: Verified on Doctor Monitoring Console
             return (
               <div
                 key={pid}
-                className={`alert-card-enhanced ${isAck ? "acknowledged-state" : ""}`}
+                className={`patient-alert ${isAck ? "patient-alert--acknowledged" : ""}`}
               >
                 {/* Top Row: Identity & Badges */}
-                <div className="alert-card-top-row">
-                  <div className="patient-badge-identity">
-                    <span className="severity-pill-badge critical">
+                <div className="patient-alert__top">
+                  <div className="patient-alert__identity">
+                    <span className="tag-critical">
                       <AlertCircle size={12} />
                       CRITICAL TELEMETRY
                     </span>
-                    <strong className="patient-display-name">{pat.name || "Patient"}</strong>
-                    <span className="patient-code-chip">
+                    <strong className="patient-alert__name">{pat.name || "Patient"}</strong>
+                    <span className="chip-info">
                       ID: {pat.patient_code || pat.patient_id_code || pid.slice(-6)}
                     </span>
                     {pat.phone && (
-                      <span className="patient-phone-chip">
+                      <span className="chip-info">
                         <Phone size={11} /> {pat.phone}
                       </span>
                     )}
                   </div>
 
-                  <div className="alert-timestamp-relative">
+                  <div className="patient-alert__time">
                     <Clock size={12} />
                     <span>{timeAgo}</span>
                   </div>
                 </div>
 
-                {/* Abnormal Vital Chips Grid */}
-                {abnormalChips.length > 0 ? (
-                  <div className="abnormal-chips-grid">
-                    {abnormalChips.map((chip) => (
+                {/* Vitals with .vital-chip */}
+                <div className="vitals">
+                  {abnormalChips.length > 0 ? (
+                    abnormalChips.map((chip) => (
                       <div
                         key={chip.id}
-                        className={`vital-reading-chip ${chip.severity.toLowerCase()}`}
+                        className={`vital-chip vital-chip--${chip.severity.toLowerCase()}`}
                         title={chip.urgency}
                       >
-                        <span className="chip-vital-name">{chip.vital}</span>
-                        <span className="chip-vital-value">{chip.value}</span>
-                        <span className="chip-vital-range">({chip.normalRange})</span>
-                        <span className="severity-pill-badge-mini">{chip.severity}</span>
+                        <span className="vital-chip__name">{chip.vital}</span>
+                        <span className="vital-chip__value">{chip.value}</span>
+                        <span className="vital-chip__range">({chip.normalRange})</span>
                         {chip.trend && (
-                          <span className={`chip-trend-arrow ${chip.trend}`}>
+                          <span className={`vital-chip__arrow vital-chip__arrow--${chip.trend}`}>
                             {chip.trend === "rising" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
                           </span>
                         )}
-                        <span className="chip-time-tag">{chip.timeAgo}</span>
+                        <span className="vital-chip__time">{chip.timeAgo}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="alert-clinical-reason">
-                    <span className="reason-lead-label">Reason Flagged: </span>
-                    <span>
-                      {summary?.message ||
-                        `SpO₂ ${vit.spo2 || 91}%, Heart rate ${vit.heart_rate || 116} bpm, BP ${vit.systolic_bp || 158}/${vit.diastolic_bp || 98} mmHg`}
-                    </span>
-                  </div>
-                )}
+                    ))
+                  ) : (
+                    <div className="vital-chip vital-chip--critical">
+                      <span className="vital-chip__name">Telemetry</span>
+                      <span className="vital-chip__value">
+                        {`SpO₂ ${vit.spo2 || 91}%, BP ${vit.systolic_bp || 158}/${vit.diastolic_bp || 98}`}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                {/* Specific Clinical Message fallback */}
-                {abnormalChips.length > 0 && summary?.message && (
-                  <div className="alert-clinical-reason">
-                    <span className="reason-lead-label">Clinical Assessment: </span>
-                    <span>{summary.message}</span>
-                  </div>
-                )}
+                {/* Clinical Assessment */}
+                <div className="assessment">
+                  <span className="assessment__lead">Clinical Assessment:</span>
+                  <span className="assessment__text">
+                    {summary?.message ||
+                      (abnormalChips.length > 0
+                        ? abnormalChips.map((c) => `${c.vital} ${c.value} (${c.status}) - ${c.urgency}`).join("; ")
+                        : `SpO₂ ${vit.spo2 || 91}%, Heart rate ${vit.heart_rate || 116} bpm, BP ${vit.systolic_bp || 158}/${vit.diastolic_bp || 98} mmHg`)}
+                  </span>
+                </div>
 
                 {/* Action Buttons Toolbar */}
-                <div className="alert-actions-toolbar">
+                <div className="actions">
                   {isAck ? (
                     <div className="ack-audit-badge">
                       <CheckCircle2 size={14} />
@@ -491,7 +490,7 @@ Physician: Verified on Doctor Monitoring Console
                     </div>
                   ) : (
                     <button
-                      className="btn-card-action btn-ack"
+                      className="btn btn--ack"
                       onClick={() => handleAcknowledge(pat)}
                       disabled={isSubmitting}
                       type="button"
@@ -503,7 +502,7 @@ Physician: Verified on Doctor Monitoring Console
 
                   {/* AI Triage Note Drawer Button */}
                   <button
-                    className="btn-card-action btn-triage"
+                    className="btn btn--ai"
                     onClick={() => handleOpenTriageDrawer(pat)}
                     type="button"
                     title="Open Clinical Decision Support Drawer"
@@ -514,7 +513,7 @@ Physician: Verified on Doctor Monitoring Console
 
                   {/* Inspect Patient: highlights and focuses patient */}
                   <button
-                    className="btn-card-action btn-inspect"
+                    className="btn btn--main"
                     onClick={() => handleInspect(pat)}
                     type="button"
                     title="Focus patient telemetry and charts"
@@ -531,10 +530,11 @@ Physician: Verified on Doctor Monitoring Console
         {/* Collapsible "+N more active alerts" bar if more than 3 */}
         {criticalPatients.length > 3 && (
           <div
-            className="more-alerts-expander"
+            className="alert-panel__expander"
             onClick={() => setIsExpanded(!isExpanded)}
             role="button"
             tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && setIsExpanded(!isExpanded)}
           >
             <span>
               {isExpanded

@@ -22,6 +22,7 @@ import "./BodyExplorer.css";
 
 // Organ icon lookup
 const ORGAN_ICONS = {
+  kidneys: Activity,
   brain: Brain,
   stomach: Flame,
   pancreas: Droplets,
@@ -29,7 +30,7 @@ const ORGAN_ICONS = {
   intestines: CircleDot,
 };
 
-export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords = [] }) {
+export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords = [], activePatientId = null }) {
   const registeredSystems = useMemo(() => getRegisteredSystems(), []);
   const [selectedSystemId, setSelectedSystemId] = useState(
     registeredSystems[0]?.id || "internal-organs"
@@ -40,8 +41,8 @@ export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords
     [selectedSystemId, registeredSystems]
   );
 
-  const availableOrganIds = activeSystem?.organIds || ["stomach", "pancreas", "thyroid", "intestines"];
-  const [selectedOrganId, setSelectedOrganId] = useState(availableOrganIds[0] || "stomach");
+  const availableOrganIds = activeSystem?.organIds || ["kidneys", "brain", "stomach", "pancreas", "thyroid", "intestines"];
+  const [selectedOrganId, setSelectedOrganId] = useState(availableOrganIds[0] || "kidneys");
 
   // Bundle patient data
   const patientData = useMemo(
@@ -160,6 +161,8 @@ export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords
             status={activeOrganStatus.key}
             statusLabel={activeOrganStatus.label}
             onSelectOrgan={setSelectedOrganId}
+            patientId={activePatientId}
+            patientData={patientData}
           />
         </div>
 

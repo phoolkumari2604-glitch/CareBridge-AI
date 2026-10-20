@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
-import AnatomicalHeart3D from "../../components/patient/AnatomicalHeart3D";
+import LiveLungsVisual from "../../components/patient/LiveLungsVisual";
 import InteractiveBodyMap from "../../components/patient/InteractiveBodyMap";
 import BodyExplorer from "../../phase2-internal-organs";
 import "./Health.css";
@@ -1758,18 +1758,14 @@ function Health() {
         </div>
       </section>
 
-      {/* 3D ANATOMICAL HEART VISUALIZATION */}
-      <AnatomicalHeart3D
-        heartRate={vitals?.heart_rate || 72}
-        isAbnormal={vitals?.heart_rate ? vitals.heart_rate > 100 || vitals.heart_rate < 55 : false}
-        status={alertSummary?.status || "NORMAL"}
-      />
+      {/* LIVE BREATHING LUNGS VISUAL */}
+      <LiveLungsVisual vitals={vitals} alerts={alerts} patientId={patientId} />
 
       {/* INTERACTIVE BODY MAP */}
       <InteractiveBodyMap vitals={vitals} healthProfile={healthProfile} alerts={alerts} />
 
       {/* 3D BODY SYSTEMS EXPLORER (PHASE 2 - INTERNAL ORGANS) */}
-      <BodyExplorer vitals={vitals} alerts={alerts} healthProfile={healthProfile} healthRecords={healthRecords} />
+      <BodyExplorer vitals={vitals} alerts={alerts} healthProfile={healthProfile} healthRecords={healthRecords} activePatientId={patientId} />
 
       {/* VITALS GRID */}
       <section className="health-section">

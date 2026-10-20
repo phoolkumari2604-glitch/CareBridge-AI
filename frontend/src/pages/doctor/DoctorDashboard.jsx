@@ -40,6 +40,7 @@ import { useAuth } from "../../context/AuthContext";
 import doctorService from "../../services/doctorService";
 import ActivePhysiologicalAlerts from "../../components/doctor/alerts/ActivePhysiologicalAlerts";
 import "./DoctorDashboard.css";
+import "./dashboard-upgrade.css";
 
 function DoctorDashboard() {
   const { user } = useAuth();
@@ -580,25 +581,26 @@ function DoctorDashboard() {
       {!loading && (
         <>
           {/* ============================================================
-              2. KPI SUMMARY METRIC CARDS (4 POLISHED LIGHT CARDS)
+              2. UPGRADED STAT CARDS GRID (.stat-grid)
           ============================================================ */}
-          <section className="kpi-metrics-grid">
+          <section className="stat-grid">
             {/* Total Monitored Patients */}
             <div
-              className={`kpi-card ${kpiFilter === "all" ? "active-kpi" : ""}`}
+              className={`stat-card stat-card--live ${kpiFilter === "all" ? "active-kpi" : ""}`}
               onClick={() => setKpiFilter("all")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && setKpiFilter("all")}
             >
-              <div className="kpi-card-head">
-                <div className="kpi-icon-wrap blue">
+              <div className="stat-card__head">
+                <div className="stat-card__icon">
                   <Users size={20} />
                 </div>
-                <span className="kpi-badge neutral">Live Registry</span>
+                <span className="stat-card__badge">Live Registry</span>
               </div>
-              <div className="kpi-value-wrap">
-                <h2>{totalPatientsCount}</h2>
-                <span className="kpi-label">Monitored Patients</span>
-              </div>
-              <div className="kpi-footer">
+              <div className="stat-card__value">{totalPatientsCount}</div>
+              <div className="stat-card__label">Monitored Patients</div>
+              <div className="stat-card__foot">
                 <span>Active Inpatients &amp; OPD</span>
                 <ArrowUpRight size={14} />
               </div>
@@ -606,43 +608,45 @@ function DoctorDashboard() {
 
             {/* Critical Alerts */}
             <div
-              className={`kpi-card ${criticalPatients.length > 0 ? "has-urgent" : ""} ${
+              className={`stat-card stat-card--critical ${criticalPatients.length > 0 ? "has-urgent" : ""} ${
                 kpiFilter === "critical" ? "active-kpi" : ""
               }`}
               onClick={() => setKpiFilter("critical")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && setKpiFilter("critical")}
             >
-              <div className="kpi-card-head">
-                <div className="kpi-icon-wrap red">
+              <div className="stat-card__head">
+                <div className="stat-card__icon">
                   <ShieldAlert size={20} />
                 </div>
-                <span className="kpi-badge critical">Immediate Action</span>
+                <span className="stat-card__badge">Immediate Action</span>
               </div>
-              <div className="kpi-value-wrap">
-                <h2 className="text-red">{criticalPatients.length}</h2>
-                <span className="kpi-label">Critical Vital Alerts</span>
-              </div>
-              <div className="kpi-footer">
-                <span className="text-red">SpO₂ &lt; 95% / High BP</span>
+              <div className="stat-card__value">{criticalPatients.length}</div>
+              <div className="stat-card__label">Critical Vital Alerts</div>
+              <div className="stat-card__foot">
+                <span>SpO₂ &lt; 95% / High BP</span>
                 <ArrowUpRight size={14} />
               </div>
             </div>
 
             {/* Needs Attention */}
             <div
-              className={`kpi-card ${kpiFilter === "attention" ? "active-kpi" : ""}`}
+              className={`stat-card stat-card--watch ${kpiFilter === "attention" ? "active-kpi" : ""}`}
               onClick={() => setKpiFilter("attention")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && setKpiFilter("attention")}
             >
-              <div className="kpi-card-head">
-                <div className="kpi-icon-wrap amber">
+              <div className="stat-card__head">
+                <div className="stat-card__icon">
                   <AlertTriangle size={20} />
                 </div>
-                <span className="kpi-badge warning">Clinical Watch</span>
+                <span className="stat-card__badge">Clinical Watch</span>
               </div>
-              <div className="kpi-value-wrap">
-                <h2 className="text-amber">{attentionPatients.length}</h2>
-                <span className="kpi-label">Needs Clinical Review</span>
-              </div>
-              <div className="kpi-footer">
+              <div className="stat-card__value">{attentionPatients.length}</div>
+              <div className="stat-card__label">Needs Clinical Review</div>
+              <div className="stat-card__foot">
                 <span>Borderline Vitals Logged</span>
                 <ArrowUpRight size={14} />
               </div>
@@ -650,20 +654,21 @@ function DoctorDashboard() {
 
             {/* Stable Physiological Baseline */}
             <div
-              className={`kpi-card ${kpiFilter === "stable" ? "active-kpi" : ""}`}
+              className={`stat-card stat-card--normal ${kpiFilter === "stable" ? "active-kpi" : ""}`}
               onClick={() => setKpiFilter("stable")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && setKpiFilter("stable")}
             >
-              <div className="kpi-card-head">
-                <div className="kpi-icon-wrap emerald">
+              <div className="stat-card__head">
+                <div className="stat-card__icon">
                   <CheckCircle2 size={20} />
                 </div>
-                <span className="kpi-badge stable">Normal Baseline</span>
+                <span className="stat-card__badge">Normal Baseline</span>
               </div>
-              <div className="kpi-value-wrap">
-                <h2 className="text-emerald">{stablePatients.length}</h2>
-                <span className="kpi-label">Physiological Baseline</span>
-              </div>
-              <div className="kpi-footer">
+              <div className="stat-card__value">{stablePatients.length}</div>
+              <div className="stat-card__label">Normal Baseline</div>
+              <div className="stat-card__foot">
                 <span>Within safe thresholds</span>
                 <ArrowUpRight size={14} />
               </div>

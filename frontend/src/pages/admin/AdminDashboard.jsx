@@ -126,7 +126,7 @@ export default function AdminDashboard() {
 
   // Handle User Status Toggle
   const handleToggleStatus = async (userId, currentStatus) => {
-    const newStatus = currentStatus === "inactive" ? "active" : "inactive";
+    const newStatus = (currentStatus === "inactive" || currentStatus === "pending_approval") ? "active" : "inactive";
     try {
       setActionLoadingId(userId);
       await authAPI.updateUserStatus(userId, newStatus);
@@ -520,7 +520,7 @@ export default function AdminDashboard() {
                       <td>
                         <span className={`admin-status-badge status-${u.status || "active"}`}>
                           <span className="status-dot"></span>
-                          {u.status === "invited" ? "Invite Sent" : (u.status || "Active")}
+                          {u.status === "invited" ? "Invite Sent" : u.status === "pending_approval" ? "Pending Approval" : (u.status || "Active")}
                         </span>
                       </td>
                       <td>
@@ -561,8 +561,8 @@ export default function AdminDashboard() {
                               type="button"
                               onClick={() => handleToggleStatus(u._id, u.status)}
                               disabled={isActionLoading}
-                              className={`action-btn ${u.status === "inactive" ? "btn-activate" : "btn-deactivate"}`}
-                              title={u.status === "inactive" ? "Activate User" : "Deactivate User"}
+                              className={`action-btn ${u.status === "inactive" || u.status === "pending_approval" ? "btn-activate" : "btn-deactivate"}`}
+                              title={u.status === "pending_approval" ? "Approve & Activate Doctor" : u.status === "inactive" ? "Activate User" : "Deactivate User"}
                             >
                               <Power size={14} />
                             </button>

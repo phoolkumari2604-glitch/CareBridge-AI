@@ -37,7 +37,12 @@ function formatCountdown(totalSeconds) {
   return `${mins}:${rem < 10 ? "0" : ""}${rem}`;
 }
 
-export default function LoginView() {
+export default function LoginView({
+  portalRole = "",
+  portalTitle = "",
+  portalSubtitle = "",
+  portalType = "doctor",
+} = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { loginUser } = useAuth();
@@ -296,6 +301,16 @@ export default function LoginView() {
         setBannerError(
           data.detail || "Your email address has not been verified yet. Please verify your email to continue."
         );
+      } else if (code === "ACCOUNT_PENDING_APPROVAL") {
+        setBannerError(
+          data.detail ||
+            "Your doctor credentials have been submitted and are currently under review by hospital administration."
+        );
+      } else if (code === "ACCOUNT_INVITED") {
+        setBannerError(
+          data.detail ||
+            "This account was invited by administration. Please check your email for the invitation link to set your password."
+        );
       } else if (code === "ACCOUNT_SUSPENDED") {
         setBannerError(
           data.detail ||
@@ -444,14 +459,17 @@ export default function LoginView() {
                 C
               </span>
               <span className="cb-login-card-brand-label">CareBridge AI</span>
+              {portalRole && (
+                <span className="cb-login-portal-tag">{portalRole}</span>
+              )}
             </div>
             <h1 id="cb-login-heading" className="cb-login-title">
-              {require2FA ? "Two-Factor Verification" : "Sign in to your account"}
+              {require2FA ? "Two-Factor Verification" : portalTitle || "Sign in to your account"}
             </h1>
             <p className="cb-login-subtitle">
               {require2FA
                 ? "Enter the 6-digit security code sent to your administrator email."
-                : "Enter your registered email and password to continue."}
+                : portalSubtitle || "Enter your registered email and password to continue."}
             </p>
           </div>
 
@@ -786,6 +804,21 @@ export default function LoginView() {
 
           {/* Card Footer: Registration Link + Dedicated Support Footer */}
           <div className="cb-login-card-footer">
+            <div className="cb-login-portal-switcher">
+              <span>Looking for another portal?</span>
+              <div className="cb-login-switcher-links">
+                {portalType !== "patient" && (
+                  <Link to="/patient-login">Patient Login</Link>
+                )}
+                {portalType !== "doctor" && (
+                  <Link to="/doctor-login">Doctor Login</Link>
+                )}
+                {portalType !== "staff" && (
+                  <Link to="/staff-login">Staff Login</Link>
+                )}
+              </div>
+            </div>
+
             <p className="cb-login-register-prompt">
               Don&apos;t have an account?
               <Link to="/register" className="cb-login-register-link">

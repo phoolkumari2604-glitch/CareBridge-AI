@@ -139,7 +139,9 @@ export function OrganSidePanel({
                 </div>
 
                 <div className="indicator-row-bottom">
-                  <span className="ind-range">Safe bounds: {ind.normalRange}</span>
+                  {ind.normalRange ? (
+                    <span className="ind-range">Safe bounds: {ind.normalRange}</span>
+                  ) : null}
                   <span className="ind-time">
                     <Clock size={11} /> {ind.timestamp}
                   </span>

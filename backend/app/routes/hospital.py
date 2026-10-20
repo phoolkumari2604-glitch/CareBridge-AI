@@ -695,6 +695,7 @@ def get_all_hospital_beds():
     except Exception as err:
         return jsonify({"error": "Failed to fetch bed statistics", "detail": str(err)}), 500
 
+
 @hospital_bp.route("/<hospital_id>/beds", methods=["PUT"], strict_slashes=False)
 def update_hospital_beds(hospital_id):
     """
@@ -737,4 +738,211 @@ def update_hospital_beds(hospital_id):
         "hospital_id": str(hospital_id),
         "updated": update_fields
     }), 200
+
+
+# ============================================================
+# OVERPASS PROXY ROUTE FOR NEARBY MEDICAL & EMERGENCY FACILITIES
+# ============================================================
+_OVERPASS_CACHE = {}
+_OVERPASS_CACHE_TTL = 600  # 10 minutes cache
+
+@hospital_bp.route("/nearby/realtime", methods=["GET", "POST"], strict_slashes=False)
+@hospital_bp.route("/nearby-emergency", methods=["GET", "POST"], strict_slashes=False)
+def get_nearby_realtime_facilities():
+    """
+    Proxies live Overpass OSM queries through backend to prevent CORS & browser rate limits.
+    Tries multiple mirrors with exponential backoff and merges with verified DB hospitals.
+    """
+    import requests
+
+    lat = request.args.get("lat", type=float)
+    lng = request.args.get("lng", type=float)
+    radius_km = request.args.get("radius_km", default=10.0, type=float)
+    if lat is None or lng is None:
+        if request.is_json:
+            data = request.get_json() or {}
+            lat = data.get("lat")
+            lng = data.get("lng")
+            radius_km = data.get("radius_km", 10.0)
+
+    if lat is None or lng is None:
+        lat = 17.3850
+        lng = 78.4867
+
+    radius_meters = int(min(max(radius_km * 1000, 1000), 50000))
+    cache_key = f"{round(lat, 3)}_{round(lng, 3)}_{round(radius_km, 1)}"
+
+    now_ts = time.time()
+    if cache_key in _OVERPASS_CACHE:
+        entry = _OVERPASS_CACHE[cache_key]
+        if now_ts - entry["timestamp"] < _OVERPASS_CACHE_TTL:
+            return jsonify({
+                "status": "success",
+                "source": "cache",
+                "facilities": entry["data"],
+                "total": len(entry["data"]),
+                "user_location": {"lat": lat, "lng": lng, "radius_km": radius_km}
+            }), 200
+
+    overpass_query = f"""[out:json][timeout:15];
+(
+  node["amenity"~"hospital|clinic|police|ambulance_station"](around:{radius_meters},{lat},{lng});
+  way["amenity"~"hospital|clinic|police|ambulance_station"](around:{radius_meters},{lat},{lng});
+  relation["amenity"~"hospital|clinic|police|ambulance_station"](around:{radius_meters},{lat},{lng});
+  node["emergency"="ambulance_station"](around:{radius_meters},{lat},{lng});
+  way["emergency"="ambulance_station"](around:{radius_meters},{lat},{lng});
+  relation["emergency"="ambulance_station"](around:{radius_meters},{lat},{lng});
+);
+out center tags;"""
+
+    mirrors = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter"
+    ]
+
+    elements = []
+    error_details = []
+
+    headers = {
+        "User-Agent": "CareBridgeAI-GeoClinical/1.0 (Healthcare Radar; contact: triage@carebridge.ai)",
+        "Accept": "application/json"
+    }
+
+    for mirror in mirrors:
+        for attempt in range(2):
+            try:
+                resp = requests.post(mirror, data={"data": overpass_query}, headers=headers, timeout=14)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    elements = data.get("elements", [])
+                    break
+                else:
+                    error_details.append(f"{mirror} HTTP {resp.status_code}")
+            except Exception as e:
+                error_details.append(f"{mirror} error: {str(e)}")
+            time.sleep(0.3 * (attempt + 1))
+        if elements:
+            break
+
+    # Parse OSM elements
+    osm_facilities = []
+    for el in elements:
+        tags = el.get("tags") or {}
+        el_lat = el.get("lat") or el.get("center", {}).get("lat")
+        el_lng = el.get("lon") or el.get("center", {}).get("lon")
+        if not el_lat or not el_lng:
+            continue
+
+        amenity = tags.get("amenity", "")
+        emergency_tag = tags.get("emergency", "")
+
+        ftype = "hospital"
+        if amenity == "police":
+            ftype = "police"
+        elif emergency_tag == "ambulance_station" or amenity == "ambulance_station":
+            ftype = "ambulance"
+        elif amenity == "clinic":
+            ftype = "clinic"
+
+        default_name = "Medical Facility"
+        if ftype == "police":
+            default_name = "Police Station"
+        elif ftype == "ambulance":
+            default_name = "Ambulance Station"
+        elif ftype == "clinic":
+            default_name = "Community Clinic"
+
+        name = tags.get("name") or tags.get("name:en") or default_name
+        is_emergency = (
+            tags.get("emergency") in ["yes", "24/7"] or
+            tags.get("emergency:service") == "yes" or
+            tags.get("opening_hours") == "24/7" or
+            ftype in ["ambulance", "police"]
+        )
+
+        addr_parts = [tags.get("addr:housenumber"), tags.get("addr:street"), tags.get("addr:suburb"), tags.get("addr:city")]
+        address = ", ".join([p for p in addr_parts if p]) or tags.get("addr:full") or f"{name}, Vicinity"
+
+        phone = tags.get("phone") or tags.get("contact:phone") or ("100" if ftype == "police" else "108" if ftype == "ambulance" else "102")
+
+        dist = haversine_km(lat, lng, el_lat, el_lng)
+
+        osm_facilities.append({
+            "id": f"osm-{el.get('id')}",
+            "name": name,
+            "type": "hospital" if ftype in ["hospital", "clinic"] else ftype,
+            "subType": ftype,
+            "lat": float(el_lat),
+            "lng": float(el_lng),
+            "address": address,
+            "phone": phone,
+            "emergency": is_emergency,
+            "isDbHospital": False,
+            "rating": 4.5,
+            "specialties": [tags.get("healthcare")] if tags.get("healthcare") else ["General Medicine", "Emergency Care"],
+            "distance": dist if dist is not None else 0
+        })
+
+    # Fetch DB facilities within radius to merge
+    db_facilities = []
+    try:
+        db = get_database()
+        cursor = db.hospitals.find({"lat": {"$exists": True}, "lng": {"$exists": True}})
+        for h in cursor:
+            try:
+                h_lat = float(h.get("lat"))
+                h_lng = float(h.get("lng"))
+                dist = haversine_km(lat, lng, h_lat, h_lng)
+                if dist is not None and dist <= radius_km * 1.5:
+                    db_facilities.append({
+                        "id": str(h.get("_id") or h.get("id")),
+                        "name": h.get("name", "Hospital"),
+                        "type": "hospital",
+                        "subType": "hospital",
+                        "lat": h_lat,
+                        "lng": h_lng,
+                        "address": h.get("address") or f"{h.get('city', '')}, {h.get('state', '')}",
+                        "phone": h.get("phone", "+91 40 2338 8000"),
+                        "emergency": bool(h.get("emergency") or h.get("has_emergency", True)),
+                        "isDbHospital": True,
+                        "rating": float(h.get("rating") or 4.8),
+                        "specialties": h.get("specialties") or ["Multi-Specialty", "Trauma Care"],
+                        "distance": dist
+                    })
+            except Exception:
+                continue
+    except Exception as e:
+        print(f"Error querying DB hospitals: {e}")
+
+    # Combine & deduplicate
+    combined = db_facilities + osm_facilities
+    deduped = []
+    seen = set()
+
+    for item in combined:
+        clean_name = "".join(c for c in item["name"].lower() if c.isalnum())
+        k = f"{clean_name}_{round(item['lat'], 3)}_{round(item['lng'], 3)}"
+        if k not in seen:
+            seen.add(k)
+            deduped.push(item)
+
+    # Sort nearest first
+    deduped.sort(key=lambda x: x["distance"])
+
+    # Update cache
+    _OVERPASS_CACHE[cache_key] = {
+        "timestamp": now_ts,
+        "data": deduped
+    }
+
+    return jsonify({
+        "status": "success",
+        "source": "live",
+        "facilities": deduped,
+        "total": len(deduped),
+        "user_location": {"lat": lat, "lng": lng, "radius_km": radius_km},
+        "errors": error_details if not deduped else []
+    }), 200
+
 

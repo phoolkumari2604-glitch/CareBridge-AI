@@ -23,11 +23,25 @@ function InteractiveBodyMap({ vitals: propVitals, healthProfile, alerts = [] }) 
 
   // Reduce motion state (checkbox + OS prefers-reduced-motion fallback)
   const [reduceMotion, setReduceMotion] = useState(() => {
-    if (typeof window !== "undefined" && window.matchMedia) {
-      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("carebridge_reduce_motion");
+      if (stored !== null) return stored === "true";
+      if (window.matchMedia) {
+        return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      }
     }
     return false;
   });
+
+  const handleToggleReduceMotion = (val) => {
+    setReduceMotion(val);
+    try {
+      localStorage.setItem("carebridge_reduce_motion", String(val));
+      window.dispatchEvent(new CustomEvent("carebridge_reduce_motion_change", { detail: { reduceMotion: val } }));
+    } catch (e) {
+      console.warn("Could not save reduceMotion preference:", e);
+    }
+  };
 
   // Live fluctuating telemetry state (updates every 3 seconds)
   const [liveMetrics, setLiveMetrics] = useState({
@@ -287,7 +301,7 @@ function InteractiveBodyMap({ vitals: propVitals, healthProfile, alerts = [] }) 
             <input
               type="checkbox"
               checked={reduceMotion}
-              onChange={(e) => setReduceMotion(e.target.checked)}
+              onChange={(e) => handleToggleReduceMotion(e.target.checked)}
             />
             <span className="toggle-box"></span>
             <span className="toggle-label">Reduce Motion</span>

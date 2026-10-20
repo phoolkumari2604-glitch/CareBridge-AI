@@ -160,6 +160,7 @@ def invite_user():
         "status": "invited",
         "email_verified": True,
         "invite_token": invite_token,
+        "invite_expires": token_expires,
         "invite_token_expires_at": token_expires,
         "invited_by": str(admin_user["_id"]),
         "staff_id": staff_id,
@@ -286,7 +287,7 @@ def update_user(user_id):
     
     return jsonify({"message": "User details updated successfully"}), 200
 
-@admin_bp.route("/users/<user_id>/status", methods=["PATCH"])
+@admin_bp.route("/users/<user_id>/status", methods=["PATCH", "PUT"])
 @admin_required
 def toggle_user_status(user_id):
     db = get_database()
@@ -309,12 +310,35 @@ def toggle_user_status(user_id):
     new_status = data.get("status")
     if not new_status:
         current_status = target.get("status", "active")
-        new_status = "inactive" if current_status == "active" else "active"
+        new_status = "active" if current_status in ("inactive", "pending_approval") else "inactive"
         
+    now_utc = datetime.now(timezone.utc)
     db.users.update_one(
         {"_id": oid},
-        {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc)}}
+        {"$set": {"status": new_status, "updated_at": now_utc}}
     )
+    
+    # Synchronize associated doctor record if applicable
+    if target.get("role") == "DOCTOR":
+        if new_status == "active":
+            db.doctors.update_one(
+                {"$or": [{"user_id": str(target["_id"])}, {"email": target.get("email")}]},
+                {"$set": {
+                    "status": "AVAILABLE",
+                    "verification_status": "Verified",
+                    "is_bookable": True,
+                    "updated_at": now_utc
+                }}
+            )
+        elif new_status in ("inactive", "suspended"):
+            db.doctors.update_one(
+                {"$or": [{"user_id": str(target["_id"])}, {"email": target.get("email")}]},
+                {"$set": {
+                    "status": "UNAVAILABLE",
+                    "is_bookable": False,
+                    "updated_at": now_utc
+                }}
+            )
     
     log_audit_action(
         db=db,

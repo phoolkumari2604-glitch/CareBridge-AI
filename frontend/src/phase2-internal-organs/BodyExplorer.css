@@ -282,24 +282,22 @@
 
 .brain-viewport-container {
   background-color: #06101f !important;
+  border-radius: 14px;
 }
 
 .brain-moving-bg {
   background-color: #06101f !important;
   background-image: radial-gradient(circle 420px at 50% 50%, rgba(30, 64, 120, 0.45) 0%, rgba(6, 16, 31, 0.95) 70%, #06101f 100%) !important;
-  background-size: 160% 160% !important;
+  background-size: 180% 180% !important;
   animation: brain-bg-drift 12s ease-in-out infinite alternate !important;
 }
 
 @keyframes brain-bg-drift {
   0% {
-    background-position: 35% 40%;
-  }
-  50% {
-    background-position: 65% 60%;
+    background-position: 25% 30%;
   }
   100% {
-    background-position: 45% 35%;
+    background-position: 75% 70%;
   }
 }
 
@@ -337,7 +335,7 @@
     filter: drop-shadow(0 0 10px rgba(56, 168, 255, 0.25));
   }
   50% {
-    filter: drop-shadow(0 0 30px rgba(56, 168, 255, 0.5)) drop-shadow(0 0 15px rgba(56, 168, 255, 0.35));
+    filter: drop-shadow(0 0 30px rgba(56, 168, 255, 0.5));
   }
 }
 
@@ -345,10 +343,48 @@
   user-select: none;
   -webkit-user-drag: none;
   transform-origin: center center;
-  animation:
-    brain-float-tilt-scale 6s ease-in-out infinite,
-    brain-blue-glow 3.5s ease-in-out infinite;
-  will-change: transform, filter;
+  animation: organ-breathing 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Subtle Neural Activity Shimmer across Brain Surface every 5s */
+.brain-neural-shimmer-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(254, 215, 170, 0.18) 50%,
+    rgba(255, 255, 255, 0) 65%,
+    transparent 100%
+  );
+  background-size: 250% 250%;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 3;
+  animation: brain-neural-shimmer 5s ease-in-out infinite;
+}
+
+@keyframes brain-neural-shimmer {
+  0% {
+    background-position: -120% -120%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  60% {
+    background-position: 180% 180%;
+    opacity: 0;
+  }
+  100% {
+    background-position: 180% 180%;
+    opacity: 0;
+  }
 }
 
 /* BRAIN LIVE BADGE: black pill with red dot blinking every 1.2s */
@@ -394,12 +430,689 @@
   .thyroid-image-gentle-motion,
   .brain-moving-bg,
   .brain-live-image,
-  .brain-red-dot {
+  .brain-red-dot,
+  .organ-image-status-animated,
+  .organ-image-breathing,
+  .organ-behind-glow,
+  .live-dot-indicator,
+  .pain-point-core,
+  .pain-point-ripple,
+  .organ-pin-marker,
+  .organ-pin-core,
+  .organ-pin-ripple,
+  .organ-callout-panel.is-highlighted {
     animation: none !important;
     transform: none !important;
     filter: none !important;
+    opacity: 1 !important;
+    transition: none !important;
   }
 }
+
+/* ==========================================================================
+   STATUS-REACTIVE ORGAN GLOW AND GENTLE FLOAT
+   - Gentle float: translateY 6px over 5s
+   - Status glow pulsing:
+     * Critical (red): 1.1s period
+     * Watch (amber): 2.0s period
+     * Normal (green): 3.5s period
+   ========================================================================== */
+
+@keyframes organ-float-subtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes organ-glow-critical {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 32px rgba(239, 68, 68, 0.85)) drop-shadow(0 0 15px rgba(239, 68, 68, 0.5));
+  }
+}
+
+@keyframes organ-glow-watch {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 26px rgba(245, 158, 11, 0.75)) drop-shadow(0 0 12px rgba(245, 158, 11, 0.4));
+  }
+}
+
+@keyframes organ-glow-normal {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.65)) drop-shadow(0 0 10px rgba(16, 185, 129, 0.35));
+  }
+}
+
+.organ-image-status-animated {
+  user-select: none;
+  -webkit-user-drag: none;
+  transform-origin: center center;
+  will-change: transform, filter;
+}
+
+.organ-image-status-animated.status-critical {
+  animation: organ-float-subtle 5s ease-in-out infinite, organ-glow-critical 1.1s ease-in-out infinite;
+}
+
+.organ-image-status-animated.status-watch {
+  animation: organ-float-subtle 5s ease-in-out infinite, organ-glow-watch 2.0s ease-in-out infinite;
+}
+
+.organ-image-status-animated.status-normal {
+  animation: organ-float-subtle 5s ease-in-out infinite, organ-glow-normal 3.5s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   PROBLEM MARKERS: NUMBERED PULSING PINS
+   ========================================================================== */
+.organ-pins-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.organ-pin-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  z-index: 20;
+  outline: none;
+}
+
+.organ-pin-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0.75;
+  animation: pin-pulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.organ-pin-marker.pin-critical .organ-pin-ripple {
+  background: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.8);
+}
+
+.organ-pin-marker.pin-watch .organ-pin-ripple {
+  background: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.8);
+}
+
+.organ-pin-marker.pin-normal .organ-pin-ripple {
+  background: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.8);
+}
+
+@keyframes pin-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.organ-pin-core {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.organ-pin-marker:hover .organ-pin-core,
+.organ-pin-marker.is-active .organ-pin-core {
+  transform: scale(1.22);
+  box-shadow: 0 0 18px #ffffff;
+}
+
+.organ-pin-marker.pin-critical .organ-pin-core {
+  background: #ef4444;
+}
+
+.organ-pin-marker.pin-watch .organ-pin-core {
+  background: #f59e0b;
+}
+
+.organ-pin-marker.pin-normal .organ-pin-core {
+  background: #10b981;
+}
+
+/* ==========================================================================
+   RED MOVING PAIN POINTS (14px, #ff2d2d, red glow, throbbing 1.1s, 2 ripple rings 1.8s)
+   ========================================================================== */
+.pain-point-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 20;
+  outline: none;
+}
+
+.pain-point-core {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ff2d2d;
+  box-shadow: 0 0 10px #ff2d2d, 0 0 20px rgba(255, 45, 45, 0.9);
+  animation: pain-point-throb 1.1s ease-in-out infinite;
+  display: block;
+  z-index: 2;
+  border: 2px solid #ffffff; /* 2px white outline for high contrast against brain/organ tissue */
+  box-sizing: border-box;
+}
+
+@keyframes pain-point-throb {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px #ff2d2d, 0 0 16px rgba(255, 45, 45, 0.7);
+  }
+  50% {
+    transform: scale(1.25);
+    box-shadow: 0 0 14px #ff2d2d, 0 0 28px rgba(255, 45, 45, 0.95);
+  }
+}
+
+.pain-point-ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  margin-left: -7px;
+  border-radius: 50%;
+  border: 1.5px solid #ff2d2d;
+  box-shadow: inset 0 0 2px 1px #ffffff; /* White inner edge on ripple ring */
+  background: rgba(255, 45, 45, 0.22);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pain-point-ripple.ripple-1 {
+  animation: pain-point-ripple-expand 1.8s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+}
+
+.pain-point-ripple.ripple-2 {
+  animation: pain-point-ripple-expand 1.8s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+  animation-delay: 0.9s;
+}
+
+@keyframes pain-point-ripple-expand {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(4.5);
+    opacity: 0;
+  }
+}
+
+.pain-point-marker:hover .pain-point-core,
+.pain-point-marker.is-selected .pain-point-core {
+  box-shadow: 0 0 16px #ff2d2d, 0 0 32px #ff2d2d, 0 0 8px #ffffff;
+}
+
+/* ==========================================================================
+   ORGAN LIVE LOOK: SLOW PULSING GLOW BEHIND KIDNEY (2.5s) & GENTLE BREATHING (4s)
+   ========================================================================== */
+.organ-behind-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 68%;
+  height: 68%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(48px);
+}
+
+.organ-behind-glow.glow-critical {
+  background: radial-gradient(circle, rgba(255, 45, 45, 0.72) 0%, rgba(220, 38, 38, 0.32) 50%, transparent 75%);
+  animation: pulse-glow-behind 2.5s ease-in-out infinite;
+}
+
+.organ-behind-glow.glow-watch {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.72) 0%, rgba(217, 119, 6, 0.32) 50%, transparent 75%);
+  animation: pulse-glow-behind 2.5s ease-in-out infinite;
+}
+
+.organ-behind-glow.glow-normal {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.68) 0%, rgba(5, 150, 105, 0.28) 50%, transparent 75%);
+  animation: pulse-glow-behind 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow-behind {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.92);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+/* Gentle breathing animation on image (scale 1.00 -> 1.015, 4s infinite) */
+.organ-image-breathing {
+  animation: organ-breathing 4s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes organ-breathing {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.015);
+  }
+}
+
+/* LIVE BADGE & BLINKING DOT (opacity 1 -> 0.3, 1.2s infinite) */
+.organ-live-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.08em;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+}
+
+.live-dot-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff2d2d;
+  box-shadow: 0 0 8px #ff2d2d;
+  display: inline-block;
+  animation: live-dot-blink 1.2s infinite ease-in-out;
+}
+
+@keyframes live-dot-blink {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+}
+
+.organ-tag-separator {
+  color: rgba(148, 163, 184, 0.4);
+  font-weight: 400;
+  margin: 0 2px;
+}
+
+/* FLIPPING HOVER TOOLTIP ON RED DOTS (fixes right edge clipping) */
+.dot-hover-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 35;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  max-width: 250px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  white-space: normal;
+  transition: opacity 0.15s ease;
+}
+
+.dot-hover-tooltip.align-left {
+  transform: translate(14px, -50%);
+}
+
+.dot-hover-tooltip.align-right {
+  transform: translate(calc(-100% - 14px), -50%);
+}
+
+.dot-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.dot-tooltip-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.dot-tooltip-badge.badge-critical {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.dot-tooltip-badge.badge-watch {
+  background: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.dot-tooltip-badge.badge-normal {
+  background: rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.dot-tooltip-organ {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.dot-tooltip-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #f8fafc;
+  line-height: 1.35;
+}
+
+/* ==========================================================================
+   CALLOUT BOX & CLINICAL ACTION PLAN BOXES (UNDER ORGAN IMAGE)
+   ========================================================================== */
+.organ-callout-panel {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-top: 14px;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.organ-callout-panel.is-highlighted {
+  border-color: #ff2d2d;
+  box-shadow: 0 0 24px rgba(255, 45, 45, 0.45), 0 8px 24px rgba(0, 0, 0, 0.35);
+  animation: note-card-pulse-highlight 1.8s ease-out;
+}
+
+@keyframes note-card-pulse-highlight {
+  0% {
+    background: rgba(255, 45, 45, 0.2);
+  }
+  100% {
+    background: rgba(15, 23, 42, 0.85);
+  }
+}
+
+.organ-finding-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff2d2d;
+  display: inline-block;
+  box-shadow: 0 0 4px #ff2d2d;
+}
+
+.organ-callout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.organ-callout-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.organ-callout-badge.badge-critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.organ-callout-badge.badge-watch {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.organ-callout-badge.badge-normal {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.organ-callout-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 4px 0;
+}
+
+.organ-callout-note {
+  font-size: 0.86rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 4 CLINICAL BOXES GRID */
+.organ-four-boxes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.organ-clinical-box {
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.organ-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  padding-bottom: 8px;
+}
+
+.organ-box-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 0.02em;
+}
+
+.organ-box-content {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.organ-medicines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.organ-med-card {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.organ-med-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.organ-med-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.organ-med-purpose {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.organ-med-disclaimer {
+  margin-top: 12px;
+  padding: 8px 10px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  color: #f59e0b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.organ-findings-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.organ-finding-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 20px;
+  color: #cbd5e1;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.organ-finding-chip-btn:hover,
+.organ-finding-chip-btn.is-active {
+  background: rgba(6, 182, 212, 0.2);
+  border-color: #06b6d4;
+  color: #38bdf8;
+}
+
+/* DOCTOR EDITING TOOLBAR & MODAL */
+.doctor-organ-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.doctor-edit-btn {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 6px;
+  color: #38bdf8;
+  padding: 4px 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.doctor-edit-btn:hover {
+  background: rgba(56, 189, 248, 0.3);
+}
+
+.doctor-pinning-banner {
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px dashed #06b6d4;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  color: #38bdf8;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 
 /* LIVE BADGE */
 .media-live-badge {

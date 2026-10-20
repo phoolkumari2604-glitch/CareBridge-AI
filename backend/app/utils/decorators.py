@@ -39,6 +39,13 @@ def token_required(f):
             if not user:
                 return jsonify({"error": "User not found", "detail": "User associated with token does not exist"}), 401
             
+            # Check user account status
+            status = (user.get("status") or "active").lower()
+            if status in ("inactive", "suspended"):
+                return jsonify({"error": "Forbidden", "code": "ACCOUNT_INACTIVE", "detail": "Your account has been deactivated."}), 403
+            if status in ("pending_approval", "pending"):
+                return jsonify({"error": "Forbidden", "code": "ACCOUNT_PENDING_APPROVAL", "detail": "Your account is pending administrator approval."}), 403
+            
             g.current_user = user
         except Exception as e:
             return jsonify({"error": "Authentication error", "detail": str(e)}), 401

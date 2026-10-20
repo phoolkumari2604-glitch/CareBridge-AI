@@ -291,7 +291,7 @@ function Navbar({ onMenuClick }) {
           </div>
           <span className="navbar-brand-title">
             CareBridge <span className="navbar-brand-ai">AI</span>
-            <span className="navbar-brand-badge">Clinical</span>
+            {role !== "patient" && <span className="navbar-brand-badge">Clinical</span>}
           </span>
         </Link>
 

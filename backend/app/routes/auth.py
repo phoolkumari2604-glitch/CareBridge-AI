@@ -122,8 +122,15 @@ def register():
     password = data.get("password", "")
     phone = data.get("phone", "").strip()
     
-    # Public registration is strictly restricted to PATIENT
-    role = "PATIENT"
+    # Support PATIENT registration and DOCTOR credential application
+    requested_role = (data.get("role") or data.get("account_type") or "PATIENT").strip().upper()
+    if requested_role in ["ADMIN", "STAFF"]:
+        return jsonify({
+            "error": "Forbidden",
+            "detail": "Staff and administrator accounts cannot be registered publicly. They must be provisioned or invited by hospital administration."
+        }), 403
+
+    role = "DOCTOR" if requested_role == "DOCTOR" else "PATIENT"
     
     if not name or not email or not password:
         return jsonify({"error": "Validation Error", "detail": "Name, email, and password are required"}), 400
@@ -145,6 +152,89 @@ def register():
     verification_expires = datetime.now(timezone.utc) + timedelta(hours=24)
     
     password_hash = hash_password(password)
+
+    # ----------------------------------------------------
+    # DOCTOR REGISTRATION & APPLICATION WORKFLOW
+    # ----------------------------------------------------
+    if role == "DOCTOR":
+        specialty = (data.get("specialty") or "").strip()
+        license_number = (data.get("license_number") or data.get("licenseNumber") or "").strip()
+        hospital_name = (data.get("hospital") or data.get("hospital_name") or "CareBridge Network Hospital").strip()
+        experience_years = data.get("experience_years") or data.get("experienceYears")
+        consultation_fee = data.get("consultation_fee") or data.get("consultationFee")
+        department = (data.get("department") or specialty).strip()
+
+        if not specialty or not license_number:
+            return jsonify({
+                "error": "Validation Error",
+                "detail": "Medical specialty and medical council license number are required for doctor verification."
+            }), 400
+
+        user_data = create_user_document(
+            name=f"Dr. {name}" if not name.lower().startswith("dr.") else name,
+            email=email,
+            password_hash=password_hash,
+            role="DOCTOR",
+            phone=phone
+        )
+        user_data["status"] = "pending_approval"
+        user_data["email_verified"] = False
+        user_data["verification_token"] = verification_token
+        user_data["verification_expires"] = verification_expires
+        user_data["specialty"] = specialty
+        user_data["department"] = department
+        user_data["license_number"] = license_number
+
+        result = db.users.insert_one(user_data)
+        user_id = str(result.inserted_id)
+
+        doctor_doc = {
+            "user_id": user_id,
+            "name": f"Dr. {name}" if not name.lower().startswith("dr.") else name,
+            "email": email,
+            "phone": phone,
+            "specialty": specialty,
+            "department": department,
+            "hospital": hospital_name,
+            "hospital_name": hospital_name,
+            "license_number": license_number,
+            "experience_years": int(experience_years) if experience_years is not None and str(experience_years).isdigit() else 5,
+            "consultation_fee": int(consultation_fee) if consultation_fee is not None and str(consultation_fee).isdigit() else 800,
+            "verification_status": "Pending Approval",
+            "status": "PENDING_APPROVAL",
+            "is_bookable": False,
+            "city": data.get("city", "New Delhi"),
+            "country": data.get("country", "India"),
+            "category": "Practicing Clinician",
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        doc_res = db.doctors.insert_one(doctor_doc)
+        doctor_id = str(doc_res.inserted_id)
+        db.users.update_one({"_id": result.inserted_id}, {"$set": {"doctor_id": doctor_id}})
+
+        send_patient_verification_email(email, name, verification_token)
+
+        log_audit_action(
+            db=db,
+            user_id=user_id,
+            user_role="DOCTOR",
+            action="DOCTOR_APPLICATION_SUBMITTED",
+            resource="AUTH",
+            resource_id=user_id,
+            details=f"Doctor application submitted for {email} (License: {license_number}, Specialty: {specialty}). Pending admin approval."
+        )
+
+        return jsonify({
+            "message": "Doctor application submitted successfully! Your credentials have been received and are pending administrator verification and approval.",
+            "requires_approval": True,
+            "status": "pending_approval",
+            "user_id": user_id,
+            "doctor_id": doctor_id,
+            "email": email,
+            "role": "DOCTOR"
+        }), 201
+
     user_data = create_user_document(
         name=name,
         email=email,
@@ -345,6 +435,22 @@ def login():
         
     # Check account status after verifying password so we don't leak account state to attackers
     account_status = (user.get("status") or "active").lower()
+    if account_status in ("pending_approval", "pending"):
+        log_dev_auth_event("ACCOUNT_PENDING_APPROVAL", email, "Account is pending administrator approval")
+        return jsonify({
+            "error": "Forbidden",
+            "code": "ACCOUNT_PENDING_APPROVAL",
+            "detail": "Your doctor credentials have been submitted and are currently under review by hospital administration. You will be able to sign in once approved."
+        }), 403
+
+    if account_status == "invited":
+        log_dev_auth_event("ACCOUNT_INVITED", email, "Account has an invitation pending")
+        return jsonify({
+            "error": "Forbidden",
+            "code": "ACCOUNT_INVITED",
+            "detail": "This account was invited by administration. Please use the invitation link sent to your email to configure your credentials."
+        }), 403
+
     if account_status in ("inactive", "suspended"):
         log_dev_auth_event("ACCOUNT_SUSPENDED", email, f"Account status is {account_status}")
         return jsonify({
@@ -770,7 +876,13 @@ def verify_invite():
     now = datetime.now(timezone.utc)
     user = db.users.find_one({
         "$or": [
-            {"invite_token": token, "invite_expires": {"$gt": now}},
+            {
+                "invite_token": token,
+                "$or": [
+                    {"invite_expires": {"$gt": now}},
+                    {"invite_token_expires_at": {"$gt": now}}
+                ]
+            },
             {"bootstrap_token": token, "bootstrap_expires": {"$gt": now}}
         ]
     })
@@ -803,7 +915,13 @@ def set_invited_password():
     now = datetime.now(timezone.utc)
     user = db.users.find_one({
         "$or": [
-            {"invite_token": token, "invite_expires": {"$gt": now}},
+            {
+                "invite_token": token,
+                "$or": [
+                    {"invite_expires": {"$gt": now}},
+                    {"invite_token_expires_at": {"$gt": now}}
+                ]
+            },
             {"bootstrap_token": token, "bootstrap_expires": {"$gt": now}}
         ]
     })
@@ -818,6 +936,7 @@ def set_invited_password():
             "password_hash": new_hash,
             "invite_token": None,
             "invite_expires": None,
+            "invite_token_expires_at": None,
             "bootstrap_token": None,
             "bootstrap_expires": None,
             "status": "active",
@@ -825,6 +944,16 @@ def set_invited_password():
             "updated_at": now
         }}
     )
+    if user.get("role") == "DOCTOR":
+        db.doctors.update_one(
+            {"$or": [{"user_id": str(user["_id"])}, {"email": user.get("email")}]},
+            {"$set": {
+                "status": "AVAILABLE",
+                "verification_status": "Verified",
+                "is_bookable": True,
+                "updated_at": now
+            }}
+        )
     
     log_audit_action(
         db=db,

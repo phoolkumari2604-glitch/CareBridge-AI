@@ -29,12 +29,21 @@ const Register = () => {
   const { setUser } = useAuth();
 
   // Core Account Form State
+  const [accountType, setAccountType] = useState("PATIENT"); // "PATIENT" | "DOCTOR"
+  const [doctorSubmitted, setDoctorSubmitted] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
     confirmPassword: "",
+    // Doctor Credentials
+    specialty: "General Medicine",
+    license_number: "",
+    hospital: "",
+    experience_years: "5",
+    consultation_fee: "800",
     // Optional Baseline Vitals & Clinical Profile
     age: "",
     gender: "Other",
@@ -67,6 +76,8 @@ const Register = () => {
     password: useRef(null),
     confirmPassword: useRef(null),
     agreeTerms: useRef(null),
+    license_number: useRef(null),
+    specialty: useRef(null),
     age: useRef(null),
     heart_rate: useRef(null),
     systolic_bp: useRef(null),
@@ -181,53 +192,62 @@ const Register = () => {
       errors.agreeTerms = "You must consent to the DPDP Act 2023 terms to register.";
     }
 
-    // 7. Optional Baseline Vitals validation (only validated if entered)
-    if (formData.age) {
-      const ageNum = Number(formData.age);
-      if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
-        errors.age = "Age must be between 0 and 120 years.";
+    if (accountType === "DOCTOR") {
+      if (!formData.specialty.trim()) {
+        errors.specialty = "Medical specialty is required.";
       }
-    }
-
-    if (formData.heart_rate) {
-      const hrNum = Number(formData.heart_rate);
-      if (isNaN(hrNum) || hrNum < 30 || hrNum > 220) {
-        errors.heart_rate = "Heart rate must be between 30 and 220 BPM.";
+      if (!formData.license_number.trim()) {
+        errors.license_number = "Medical Council License / Registration # is required.";
       }
-    }
-
-    if (formData.systolic_bp) {
-      const sysNum = Number(formData.systolic_bp);
-      if (isNaN(sysNum) || sysNum < 70 || sysNum > 200) {
-        errors.systolic_bp = "Systolic BP must be between 70 and 200 mmHg.";
+    } else {
+      // 7. Optional Baseline Vitals validation (only validated if entered)
+      if (formData.age) {
+        const ageNum = Number(formData.age);
+        if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+          errors.age = "Age must be between 0 and 120 years.";
+        }
       }
-    }
 
-    if (formData.diastolic_bp) {
-      const diaNum = Number(formData.diastolic_bp);
-      if (isNaN(diaNum) || diaNum < 40 || diaNum > 130) {
-        errors.diastolic_bp = "Diastolic BP must be between 40 and 130 mmHg.";
+      if (formData.heart_rate) {
+        const hrNum = Number(formData.heart_rate);
+        if (isNaN(hrNum) || hrNum < 30 || hrNum > 220) {
+          errors.heart_rate = "Heart rate must be between 30 and 220 BPM.";
+        }
       }
-    }
 
-    if (formData.spo2) {
-      const spo2Num = Number(formData.spo2);
-      if (isNaN(spo2Num) || spo2Num < 70 || spo2Num > 100) {
-        errors.spo2 = "SpO2 oxygen saturation must be between 70% and 100%.";
+      if (formData.systolic_bp) {
+        const sysNum = Number(formData.systolic_bp);
+        if (isNaN(sysNum) || sysNum < 70 || sysNum > 200) {
+          errors.systolic_bp = "Systolic BP must be between 70 and 200 mmHg.";
+        }
       }
-    }
 
-    if (formData.temperature) {
-      const tempNum = Number(formData.temperature);
-      if (isNaN(tempNum) || tempNum < 34 || tempNum > 42) {
-        errors.temperature = "Temperature must be between 34 °C and 42 °C.";
+      if (formData.diastolic_bp) {
+        const diaNum = Number(formData.diastolic_bp);
+        if (isNaN(diaNum) || diaNum < 40 || diaNum > 130) {
+          errors.diastolic_bp = "Diastolic BP must be between 40 and 130 mmHg.";
+        }
       }
-    }
 
-    if (formData.weight) {
-      const weightNum = Number(formData.weight);
-      if (isNaN(weightNum) || weightNum < 2 || weightNum > 300) {
-        errors.weight = "Weight must be between 2 kg and 300 kg.";
+      if (formData.spo2) {
+        const spo2Num = Number(formData.spo2);
+        if (isNaN(spo2Num) || spo2Num < 70 || spo2Num > 100) {
+          errors.spo2 = "SpO2 oxygen saturation must be between 70% and 100%.";
+        }
+      }
+
+      if (formData.temperature) {
+        const tempNum = Number(formData.temperature);
+        if (isNaN(tempNum) || tempNum < 34 || tempNum > 42) {
+          errors.temperature = "Temperature must be between 34 °C and 42 °C.";
+        }
+      }
+
+      if (formData.weight) {
+        const weightNum = Number(formData.weight);
+        if (isNaN(weightNum) || weightNum < 2 || weightNum > 300) {
+          errors.weight = "Weight must be between 2 kg and 300 kg.";
+        }
       }
     }
 
@@ -277,40 +297,62 @@ const Register = () => {
     const cleanedPhone = sanitizeIndianPhone(formData.phone);
 
     try {
-      const payload = {
-        name: formData.name.trim(),
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-        phone: cleanedPhone.length === 10 ? `+91 ${cleanedPhone}` : formData.phone.trim(),
-        role: "PATIENT",
-      };
+      let payload;
+      if (accountType === "DOCTOR") {
+        payload = {
+          name: formData.name.trim(),
+          email: formData.email.trim().toLowerCase(),
+          password: formData.password,
+          phone: cleanedPhone.length === 10 ? `+91 ${cleanedPhone}` : formData.phone.trim(),
+          role: "DOCTOR",
+          specialty: formData.specialty.trim(),
+          license_number: formData.license_number.trim(),
+          hospital: formData.hospital.trim() || "CareBridge Network Hospital",
+          experience_years: formData.experience_years ? parseInt(formData.experience_years, 10) : 5,
+          consultation_fee: formData.consultation_fee ? parseInt(formData.consultation_fee, 10) : 800,
+        };
+      } else {
+        payload = {
+          name: formData.name.trim(),
+          email: formData.email.trim().toLowerCase(),
+          password: formData.password,
+          phone: cleanedPhone.length === 10 ? `+91 ${cleanedPhone}` : formData.phone.trim(),
+          role: "PATIENT",
+        };
 
-      // Add baseline vitals if provided
-      if (formData.age) payload.age = parseInt(formData.age, 10);
-      if (formData.gender) payload.gender = formData.gender;
-      if (formData.blood_group) payload.blood_group = formData.blood_group;
-      if (formData.heart_rate) payload.heart_rate = parseInt(formData.heart_rate, 10);
-      if (formData.systolic_bp) payload.systolic_bp = parseInt(formData.systolic_bp, 10);
-      if (formData.diastolic_bp) payload.diastolic_bp = parseInt(formData.diastolic_bp, 10);
-      if (formData.spo2) payload.spo2 = parseFloat(formData.spo2);
-      if (formData.temperature) payload.temperature = parseFloat(formData.temperature);
-      if (formData.weight) payload.weight = parseFloat(formData.weight);
-      if (formData.height) payload.height = parseFloat(formData.height);
-      if (formData.allergies) {
-        payload.allergies = formData.allergies
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean);
-      }
-      if (formData.medical_history) {
-        payload.medical_history = formData.medical_history
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean);
+        // Add baseline vitals if provided
+        if (formData.age) payload.age = parseInt(formData.age, 10);
+        if (formData.gender) payload.gender = formData.gender;
+        if (formData.blood_group) payload.blood_group = formData.blood_group;
+        if (formData.heart_rate) payload.heart_rate = parseInt(formData.heart_rate, 10);
+        if (formData.systolic_bp) payload.systolic_bp = parseInt(formData.systolic_bp, 10);
+        if (formData.diastolic_bp) payload.diastolic_bp = parseInt(formData.diastolic_bp, 10);
+        if (formData.spo2) payload.spo2 = parseFloat(formData.spo2);
+        if (formData.temperature) payload.temperature = parseFloat(formData.temperature);
+        if (formData.weight) payload.weight = parseFloat(formData.weight);
+        if (formData.height) payload.height = parseFloat(formData.height);
+        if (formData.allergies) {
+          payload.allergies = formData.allergies
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+        if (formData.medical_history) {
+          payload.medical_history = formData.medical_history
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
       }
 
       const res = await authAPI.register(payload, controller.signal);
       clearTimeout(timeoutId);
+
+      if (res?.requires_approval || res?.status === "pending_approval") {
+        setDoctorSubmitted(true);
+        setSuccessToast("Doctor application submitted successfully!");
+        return;
+      }
 
       // Instant auto-login if token and user are returned
       if (res?.access_token && res?.user) {
@@ -480,12 +522,90 @@ const Register = () => {
           </div>
 
           <div className="cb-form-container">
-            {/* Header */}
-            <div className="cb-form-header">
-              <span className="cb-form-tag">PATIENT REGISTRATION</span>
-              <h2>Create your account</h2>
-              <p>Sign up to start managing your clinical consultations and telemetry</p>
-            </div>
+            {doctorSubmitted ? (
+              <div style={{ textAlign: "center", padding: "32px 16px" }}>
+                <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "rgba(16, 185, 129, 0.15)", border: "1px solid rgba(16, 185, 129, 0.4)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+                  <CheckCircle2 size={36} color="#10b981" />
+                </div>
+                <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#f8fafc", marginBottom: "8px" }}>
+                  Doctor Application Submitted
+                </h2>
+                <p style={{ color: "#94a3b8", fontSize: "14px", lineHeight: "1.6", maxWidth: "440px", margin: "0 auto 24px" }}>
+                  Thank you, <strong>Dr. {formData.name}</strong>. Your professional credentials (License: <code style={{ color: "#38bdf8" }}>{formData.license_number}</code>) have been securely registered and submitted for administrator verification.
+                </p>
+                <div style={{ background: "rgba(15, 23, 42, 0.7)", border: "1px solid rgba(51, 65, 85, 0.7)", borderRadius: "10px", padding: "16px", textAlign: "left", marginBottom: "24px", maxWidth: "440px", marginLeft: "auto", marginRight: "auto" }}>
+                  <p style={{ fontSize: "12px", fontWeight: "600", color: "#38bdf8", marginBottom: "8px" }}>Verification & Approval Process:</p>
+                  <ul style={{ fontSize: "12px", color: "#cbd5e1", paddingLeft: "18px", margin: 0, display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <li>Hospital administrators verify state/national medical council registration.</li>
+                    <li>Clinical specialty privileges and OPD consulting queues are assigned.</li>
+                    <li>You will be able to log in to the doctor portal once approved.</li>
+                  </ul>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="cb-submit-btn"
+                  style={{ maxWidth: "440px", margin: "0 auto" }}
+                >
+                  <span>Go to Sign In</span>
+                  <ArrowRight size={18} />
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Header with Account Type Toggle */}
+                <div className="cb-form-header">
+                  <div style={{ display: "flex", gap: "8px", background: "rgba(15, 23, 42, 0.6)", padding: "4px", borderRadius: "10px", border: "1px solid rgba(51, 65, 85, 0.6)", marginBottom: "16px" }}>
+                    <button
+                      type="button"
+                      onClick={() => { setAccountType("PATIENT"); setFieldErrors({}); setGlobalError(""); }}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        borderRadius: "8px",
+                        border: "none",
+                        cursor: "pointer",
+                        background: accountType === "PATIENT" ? "#0ea5e9" : "transparent",
+                        color: accountType === "PATIENT" ? "#020617" : "#94a3b8",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      Patient Account
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setAccountType("DOCTOR"); setFieldErrors({}); setGlobalError(""); }}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        borderRadius: "8px",
+                        border: "none",
+                        cursor: "pointer",
+                        background: accountType === "DOCTOR" ? "#0ea5e9" : "transparent",
+                        color: accountType === "DOCTOR" ? "#020617" : "#94a3b8",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      Doctor Application
+                    </button>
+                  </div>
+
+                  <span className="cb-form-tag">
+                    {accountType === "DOCTOR" ? "PHYSICIAN ONBOARDING" : "PATIENT REGISTRATION"}
+                  </span>
+                  <h2>
+                    {accountType === "DOCTOR" ? "Doctor & Specialist Application" : "Create your account"}
+                  </h2>
+                  <p>
+                    {accountType === "DOCTOR"
+                      ? "Submit your clinical credentials for verification and hospital practice access"
+                      : "Sign up to start managing your clinical consultations and telemetry"}
+                  </p>
+                </div>
 
             {/* Global Styled Alert Box */}
             {globalError && (
@@ -677,9 +797,95 @@ const Register = () => {
               </div>
 
               {/* =====================================================
-                  OPTIONAL BASELINE VITALS CARD (Collapsed by default)
+                  CLINICAL CREDENTIALS (DOCTOR) OR BASELINE VITALS (PATIENT)
                   ===================================================== */}
-              <div className="cb-vitals-card">
+              {accountType === "DOCTOR" ? (
+                <div className="cb-vitals-card" style={{ marginTop: "16px" }}>
+                  <div style={{ padding: "14px 18px", borderBottom: "1px solid rgba(51, 65, 85, 0.4)", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <ShieldCheck size={18} color="#38bdf8" />
+                    <span style={{ fontSize: "13px", fontWeight: "600", color: "#f8fafc" }}>
+                      Professional Clinical Credentials
+                    </span>
+                  </div>
+                  <div style={{ padding: "18px" }}>
+                    <div className="cb-form-grid">
+                      {/* Medical Specialty */}
+                      <div className="cb-input-group">
+                        <label className="cb-label">Specialty <span className="cb-req">*</span></label>
+                        <div className={`cb-input-wrap ${fieldErrors.specialty ? "has-error" : ""}`}>
+                          <select
+                            ref={fieldRefs.specialty}
+                            value={formData.specialty}
+                            onChange={(e) => updateField("specialty", e.target.value)}
+                            className="cb-input"
+                            style={{ background: "#0f172a", color: "#f8fafc" }}
+                          >
+                            <option value="General Medicine">General Medicine</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="Orthopedics">Orthopedics</option>
+                            <option value="Dermatology">Dermatology</option>
+                            <option value="Oncology">Oncology</option>
+                            <option value="Psychiatry">Psychiatry</option>
+                            <option value="Gynecology">Gynecology & Obstetrics</option>
+                            <option value="ENT">ENT</option>
+                            <option value="Pulmonology">Pulmonology</option>
+                          </select>
+                        </div>
+                        {fieldErrors.specialty && <span className="cb-error-text">{fieldErrors.specialty}</span>}
+                      </div>
+
+                      {/* License Number */}
+                      <div className="cb-input-group">
+                        <label className="cb-label">Medical Council License # <span className="cb-req">*</span></label>
+                        <div className={`cb-input-wrap ${fieldErrors.license_number ? "has-error" : ""}`}>
+                          <input
+                            ref={fieldRefs.license_number}
+                            type="text"
+                            placeholder="e.g. MCI-2024-8842"
+                            value={formData.license_number}
+                            onChange={(e) => updateField("license_number", e.target.value)}
+                            className="cb-input"
+                          />
+                        </div>
+                        {fieldErrors.license_number && <span className="cb-error-text">{fieldErrors.license_number}</span>}
+                      </div>
+
+                      {/* Hospital Affiliation */}
+                      <div className="cb-input-group">
+                        <label className="cb-label">Hospital / Clinic Affiliation</label>
+                        <div className="cb-input-wrap">
+                          <input
+                            type="text"
+                            placeholder="e.g. AIIMS Delhi / CareBridge"
+                            value={formData.hospital}
+                            onChange={(e) => updateField("hospital", e.target.value)}
+                            className="cb-input"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Experience Years */}
+                      <div className="cb-input-group">
+                        <label className="cb-label">Years of Experience</label>
+                        <div className="cb-input-wrap">
+                          <input
+                            type="number"
+                            min="0"
+                            max="60"
+                            placeholder="e.g. 5"
+                            value={formData.experience_years}
+                            onChange={(e) => updateField("experience_years", e.target.value)}
+                            className="cb-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="cb-vitals-card">
                 <button
                   type="button"
                   className="cb-vitals-header-btn"
@@ -882,6 +1088,7 @@ const Register = () => {
                   </div>
                 )}
               </div>
+              )}
 
               {/* DPDP Act Consent Checkbox */}
               <div className={`cb-consent-box ${fieldErrors.agreeTerms ? "has-error" : ""}`}>
@@ -930,11 +1137,11 @@ const Register = () => {
                 {loading ? (
                   <>
                     <Loader2 size={19} className="cb-spinner" />
-                    <span>Creating account...</span>
+                    <span>{accountType === "DOCTOR" ? "Submitting Application..." : "Creating account..."}</span>
                   </>
                 ) : (
                   <>
-                    <span>Create account</span>
+                    <span>{accountType === "DOCTOR" ? "Submit Doctor Application" : "Create account"}</span>
                     <ArrowRight size={18} />
                   </>
                 )}
@@ -956,6 +1163,8 @@ const Register = () => {
                 support@carebridge.ai
               </a>
             </div>
+              </>
+            )}
           </div>
         </main>
       </div>
