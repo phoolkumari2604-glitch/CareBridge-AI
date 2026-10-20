@@ -911,14 +911,49 @@ def get_default_organ_data(organ_key):
             ]
         },
         "intestines": {
-            "what_happened": "Enteric dysmotility with altered water reabsorption leading to episodic abdominal cramps and irregular bowel habit.",
-            "how_to_reduce": "Gradually increase dietary soluble fiber (psyllium/flaxseed), drink 8-10 glasses of clean water, and incorporate fermented probiotic foods.",
+            "what_happened": "Enteric dysmotility with altered water reabsorption leading to episodic abdominal cramps, segmental cramping along jejunoileal loops, and irregular bowel transit.",
+            "how_to_reduce": "Gradually increase dietary soluble fiber (psyllium/flaxseed), drink 8-10 glasses of clean water, incorporate fermented probiotic foods, and avoid gastrointestinal irritants.",
             "medicines": [
                 {"name": "Mebeverine", "purpose": "Gastrointestinal smooth muscle antispasmodic"},
                 {"name": "Lactobacillus Spores", "purpose": "Enteric microbiome equilibrium restoration"}
             ],
             "findings": [
-                {"id": "i1", "x": 49.0, "y": 58.0, "label": "Descending Colon Hyper-motility", "severity": "watch", "note": "Spasmodic contraction loop identified in descending colon with localized tenderness."}
+                {
+                    "id": "i1",
+                    "x": 50.0,
+                    "y": 32.0,
+                    "label": "Upper Small Intestine (Duodenum / Jejunum)",
+                    "title": "Upper Small Intestine Finding",
+                    "severity": "watch",
+                    "note": "Transient mucosal irritation and rapid peristaltic transit observed along proximal jejunal loops."
+                },
+                {
+                    "id": "i2",
+                    "x": 55.0,
+                    "y": 50.0,
+                    "label": "Middle Small Intestine (Jejunoileal)",
+                    "title": "Middle Small Intestine Finding",
+                    "severity": "watch",
+                    "note": "Mild gaseous distension and segmental hyper-motility along mid-enteric coils."
+                },
+                {
+                    "id": "i3",
+                    "x": 45.0,
+                    "y": 68.0,
+                    "label": "Lower Small Intestine (Terminal Ileum)",
+                    "title": "Lower Small Intestine Finding",
+                    "severity": "watch",
+                    "note": "Hyperactive ileocecal junctional tone with intermittent focal cramping response."
+                },
+                {
+                    "id": "i4",
+                    "x": 60.0,
+                    "y": 84.0,
+                    "label": "Large Intestine (Colon)",
+                    "title": "Large Intestine Finding",
+                    "severity": "watch",
+                    "note": "Spasmodic segmental contraction wave in descending colon with localized hypersensitivity."
+                }
             ]
         }
     }
