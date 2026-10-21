@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Activity,
   Layers,
@@ -18,6 +18,8 @@ import { getOrganConfig } from "./organs.config.js";
 import { getOrganStatus } from "./getOrganStatus.js";
 import OrganViewer3D from "./OrganViewer3D.jsx";
 import OrganSidePanel from "./OrganSidePanel.jsx";
+import { useAuth } from "../context/AuthContext";
+import patientService from "../services/patientService";
 import "./BodyExplorer.css";
 
 // Organ icon lookup
@@ -31,6 +33,9 @@ const ORGAN_ICONS = {
 };
 
 export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords = [], activePatientId = null }) {
+  const { user } = useAuth();
+  const effectivePatientId = activePatientId || user?.patient_id || user?.id || user?._id || "6ad74791bab1d0fdb9dbb23d";
+
   const registeredSystems = useMemo(() => getRegisteredSystems(), []);
   const [selectedSystemId, setSelectedSystemId] = useState(
     registeredSystems[0]?.id || "internal-organs"
@@ -44,22 +49,120 @@ export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords
   const availableOrganIds = activeSystem?.organIds || ["kidneys", "brain", "stomach", "pancreas", "thyroid", "intestines"];
   const [selectedOrganId, setSelectedOrganId] = useState(availableOrganIds[0] || "kidneys");
 
-  // Bundle patient data
+  // Real-time Dossier State
+  const [dossierMap, setDossierMap] = useState({});
+  const [isLiveConnected, setIsLiveConnected] = useState(false);
+  const [lastDataTimestamp, setLastDataTimestamp] = useState(null);
+
+  // Bundle legacy patient data
   const patientData = useMemo(
-    () => ({ vitals, alerts, healthProfile, healthRecords }),
-    [vitals, alerts, healthProfile, healthRecords]
+    () => ({ vitals, alerts, healthProfile, healthRecords, organDossiers: dossierMap }),
+    [vitals, alerts, healthProfile, healthRecords, dossierMap]
   );
 
-  // Compute status for all organs in active system
+  // Fetch complete organ dossier from database
+  const fetchDossier = useCallback(async () => {
+    if (!effectivePatientId) return;
+    try {
+      const res = await patientService.getPatientOrgans(effectivePatientId);
+      if (res && res.organs) {
+        setDossierMap(res.organs);
+        setLastDataTimestamp(new Date());
+      }
+    } catch (err) {
+      console.warn("[BodyExplorer] Failed to fetch organs dossier:", err);
+    }
+  }, [effectivePatientId]);
+
+  // Connect Server-Sent Events (SSE) with 15s polling fallback
+  useEffect(() => {
+    let isMounted = true;
+    let eventSource = null;
+    let pollInterval = null;
+
+    // Initial fetch
+    fetchDossier();
+
+    // Setup SSE
+    try {
+      const streamUrl = patientService.getPatientOrganStreamUrl(effectivePatientId);
+      eventSource = new EventSource(streamUrl);
+
+      const handlePayload = (e) => {
+        if (!isMounted) return;
+        try {
+          const payload = JSON.parse(e.data);
+          if (payload && payload.organs) {
+            setDossierMap(payload.organs);
+            setLastDataTimestamp(new Date());
+            setIsLiveConnected(true);
+          }
+        } catch (err) {
+          console.error("[BodyExplorer SSE] Error parsing payload:", err);
+        }
+      };
+
+      eventSource.addEventListener("initial", handlePayload);
+      eventSource.addEventListener("update", handlePayload);
+      eventSource.addEventListener("heartbeat", () => {
+        if (!isMounted) return;
+        setIsLiveConnected(true);
+      });
+
+      eventSource.onmessage = handlePayload;
+
+      eventSource.onerror = () => {
+        if (!isMounted) return;
+        setIsLiveConnected(false);
+      };
+
+      eventSource.onopen = () => {
+        if (!isMounted) return;
+        setIsLiveConnected(true);
+      };
+    } catch (err) {
+      console.warn("[BodyExplorer] SSE initialization failed, falling back to polling:", err);
+      setIsLiveConnected(false);
+    }
+
+    // 15-second polling fallback
+    pollInterval = setInterval(() => {
+      if (!isMounted) return;
+      fetchDossier();
+    }, 15000);
+
+    return () => {
+      isMounted = false;
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [effectivePatientId, fetchDossier]);
+
+  // Honest LIVE badge calculation: offline or data older than 5 minutes -> neutral grey
+  const isStale = useMemo(() => {
+    if (!lastDataTimestamp) return true;
+    return Date.now() - new Date(lastDataTimestamp).getTime() > 5 * 60 * 1000;
+  }, [lastDataTimestamp]);
+
+  const isFeedHonestLive = isLiveConnected && !isStale;
+  const lastUpdatedFormatted = lastDataTimestamp
+    ? new Date(lastDataTimestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "--:--";
+
+  // Compute status for all organs in active system using live dossier
   const organStatuses = useMemo(() => {
     const map = {};
     availableOrganIds.forEach((id) => {
-      map[id] = getOrganStatus(id, patientData);
+      map[id] = getOrganStatus(id, patientData, dossierMap[id]);
     });
     return map;
-  }, [availableOrganIds, patientData]);
+  }, [availableOrganIds, patientData, dossierMap]);
 
-  const activeOrganStatus = organStatuses[selectedOrganId] || getOrganStatus(selectedOrganId, patientData);
+  const activeOrganStatus = organStatuses[selectedOrganId] || getOrganStatus(selectedOrganId, patientData, dossierMap[selectedOrganId]);
   const activeConfig = getOrganConfig(selectedOrganId);
 
   return (
@@ -75,9 +178,12 @@ export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords
         </div>
 
         <div className="explorer-header-right">
-          <div className="live-telemetry-pill font-mono">
-            <Radio size={12} className="pulse-icon text-cyan" />
-            <span>TELEMETRY SYNCED</span>
+          <div
+            className={`live-telemetry-pill font-mono ${!isFeedHonestLive ? "offline" : ""}`}
+            title={isFeedHonestLive ? "Live continuous telemetry feed active" : `Last updated ${lastUpdatedFormatted}`}
+          >
+            <Radio size={12} className={`pulse-icon ${isFeedHonestLive ? "text-cyan" : ""}`} />
+            <span>{isFeedHonestLive ? "LIVE TELEMETRY" : `OFFLINE · ${lastUpdatedFormatted}`}</span>
           </div>
         </div>
       </div>
@@ -112,7 +218,7 @@ export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords
       <div className="organ-selector-row" role="tablist" aria-label="Internal Organs Selector">
         {availableOrganIds.map((id) => {
           const cfg = getOrganConfig(id);
-          const st = organStatuses[id] || getOrganStatus(id, patientData);
+          const st = organStatuses[id] || getOrganStatus(id, patientData, dossierMap[id]);
           const isSelected = id === selectedOrganId;
           const Icon = ORGAN_ICONS[id] || Activity;
 
@@ -161,17 +267,20 @@ export function BodyExplorer({ vitals, alerts = [], healthProfile, healthRecords
             status={activeOrganStatus.key}
             statusLabel={activeOrganStatus.label}
             onSelectOrgan={setSelectedOrganId}
-            patientId={activePatientId}
+            patientId={effectivePatientId}
             patientData={patientData}
+            organDossier={dossierMap[selectedOrganId]}
+            onFindingsChange={fetchDossier}
           />
         </div>
 
-        {/* RIGHT COLUMN: REUSED CLINICAL SIDE PANEL */}
+        {/* RIGHT COLUMN: CLINICAL SIDE PANEL */}
         <div className="explorer-panel-column">
           <OrganSidePanel
             organId={selectedOrganId}
             organStatus={activeOrganStatus}
             patientData={patientData}
+            organDossier={dossierMap[selectedOrganId]}
             onSelectOrgan={setSelectedOrganId}
           />
         </div>

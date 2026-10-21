@@ -121,4 +121,49 @@ assert(p3Group, "Phase 3 must be successfully registered");
 assert(p3Group.organIds.length === 6, "Phase 3 should have 6 organ/system IDs");
 console.log("  PASS: System Registry supports one-line Phase 3 expansion.");
 
+// TEST 7: Live Organ Dossier & Doctor Override Precedence
+console.log("Test 7: Validating Live Organ Dossier & Doctor Override...");
+const kidneyDossier = {
+  status: "watch",
+  findings: [{ id: "f1", title: "Mild Cortical Thinning", severity: "watch" }],
+  telemetry: [],
+  reports: [{ id: "r1", title: "Ultrasound" }],
+};
+const kidneyStatus = getOrganStatus("kidneys", {}, kidneyDossier);
+assert(kidneyStatus.key === "amber", `Kidneys must be amber (watch), got ${kidneyStatus.key}`);
+assert(kidneyStatus.label === "Watch", "Label must be Watch");
+assert(kidneyStatus.findings.length === 1, "Findings must be passed through");
+assert(kidneyStatus.reports.length === 1, "Reports must be passed through");
+
+// Pancreas critical
+const pancreasDossier = {
+  status: "critical",
+  findings: [{ id: "f2", title: "Hyperglycemia Crisis", severity: "critical" }],
+  telemetry: [{ indicatorKey: "blood_glucose", label: "Blood Glucose", value: 310, unit: "mg/dL", safeMin: 70, safeMax: 140 }],
+};
+const pancreasStatus = getOrganStatus("pancreas", {}, pancreasDossier);
+assert(pancreasStatus.key === "red", `Pancreas must be red (critical), got ${pancreasStatus.key}`);
+
+// Doctor status override beats computed
+const overriddenDossier = {
+  status: "critical",
+  statusOverride: "normal",
+  findings: [{ id: "f2", title: "Resolved Finding", severity: "critical" }],
+  telemetry: [],
+};
+const overrideStatus = getOrganStatus("pancreas", {}, overriddenDossier);
+assert(overrideStatus.key === "green", `Doctor override to normal must yield green, got ${overrideStatus.key}`);
+assert(overrideStatus.label === "Normal", "Doctor override label must be Normal");
+
+// Empty dossier yields No data yet
+const emptyDossier = {
+  status: "no_data",
+  findings: [],
+  telemetry: [],
+};
+const emptyStatus = getOrganStatus("stomach", {}, emptyDossier);
+assert(emptyStatus.key === "grey", `Empty dossier must be grey (no_data), got ${emptyStatus.key}`);
+assert(emptyStatus.label === "No data yet", "Label must be No data yet");
+console.log("  PASS: Live Organ Dossier and Doctor Override precedence verified.");
+
 console.log("\n>>> ALL PHASE 2 TESTS PASSED SUCCESSFULLY! <<<\n");

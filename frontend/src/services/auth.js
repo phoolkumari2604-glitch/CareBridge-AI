@@ -20,6 +20,18 @@ export const authAPI = {
     const response = await api.post("/auth/login", payload, {
       signal,
       withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  // Server security question (captcha)
+  getCaptcha: async (signal) => {
+    const response = await api.get("/auth/captcha", {
+      signal,
+      withCredentials: true,
     });
     return response.data;
   },

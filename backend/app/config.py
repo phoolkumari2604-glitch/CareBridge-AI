@@ -17,9 +17,9 @@ PORT = int(os.getenv("PORT", "5000"))
 FLASK_ENV = os.getenv("FLASK_ENV", "production")
 
 APP_URL = os.getenv("APP_URL", "http://localhost:5173")
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "phoolkumari2603@gmail.com").strip().lower()
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "phoolkumari2604@gmail.com").strip().lower()
 ADMIN_NAME = os.getenv("ADMIN_NAME", "Phool Kumari").strip()
-SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "phoolkumari2603@gmail.com").strip().lower()
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "phoolkumari2604@gmail.com").strip().lower()
 
 # SMTP & Transactional Email
 SMTP_HOST = os.getenv("SMTP_HOST", "")

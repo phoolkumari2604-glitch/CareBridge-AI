@@ -42,11 +42,12 @@ def log_dev_auth_event(code: str, email: str, detail: str):
         print(f"[AuthSecurity][{code}] email={email} ip={get_client_ip()} | {detail}")
 
 
-def generate_login_challenge() -> dict:
-    """Generate a lightweight server-signed arithmetic challenge after repeated failures."""
-    a = secrets.randbelow(8) + 2
-    b = secrets.randbelow(8) + 2
-    answer = str(a + b)
+def generate_login_challenge(answer: str = None) -> dict:
+    """Generate a lightweight server-signed 4-digit numeric challenge."""
+    if not answer or not str(answer).isdigit():
+        answer = str(secrets.randbelow(9000) + 1000)
+    else:
+        answer = str(answer).strip()
     secret = os.getenv("JWT_SECRET_KEY", "carebridge-default-secret")
     nonce = secrets.token_hex(8)
     sig = hmac.new(
@@ -55,8 +56,11 @@ def generate_login_challenge() -> dict:
         hashlib.sha256,
     ).hexdigest()
     return {
-        "question": f"What is {a} + {b}?",
+        "captcha": answer,
+        "code": answer,
+        "question": answer,
         "token": f"{nonce}:{sig}",
+        "captcha_token": f"{nonce}:{sig}",
     }
 
 
@@ -68,7 +72,7 @@ def verify_login_challenge(token: str, user_answer: str) -> bool:
     secret = os.getenv("JWT_SECRET_KEY", "carebridge-default-secret")
     expected_sig = hmac.new(
         secret.encode("utf-8"),
-        f"{nonce}:{user_answer.strip()}".encode("utf-8"),
+        f"{nonce}:{str(user_answer).strip()}".encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()
     return hmac.compare_digest(sig, expected_sig)

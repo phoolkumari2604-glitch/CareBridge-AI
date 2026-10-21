@@ -23,10 +23,19 @@ from app.routes import (
     audit_bp,
     billing_bp,
     medicine_assistant_bp,
+    organ_bp,
 )
 
 def create_app():
     app = Flask(__name__)
+    
+    # ----------------------------------------------------
+    # SESSION & SECURITY CONFIGURATION
+    # ----------------------------------------------------
+    app.secret_key = os.getenv("FLASK_SECRET_KEY") or os.getenv("JWT_SECRET_KEY") or "carebridge_flask_session_secret_2026"
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = os.getenv("FLASK_ENV", "development").lower() == "production"
     
     # ----------------------------------------------------
     # CORS CONFIGURATION
@@ -128,6 +137,10 @@ def create_app():
 
     # Register medicine assistant (handles both /assistant/... and /api/assistant/...)
     app.register_blueprint(medicine_assistant_bp)
+
+    # Register organ data & live telemetry stream (/api/patients/... and /patients/...)
+    app.register_blueprint(organ_bp, url_prefix="/api", name="api_organ")
+    app.register_blueprint(organ_bp, url_prefix="", name="root_organ")
 
     # ----------------------------------------------------
     # GLOBAL ERROR HANDLERS

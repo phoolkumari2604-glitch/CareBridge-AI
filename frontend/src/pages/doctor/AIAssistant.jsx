@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import doctorService from "../../services/doctorService";
 import api from "../../services/api";
+import CameraModal from "../../components/common/CameraModal";
 import "./DoctorAIAssistant.css";
 
 /* 5 Test & Clinical Query Presets */
@@ -142,6 +143,7 @@ export default function DoctorAIAssistant() {
   const fileInputRef = useRef(null);
 
   // Camera Capture Modal State
+  const [cameraOpen, setCameraOpen] = useState(false);
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
   const [cameraFacingMode, setCameraFacingMode] = useState("user"); // "user" | "environment"
   const [capturedPhoto, setCapturedPhoto] = useState(null);
@@ -325,6 +327,22 @@ export default function DoctorAIAssistant() {
 
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleImageSelected = (fileOrFiles) => {
+    if (!fileOrFiles) return;
+    if (fileOrFiles.target && fileOrFiles.target.files) {
+      handleFilesSelected(fileOrFiles.target.files);
+      return;
+    }
+    const filesArray = fileOrFiles instanceof File
+      ? [fileOrFiles]
+      : Array.isArray(fileOrFiles)
+      ? fileOrFiles
+      : fileOrFiles instanceof FileList
+      ? Array.from(fileOrFiles)
+      : [fileOrFiles];
+    handleFilesSelected(filesArray);
   };
 
   const handleRemoveAttachment = (id) => {
@@ -992,7 +1010,7 @@ export default function DoctorAIAssistant() {
                 accept="image/jpeg,image/png,image/webp,application/pdf"
                 style={{ display: "none" }}
                 onChange={(e) => {
-                  if (e.target.files) handleFilesSelected(e.target.files);
+                  if (e.target.files) handleImageSelected(e.target.files);
                   e.target.value = "";
                 }}
               />
@@ -1010,10 +1028,7 @@ export default function DoctorAIAssistant() {
               <button
                 type="button"
                 className="camera-btn"
-                onClick={() => {
-                  setIsCameraModalOpen(true);
-                  setCapturedPhoto(null);
-                }}
+                onClick={() => setCameraOpen(true)}
                 title="Capture Medical Photo with Camera"
                 disabled={busy}
               >
@@ -1143,6 +1158,13 @@ export default function DoctorAIAssistant() {
           </div>
         )}
       </aside>
+
+      {/* CAMERA MODAL */}
+      <CameraModal
+        open={cameraOpen}
+        onClose={() => setCameraOpen(false)}
+        onCapture={handleImageSelected}
+      />
 
       {/* CAMERA CAPTURE MODAL */}
       {isCameraModalOpen && (

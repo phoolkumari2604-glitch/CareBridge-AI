@@ -28,6 +28,8 @@ export function OrganViewer3D({
   onOpenPanel,
   patientId = null,
   patientData = {},
+  organDossier = null,
+  onFindingsChange = null,
 }) {
   const { user } = useAuth();
   const isDoctor = (user?.role || "").toUpperCase() === "DOCTOR";
@@ -60,6 +62,7 @@ export function OrganViewer3D({
   const organKey = organId || "kidneys";
   const isBrain = organKey === "brain";
   const isIntestines = organKey === "intestines";
+  const isStomach = organKey === "stomach";
 
   // State for Problem Markers & 4 Clinical Boxes
   const [findings, setFindings] = useState([]);
@@ -109,40 +112,51 @@ export function OrganViewer3D({
     };
   }, []);
 
-  // Fetch Findings and Care Boxes from backend
+  // Fetch Findings and Care Boxes from backend or live organDossier
   useEffect(() => {
     let isMounted = true;
-    setLoadingData(true);
-    setSelectedPinId(null);
     setIsAddingPin(false);
     setIsEditingBoxes(false);
     setPinModal(null);
+
+    if (organDossier && Array.isArray(organDossier.findings)) {
+      const activeOnly = organDossier.findings.filter((f) => !f.resolvedAt);
+      setFindings(activeOnly);
+      if (organDossier.clinicalState?.text) {
+        setWhatHappened(organDossier.clinicalState.text);
+      }
+      if (activeOnly.length > 0) {
+        setSelectedPinId((prev) => {
+          if (prev && activeOnly.some((f) => (f.id || f._id) === prev)) return prev;
+          return activeOnly[0].id || activeOnly[0]._id;
+        });
+      } else {
+        setSelectedPinId(null);
+      }
+      setLoadingData(false);
+      return;
+    }
+
+    setLoadingData(true);
+    setSelectedPinId(null);
 
     patientService
       .getOrganFindings(activePatientId, organKey)
       .then((data) => {
         if (!isMounted) return;
-        const patientFindings = Array.isArray(data?.findings)
-          ? data.findings
-          : Array.isArray(config?.painPoints)
-          ? config.painPoints
-          : [];
+        const patientFindings = Array.isArray(data?.findings) ? data.findings : [];
         setFindings(patientFindings);
         setWhatHappened(data?.what_happened || "");
         setHowToReduce(data?.how_to_reduce || "");
         setMedicines(Array.isArray(data?.medicines) ? data.medicines : []);
         if (patientFindings && patientFindings.length > 0) {
-          setSelectedPinId(patientFindings[0].id);
+          setSelectedPinId(patientFindings[0].id || patientFindings[0]._id);
         }
       })
       .catch((err) => {
-        console.warn("Could not load organ findings, checking config:", err);
+        console.warn("Could not load organ findings:", err);
         if (!isMounted) return;
-        const fallback = Array.isArray(config?.painPoints) ? config.painPoints : [];
-        setFindings(fallback);
-        if (fallback.length > 0) {
-          setSelectedPinId(fallback[0].id);
-        }
+        setFindings([]);
       })
       .finally(() => {
         if (isMounted) setLoadingData(false);
@@ -151,7 +165,7 @@ export function OrganViewer3D({
     return () => {
       isMounted = false;
     };
-  }, [organKey, activePatientId, config]);
+  }, [organKey, activePatientId, config, organDossier]);
 
   // Particle Canvas for Brain background (~60 small blue particles floating upward)
   useEffect(() => {
@@ -243,10 +257,12 @@ export function OrganViewer3D({
       ? "/assets/organs/pancreas-realistic.png"
       : organKey === "intestines"
       ? "/assets/organs/intestines-realistic.png"
+      : organKey === "stomach"
+      ? "/assets/organs/stomach-realistic.png"
       : config?.imageSrc || `/assets/organs/${organKey}.jpg`;
 
   // Status Color & Animation Class Resolution
-  // Pulsing glow behind kidney (2.5s ease-in-out infinite): Critical = red, Watch = amber, Normal = green
+  // Pulsing glow behind organ (2.5s ease-in-out infinite): Critical = red, Watch = amber, Normal = green, No data = neutral blue-grey
   const normStatus = (status || "").toLowerCase();
   let statusGlowClass = "glow-normal";
   let statusColor = "#10b981";
@@ -256,6 +272,9 @@ export function OrganViewer3D({
   } else if (normStatus === "amber" || normStatus === "watch") {
     statusGlowClass = "glow-watch";
     statusColor = "#f59e0b";
+  } else if (normStatus === "grey" || normStatus === "no_data") {
+    statusGlowClass = "glow-nodata";
+    statusColor = "#64748b";
   }
 
   // Toolbar Actions
@@ -293,19 +312,22 @@ export function OrganViewer3D({
   // Red pain point hover -> flipping tooltip that stays inside viewer
   const handleDotMouseEnter = (e, point) => {
     if (!containerRef.current) return;
+    setTooltipPos((prev) => ({ ...prev, visible: false }));
     const cRect = containerRef.current.getBoundingClientRect();
     const dRect = e.currentTarget.getBoundingClientRect();
     const relX = dRect.left + dRect.width / 2 - cRect.left;
     const relY = dRect.top + dRect.height / 2 - cRect.top;
-    const isRight = relX > cRect.width / 2;
+    const isRight = relX > cRect.width - 220;
+    const clampedY = Math.max(34, Math.min(cRect.height - 34, relY));
 
     setActiveDotTooltip({
       x: relX,
-      y: relY,
+      y: clampedY,
       align: isRight ? "right" : "left",
       title: point.title || point.label || "Clinical Finding",
       severity: (point.severity || "watch").toUpperCase(),
       organName: config?.name || "Organ",
+      statusLabel: statusLabel,
     });
   };
 
@@ -407,29 +429,61 @@ export function OrganViewer3D({
         x: pinModal.x,
         y: pinModal.y,
         label: pinModal.label || "Clinical Finding",
+        title: pinModal.label || "Clinical Finding",
         severity: pinModal.severity || "watch",
         note: pinModal.note || "",
+        description: pinModal.note || "",
       };
       updatedFindings = [...findings, newPin];
       setSelectedPinId(newPin.id);
+
+      // Save via new Phase 2 finding API
+      try {
+        await patientService.postFinding(activePatientId, {
+          organId: organKey,
+          title: newPin.title,
+          description: newPin.description,
+          severity: newPin.severity,
+          x: newPin.x,
+          y: newPin.y,
+        });
+      } catch (err) {
+        console.error("Failed to post finding to Phase 2 API:", err);
+      }
     } else {
       updatedFindings = findings.map((f) =>
-        f.id === pinModal.id
+        (f.id || f._id) === pinModal.id
           ? {
               ...f,
               label: pinModal.label,
+              title: pinModal.label,
               severity: pinModal.severity,
               note: pinModal.note,
+              description: pinModal.note,
             }
           : f
       );
+
+      // Save via patch finding API
+      try {
+        await patientService.patchFinding(pinModal.id, {
+          title: pinModal.label,
+          description: pinModal.note,
+          severity: pinModal.severity,
+        });
+      } catch (err) {
+        console.error("Failed to patch finding in Phase 2 API:", err);
+      }
     }
 
     setFindings(updatedFindings);
     setPinModal(null);
     setIsAddingPin(false);
 
-    // Persist to backend
+    // Notify parent to recompute status and reload dossier immediately
+    onFindingsChange?.();
+
+    // Persist to backend backup
     await persistFindings(updatedFindings, whatHappened, howToReduce, medicines);
   };
 
@@ -437,11 +491,21 @@ export function OrganViewer3D({
   const handleRemovePin = async (pinId, e) => {
     e?.stopPropagation();
     if (!isDoctor) return;
-    const updated = findings.filter((f) => f.id !== pinId);
+    const updated = findings.filter((f) => (f.id || f._id) !== pinId);
     setFindings(updated);
     if (selectedPinId === pinId) {
-      setSelectedPinId(updated[0]?.id || null);
+      setSelectedPinId(updated[0]?.id || updated[0]?._id || null);
     }
+
+    try {
+      await patientService.patchFinding(pinId, {
+        resolved: true,
+      });
+    } catch (err) {
+      console.error("Failed to resolve finding in Phase 2 API:", err);
+    }
+
+    onFindingsChange?.();
     await persistFindings(updated, whatHappened, howToReduce, medicines);
   };
 
@@ -475,6 +539,14 @@ export function OrganViewer3D({
     setHowToReduce(tempHowToReduce);
     setMedicines(tempMedicines);
     setIsEditingBoxes(false);
+
+    try {
+      await patientService.putClinicalState(activePatientId, organKey, tempWhatHappened);
+    } catch (err) {
+      console.error("Failed to update clinical state in Phase 2 API:", err);
+    }
+
+    onFindingsChange?.();
     await persistFindings(findings, tempWhatHappened, tempHowToReduce, tempMedicines);
     setIsSaving(false);
   };
@@ -531,6 +603,10 @@ export function OrganViewer3D({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerLeave={() => {
+            setTooltipPos((prev) => ({ ...prev, visible: false }));
+            setActiveDotTooltip(null);
+          }}
           style={{
             cursor: isDoctor
               ? isAddingPin
@@ -575,7 +651,7 @@ export function OrganViewer3D({
           >
             {/* Stage maintaining aspect ratio matching the realistic organ image without stretching/cropping */}
             <div
-              className={`organ-image-stage ${isIntestines ? "intestines-stage" : ""}`}
+              className={`organ-image-stage ${isIntestines ? "intestines-stage" : ""} ${isStomach ? "stomach-stage" : ""}`}
               style={{
                 position: "relative",
                 display: "flex",
@@ -614,6 +690,8 @@ export function OrganViewer3D({
                   className={`organ-media-element ${
                     isBrain && !reducedMotion
                       ? "brain-live-image organ-image-breathing"
+                      : isStomach && !reducedMotion
+                      ? "stomach-live-image organ-image-breathing"
                       : !reducedMotion
                       ? "organ-image-breathing"
                       : ""
@@ -622,7 +700,7 @@ export function OrganViewer3D({
                     objectFit: "contain",
                     width: "100%",
                     height: "100%",
-                    mixBlendMode: "screen",
+                    mixBlendMode: isStomach ? "normal" : "screen",
                     position: "relative",
                     zIndex: 2,
                   }}
@@ -637,16 +715,21 @@ export function OrganViewer3D({
                 {isIntestines && !reducedMotion && (
                   <div className="intestines-peristalsis-wave" aria-hidden="true" />
                 )}
+
+                {/* Subtle Churning Wave across Stomach Wall */}
+                {isStomach && !reducedMotion && (
+                  <div className="stomach-churning-wave" aria-hidden="true" />
+                )}
               </div>
 
               {/* RED MOVING PAIN POINTS (percentage coordinates locked to anatomy) */}
               <div className="organ-pins-layer" aria-label="Clinical problem markers">
                 {findings.map((point, idx) => {
-                  const isSelected = selectedPinId === point.id;
+                  const isSelected = selectedPinId === point.id || selectedPinId === point._id;
                   const pointTitle = point.title || point.label || "Clinical Finding";
                   return (
                     <button
-                      key={point.id || idx}
+                      key={point.id || point._id || idx}
                       type="button"
                       className={`pain-point-marker ${isSelected ? "is-selected" : ""}`}
                       style={{ left: `${point.x}%`, top: `${point.y}%` }}
@@ -803,7 +886,9 @@ export function OrganViewer3D({
               <span className={`dot-tooltip-badge badge-${activeDotTooltip.severity.toLowerCase()}`}>
                 {activeDotTooltip.severity}
               </span>
-              <span className="dot-tooltip-organ">{activeDotTooltip.organName}</span>
+              <span className="dot-tooltip-organ">
+                {activeDotTooltip.organName} · Status: {activeDotTooltip.statusLabel || statusLabel}
+              </span>
             </div>
             <div className="dot-tooltip-title">{activeDotTooltip.title}</div>
           </div>
@@ -984,7 +1069,7 @@ export function OrganViewer3D({
           </div>
 
           <p className="organ-callout-note">
-            {activeFinding.note || "No specific radiological or clinical remarks logged for this coordinate."}
+            {activeFinding.description || activeFinding.note || "No specific radiological or clinical remarks logged for this coordinate."}
           </p>
 
           {/* Finding Selector Chips */}
@@ -992,9 +1077,9 @@ export function OrganViewer3D({
             <div className="organ-findings-chip-list">
               {findings.map((f, i) => (
                 <button
-                  key={f.id || i}
+                  key={f.id || f._id || i}
                   type="button"
-                  className={`organ-finding-chip-btn ${f.id === activeFinding.id ? "is-active" : ""}`}
+                  className={`organ-finding-chip-btn ${(f.id || f._id) === (activeFinding.id || activeFinding._id) ? "is-active" : ""}`}
                   onClick={() => handleSelectPoint(f)}
                 >
                   <span className="organ-finding-chip-dot" />
@@ -1003,6 +1088,14 @@ export function OrganViewer3D({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {!activeFinding && (
+        <div className="organ-callout-panel empty-findings" style={{ opacity: 0.85 }}>
+          <p className="organ-callout-note" style={{ fontStyle: "italic", color: "#94a3b8" }}>
+            No immediate clinical findings recorded for {config?.name || "this organ"}.
+          </p>
         </div>
       )}
 

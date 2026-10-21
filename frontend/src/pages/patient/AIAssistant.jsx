@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import patientService from "../../services/patientService";
+import CameraModal from "../../components/common/CameraModal";
 import "./AIAssistant.css";
 
 const MAX_IMAGES = 3;
@@ -57,6 +58,7 @@ function AIAssistant() {
   const [lightboxImage, setLightboxImage] = useState(null); // { url, name }
 
   // Camera Modal State
+  const [cameraOpen, setCameraOpen] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [cameraFacingMode, setCameraFacingMode] = useState("environment"); // "user" | "environment"
   const [capturedPhotoUrl, setCapturedPhotoUrl] = useState(null);
@@ -233,10 +235,18 @@ function AIAssistant() {
   // ==========================================
   const validateAndAddFiles = (files) => {
     setInlineError(null);
-    if (!files || files.length === 0) return;
+    if (!files) return;
 
     const currentCount = selectedImages.length;
-    const incomingList = Array.from(files);
+    const incomingList = files instanceof File
+      ? [files]
+      : Array.isArray(files)
+      ? files
+      : files instanceof FileList
+      ? Array.from(files)
+      : [files];
+
+    if (incomingList.length === 0) return;
 
     if (currentCount + incomingList.length > MAX_IMAGES) {
       setInlineError(`You can attach a maximum of ${MAX_IMAGES} images at once.`);
@@ -245,12 +255,14 @@ function AIAssistant() {
 
     const validNewImages = [];
     for (const file of incomingList) {
-      if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
-        setInlineError(`File '${file.name}' is not supported. Please select PNG, JPG, or WEBP images.`);
+      if (!file) continue;
+      const fileType = (file.type || "").toLowerCase();
+      if (fileType && !ALLOWED_TYPES.includes(fileType)) {
+        setInlineError(`File '${file.name || "image"}' is not supported. Please select PNG, JPG, or WEBP images.`);
         return;
       }
       if (file.size > MAX_IMAGE_SIZE_BYTES) {
-        setInlineError(`File '${file.name}' is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum allowed size is 5 MB.`);
+        setInlineError(`File '${file.name || "image"}' is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum allowed size is 5 MB.`);
         return;
       }
 
@@ -259,17 +271,26 @@ function AIAssistant() {
         id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         file,
         previewUrl,
-        name: file.name,
-        size: file.size,
+        name: file.name || `capture_${Date.now()}.jpg`,
+        size: file.size || 0,
       });
     }
 
     setSelectedImages((prev) => [...prev, ...validNewImages]);
   };
 
+  const handleImageSelected = (fileOrFiles) => {
+    if (!fileOrFiles) return;
+    if (fileOrFiles.target && fileOrFiles.target.files) {
+      validateAndAddFiles(fileOrFiles.target.files);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    validateAndAddFiles(fileOrFiles);
+  };
+
   const handleFileInputChange = (e) => {
-    validateAndAddFiles(e.target.files);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    handleImageSelected(e);
   };
 
   const handleRemoveImage = (idToRemove) => {
@@ -346,15 +367,16 @@ function AIAssistant() {
   };
 
   const openCameraModal = () => {
+    setCameraOpen(true);
     setIsCameraOpen(true);
-    startCamera(cameraFacingMode);
   };
 
   const closeCameraModal = () => {
+    setCameraOpen(false);
+    setIsCameraOpen(false);
     stopCamera();
     setCapturedPhotoUrl(null);
     setCameraError(null);
-    setIsCameraOpen(false);
   };
 
   const flipCamera = () => {
@@ -536,84 +558,11 @@ function AIAssistant() {
       )}
 
       {/* CAMERA MODAL */}
-      {isCameraOpen && (
-        <div className="ai-camera-modal-backdrop">
-          <div className="ai-camera-modal">
-            <div className="camera-modal-header">
-              <div className="camera-title">
-                <Camera size={18} />
-                <span>Take Photo of Medical Report or Symptom</span>
-              </div>
-              <button onClick={closeCameraModal} className="camera-close-btn">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="camera-body">
-              {cameraError ? (
-                <div className="camera-error-box">
-                  <AlertTriangle size={32} />
-                  <p>{cameraError}</p>
-                  <div className="camera-error-actions">
-                    <button
-                      type="button"
-                      onClick={() => mobileCameraInputRef.current?.click()}
-                      className="cam-fallback-btn"
-                    >
-                      <Camera size={15} /> Use Device Native Camera
-                    </button>
-                    <button type="button" onClick={() => startCamera(cameraFacingMode)} className="cam-retry-btn">
-                      <RefreshCw size={15} /> Retry
-                    </button>
-                  </div>
-                </div>
-              ) : capturedPhotoUrl ? (
-                <div className="camera-preview-container">
-                  <img src={capturedPhotoUrl} alt="Captured preview" className="camera-captured-img" />
-                </div>
-              ) : (
-                <div className="camera-video-container">
-                  <video ref={videoRef} autoPlay playsInline muted className="camera-video-feed" />
-                </div>
-              )}
-            </div>
-
-            <div className="camera-modal-footer">
-              {!capturedPhotoUrl && !cameraError && (
-                <>
-                  <button type="button" onClick={flipCamera} className="cam-tool-btn" title="Flip Camera">
-                    <RotateCw size={16} />
-                    <span>Flip</span>
-                  </button>
-                  <button type="button" onClick={takeSnapshot} className="cam-capture-btn" title="Capture Photo">
-                    <div className="capture-inner" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => mobileCameraInputRef.current?.click()}
-                    className="cam-tool-btn"
-                    title="System File Camera"
-                  >
-                    <ImageIcon size={16} />
-                    <span>Files</span>
-                  </button>
-                </>
-              )}
-
-              {capturedPhotoUrl && (
-                <>
-                  <button type="button" onClick={retakePhoto} className="cam-retake-btn">
-                    <RotateCcw size={15} /> Retake
-                  </button>
-                  <button type="button" onClick={useCapturedPhoto} className="cam-use-btn">
-                    <Check size={16} /> Use Photo
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <CameraModal
+        open={cameraOpen}
+        onClose={() => setCameraOpen(false)}
+        onCapture={handleImageSelected}
+      />
 
       {/* HEADER */}
       <section className="ai-assistant-heading">
@@ -994,7 +943,7 @@ function AIAssistant() {
               <button
                 type="button"
                 className="camera-action-btn"
-                onClick={openCameraModal}
+                onClick={() => setCameraOpen(true)}
                 title="Open Camera to capture report or symptom"
                 disabled={selectedImages.length >= MAX_IMAGES}
               >

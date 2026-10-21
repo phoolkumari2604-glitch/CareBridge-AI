@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Pill,
@@ -23,51 +23,98 @@ import {
   AlertOctagon,
   Clock,
   HelpCircle,
-  FileText
+  FileText,
+  Languages,
+  Bookmark,
+  Camera,
+  Check
 } from "lucide-react";
+
+import { useAuth } from "../../context/AuthContext";
 import medicineService from "../../services/medicineService";
+import patientService from "../../services/patientService";
+import CameraModal from "../../components/common/CameraModal";
+
+import { I18N } from "./medicine-assistant/i18n";
+import { checkRedFlagEmergency } from "./medicine-assistant/redFlagChecker";
+import SymptomWizard from "./medicine-assistant/SymptomWizard";
+import ResultsView from "./medicine-assistant/ResultsView";
+import RedFlagModal from "./medicine-assistant/RedFlagModal";
+import HistoryTab from "./medicine-assistant/HistoryTab";
+
 import "./MedicineAssistant.css";
 
-const PRESET_SYMPTOMS = [
-  { id: "fever", label: "Fever / Pyrexia" },
-  { id: "headache", label: "Headache" },
-  { id: "body_ache", label: "Body Aches / Muscle Pain" },
-  { id: "runny_nose", label: "Runny Nose / Cold" },
-  { id: "sneezing", label: "Frequent Sneezing" },
-  { id: "nasal_congestion", label: "Blocked Nose" },
-  { id: "dry_cough", label: "Dry Cough" },
-  { id: "wet_cough", label: "Chesty / Wet Cough" },
-  { id: "sore_throat", label: "Sore Throat" },
-  { id: "heartburn", label: "Heartburn / Acidity" },
-  { id: "loose_motion", label: "Loose Motions / Diarrhea" },
-  { id: "minor_cut", label: "Minor Cut / Scratch" },
-  { id: "skin_rash_itchy", label: "Itchy Skin / Ringworm" },
-];
-
-const PRESET_ALLERGIES = ["Paracetamol", "Aspirin", "Ibuprofen", "Sulfa Drugs", "Penicillin"];
-const PRESET_CONDITIONS = ["Peptic Ulcer", "Kidney Disease", "Liver Disease", "Asthma", "Hypertension"];
+const STORAGE_HISTORY_KEY = "carebridge_medicine_eval_history";
 
 function MedicineAssistant() {
-  const [activeTab, setActiveTab] = useState("intake"); // "intake" | "chat" | "search"
+  const { user } = useAuth();
 
-  // Intake State
-  const [symptoms, setSymptoms] = useState([]);
-  const [customSymptom, setCustomSymptom] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("unspecified");
-  const [pregnant, setPregnant] = useState(false);
-  const [allergies, setAllergies] = useState([]);
-  const [customAllergy, setCustomAllergy] = useState("");
-  const [currentMedicines, setCurrentMedicines] = useState([]);
-  const [customMed, setCustomMed] = useState("");
-  const [conditions, setConditions] = useState([]);
+  // Language state (en, hi, te)
+  const [lang, setLang] = useState(() => {
+    return localStorage.getItem("carebridge_lang") || "en";
+  });
+  const t = useMemo(() => I18N[lang] || I18N.en, [lang]);
+
+  const handleLangChange = (newLang) => {
+    setLang(newLang);
+    localStorage.setItem("carebridge_lang", newLang);
+  };
+
+  // Active Tab: "intake" | "chat" | "search" | "history"
+  const [activeTab, setActiveTab] = useState("intake");
+
+  // Patient Clinical Intake State
+  const [intake, setIntake] = useState({
+    symptoms: [],
+    symptomDetails: {}, // { [label]: { duration: '1-3 days', severity: 'mild' } }
+    age: "",
+    weight: "",
+    gender: "unspecified",
+    pregnant: false,
+    nursing: false,
+    pregnancyTrimester: "",
+    alcohol: false,
+    smoking: false,
+    allergies: [],
+    current_medicines: [],
+    conditions: [],
+    hasAutofilled: false,
+  });
+
+  // User Profile loaded from auth or health record
+  const [userProfile, setUserProfile] = useState(null);
+
+  // Red-flag emergency screening state
+  const [emergencyData, setEmergencyData] = useState({ triggered: false });
 
   // Evaluation & Results State
   const [evaluating, setEvaluating] = useState(false);
   const [evalResult, setEvalResult] = useState(null);
   const [evalError, setEvalError] = useState(null);
 
-  // Search State
+  // Camera Modal for Scanning Medicine Strip
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+
+  // Evaluation History State
+  const [historyItems, setHistoryItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_HISTORY_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Toast Notification State
+  const [toastMessage, setToastMessage] = useState(null);
+  const showToast = useCallback((msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  }, []);
+
+  // Search Tab State
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -76,7 +123,7 @@ function MedicineAssistant() {
   const [interactionResult, setInteractionResult] = useState(null);
   const [interactionLoading, setInteractionLoading] = useState(false);
 
-  // Chat State
+  // Chat Tab State
   const [chatMessages, setChatMessages] = useState([
     {
       id: "welcome",
@@ -88,87 +135,133 @@ function MedicineAssistant() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
 
-  // Toggle symptom chip
-  const toggleSymptom = (label) => {
-    if (symptoms.includes(label)) {
-      setSymptoms(symptoms.filter((s) => s !== label));
-    } else {
-      setSymptoms([...symptoms, label]);
+  // Load Patient Profile from Patient Service / Auth Context
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const patientId = user?.patient_id || user?.id;
+        if (patientId) {
+          const profile = await patientService.getPatientProfile(patientId);
+          if (profile) {
+            setUserProfile(profile);
+          }
+        } else if (user) {
+          setUserProfile(user);
+        }
+      } catch (err) {
+        if (user) setUserProfile(user);
+      }
+    };
+    fetchProfile();
+  }, [user]);
+
+  // Save history to localStorage whenever updated
+  const saveEvaluationHistory = (newItem) => {
+    const updated = [newItem, ...historyItems].slice(0, 30);
+    setHistoryItems(updated);
+    try {
+      localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(updated));
+    } catch (_) {}
+  };
+
+  const clearEvaluationHistory = () => {
+    if (window.confirm("Are you sure you want to clear your local evaluation history?")) {
+      setHistoryItems([]);
+      localStorage.removeItem(STORAGE_HISTORY_KEY);
+      showToast("Evaluation history cleared.");
     }
   };
 
-  const addCustomSymptom = (e) => {
-    e.preventDefault();
-    if (customSymptom.trim() && !symptoms.includes(customSymptom.trim())) {
-      setSymptoms([...symptoms, customSymptom.trim()]);
-      setCustomSymptom("");
+  const reloadIntakeFromHistory = (historicalIntake) => {
+    if (historicalIntake) {
+      setIntake({
+        ...historicalIntake,
+        hasAutofilled: true,
+      });
+      setEvalResult(null);
+      setActiveTab("intake");
+      showToast("Historical symptoms and profile re-loaded into wizard.");
     }
   };
 
-  const toggleAllergy = (a) => {
-    if (allergies.includes(a)) {
-      setAllergies(allergies.filter((x) => x !== a));
-    } else {
-      setAllergies([...allergies, a]);
-    }
-  };
-
-  const addCustomAllergy = (e) => {
-    e.preventDefault();
-    if (customAllergy.trim() && !allergies.includes(customAllergy.trim())) {
-      setAllergies([...allergies, customAllergy.trim()]);
-      setCustomAllergy("");
-    }
-  };
-
-  const addCurrentMed = (e) => {
-    e.preventDefault();
-    if (customMed.trim() && !currentMedicines.includes(customMed.trim())) {
-      setCurrentMedicines([...currentMedicines, customMed.trim()]);
-      setCustomMed("");
-    }
-  };
-
-  const toggleCondition = (c) => {
-    if (conditions.includes(c)) {
-      setConditions(conditions.filter((x) => x !== c));
-    } else {
-      setConditions([...conditions, c]);
-    }
-  };
-
-  // Run 5-Layer Safety Evaluation
+  // =========================================================
+  // EVALUATION & RED-FLAG EMERGENCY TRIAGE
+  // =========================================================
   const handleEvaluate = async () => {
-    if (symptoms.length === 0) {
-      setEvalError("Please select or enter at least one symptom to evaluate.");
+    setEvalError(null);
+
+    // B. CLIENT-SIDE RED-FLAG EMERGENCY SCREENING (Runs BEFORE evaluation)
+    const redFlagCheck = checkRedFlagEmergency({
+      symptoms: intake.symptoms,
+      symptomDetails: intake.symptomDetails,
+      age: intake.age ? parseInt(intake.age, 10) : null,
+      pregnant: intake.pregnant,
+      pregnancyTrimester: intake.pregnancyTrimester,
+    });
+
+    if (redFlagCheck.triggered) {
+      setEmergencyData(redFlagCheck);
+      setEvaluating(false);
       return;
     }
-    setEvalError(null);
+
     setEvaluating(true);
     setEvalResult(null);
 
     try {
       const payload = {
-        symptoms,
-        age: age ? parseInt(age, 10) : null,
-        gender,
-        pregnant,
-        allergies,
-        current_medicines: currentMedicines,
-        conditions,
+        symptoms: intake.symptoms,
+        age: intake.age ? parseInt(intake.age, 10) : null,
+        gender: intake.gender,
+        pregnant: intake.pregnant,
+        pregnancy_trimester: intake.pregnancyTrimester,
+        allergies: intake.allergies,
+        current_medicines: intake.current_medicines,
+        conditions: intake.conditions,
       };
+
       const data = await medicineService.suggestMedicines(payload);
-      setEvalResult(data);
+
+      // Also check if backend returned an emergency triage
+      if (data.is_emergency || data.red_flag_triggered) {
+        setEmergencyData({
+          triggered: true,
+          code: "BACKEND_EMERGENCY",
+          title: "Critical Clinical Triage Alert",
+          reason: data.alert_message || data.emergency_alert,
+          actionText: "Seek immediate emergency hospital medical evaluation.",
+        });
+      } else {
+        setEvalResult(data);
+        showToast("Clinical safety evaluation completed successfully!");
+      }
     } catch (err) {
       setEvalError(
-        err.response?.data?.error || "Failed to evaluate symptoms. Please check connectivity."
+        err.response?.data?.error ||
+          "Failed to evaluate symptoms. Please check network connectivity and retry."
       );
     } finally {
       setEvaluating(false);
     }
   };
 
-  // Handle Search
+  // Medicine Strip Camera Capture Handler
+  const handleMedicineStripCaptured = (file) => {
+    showToast(`Captured photo: "${file.name || "medicine_scan.jpg"}". Searching database...`);
+    // Pre-populate search query and switch to search tab
+    const cleanName = (file.name || "").replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+    if (cleanName && !cleanName.startsWith("camera_capture")) {
+      setSearchQuery(cleanName);
+      setActiveTab("search");
+      medicineService.searchMedicines(cleanName).then((data) => {
+        setSearchResults(data.results || []);
+      });
+    } else {
+      setActiveTab("search");
+    }
+  };
+
+  // Handle Brand Search
   const handleSearch = async (e) => {
     e?.preventDefault();
     if (!searchQuery.trim()) return;
@@ -197,7 +290,7 @@ function MedicineAssistant() {
     }
   };
 
-  // Handle Chat Submit
+  // Handle Conversational RAG Chat Submit
   const handleChatSubmit = async (e) => {
     e.preventDefault();
     const userMsg = chatInput.trim();
@@ -216,13 +309,14 @@ function MedicineAssistant() {
 
     try {
       const intakeData = {
-        age: age ? parseInt(age, 10) : null,
-        gender,
-        pregnant,
-        allergies,
-        current_medicines: currentMedicines,
-        conditions,
-        symptoms,
+        age: intake.age ? parseInt(intake.age, 10) : null,
+        gender: intake.gender,
+        pregnant: intake.pregnant,
+        pregnancy_trimester: intake.pregnancyTrimester,
+        allergies: intake.allergies,
+        current_medicines: intake.current_medicines,
+        conditions: intake.conditions,
+        symptoms: intake.symptoms,
       };
 
       const response = await medicineService.chatAssistant({
@@ -258,476 +352,170 @@ function MedicineAssistant() {
 
   return (
     <div className="med-assistant-page">
+      {/* TOAST NOTIFICATION */}
+      {toastMessage && (
+        <div className="med-toast-container" role="status" aria-live="polite">
+          <div className="med-toast-card">
+            <CheckCircle2 size={16} className="med-text-success" />
+            <span>{toastMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* RED-FLAG EMERGENCY MODAL */}
+      <RedFlagModal
+        emergency={emergencyData}
+        onClose={() => setEmergencyData({ triggered: false })}
+        lang={lang}
+        t={t}
+      />
+
+      {/* CAMERA SCANNER MODAL */}
+      <CameraModal
+        open={cameraModalOpen}
+        onClose={() => setCameraModalOpen(false)}
+        onCapture={handleMedicineStripCaptured}
+      />
+
       {/* =========================================================
-          PERSISTENT COMPLIANCE & EDUCATIONAL DISCLAIMER BANNER
+          PERSISTENT LEGAL & EDUCATIONAL DISCLAIMER BANNER
       ========================================================= */}
       <div className="med-disclaimer-banner" role="region" aria-label="Medical Disclaimer">
         <div className="med-disclaimer-content">
           <Info size={18} className="med-disclaimer-icon" />
           <div className="med-disclaimer-text">
-            <strong>Educational Non-Commercial Student Project:</strong> All suggestions are for informational and clinical decision-support evaluation only. This tool never provides a medical diagnosis or formal prescription. Always consult a qualified physician or pharmacist before taking medication.
+            <strong>{t.educationalDisclaimer.split(":")[0]}:</strong>{" "}
+            {t.educationalDisclaimer.split(":")[1] || t.educationalDisclaimer}
             <div className="med-privacy-note">
-              🔒 <strong>Privacy Assured:</strong> Symptoms and queries are processed anonymously without storing Personally Identifiable Information (non-PII).
+              🔒 <strong>{t.privacyNote.split(":")[0]}:</strong>{" "}
+              {t.privacyNote.split(":")[1] || t.privacyNote}
             </div>
           </div>
         </div>
         <Link to="/patient/sources-attribution" className="med-sources-pill-btn">
           <Database size={13} />
-          <span>Data Sources & Attribution</span>
+          <span>{t.sourcesAttribution}</span>
         </Link>
       </div>
 
       {/* =========================================================
-          HEADER
+          HEADER & LANGUAGE SWITCHER
       ========================================================= */}
       <div className="med-header">
         <div>
-          <span className="med-eyebrow">CLINICAL SAFETY ENGINE</span>
-          <h1>Medicine Assistant & OTC Guide</h1>
-          <p>
-            Grounded Over-The-Counter pharmaceutical decision support using curated Indian formularies (NLEM 2022, CDSCO banned lists, DDInter, openFDA).
-          </p>
+          <span className="med-eyebrow">5-LAYER CLINICAL SAFETY PIPELINE</span>
+          <h1>{t.title}</h1>
+          <p>{t.subtitle}</p>
         </div>
 
         <div className="med-header-actions">
+          {/* Language Toggle */}
+          <div className="med-lang-switch-wrapper">
+            <Languages size={15} className="med-lang-icon" />
+            <div className="med-lang-toggle-group">
+              <button
+                type="button"
+                className={`med-lang-btn ${lang === "en" ? "active" : ""}`}
+                onClick={() => handleLangChange("en")}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                className={`med-lang-btn ${lang === "hi" ? "active" : ""}`}
+                onClick={() => handleLangChange("hi")}
+              >
+                हिन्दी
+              </button>
+              <button
+                type="button"
+                className={`med-lang-btn ${lang === "te" ? "active" : ""}`}
+                onClick={() => handleLangChange("te")}
+              >
+                తెలుగు
+              </button>
+            </div>
+          </div>
+
           <Link to="/patient/doctors" className="med-btn-primary">
             <Stethoscope size={16} />
-            <span>Talk to a Doctor</span>
+            <span>{t.talkToDoctor}</span>
           </Link>
         </div>
       </div>
 
       {/* =========================================================
-          NAVIGATION TABS
+          NAVIGATION TABS (4 TABS: Intake, Chat, Search, History)
       ========================================================= */}
-      <div className="med-tabs">
+      <div className="med-tabs" role="tablist">
         <button
+          role="tab"
+          aria-selected={activeTab === "intake"}
           className={`med-tab-btn ${activeTab === "intake" ? "active" : ""}`}
           onClick={() => setActiveTab("intake")}
         >
           <ShieldCheck size={16} />
-          <span>Symptom Intake & Safety Engine</span>
+          <span>{t.tabIntake}</span>
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === "chat"}
           className={`med-tab-btn ${activeTab === "chat" ? "active" : ""}`}
           onClick={() => setActiveTab("chat")}
         >
           <Bot size={16} />
-          <span>Conversational RAG Assistant</span>
+          <span>{t.tabChat}</span>
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === "search"}
           className={`med-tab-btn ${activeTab === "search" ? "active" : ""}`}
           onClick={() => setActiveTab("search")}
         >
           <Search size={16} />
-          <span>Brand Search & Interactions</span>
+          <span>{t.tabSearch}</span>
+        </button>
+        <button
+          role="tab"
+          aria-selected={activeTab === "history"}
+          className={`med-tab-btn ${activeTab === "history" ? "active" : ""}`}
+          onClick={() => setActiveTab("history")}
+        >
+          <Clock size={16} />
+          <span>
+            {t.tabHistory} ({historyItems.length})
+          </span>
         </button>
       </div>
 
       {/* =========================================================
-          TAB 1: SYMPTOM INTAKE & 5-LAYER SAFETY EVALUATION
+          TAB 1: SYMPTOM INTAKE WIZARD & 5-LAYER SAFETY RESULTS
       ========================================================= */}
       {activeTab === "intake" && (
         <div className="med-intake-container">
-          {/* INTAKE FORM */}
-          <div className="med-card med-form-card">
-            <h2>1. Patient Clinical Profile & Symptoms</h2>
-            <p className="med-card-subtitle">
-              Complete these clinical factors to activate the 5-layer safety filter (Allergy, Interaction, Pediatric, Pregnancy, and CDSCO Ban checks).
-            </p>
+          {/* 4-Step Wizard */}
+          <SymptomWizard
+            intake={intake}
+            setIntake={setIntake}
+            onEvaluate={handleEvaluate}
+            evaluating={evaluating}
+            evalError={evalError}
+            t={t}
+            lang={lang}
+            userProfile={userProfile}
+          />
 
-            {/* SYMPTOMS SELECTOR */}
-            <div className="med-form-section">
-              <label className="med-label">
-                Select Presenting Symptoms <span className="med-req">*</span>
-              </label>
-              <div className="med-chip-group">
-                {PRESET_SYMPTOMS.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    className={`med-chip ${symptoms.includes(s.label) ? "selected" : ""}`}
-                    onClick={() => toggleSymptom(s.label)}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Custom Symptom Input */}
-              <form onSubmit={addCustomSymptom} className="med-custom-input-form">
-                <input
-                  type="text"
-                  placeholder="Or type custom symptom (e.g. tickly throat, chest tightness)..."
-                  value={customSymptom}
-                  onChange={(e) => setCustomSymptom(e.target.value)}
-                  className="med-input"
-                />
-                <button type="submit" className="med-btn-secondary">
-                  Add Symptom
-                </button>
-              </form>
-
-              {symptoms.length > 0 && (
-                <div className="med-selected-tags">
-                  <span className="med-tags-title">Selected ({symptoms.length}):</span>
-                  {symptoms.map((s) => (
-                    <span key={s} className="med-active-tag">
-                      {s}
-                      <button type="button" onClick={() => toggleSymptom(s)}>×</button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* AGE, GENDER & PREGNANCY */}
-            <div className="med-form-grid">
-              <div className="med-form-group">
-                <label className="med-label">
-                  Age (Years)
-                  {age && parseInt(age, 10) < 12 && (
-                    <span className="med-badge-warn">Pediatric (&lt;12)</span>
-                  )}
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="120"
-                  placeholder="e.g. 28"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  className="med-input"
-                />
-                <span className="med-hint">
-                  Children under 12 receive strict weight-based pediatrician referral only.
-                </span>
-              </div>
-
-              <div className="med-form-group">
-                <label className="med-label">Gender</label>
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className="med-select"
-                >
-                  <option value="unspecified">Prefer not to say</option>
-                  <option value="female">Female</option>
-                  <option value="male">Male</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div className="med-form-group med-checkbox-group">
-                <label className="med-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={pregnant}
-                    onChange={(e) => setPregnant(e.target.checked)}
-                  />
-                  <span>Currently Pregnant or Nursing</span>
-                </label>
-                {pregnant && (
-                  <span className="med-warn-text">
-                    Strict pregnancy filter active: NSAIDs (Ibuprofen) are blocked.
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* ALLERGIES */}
-            <div className="med-form-section">
-              <label className="med-label">Known Drug Allergies</label>
-              <div className="med-chip-group">
-                {PRESET_ALLERGIES.map((a) => (
-                  <button
-                    key={a}
-                    type="button"
-                    className={`med-chip med-chip-danger ${allergies.includes(a) ? "selected" : ""}`}
-                    onClick={() => toggleAllergy(a)}
-                  >
-                    {a}
-                  </button>
-                ))}
-              </div>
-              <form onSubmit={addCustomAllergy} className="med-custom-input-form">
-                <input
-                  type="text"
-                  placeholder="Add other drug allergy..."
-                  value={customAllergy}
-                  onChange={(e) => setCustomAllergy(e.target.value)}
-                  className="med-input"
-                />
-                <button type="submit" className="med-btn-secondary">Add Allergy</button>
-              </form>
-            </div>
-
-            {/* CURRENT MEDICINES */}
-            <div className="med-form-section">
-              <label className="med-label">
-                Current Medications (for Drug-Drug Interaction Check)
-              </label>
-              <form onSubmit={addCurrentMed} className="med-custom-input-form">
-                <input
-                  type="text"
-                  placeholder="e.g. Warfarin, Metformin, Aspirin, Blood Pressure meds..."
-                  value={customMed}
-                  onChange={(e) => setCustomMed(e.target.value)}
-                  className="med-input"
-                />
-                <button type="submit" className="med-btn-secondary">Add Medicine</button>
-              </form>
-              {currentMedicines.length > 0 && (
-                <div className="med-selected-tags">
-                  {currentMedicines.map((m) => (
-                    <span key={m} className="med-active-tag med-active-tag-info">
-                      {m}
-                      <button type="button" onClick={() => setCurrentMedicines(currentMedicines.filter((x) => x !== m))}>×</button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* CHRONIC CONDITIONS */}
-            <div className="med-form-section">
-              <label className="med-label">Existing Chronic Conditions</label>
-              <div className="med-chip-group">
-                {PRESET_CONDITIONS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    className={`med-chip ${conditions.includes(c) ? "selected" : ""}`}
-                    onClick={() => toggleCondition(c)}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {evalError && (
-              <div className="med-alert med-alert-error">
-                <AlertTriangle size={18} />
-                <span>{evalError}</span>
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="med-btn-evaluate"
-              disabled={evaluating || symptoms.length === 0}
-              onClick={handleEvaluate}
-            >
-              {evaluating ? (
-                <>
-                  <Loader2 size={18} className="med-spin" />
-                  <span>Evaluating 5-Layer Clinical Pipeline...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles size={18} />
-                  <span>Evaluate Safe OTC Medicines</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* EVALUATION RESULTS VIEW */}
+          {/* Results View */}
           {evalResult && (
-            <div className="med-results-section">
-              {/* RED-FLAG EMERGENCY TRIAGE TRIGGERED */}
-              {evalResult.red_flag_triggered || evalResult.is_emergency ? (
-                <div className="med-red-flag-card">
-                  <div className="med-red-flag-header">
-                    <AlertOctagon size={32} className="med-pulse" />
-                    <div>
-                      <h3>CRITICAL RED-FLAG ALERT: SEEK IMMEDIATE MEDICAL CARE</h3>
-                      <p>A potentially severe or life-threatening condition was identified. Do NOT take OTC medication.</p>
-                    </div>
-                  </div>
-
-                  <div className="med-red-flag-alert-body">
-                    <strong>Triage Reason:</strong> {evalResult.alert_message || evalResult.emergency_alert}
-                  </div>
-
-                  <div className="med-emergency-contacts">
-                    <h4>Emergency Helplines (India):</h4>
-                    <div className="med-contacts-grid">
-                      <a href="tel:112" className="med-call-pill med-call-emergency">
-                        <PhoneCall size={16} />
-                        <span>112 - National Emergency</span>
-                      </a>
-                      <a href="tel:108" className="med-call-pill med-call-ambulance">
-                        <PhoneCall size={16} />
-                        <span>108 - Ambulance Service</span>
-                      </a>
-                      <a href="tel:14416" className="med-call-pill med-call-telemanas">
-                        <PhoneCall size={16} />
-                        <span>14416 - Tele-MANAS Mental Health</span>
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="med-red-flag-footer">
-                    <Link to="/patient/doctors" className="med-btn-danger">
-                      <Stethoscope size={16} />
-                      <span>Find Nearest Emergency Doctor</span>
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {/* CLINICAL ADVISORIES (Pediatric & Pregnancy) */}
-                  {evalResult.pediatric_warning && (
-                    <div className="med-alert med-alert-warn">
-                      <AlertTriangle size={20} />
-                      <div>
-                        <strong>Pediatric Clinical Warning:</strong> {evalResult.pediatric_warning}
-                      </div>
-                    </div>
-                  )}
-
-                  {evalResult.pregnancy_warning && (
-                    <div className="med-alert med-alert-warn">
-                      <AlertTriangle size={20} />
-                      <div>
-                        <strong>Pregnancy Clinical Caution:</strong> {evalResult.pregnancy_warning}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* APPROVED OTC SUGGESTIONS */}
-                  <div className="med-suggestions-header">
-                    <h3>Approved First-Line OTC Options ({evalResult.suggestions.length})</h3>
-                    <span className="med-badge-verified">
-                      <ShieldCheck size={14} />
-                      Curated OTC Allowlist & DDInter Validated
-                    </span>
-                  </div>
-
-                  {evalResult.suggestions.length === 0 ? (
-                    <div className="med-empty-card">
-                      <HelpCircle size={32} />
-                      <h4>No Safe OTC Recommendations Found</h4>
-                      <p>
-                        Either no first-line OTC drugs exist for this specific combination, or potential medications were excluded by safety filters (allergies, interactions, or contraindications).
-                      </p>
-                      <Link to="/patient/doctors" className="med-btn-primary">
-                        Consult a Verified CareBridge Physician
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="med-suggestions-grid">
-                      {evalResult.suggestions.map((med, idx) => (
-                        <div key={idx} className="med-suggestion-card">
-                          <div className="med-card-top">
-                            <div>
-                              <span className="med-drug-class">{med.drug_class || "First-Line Agent"}</span>
-                              <h4 className="med-generic-name">{med.generic_name}</h4>
-                            </div>
-                            <span className="med-otc-badge">OTC Approved</span>
-                          </div>
-
-                          <div className="med-card-body">
-                            <div className="med-section-row">
-                              <span className="med-row-label">Commonly Used For:</span>
-                              <p className="med-row-text">{med.commonly_used_for}</p>
-                            </div>
-
-                            {/* BRANDS */}
-                            {med.common_brands && med.common_brands.length > 0 && (
-                              <div className="med-section-row">
-                                <span className="med-row-label">Common Indian Brands:</span>
-                                <div className="med-brands-list">
-                                  {med.common_brands.map((b, bIdx) => (
-                                    <div key={bIdx} className="med-brand-item">
-                                      <div className="med-brand-title">
-                                        <strong>{b.brand_name}</strong> ({b.strength}) - {b.form}
-                                      </div>
-                                      <div className="med-brand-meta">
-                                        <span>Mfg: {b.manufacturer}</span>
-                                        {b.price_inr && <span className="med-price">₹{b.price_inr} MRP</span>}
-                                        {b.is_essential && (
-                                          <span className="med-essential-pill">NLEM Essential</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* WARNINGS */}
-                            {med.warnings && med.warnings.length > 0 && (
-                              <div className="med-section-row">
-                                <span className="med-row-label">Clinical Warnings:</span>
-                                <ul className="med-warnings-list">
-                                  {med.warnings.map((w, wIdx) => (
-                                    <li key={wIdx}>{w}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-
-                            {/* SIDE EFFECTS */}
-                            {med.side_effects && med.side_effects.length > 0 && (
-                              <div className="med-section-row">
-                                <span className="med-row-label">Reported Side Effects (SIDER):</span>
-                                <div className="med-side-effects-chips">
-                                  {med.side_effects.map((se, sIdx) => (
-                                    <span key={sIdx} className="med-se-chip">
-                                      {se.effect} <small>({se.frequency.toLowerCase()})</small>
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* INTERACTIONS CAUTION */}
-                            {med.interactions_caution && (
-                              <div className="med-section-row med-caution-box">
-                                <span className="med-row-label">Drug Interaction Status:</span>
-                                {med.interactions_caution.map((ic, iIdx) => (
-                                  <p key={iIdx} className="med-caution-text">⚠️ {ic}</p>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="med-card-footer">
-                            <span className="med-provenance-tag">
-                              Source: {med.source || "A-Z Medicine Dataset of India (CC0), NLEM 2022"}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* SAFETY FILTER LOG (EXCLUDED MEDICINES) */}
-                  {evalResult.filtered_out && evalResult.filtered_out.length > 0 && (
-                    <div className="med-excluded-card">
-                      <h4>
-                        <XCircle size={18} className="med-text-danger" />
-                        Medications Excluded by 5-Layer Safety Filter ({evalResult.filtered_out.length})
-                      </h4>
-                      <p className="med-card-subtitle">
-                        These medications match your symptoms but were strictly removed to protect against adverse clinical risks:
-                      </p>
-                      <div className="med-excluded-list">
-                        {evalResult.filtered_out.map((ex, exIdx) => (
-                          <div key={exIdx} className="med-excluded-item">
-                            <span className="med-excluded-name">{ex.generic_name}</span>
-                            <span className="med-excluded-reason">{ex.reason}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+            <ResultsView
+              result={evalResult}
+              intake={intake}
+              t={t}
+              lang={lang}
+              onSaveHistory={saveEvaluationHistory}
+              onOpenScanModal={() => setCameraModalOpen(true)}
+              showToast={showToast}
+            />
           )}
         </div>
       )}
@@ -736,7 +524,7 @@ function MedicineAssistant() {
           TAB 2: CONVERSATIONAL RAG ASSISTANT
       ========================================================= */}
       {activeTab === "chat" && (
-        <div className="med-chat-container">
+        <div className="med-chat-container med-fade-in">
           <div className="med-chat-messages">
             {chatMessages.map((m) => (
               <div key={m.id} className={`med-chat-bubble ${m.sender === "user" ? "user" : "ai"}`}>
@@ -759,7 +547,8 @@ function MedicineAssistant() {
                     <div className="med-bubble-emergency-box">
                       <AlertOctagon size={20} />
                       <div>
-                        <strong>Emergency Alert:</strong> Critical symptoms detected. Call 112 / 108 or proceed to emergency triage immediately.
+                        <strong>Emergency Alert:</strong> Critical symptoms detected. Call 112 /
+                        108 or proceed to emergency triage immediately.
                       </div>
                     </div>
                   )}
@@ -768,7 +557,9 @@ function MedicineAssistant() {
             ))}
             {chatLoading && (
               <div className="med-chat-bubble ai">
-                <div className="med-bubble-avatar"><Bot size={16} /></div>
+                <div className="med-bubble-avatar">
+                  <Bot size={16} />
+                </div>
                 <div className="med-bubble-body med-loading-bubble">
                   <Loader2 size={16} className="med-spin" />
                   <span>Searching verified pharmaceutical database & evaluating safety...</span>
@@ -801,12 +592,24 @@ function MedicineAssistant() {
           TAB 3: BRAND SEARCH & DRUG-DRUG INTERACTIONS
       ========================================================= */}
       {activeTab === "search" && (
-        <div className="med-search-container">
+        <div className="med-search-container med-fade-in">
           <div className="med-card">
-            <h2>Indian Brand & Generic Medicine Lookup</h2>
-            <p className="med-card-subtitle">
-              Fuzzy search across 30,000+ Indian pharmaceutical brands, composition strengths, and NLEM essential drug statuses.
-            </p>
+            <div className="med-card-header-row">
+              <div>
+                <h2>Indian Brand & Generic Medicine Lookup</h2>
+                <p className="med-card-subtitle">
+                  Fuzzy search across 30,000+ Indian pharmaceutical brands, composition strengths, and NLEM essential drug statuses.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="med-btn-scan-strip"
+                onClick={() => setCameraModalOpen(true)}
+              >
+                <Camera size={16} />
+                <span>Scan Medicine Strip</span>
+              </button>
+            </div>
 
             <form onSubmit={handleSearch} className="med-search-bar">
               <input
@@ -833,9 +636,17 @@ function MedicineAssistant() {
                         <span className="med-generic-pill">{m.generic_name}</span>
                       </div>
                       <div className="med-search-item-body">
-                        <p><strong>Manufacturer:</strong> {m.manufacturer}</p>
-                        <p><strong>Form & Strength:</strong> {m.dosage_form} ({m.strength})</p>
-                        {m.price_inr && <p><strong>Price:</strong> ₹{m.price_inr} MRP</p>}
+                        <p>
+                          <strong>Manufacturer:</strong> {m.manufacturer}
+                        </p>
+                        <p>
+                          <strong>Form & Strength:</strong> {m.dosage_form} ({m.strength})
+                        </p>
+                        {m.price_inr && (
+                          <p>
+                            <strong>Price:</strong> ₹{m.price_inr} MRP
+                          </p>
+                        )}
                         <div className="med-search-badges">
                           {m.is_otc ? (
                             <span className="med-badge-otc">OTC Available</span>
@@ -843,11 +654,13 @@ function MedicineAssistant() {
                             <span className="med-badge-rx">Prescription Only</span>
                           )}
                           {m.is_nlem && <span className="med-badge-nlem">NLEM Essential</span>}
-                          {m.is_banned && <span className="med-badge-banned">CDSCO Banned FDC</span>}
+                          {m.is_banned && (
+                            <span className="med-badge-banned">CDSCO Banned FDC</span>
+                          )}
                         </div>
                       </div>
 
-                      {/* INTERACTION CHECK BUTTON */}
+                      {/* Interaction check button */}
                       <div className="med-search-item-footer">
                         <button
                           type="button"
@@ -866,12 +679,21 @@ function MedicineAssistant() {
               </div>
             )}
 
-            {/* INTERACTION CHECK MODAL / PANEL */}
+            {/* Interaction Check Modal / Panel */}
             {selectedMed && (
-              <div className="med-interaction-panel">
+              <div className="med-interaction-panel med-fade-in">
                 <div className="med-panel-header">
-                  <h3>Check Drug Interaction for: {selectedMed.brand_name} ({selectedMed.generic_name})</h3>
-                  <button type="button" onClick={() => setSelectedMed(null)} className="med-close-btn">×</button>
+                  <h3>
+                    Check Drug Interaction for: {selectedMed.brand_name} (
+                    {selectedMed.generic_name})
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMed(null)}
+                    className="med-close-btn"
+                  >
+                    ×
+                  </button>
                 </div>
                 <div className="med-panel-body">
                   <div className="med-interaction-form">
@@ -888,20 +710,29 @@ function MedicineAssistant() {
                       onClick={() => handleCheckInteraction(selectedMed.generic_name)}
                       disabled={interactionLoading || !partnerDrug.trim()}
                     >
-                      {interactionLoading ? <Loader2 size={16} className="med-spin" /> : <ShieldCheck size={16} />}
+                      {interactionLoading ? (
+                        <Loader2 size={16} className="med-spin" />
+                      ) : (
+                        <ShieldCheck size={16} />
+                      )}
                       <span>Check Compatibility</span>
                     </button>
                   </div>
 
                   {interactionResult && (
                     <div className="med-interaction-result">
-                      {interactionResult.interactions && interactionResult.interactions.length > 0 ? (
+                      {interactionResult.interactions &&
+                      interactionResult.interactions.length > 0 ? (
                         <div className="med-alert med-alert-error">
                           <AlertTriangle size={20} />
                           <div>
-                            <strong>Interaction Alert ({interactionResult.interactions[0].severity}):</strong>
+                            <strong>
+                              Interaction Alert ({interactionResult.interactions[0].severity}):
+                            </strong>
                             <p>{interactionResult.interactions[0].clinical_advice}</p>
-                            <small>Mechanism: {interactionResult.interactions[0].mechanism}</small>
+                            <small>
+                              Mechanism: {interactionResult.interactions[0].mechanism}
+                            </small>
                           </div>
                         </div>
                       ) : (
@@ -923,6 +754,18 @@ function MedicineAssistant() {
             )}
           </div>
         </div>
+      )}
+
+      {/* =========================================================
+          TAB 4: EVALUATION HISTORY
+      ========================================================= */}
+      {activeTab === "history" && (
+        <HistoryTab
+          historyItems={historyItems}
+          onClearHistory={clearEvaluationHistory}
+          onReloadIntake={reloadIntakeFromHistory}
+          t={t}
+        />
       )}
     </div>
   );

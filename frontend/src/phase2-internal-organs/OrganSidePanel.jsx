@@ -21,6 +21,7 @@ export function OrganSidePanel({
   organId,
   organStatus,
   patientData = {},
+  organDossier = null,
   onSelectOrgan,
 }) {
   const navigate = useNavigate();
@@ -37,16 +38,29 @@ export function OrganSidePanel({
   const { status, label, color, bg, border, badgeClass, summary, indicators = [], disclaimer } =
     organStatus || {};
 
-  // Find linked health records from patient EHR dossier
+  // Resolve Linked Medical Reports from live database organ reports or EHR records
+  const dossierReports = Array.isArray(organDossier?.reports)
+    ? organDossier.reports
+    : Array.isArray(organStatus?.reports)
+    ? organStatus.reports
+    : [];
+
   const healthRecords = Array.isArray(patientData.healthRecords) ? patientData.healthRecords : [];
-  const linkedRecords = healthRecords.filter((rec) => {
+  const linkedEhrRecords = healthRecords.filter((rec) => {
     const text = `${rec.title || ""} ${rec.diagnosis || ""} ${rec.record_type || ""}`.toLowerCase();
+    if (organId === "kidneys") return text.includes("kidney") || text.includes("renal") || text.includes("creatinine");
+    if (organId === "brain") return text.includes("brain") || text.includes("cerebral") || text.includes("mri") || text.includes("neuro");
     if (organId === "stomach") return text.includes("stomach") || text.includes("gastric") || text.includes("gi") || text.includes("dyspepsia");
     if (organId === "pancreas") return text.includes("pancreas") || text.includes("glucose") || text.includes("hba1c") || text.includes("diabetes");
     if (organId === "thyroid") return text.includes("thyroid") || text.includes("tsh") || text.includes("endocrine");
     if (organId === "intestines") return text.includes("intestine") || text.includes("colon") || text.includes("bowel") || text.includes("digestive");
     return false;
   });
+
+  const displayReports = dossierReports.length > 0 ? dossierReports : linkedEhrRecords;
+
+  // Clinical State Text (prefer explicit clinicalState from dossier)
+  const clinicalStateText = organDossier?.clinicalState?.text || summary || "";
 
   // Handle Ask CareBridge AI
   const handleAskAI = () => {
@@ -154,10 +168,10 @@ export function OrganSidePanel({
         )}
 
         {/* Clinical Summary */}
-        {summary && (
+        {clinicalStateText && (
           <div className="panel-clinical-summary-bubble" style={{ borderLeftColor: color }}>
             <span className="summary-title">Clinical State:</span>
-            <p>{summary}</p>
+            <p>{clinicalStateText}</p>
           </div>
         )}
       </div>
@@ -166,25 +180,52 @@ export function OrganSidePanel({
       <div className="panel-section-box">
         <div className="panel-indicators-header">
           <span className="panel-box-kicker">LINKED MEDICAL REPORTS</span>
-          <span className="count-chip">{linkedRecords.length} on file</span>
+          <span className="count-chip">{displayReports.length} on file</span>
         </div>
 
-        {linkedRecords.length === 0 ? (
+        {displayReports.length === 0 ? (
           <div className="panel-no-indicators">
             <FileText size={15} />
             <span>No direct diagnostic pathology reports uploaded for {config.name}.</span>
           </div>
         ) : (
           <div className="panel-linked-records-list">
-            {linkedRecords.map((rec) => (
+            {displayReports.map((rec) => (
               <div key={rec._id || rec.id} className="panel-record-item">
                 <FileText size={16} className="record-item-icon" />
                 <div className="record-item-info">
                   <span className="record-item-title">{rec.title}</span>
                   <small className="record-item-date">
-                    {rec.record_date || new Date(rec.created_at).toLocaleDateString()} · {rec.record_type}
+                    {rec.uploadedAt
+                      ? new Date(rec.uploadedAt).toLocaleDateString()
+                      : rec.record_date || new Date().toLocaleDateString()}
+                    {rec.record_type ? ` · ${rec.record_type}` : ""}
                   </small>
                 </div>
+                {rec.fileUrl && (
+                  <a
+                    href={rec.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="report-view-link"
+                    style={{
+                      marginLeft: "auto",
+                      fontSize: "0.75rem",
+                      color: "#06b6d4",
+                      textDecoration: "none",
+                      padding: "4px 8px",
+                      borderRadius: "6px",
+                      background: "rgba(6, 182, 212, 0.1)",
+                      border: "1px solid rgba(6, 182, 212, 0.25)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <span>View</span>
+                    <ExternalLink size={11} />
+                  </a>
+                )}
               </div>
             ))}
           </div>

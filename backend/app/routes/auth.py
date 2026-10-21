@@ -3,7 +3,7 @@ import random
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, g, session
 from bson import ObjectId
 from app.core.database import get_database
 from app.utils.security import hash_password, verify_password, create_access_token
@@ -27,6 +27,7 @@ from app.services.login_security import (
     reset_login_counters,
     attach_session_cookie,
     CAPTCHA_THRESHOLD,
+    get_client_ip,
 )
 
 auth_bp = Blueprint("auth", __name__)
@@ -319,19 +320,49 @@ def register():
     }), 201
 
 # ============================================================
+# CAPTCHA CHALLENGE (SERVER-SIDE 4-DIGIT NUMERIC CAPTCHA)
+# ============================================================
+@auth_bp.route("/captcha", methods=["GET"])
+def get_captcha():
+    """
+    Generate 4-digit numeric security challenge, store expected answer in session,
+    and return the 4-digit code and signed challenge token to the client.
+    """
+    code = str(secrets.randbelow(9000) + 1000)
+    session["captcha_expected"] = code
+    challenge = generate_login_challenge(code)
+    print(f"[Auth][Captcha] Generated 4-digit challenge: {code}")
+    return jsonify({
+        "captcha": code,
+        "code": code,
+        "question": code,
+        "captcha_token": challenge["token"],
+        "token": challenge["token"],
+        "status": "ok"
+    }), 200
+
+
+# ============================================================
 # LOGIN & 2FA
 # ============================================================
 @auth_bp.route("/login", methods=["POST"])
 def login():
     db = get_database()
     bootstrap_admin_if_needed(db)
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     
+    # 9. Normalize emails (strip + lowercase) on login
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
-    remember_me = bool(data.get("remember_me") or data.get("rememberMe"))
-    captcha_token = (data.get("captcha_token") or "").strip()
-    captcha_answer = str(data.get("captcha_answer") or "").strip()
+    role = (data.get("role") or "").strip().upper()
+    remember_me = bool(data.get("remember") if "remember" in data else (data.get("remember_me") or data.get("rememberMe")))
+    captcha_answer = data.get("captcha_answer")
+    if captcha_answer is not None:
+        captcha_answer = str(captcha_answer).strip()
+
+    client_ip = get_client_ip()
+    # 14. Temporary server logs (never log passwords)
+    print(f"[Auth][Login] Incoming request: email='{email}' ip='{client_ip}' role='{role or '<unspecified>'}'")
     
     if not email or not password:
         log_dev_auth_event("MISSING_CREDENTIALS", email or "<empty>", "Email or password missing in request")
@@ -341,6 +372,14 @@ def login():
             "detail": "Email and password are required"
         }), 400
 
+    if len(password) < 8:
+        log_dev_auth_event("INVALID_PASSWORD_LENGTH", email, "Password must be at least 8 characters")
+        return jsonify({
+            "error": "Validation Error",
+            "code": "VALIDATION_ERROR",
+            "detail": "Password must be at least 8 characters"
+        }), 400
+
     if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
         log_dev_auth_event("INVALID_EMAIL_FORMAT", email, "Email format failed validation")
         return jsonify({
@@ -348,6 +387,48 @@ def login():
             "code": "INVALID_EMAIL",
             "detail": "Please enter a valid email address"
         }), 400
+
+    # 11. Validate the 4-digit CAPTCHA server-side.
+    if captcha_answer is None or captcha_answer == "":
+        log_dev_auth_event("CAPTCHA_MISSING", email, "Missing or empty captcha answer")
+        print("[Auth][Login] Captcha result: FAILED (missing/empty answer) -> 400 Bad Request, no attempt penalty")
+        return jsonify({
+            "error": "Validation Error",
+            "code": "CAPTCHA_REQUIRED",
+            "detail": "Please enter the 4-digit security code"
+        }), 400
+
+    captcha_str = str(captcha_answer).strip()
+    session_expected = session.get("captcha_expected")
+    captcha_token = (data.get("captcha_token") or data.get("token") or "").strip()
+
+    captcha_valid = False
+    if session_expected is not None and captcha_str == str(session_expected):
+        captcha_valid = True
+        session.pop("captcha_expected", None)
+    elif captcha_token and verify_login_challenge(captcha_token, captcha_str):
+        captcha_valid = True
+
+    if not captcha_valid:
+        log_dev_auth_event("CAPTCHA_MISMATCH", email, f"Expected {session_expected}, got {captcha_str}")
+        print(f"[Auth][Login] Captcha result: FAILED (mismatch: got '{captcha_str}')")
+        new_code = str(secrets.randbelow(9000) + 1000)
+        session["captcha_expected"] = new_code
+        new_ch = generate_login_challenge(new_code)
+        return jsonify({
+            "error": "Validation Error",
+            "code": "CAPTCHA_INVALID",
+            "detail": "Incorrect security check answer. Please try again.",
+            "captcha": {
+                "captcha": new_code,
+                "code": new_code,
+                "question": new_code,
+                "token": new_ch["token"],
+                "captcha_token": new_ch["token"]
+            }
+        }), 400
+
+    print(f"[Auth][Login] Captcha result: PASSED (answer provided: {captcha_str})")
         
     user = db.users.find_one({"email": email})
     if not user:
@@ -364,6 +445,7 @@ def login():
     if is_locked:
         minutes_left = max(1, (rem_seconds + 59) // 60)
         log_dev_auth_event("ACCOUNT_LOCKED", email, f"Locked for {rem_seconds}s")
+        print(f"[Auth][Login] Account/IP is LOCKED: {rem_seconds}s remaining ({minutes_left}m)")
         return jsonify({
             "error": "Too Many Requests",
             "code": "ACCOUNT_LOCKED",
@@ -373,29 +455,11 @@ def login():
             "detail": f"Account temporarily locked due to 5 failed sign-in attempts. Please wait {minutes_left} minute(s) or reset your password."
         }), 429
 
-    # 2. Enforce security challenge if 3+ prior failures
-    if prior_failures >= CAPTCHA_THRESHOLD:
-        if not captcha_token or not captcha_answer:
-            log_dev_auth_event("CAPTCHA_REQUIRED", email, f"Challenge required after {prior_failures} failures")
-            return jsonify({
-                "error": "Security Check Required",
-                "code": "CAPTCHA_REQUIRED",
-                "requires_captcha": True,
-                "captcha": generate_login_challenge(),
-                "detail": "Please complete the security check below to continue."
-            }), 401
-        if not verify_login_challenge(captcha_token, captcha_answer):
-            log_dev_auth_event("CAPTCHA_INVALID", email, "Incorrect security challenge response")
-            return jsonify({
-                "error": "Security Check Failed",
-                "code": "CAPTCHA_INVALID",
-                "requires_captcha": True,
-                "captcha": generate_login_challenge(),
-                "detail": "Incorrect security check answer. Please solve the new challenge."
-            }), 401
-
+    # 14. Server log: User found or not
     if not user:
+        print(f"[Auth][Login] User found: NO (email='{email}')")
         fail_info = record_failed_login(db, email, None, now)
+        print(f"[Auth][Login] Password check result: NOT PERFORMED (user not found)")
         log_dev_auth_event("USER_NOT_FOUND", email, "No matching user document in db.users")
         log_audit_action(
             db=db,
@@ -411,8 +475,55 @@ def login():
             **fail_info
         }), fail_info["status_code"]
 
+    user_role = (user.get("role") or "PATIENT").strip().upper()
+    print(f"[Auth][Login] User found: YES (id={user['_id']}, role={user_role})")
+
+    # 10. Filter by the role that matches the portal being used. If the role doesn't match, return generic error.
+    role_matched = True
+    effective_role = user_role
+    if role and role not in ["", "ANY", "ALL", "UNIVERSAL"]:
+        if user_role == "ADMIN":
+            # Admin accounts can access all clinical portals (Doctor, Patient, Staff, Admin)
+            role_matched = True
+            effective_role = role
+        elif role == "STAFF":
+            # Staff portal accepts STAFF or ADMIN
+            role_matched = user_role in ["STAFF", "ADMIN"]
+            effective_role = "STAFF"
+        elif role == "DOCTOR":
+            role_matched = (user_role == "DOCTOR")
+            effective_role = "DOCTOR"
+        elif role == "PATIENT":
+            role_matched = (user_role == "PATIENT")
+            effective_role = "PATIENT"
+        elif role == "ADMIN":
+            role_matched = (user_role == "ADMIN")
+            effective_role = "ADMIN"
+        else:
+            role_matched = (user_role == role)
+            effective_role = user_role
+    else:
+        # Universal login: preserve the user's registered role
+        effective_role = user_role
+
+    # 14. Server log: Role matched or not
+    print(f"[Auth][Login] Role matched: {'YES' if role_matched else 'NO'} (portal_role='{role}', actual_role='{user_role}', effective_role='{effective_role}')")
+    if not role_matched:
+        fail_info = record_failed_login(db, email, user, now)
+        log_dev_auth_event("ROLE_MISMATCH", email, f"User role {user_role} does not match requested portal role {role}")
+        print(f"[Auth][Login] Role check failed for {email}: returning generic 401/429")
+        return jsonify({
+            "error": "Too Many Requests" if fail_info["locked"] else "Unauthorized",
+            **fail_info
+        }), fail_info["status_code"]
+
+    # 8. Password verification using check_password_hash / bcrypt.checkpw
     stored_hash = user.get("password_hash") or user.get("password")
-    if not verify_password(password, stored_hash):
+    pw_matched = verify_password(password, stored_hash)
+    # 14. Server log: Password check result
+    print(f"[Auth][Login] Password check result: {'PASS' if pw_matched else 'FAIL'}")
+
+    if not pw_matched:
         fail_info = record_failed_login(db, email, user, now)
         log_dev_auth_event(
             "ACCOUNT_LOCKED" if fail_info["locked"] else "PASSWORD_MISMATCH",
@@ -422,7 +533,7 @@ def login():
         log_audit_action(
             db=db,
             user_id=str(user["_id"]),
-            user_role=user.get("role", "PATIENT"),
+            user_role=user_role,
             action="ACCOUNT_LOCKED" if fail_info["locked"] else "LOGIN_FAILED",
             resource="AUTH",
             resource_id=str(user["_id"]),
@@ -469,7 +580,7 @@ def login():
         }), 403
         
     user_id = str(user["_id"])
-    role = (user.get("role") or "PATIENT").strip().upper()
+    role = effective_role
     
     # Reset failed attempts for both user and IP upon valid authentication
     reset_login_counters(db, user, now)
@@ -477,7 +588,7 @@ def login():
     # ----------------------------------------------------
     # ADMIN 2FA OTP REQUIREMENT
     # ----------------------------------------------------
-    if role == "ADMIN":
+    if role == "ADMIN" and bool(user.get("two_factor_enabled") or user.get("twoFactorEnabled")):
         otp_code = f"{secrets.randbelow(900000) + 100000}"
         temp_token = secrets.token_urlsafe(32)
         otp_expires = now + timedelta(minutes=10)

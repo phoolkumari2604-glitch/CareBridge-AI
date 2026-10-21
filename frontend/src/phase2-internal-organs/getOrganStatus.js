@@ -2,14 +2,16 @@
  * Pure clinical status resolver for CareBridge Body Explorer.
  * 
  * Rules:
- * - Read-only from patient telemetry and alerts.
+ * - Read-only from patient telemetry, findings, and clinical state.
  * - Computes: green (normal), amber (watch), red (critical), grey (No data yet).
  * - Maps status to organ tint/emissive AND accessible text badge.
  * - Labeled: "Related indicator, not a diagnosis".
- * - Never modifies or mutates external alerts or telemetry.
+ * - A doctor's statusOverride always wins over computed status.
+ * - Prioritizes live database organ dossier when available.
  */
 
 import { ORGANS_CONFIG } from "./organs.config.js";
+import { evaluateTelemetrySeverity } from "./clinicalThresholds.js";
 
 export const STATUS_THEME = {
   green: {
@@ -50,31 +52,104 @@ export const STATUS_THEME = {
   },
 };
 
+const STATUS_KEY_MAP = {
+  normal: "green",
+  watch: "amber",
+  critical: "red",
+  no_data: "grey",
+};
+
 /**
  * Pure function: Computes organ clinical status and indicators.
  * 
- * @param {string} organId - 'stomach' | 'pancreas' | 'thyroid' | 'intestines'
- * @param {Object} patientData - { vitals, alerts, healthProfile, healthRecords }
- * @returns {Object} { status, label, color, tintHex, badgeClass, summary, indicators, disclaimer }
+ * @param {string} organId - 'kidneys' | 'brain' | 'stomach' | 'pancreas' | 'thyroid' | 'intestines'
+ * @param {Object} patientData - { vitals, alerts, healthProfile, healthRecords, organDossiers }
+ * @param {Object|null} organDossier - Direct dossier from backend /api/patients/:id/organs
+ * @returns {Object} { key, label, color, tintHex, badgeClass, summary, indicators, disclaimer, findings, reports, clinicalState }
  */
-export function getOrganStatus(organId, patientData = {}) {
+export function getOrganStatus(organId, patientData = {}, organDossier = null) {
   const cfg = ORGANS_CONFIG[organId];
   if (!cfg) {
     return {
       ...STATUS_THEME.grey,
       summary: "Organ configuration not found.",
       indicators: [],
+      findings: [],
+      reports: [],
       disclaimer: "Related indicator, not a diagnosis.",
     };
   }
 
+  // Check if live dossier was passed directly or embedded inside patientData
+  const dossier = organDossier || patientData?.organDossiers?.[organId] || patientData?.dossiers?.[organId];
+
+  if (dossier) {
+    const rawStatus = dossier.statusOverride || dossier.status || "no_data";
+    const statusKey = STATUS_KEY_MAP[rawStatus] || "grey";
+    const theme = STATUS_THEME[statusKey] || STATUS_THEME.grey;
+
+    const indicators = Array.isArray(dossier.telemetry)
+      ? dossier.telemetry.map((t) => {
+          const sev = t.severity || evaluateTelemetrySeverity(t.indicatorKey, organId, t.value, t.safeMin, t.safeMax);
+          const indStatus = STATUS_KEY_MAP[sev] || "green";
+          const formattedTime = t.recordedAt
+            ? new Date(t.recordedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : "Recent";
+
+          return {
+            label: t.label || t.indicatorKey,
+            value: String(t.value),
+            unit: t.unit || "",
+            timestamp: formattedTime,
+            normalRange: t.safeMin !== undefined && t.safeMax !== undefined ? `${t.safeMin} – ${t.safeMax} ${t.unit || ""}` : undefined,
+            status: indStatus,
+            note: t.note || "Live physiological telemetry",
+            source: t.source || "CareBridge Sensor",
+            isProxy: false,
+          };
+        })
+      : [];
+
+    const activeFindings = Array.isArray(dossier.findings)
+      ? dossier.findings.filter((f) => !f.resolvedAt)
+      : [];
+
+    let summary = dossier.clinicalState?.text || "";
+    if (!summary) {
+      if (rawStatus === "critical") {
+        summary = `Critical alerts recorded for ${cfg.name}. Immediate clinical evaluation advised.`;
+      } else if (rawStatus === "watch") {
+        summary = `Clinical watch indicators active for ${cfg.name}. Ongoing physiological monitoring.`;
+      } else if (rawStatus === "normal") {
+        summary = `${cfg.name} telemetry within healthy physiological ranges.`;
+      } else {
+        summary = `No immediate telemetry measurements recorded for this cycle.`;
+      }
+    }
+
+    return {
+      ...theme,
+      summary,
+      indicators,
+      findings: activeFindings,
+      reports: dossier.reports || [],
+      clinicalState: dossier.clinicalState || null,
+      statusOverride: dossier.statusOverride || null,
+      rawStatus,
+      disclaimer: "Related indicator, not a diagnosis.",
+    };
+  }
+
+  // =========================================================================
+  // FALLBACK PATH: evaluate using legacy patientData { vitals, alerts }
+  // =========================================================================
   const vitals = patientData.vitals || {};
   const alerts = Array.isArray(patientData.alerts) ? patientData.alerts : [];
   const timestamp = vitals.recorded_at
     ? new Date(vitals.recorded_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "Recent";
 
-  // 0. KIDNEYS: maps to Renal Function, Creatinine, Hydration & Arterial Perfusion Pressure
+  // 0. KIDNEYS
   if (organId === "kidneys") {
     const kidneyAlert = alerts.find((a) => {
       const msg = (a.message || a.alert_type || "").toLowerCase();
@@ -97,6 +172,8 @@ export function getOrganStatus(organId, patientData = {}) {
             note: "Correlated from active clinical alerts feed",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
@@ -131,21 +208,24 @@ export function getOrganStatus(organId, patientData = {}) {
             note: "Hemodynamic indicator of renal glomerular perfusion load",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
     return {
       ...STATUS_THEME.grey,
-      summary: "Renal parameters within normal operating range. Adequate fluid intake recommended.",
+      summary: "No immediate telemetry measurements recorded for this cycle.",
       indicators: [],
+      findings: [],
+      reports: [],
       disclaimer: "Related indicator, not a diagnosis.",
     };
   }
 
-  // 1. BRAIN: maps to Arterial Perfusion Pressure & Neurological Indicators
+  // 1. BRAIN
   if (organId === "brain") {
-    // Check neurological or hypertensive cerebral alerts
     const brainAlert = alerts.find((a) => {
       const msg = (a.message || a.alert_type || "").toLowerCase();
       return msg.includes("brain") || msg.includes("cerebral") || msg.includes("neuro") || msg.includes("hypertensive");
@@ -170,6 +250,8 @@ export function getOrganStatus(organId, patientData = {}) {
             note: brainAlert.message || "Correlated from active clinical alerts feed",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
@@ -204,19 +286,23 @@ export function getOrganStatus(organId, patientData = {}) {
             note: "Primary hemodynamic cerebral perfusion indicator",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
     return {
       ...STATUS_THEME.grey,
-      summary: "No direct intracranial perfusion markers logged. Neural pathways operating in steady homeostasis.",
+      summary: "No immediate telemetry measurements recorded for this cycle.",
       indicators: [],
+      findings: [],
+      reports: [],
       disclaimer: "Related indicator, not a diagnosis.",
     };
   }
 
-  // 1. PANCREAS: maps to Blood Glucose
+  // 2. PANCREAS
   if (organId === "pancreas") {
     const rawSugar = vitals.blood_sugar;
     if (rawSugar !== null && rawSugar !== undefined && rawSugar !== "" && !isNaN(Number(rawSugar))) {
@@ -248,11 +334,12 @@ export function getOrganStatus(organId, patientData = {}) {
             note: "Primary pancreatic endocrine proxy",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
-    // Check if any active alerts specifically flag glucose / diabetes / pancreas
     const glucoseAlert = alerts.find((a) => {
       const msg = (a.message || a.alert_type || "").toLowerCase();
       return msg.includes("glucose") || msg.includes("sugar") || msg.includes("pancreas") || msg.includes("diabetes") || msg.includes("glycemic");
@@ -274,31 +361,34 @@ export function getOrganStatus(organId, patientData = {}) {
             note: "Correlated from active clinical alerts feed",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
     return {
       ...STATUS_THEME.grey,
-      summary: "No blood glucose telemetry logged for this interval. Insulin/pancreatic regulation status pending data.",
+      summary: "No immediate telemetry measurements recorded for this cycle.",
       indicators: [],
+      findings: [],
+      reports: [],
       disclaimer: "Related indicator, not a diagnosis.",
     };
   }
 
-  // 2. THYROID: checks TSH lab or metabolic heart rate proxy
+  // 3. THYROID
   if (organId === "thyroid") {
-    // Check if patient records or vitals contain TSH lab
     const rawTsh = vitals.tsh;
     if (rawTsh !== null && rawTsh !== undefined && rawTsh !== "" && !isNaN(Number(rawTsh))) {
       const tsh = Number(rawTsh);
       let statusKey = "green";
-      let summary = "Serum TSH levels are within normal physiological reference range (0.4 - 4.0 mIU/L).";
+      let summary = "Thyroid Stimulating Hormone (TSH) within euthyroid reference range (0.4 – 4.0 mIU/L).";
 
-      if (tsh > 10.0 || tsh < 0.1) {
+      if (tsh >= 10.0 || tsh <= 0.1) {
         statusKey = "red";
         summary = `Significant thyroid hormone deviation (TSH: ${tsh} mIU/L). Endocrinological consultation recommended.`;
-      } else if (tsh > 4.5 || tsh < 0.3) {
+      } else if (tsh > 4.0 || tsh < 0.4) {
         statusKey = "amber";
         summary = `Subclinical TSH variance (${tsh} mIU/L). Follow-up panel suggested.`;
       }
@@ -317,11 +407,12 @@ export function getOrganStatus(organId, patientData = {}) {
             note: "Direct thyroid endocrine biomarker",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
-    // Fallback: Check resting heart rate as metabolic proxy
     const rawHr = vitals.heart_rate;
     if (rawHr !== null && rawHr !== undefined && rawHr !== "" && !isNaN(Number(rawHr))) {
       const hr = Number(rawHr);
@@ -348,31 +439,42 @@ export function getOrganStatus(organId, patientData = {}) {
             isProxy: true,
           },
         ],
+        findings: [],
+        reports: [],
+        disclaimer: "Related indicator, not a diagnosis.",
+      };
+    }
+
+    const thyroidAlert = alerts.find((a) => {
+      const msg = (a.message || a.alert_type || "").toLowerCase();
+      return msg.includes("thyroid") || msg.includes("tsh") || msg.includes("goiter");
+    });
+
+    if (thyroidAlert) {
+      const isCritical = (thyroidAlert.severity || "").toLowerCase() === "critical";
+      const statusKey = isCritical ? "red" : "amber";
+      return {
+        ...STATUS_THEME[statusKey],
+        summary: thyroidAlert.message || "Thyroid endocrine observation logged.",
+        indicators: [],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
     return {
-      ...STATUS_THEME.amber,
-      summary: "Thyroid metabolic variance noted. Benign colloid nodular architecture tracked under clinical observation.",
-      indicators: [
-        {
-          label: "TSH Metabolic Proxy",
-          value: "4.8",
-          unit: "mIU/L",
-          timestamp,
-          normalRange: "0.4 - 4.0 mIU/L",
-          status: "amber",
-          note: "Subclinical thyroid stimulation variance tracked on clinical observation",
-        },
-      ],
+      ...STATUS_THEME.grey,
+      summary: "No immediate telemetry measurements recorded for this cycle.",
+      indicators: [],
+      findings: [],
+      reports: [],
       disclaimer: "Related indicator, not a diagnosis.",
     };
   }
 
-  // 3. STOMACH: checks GI-related alerts or core temperature
+  // 4. STOMACH
   if (organId === "stomach") {
-    // Check if any active alerts specifically mention gastric / stomach / acid
     const giAlert = alerts.find((a) => {
       const msg = (a.message || a.alert_type || "").toLowerCase();
       return msg.includes("gastric") || msg.includes("stomach") || msg.includes("reflux") || msg.includes("ulcer");
@@ -394,15 +496,16 @@ export function getOrganStatus(organId, patientData = {}) {
             note: "Correlated from active clinical alerts feed",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
-    // Secondary check: core temperature
     const rawTemp = vitals.temperature;
     if (rawTemp !== null && rawTemp !== undefined && rawTemp !== "" && !isNaN(Number(rawTemp))) {
       const temp = Number(rawTemp);
-      const cTemp = temp > 50 ? (temp - 32) * 5 / 9 : temp; // normalize F to C
+      const cTemp = temp > 50 ? ((temp - 32) * 5) / 9 : temp; // normalize F to C
       let statusKey = "green";
       let summary = "Core gastric region temperature is within safe biological limits.";
 
@@ -428,24 +531,27 @@ export function getOrganStatus(organId, patientData = {}) {
             note: "Gastric core homeostasis indicator",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
     return {
       ...STATUS_THEME.grey,
-      summary: "No direct gastric pathology or dyspeptic telemetry logged. Mucosal function stable.",
+      summary: "No immediate telemetry measurements recorded for this cycle.",
       indicators: [],
+      findings: [],
+      reports: [],
       disclaimer: "Related indicator, not a diagnosis.",
     };
   }
 
-  // 4. INTESTINES: checks enteric alerts or systemic perfusion (BP)
+  // 5. INTESTINES
   if (organId === "intestines") {
-    // Check if any active alerts mention bowel / intestines / colon / enteric
     const entericAlert = alerts.find((a) => {
       const msg = (a.message || a.alert_type || "").toLowerCase();
-      return msg.includes("bowel") || msg.includes("intestine") || msg.includes("colon") || msg.includes("enteric");
+      return msg.includes("bowel") || msg.includes("intestine") || msg.includes("colon") || msg.includes("enteric") || msg.includes("motility");
     });
 
     if (entericAlert) {
@@ -453,22 +559,23 @@ export function getOrganStatus(organId, patientData = {}) {
       const statusKey = isCritical ? "red" : "amber";
       return {
         ...STATUS_THEME[statusKey],
-        summary: entericAlert.message || "Enteric tract indicator detected in active alerts.",
+        summary: entericAlert.message || "Enteric motility variance detected.",
         indicators: [
           {
-            label: "Enteric Clinical Alert",
-            value: entericAlert.alert_type || "Active Alert",
+            label: "Enteric Motility Alert",
+            value: entericAlert.alert_type || "Enteric Alert",
             unit: "",
             timestamp: entericAlert.created_at ? new Date(entericAlert.created_at).toLocaleTimeString() : timestamp,
             status: statusKey,
             note: "Correlated from active clinical alerts feed",
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
-    // Secondary check: Mesenteric arterial perfusion via systolic/diastolic BP
     const sys = vitals.systolic_bp;
     const dia = vitals.diastolic_bp;
     if (sys !== null && sys !== undefined && sys !== "" && !isNaN(Number(sys))) {
@@ -497,34 +604,29 @@ export function getOrganStatus(organId, patientData = {}) {
             isProxy: true,
           },
         ],
+        findings: [],
+        reports: [],
         disclaimer: "Related indicator, not a diagnosis.",
       };
     }
 
     return {
-      ...STATUS_THEME.amber,
-      summary: "Elevated arterial perfusion pressure (185/115 mmHg) with enteric transit hypersensitivity and spasmodic motility under observation.",
-      indicators: [
-        {
-          label: "Arterial Perfusion (BP)",
-          value: "185/115",
-          unit: "mmHg",
-          timestamp,
-          normalRange: "90/60 - 120/80 mmHg",
-          status: "amber",
-          note: "Mesenteric microvascular perfusion proxy",
-          isProxy: true,
-        },
-      ],
+      ...STATUS_THEME.grey,
+      summary: "No immediate telemetry measurements recorded for this cycle.",
+      indicators: [],
+      findings: [],
+      reports: [],
       disclaimer: "Related indicator, not a diagnosis.",
     };
   }
 
-  // Fallback for any unknown organ
+  // Fallback for any other organ
   return {
     ...STATUS_THEME.grey,
-    summary: "No clinical telemetry recorded for this organ.",
+    summary: "No immediate telemetry measurements recorded for this cycle.",
     indicators: [],
+    findings: [],
+    reports: [],
     disclaimer: "Related indicator, not a diagnosis.",
   };
 }

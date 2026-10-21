@@ -483,6 +483,59 @@ const patientService = {
     const res = await api.post(`/health-records/patient/${pId}/organ-chat/${organKey}`, { text });
     return res.data;
   },
+
+  // ==========================================
+  // PHASE 2 LIVE INTERNAL ORGANS API
+  // ==========================================
+  async getPatientOrgans(patientId) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.get(`/patients/${pId}/organs`);
+    return res.data;
+  },
+
+  getPatientOrganStreamUrl(patientId) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const token = typeof localStorage !== "undefined" ? localStorage.getItem("access_token") : "";
+    const baseUrl = api.defaults.baseURL || "/api";
+    const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
+    return `${cleanBase}/patients/${pId}/organs/stream${tokenParam}`;
+  },
+
+  async postTelemetry(patientId, payload) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.post(`/patients/${pId}/telemetry`, payload);
+    return res.data;
+  },
+
+  async postFinding(patientId, payload) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.post(`/patients/${pId}/findings`, payload);
+    return res.data;
+  },
+
+  async patchFinding(findingId, payload) {
+    const res = await api.patch(`/findings/${findingId}`, payload);
+    return res.data;
+  },
+
+  async putClinicalState(patientId, organId, text) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.put(`/patients/${pId}/organs/${organId}/clinical-state`, { text });
+    return res.data;
+  },
+
+  async postOrganReport(patientId, payload) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.post(`/patients/${pId}/reports`, payload);
+    return res.data;
+  },
+
+  async putOrganStatusOverride(patientId, organId, statusOverride) {
+    const pId = patientId || this.getCurrentPatientId() || "demo-patient";
+    const res = await api.put(`/patients/${pId}/organs/${organId}/status-override`, { statusOverride });
+    return res.data;
+  },
 };
 
 export { patientService };

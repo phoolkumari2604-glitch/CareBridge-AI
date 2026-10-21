@@ -17,6 +17,7 @@ from app.routes.notification import notification_bp
 from app.routes.audit import audit_bp
 from app.routes.billing import billing_bp
 from app.routes.medicine_assistant import medicine_assistant_bp
+from app.routes.organ import organ_bp
 
 __all__ = [
     "auth_bp",
@@ -38,4 +39,5 @@ __all__ = [
     "audit_bp",
     "billing_bp",
     "medicine_assistant_bp",
+    "organ_bp",
 ]

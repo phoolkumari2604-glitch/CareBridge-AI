@@ -15,6 +15,7 @@ import {
   Clock,
   CalendarCheck,
   RefreshCw,
+  HeartPulse,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { authAPI } from "../../services/auth";
@@ -37,11 +38,20 @@ function formatCountdown(totalSeconds) {
   return `${mins}:${rem < 10 ? "0" : ""}${rem}`;
 }
 
+// 1. Pure generator for 4-digit numeric CAPTCHA
+function generate4DigitCaptcha() {
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  return {
+    code,
+    token: "",
+  };
+}
+
 export default function LoginView({
   portalRole = "",
   portalTitle = "",
   portalSubtitle = "",
-  portalType = "doctor",
+  portalType = "",
 } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,8 +89,9 @@ export default function LoginView({
   const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [resendState, setResendState] = useState({ sending: false, message: "" });
 
-  // Server-signed security challenge after 3+ failed attempts
-  const [captchaChallenge, setCaptchaChallenge] = useState(null);
+  // 1. 4-Digit numeric CAPTCHA state
+  const [captchaData, setCaptchaData] = useState(generate4DigitCaptcha);
+  // 2. Controlled input bound to state for captcha answer
   const [captchaAnswer, setCaptchaAnswer] = useState("");
 
   // Admin 2FA state
@@ -91,6 +102,59 @@ export default function LoginView({
 
   const [loading, setLoading] = useState(false);
   const errorBannerRef = useRef(null);
+
+  // 4. Clear the error as soon as the user edits any field
+  const clearFieldAndBannerError = (field) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      return { ...prev, [field]: "" };
+    });
+    if (bannerError) {
+      setBannerError("");
+      setErrorCode("");
+    }
+  };
+
+  // 5. Regenerate the 4-digit CAPTCHA when refreshed or after a wrong answer
+  const regenerateCaptcha = async () => {
+    setCaptchaAnswer("");
+    try {
+      const res = await authAPI.getCaptcha();
+      if (res?.code || res?.captcha || res?.question) {
+        const code = String(res.code || res.captcha || res.question).trim();
+        setCaptchaData({
+          code,
+          token: res.captcha_token || res.token || "",
+        });
+        return;
+      }
+    } catch {
+      // Local fallback
+    }
+    setCaptchaData(generate4DigitCaptcha());
+  };
+
+  // Synchronize server session on mount (without re-running on ordinary renders)
+  useEffect(() => {
+    let active = true;
+    authAPI.getCaptcha()
+      .then((res) => {
+        if (!active) return;
+        if (res?.code || res?.captcha || res?.question) {
+          const code = String(res.code || res.captcha || res.question).trim();
+          setCaptchaData({
+            code,
+            token: res.captcha_token || res.token || "",
+          });
+        }
+      })
+      .catch(() => {
+        // Fallback initialized via useState initializer
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Set browser tab title and strip any accidental query parameters containing credentials
   useEffect(() => {
@@ -162,10 +226,19 @@ export default function LoginView({
 
     if (!password) {
       nextErrors.password = "Password is required.";
+    } else if (password.length < 8) {
+      nextErrors.password = "Password must be at least 8 characters.";
     }
 
-    if (captchaChallenge && !captchaAnswer.trim()) {
-      nextErrors.captcha = "Please answer the security check above.";
+    // 3. 4-Digit numeric CAPTCHA validation
+    const trimmedCaptcha = captchaAnswer.trim();
+    if (!trimmedCaptcha) {
+      nextErrors.captcha = "Please enter the 4-digit security code.";
+    } else if (!/^\d{4}$/.test(trimmedCaptcha)) {
+      nextErrors.captcha = "Security code must be a 4-digit number.";
+    } else if (captchaData.code && trimmedCaptcha !== captchaData.code) {
+      nextErrors.captcha = "Incorrect security check answer. Please try again.";
+      regenerateCaptcha();
     }
 
     setFieldErrors(nextErrors);
@@ -243,15 +316,18 @@ export default function LoginView({
     setLoading(true);
 
     try {
+      // 6. Send correct field names to Flask (email, password, role, captcha_answer, captcha_token, remember)
+      const resolvedRole = portalType ? portalType.toUpperCase() : "";
+
       const payload = {
         email: normalizedEmail,
         password,
+        role: resolvedRole,
+        captcha_answer: captchaAnswer.trim(),
+        captcha_token: captchaData.token,
+        remember: rememberMe,
         remember_me: rememberMe,
       };
-      if (captchaChallenge?.token) {
-        payload.captcha_token = captchaChallenge.token;
-        payload.captcha_answer = captchaAnswer.trim();
-      }
 
       const res = await authAPI.login(payload);
 
@@ -266,6 +342,9 @@ export default function LoginView({
       completeSignInRedirect(res);
     } catch (err) {
       console.error("Login error:", err);
+
+      // 5. Regenerate the CAPTCHA after a wrong answer or a failed login.
+      regenerateCaptcha();
 
       if (!err.response) {
         setErrorCode("NETWORK_ERROR");
@@ -294,8 +373,21 @@ export default function LoginView({
         setLockoutSeconds(lockSecs);
         setBannerError(
           data.detail ||
-            "Account temporarily locked due to 5 failed sign-in attempts. Please wait or reset your password."
+            "Account temporarily locked due to 5 failed sign-in attempts. Please wait 15 minutes or reset your password."
         );
+      } else if (status === 400) {
+        // Show server's specific validation messages
+        const specificMsg = data.detail || data.error || data.message || "Please answer the security question";
+        if (
+          code === "CAPTCHA_REQUIRED" ||
+          code === "CAPTCHA_INVALID" ||
+          specificMsg.toLowerCase().includes("security") ||
+          specificMsg.toLowerCase().includes("question") ||
+          specificMsg.toLowerCase().includes("check")
+        ) {
+          setFieldErrors((prev) => ({ ...prev, captcha: specificMsg }));
+        }
+        setBannerError(specificMsg);
       } else if (code === "EMAIL_NOT_VERIFIED") {
         setUnverifiedEmail(data.unverified_email || normalizedEmail);
         setBannerError(
@@ -317,18 +409,9 @@ export default function LoginView({
             "This account has been suspended or deactivated. Please contact support@carebridge.ai for assistance."
         );
       } else if (status === 401) {
-        setBannerError(
-          code === "CAPTCHA_REQUIRED" || code === "CAPTCHA_INVALID"
-            ? data.detail || "Invalid email or password"
-            : "Invalid email or password"
-        );
+        setBannerError(data.detail || "Invalid email or password");
       } else {
         setBannerError(data.detail || data.error || "Invalid email or password");
-      }
-
-      if (data.requires_captcha && data.captcha) {
-        setCaptchaChallenge(data.captcha);
-        setCaptchaAnswer("");
       }
     } finally {
       setLoading(false);
@@ -370,10 +453,12 @@ export default function LoginView({
       <header className="cb-login-topbar">
         <Link to="/" className="cb-login-brand-link" aria-label="CareBridge AI Home">
           <span className="cb-login-logo-mark" aria-hidden="true">
-            C
+            <HeartPulse size={22} className="cb-login-pulse-icon" />
           </span>
           <span className="cb-login-brand-text">
-            <span className="cb-login-brand-name">CareBridge AI</span>
+            <span className="cb-login-brand-name">
+              CareBridge <span className="cb-login-brand-ai">AI</span>
+            </span>
             <span className="cb-login-brand-tag">Clinical Intelligence Platform</span>
           </span>
         </Link>
@@ -456,7 +541,7 @@ export default function LoginView({
           <div className="cb-login-card-header">
             <div className="cb-login-card-header-top">
               <span className="cb-login-card-logo-mini" aria-hidden="true">
-                C
+                <HeartPulse size={18} />
               </span>
               <span className="cb-login-card-brand-label">CareBridge AI</span>
               {portalRole && (
@@ -560,9 +645,7 @@ export default function LoginView({
                     aria-describedby={fieldErrors.email ? "cb-login-email-error" : undefined}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      if (fieldErrors.email) {
-                        setFieldErrors((prev) => ({ ...prev, email: "" }));
-                      }
+                      clearFieldAndBannerError("email");
                     }}
                     onBlur={() => {
                       const trimmed = email.trim();
@@ -610,9 +693,7 @@ export default function LoginView({
                     aria-describedby={fieldErrors.password ? "cb-login-password-error" : undefined}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      if (fieldErrors.password) {
-                        setFieldErrors((prev) => ({ ...prev, password: "" }));
-                      }
+                      clearFieldAndBannerError("password");
                     }}
                     onBlur={(e) => {
                       // Re-hide password when focus leaves the password field (unless clicking the eye toggle)
@@ -650,49 +731,81 @@ export default function LoginView({
                 )}
               </div>
 
-              {/* Security Challenge after 3+ failed attempts */}
-              {captchaChallenge && (
-                <div className="cb-login-challenge-box">
-                  <div className="cb-login-challenge-header">
+              {/* 4-Digit Numeric Security Verification Check */}
+              <div className="cb-login-challenge-box">
+                <div className="cb-login-challenge-header">
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <ShieldCheck size={14} aria-hidden="true" style={{ color: "#38BDF8" }} />
                     <span>Security Verification</span>
-                    {remainingAttempts !== null && remainingAttempts > 0 && (
-                      <span>{remainingAttempts} attempt(s) left</span>
-                    )}
-                  </div>
-                  <label
-                    htmlFor="cb-login-captcha"
-                    className="cb-login-challenge-question"
+                  </span>
+                  {remainingAttempts !== null && remainingAttempts > 0 && (
+                    <span style={{ color: "#F59E0B" }}>{remainingAttempts} attempt(s) left</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={regenerateCaptcha}
+                    className="cb-login-captcha-refresh"
+                    title="Get a new security code"
+                    disabled={loading || lockoutSeconds > 0}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#38BDF8",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "0.75rem",
+                      fontWeight: "600",
+                      padding: "2px 4px",
+                    }}
                   >
-                    {captchaChallenge.question}
-                  </label>
+                    <RefreshCw size={12} aria-hidden="true" />
+                    <span>New code</span>
+                  </button>
+                </div>
+
+                <div className="cb-login-captcha-preview-wrap">
+                  <div
+                    className="cb-login-captcha-code-badge"
+                    aria-label={`Security code: ${captchaData.code}`}
+                  >
+                    {captchaData.code || "----"}
+                  </div>
+                  <span className="cb-login-captcha-label">Enter the 4-digit code shown above</span>
+                </div>
+
+                <div className="cb-login-input-wrap">
                   <input
                     id="cb-login-captcha"
                     name="captcha_answer"
                     type="text"
                     inputMode="numeric"
+                    maxLength={4}
                     autoComplete="off"
-                    placeholder="Enter numeric answer"
+                    placeholder="Enter 4-digit code"
                     value={captchaAnswer}
                     disabled={loading || lockoutSeconds > 0}
+                    aria-invalid={Boolean(fieldErrors.captcha)}
+                    aria-describedby={fieldErrors.captcha ? "cb-login-captcha-error" : undefined}
                     onChange={(e) => {
-                      setCaptchaAnswer(e.target.value);
-                      if (fieldErrors.captcha) {
-                        setFieldErrors((prev) => ({ ...prev, captcha: "" }));
-                      }
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                      setCaptchaAnswer(val);
+                      clearFieldAndBannerError("captcha");
                     }}
                     className={`cb-login-input ${
                       fieldErrors.captcha ? "cb-login-input--error" : ""
                     }`}
-                    style={{ paddingLeft: "14px", height: "42px" }}
+                    style={{ paddingLeft: "14px", height: "42px", letterSpacing: "3px", fontWeight: "700" }}
                     required
                   />
-                  {fieldErrors.captcha && (
-                    <p role="alert" className="cb-login-field-error">
-                      {fieldErrors.captcha}
-                    </p>
-                  )}
                 </div>
-              )}
+                {fieldErrors.captcha && (
+                  <p id="cb-login-captcha-error" role="alert" className="cb-login-field-error">
+                    {fieldErrors.captcha}
+                  </p>
+                )}
+              </div>
 
               {/* Remember Me Checkbox */}
               <div className="cb-login-remember-row">
